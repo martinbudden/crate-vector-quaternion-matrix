@@ -642,7 +642,7 @@ impl<T> From<Vector3d<T>> for [T; 3] {
 ///
 /// let v_i16 = Vector3d::<i16>{x: 2, y: 3, z: 5};
 /// let v_f32 = Vector3d::<f32>::from(v_i16);
-
+///
 /// let w_f32 = Vector3d::<f32>{x: 7.0, y: 11.0, z: 13.0};
 /// let w_i16 : Vector3d::<i16> = w_f32.into();
 ///
