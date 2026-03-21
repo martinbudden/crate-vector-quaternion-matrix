@@ -1,9 +1,7 @@
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{One, Signed, Zero, float::FloatCore};
 
-use crate::Quaternion;
-use crate::Vector3d;
-use crate::math_functions::MathFunctions;
+use crate::{MathConstants, MathFunctions, Quaternion, Vector3d};
 
 pub type Matrix3x3f32 = Matrix3x3<f32>;
 pub type Matrix3x3f64 = Matrix3x3<f64>;
@@ -978,7 +976,19 @@ where
     }
 }
 
-impl Matrix3x3<f32> {
+impl<T> Matrix3x3<T>
+where
+    T: Copy
+        + Zero
+        + One
+        + MathConstants
+        + MathFunctions
+        + PartialOrd
+        + Neg<Output = T>
+        + Sub<Output = T>
+        + Mul<Output = T>
+        + Div<Output = T>,
+{
     /// Invert matrix, in-place
     /// ```
     /// # use vector_quaternion_matrix::Matrix3x3;
@@ -992,7 +1002,7 @@ impl Matrix3x3<f32> {
     pub fn invert_in_place(&mut self) -> bool {
         let adjugate = self.adjugate();
         let determinant = self.a[0] * adjugate.a[0] + self.a[1] * adjugate.a[3] + self.a[2] * adjugate.a[6];
-        if determinant.abs() <= f32::EPSILON {
+        if determinant.abs() <= T::EPSILON {
             return false;
         }
         *self = adjugate / determinant;
@@ -1024,7 +1034,7 @@ impl Matrix3x3<f32> {
     /// ```
     pub fn is_near_zero(&self) -> bool {
         for a in self.a.iter() {
-            if a.abs() > f32::EPSILON {
+            if a.abs() > T::EPSILON {
                 return false;
             }
         }
@@ -1040,97 +1050,17 @@ impl Matrix3x3<f32> {
     /// assert!(I.is_near_identity());
     /// ```
     pub fn is_near_identity(&self) -> bool {
-        if self.a[1].abs() > f32::EPSILON
-            || self.a[2].abs() > f32::EPSILON
-            || self.a[3].abs() > f32::EPSILON
-            || self.a[5].abs() > f32::EPSILON
-            || self.a[6].abs() > f32::EPSILON
+        if self.a[1].abs() > T::EPSILON
+            || self.a[2].abs() > T::EPSILON
+            || self.a[3].abs() > T::EPSILON
+            || self.a[5].abs() > T::EPSILON
+            || self.a[6].abs() > T::EPSILON
         {
             return false;
         }
-        if (self.a[0] - 1.0).abs() > f32::EPSILON
-            || (self.a[4] - 1.0).abs() > f32::EPSILON
-            || (self.a[8] - 1.0).abs() > f32::EPSILON
-        {
-            return false;
-        }
-        true
-    }
-}
-
-impl Matrix3x3<f64> {
-    /// Invert matrix, in-place
-    /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3;
-    ///
-    /// let mut A = Matrix3x3::<f64>::from([ 2.0,  3.0,  5.0,
-    ///                                      7.0, 11.0, 13.0,
-    ///                                     17.0, 19.0, 23.0]);
-    /// A.invert_in_place();
-    ///
-    /// ```
-    pub fn invert_in_place(&mut self) -> bool {
-        let adjugate = self.adjugate();
-        let determinant = self.a[0] * adjugate.a[0] + self.a[1] * adjugate.a[3] + self.a[2] * adjugate.a[6];
-        if determinant.abs() <= f64::EPSILON {
-            return false;
-        }
-        *self = adjugate / determinant;
-        true
-    }
-
-    /// Return inverse of matrix
-    /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3;
-    ///
-    /// let A = Matrix3x3::<f64>::from([ 2.0,  3.0,  5.0,
-    ///                                  7.0, 11.0, 13.0,
-    ///                                 17.0, 19.0, 23.0]);
-    /// let B = A.inverse();
-    ///
-    /// ```
-    pub fn inverse(&self) -> Self {
-        let adjugate = self.adjugate();
-        let determinant = self.a[0] * adjugate.a[0] + self.a[1] * adjugate.a[3] + self.a[2] * adjugate.a[6];
-        adjugate / determinant
-    }
-    /// Return true if matrix is near zero
-    /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3;
-    /// # use num_traits::Zero;
-    ///
-    /// let Z = Matrix3x3::<f64>::zero();
-    /// assert!(Z.is_near_zero());
-    /// ```
-    pub fn is_near_zero(&self) -> bool {
-        for a in self.a.iter() {
-            if a.abs() > f64::EPSILON {
-                return false;
-            }
-        }
-        true
-    }
-
-    /// Return true if matrix is near identity
-    /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3;
-    /// # use num_traits::One;
-    ///
-    /// let I = Matrix3x3::<f64>::one();
-    /// assert!(I.is_near_identity());
-    /// ```
-    pub fn is_near_identity(&self) -> bool {
-        if self.a[1].abs() > f64::EPSILON
-            || self.a[2].abs() > f64::EPSILON
-            || self.a[3].abs() > f64::EPSILON
-            || self.a[5].abs() > f64::EPSILON
-            || self.a[6].abs() > f64::EPSILON
-        {
-            return false;
-        }
-        if (self.a[0] - 1.0).abs() > f64::EPSILON
-            || (self.a[4] - 1.0).abs() > f64::EPSILON
-            || (self.a[8] - 1.0).abs() > f64::EPSILON
+        if (self.a[0] - T::one()).abs() > T::EPSILON
+            || (self.a[4] - T::one()).abs() > T::EPSILON
+            || (self.a[8] - T::one()).abs() > T::EPSILON
         {
             return false;
         }

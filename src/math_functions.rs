@@ -18,6 +18,8 @@ use num_traits::Float;
 // x.hypot()
 
 pub trait MathFunctions: Sized {
+    fn abs(self) -> Self;
+
     fn sqrt(self) -> Self;
     fn reciprocal_sqrt(self) -> Self;
     fn half_reciprocal_sqrt(self) -> Self;
@@ -31,6 +33,10 @@ pub trait MathFunctions: Sized {
 }
 
 impl MathFunctions for f32 {
+    fn abs(self) -> Self {
+        (self).abs()
+    }
+
     fn sqrt(self) -> Self {
         libm::sqrtf(self)
     }
@@ -65,6 +71,10 @@ impl MathFunctions for f32 {
 }
 
 impl MathFunctions for f64 {
+    fn abs(self) -> Self {
+        (self).abs()
+    }
+
     fn sqrt(self) -> Self {
         libm::sqrt(self)
     }

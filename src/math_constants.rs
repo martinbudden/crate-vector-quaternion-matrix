@@ -1,6 +1,8 @@
 #![allow(clippy::excessive_precision)]
 
 pub trait MathConstants {
+    const EPSILON: Self;
+
     const PI: Self; // Archimedes’ constant (π)
     const TAU: Self; // The full circle constant (τ = 2π)
     const E: Self; // Euler’s number (e)
@@ -48,6 +50,8 @@ pub trait MathConstants {
 }
 
 impl MathConstants for f32 {
+    const EPSILON: Self = f32::EPSILON;
+
     const PI: Self = core::f32::consts::PI;
     const TAU: Self = core::f32::consts::TAU;
     const E: Self = core::f32::consts::E;
@@ -90,6 +94,8 @@ impl MathConstants for f32 {
 }
 
 impl MathConstants for f64 {
+    const EPSILON: Self = f64::EPSILON;
+
     const PI: Self = core::f64::consts::PI;
     const TAU: Self = core::f64::consts::TAU;
     const E: Self = core::f64::consts::E;
