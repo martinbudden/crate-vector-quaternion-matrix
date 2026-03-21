@@ -5,11 +5,13 @@
 #![deny(unused_must_use)]
 
 mod math_methods;
+mod math_constants;
 mod matrix3x3;
 mod quaternion;
 mod vector3d;
 
 pub use math_methods::MathMethods;
+pub use math_constants::MathConstants;
 
 pub use matrix3x3::Matrix3x3;
 pub use matrix3x3::Matrix3x3f32;

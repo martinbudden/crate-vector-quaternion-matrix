@@ -8,10 +8,12 @@
         "codegen",
         "cosf",
         "debuginfo",
+        "EGAMMA",
         "Eigen",
         "fract",
         "hypot",
         "libm",
+        "Mascheroni",
         "Pitchf",
         "Quaternionf",
         "roundf",
@@ -19,6 +21,7 @@
         "sinf",
         "sqrtf",
         "tanf",
+        "Testf",
         "trunc",
         "Yawf"
     ]

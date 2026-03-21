@@ -126,6 +126,7 @@ trait Sin5Coefficients {
     const SIN_C3: Self;
     const SIN_C5: Self;
 }
+
 trait Cos6Coefficients {
     const COS_C0: Self;
     const COS_C2: Self;
@@ -158,6 +159,7 @@ impl Cos6Coefficients for f64 {
     const COS_C4: Self = 0.25360107422;
     const COS_C6: Self = -0.020408373326;
 }
+
 // sin4 (5.60E-07): x * (0.9999949932098388671875 + x2*(-0.166601598262786865234375 + x2*8.12153331935405731201171875e-3))
 // sin5 (1.80E-09): x * (1 + x2*(-0.166666507720947265625 +x2*(8.331983350217342376708984375e-3 + x2*(-1.94961365195922553539276123046875e-4))))
 // cos4 (6.70E-06): 0.999990046024322509765625 + x2*(-0.4997082054615020751953125 + x2*4.03986163437366485595703125e-2)
@@ -245,6 +247,7 @@ fn sin_cos(x: f32) -> (f32, f32) {
 
 #[cfg(test)]
 mod tests {
+    #![allow(unused)]
     use super::*;
 
     #[test]
