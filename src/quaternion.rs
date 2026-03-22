@@ -3,7 +3,7 @@ use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign,
 use num_traits::{One, Signed, Zero, float::FloatCore};
 
 use crate::Vector3d;
-use crate::math_functions::MathFunctions;
+use crate::math_methods::MathMethods;
 
 pub type Quaternionf32 = Quaternion<f32>;
 pub type Quaternionf64 = Quaternion<f64>;
@@ -425,7 +425,7 @@ where
         + Sub<Output = T>
         + Mul<Output = T>
         + Div<Output = T>
-        + MathFunctions,
+        + MathMethods,
 {
     /// Return Euclidean norm
     pub fn norm(&self) -> T {
@@ -664,7 +664,7 @@ where
         + Sub<Output = T>
         + Mul<Output = T>
         + Div<Output = T>
-        + MathFunctions
+        + MathMethods
         + FloatCore,
 {
     pub fn calculate_roll_degrees(self) -> T {
@@ -742,7 +742,7 @@ where
         + Sub<Output = T>
         + Mul<Output = T>
         + Div<Output = T>
-        + MathFunctions
+        + MathMethods
         + FloatCore,
 {
     fn from((roll_radians, pitch_radians): (T, T)) -> Self {
@@ -760,7 +760,7 @@ where
         + Sub<Output = T>
         + Mul<Output = T>
         + Div<Output = T>
-        + MathFunctions
+        + MathMethods
         + FloatCore,
 {
     fn from((roll_radians, pitch_radians, yaw_radians): (T, T, T)) -> Self {
@@ -778,7 +778,7 @@ where
         + Sub<Output = T>
         + Mul<Output = T>
         + Div<Output = T>
-        + MathFunctions
+        + MathMethods
         + FloatCore,
 {
     fn from(angles: RollPitchYaw<T>) -> Self {
@@ -796,7 +796,7 @@ where
         + Sub<Output = T>
         + Mul<Output = T>
         + Div<Output = T>
-        + MathFunctions
+        + MathMethods
         + FloatCore,
 {
     fn from(angles: RollPitch<T>) -> Self {

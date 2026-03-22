@@ -1,7 +1,7 @@
 use core::ops::{Div, Mul, Neg, Sub};
 use num_traits::{One, Zero, float::FloatCore};
 
-use crate::{MathConstants, MathFunctions, Matrix3x3, Matrix3x3f32, Vector3d, Vector3df32};
+use crate::{MathConstants, MathMethods, Matrix3x3, Matrix3x3f32, Vector3d, Vector3df32};
 
 pub struct EigenResult3x3<T> {
     pub eigenvalue: T,
@@ -105,7 +105,7 @@ where
         + Zero
         + One
         + MathConstants
-        + MathFunctions
+        + MathMethods
         + PartialOrd
         + FloatCore
         + Neg<Output = T>

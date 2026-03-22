@@ -1,7 +1,7 @@
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{One, Signed, Zero, float::FloatCore};
 
-use crate::MathFunctions;
+use crate::MathMethods;
 
 pub type Vector3di8 = Vector3d<i8>;
 pub type Vector3di16 = Vector3d<i16>;
@@ -481,7 +481,7 @@ where
         + Sub<Output = T>
         + Mul<Output = T>
         + Div<Output = T>
-        + MathFunctions,
+        + MathMethods,
 {
     /// Return Euclidean norm
     pub fn norm(&self) -> T {

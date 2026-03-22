@@ -1,7 +1,7 @@
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{One, Signed, Zero, float::FloatCore};
 
-use crate::{MathConstants, MathFunctions, Quaternion, Vector3d};
+use crate::{MathConstants, MathMethods, Quaternion, Vector3d};
 
 pub type Matrix3x3f32 = Matrix3x3<f32>;
 pub type Matrix3x3f64 = Matrix3x3<f64>;
@@ -1016,7 +1016,7 @@ where
         + Zero
         + One
         + MathConstants
-        + MathFunctions
+        + MathMethods
         + PartialOrd
         + FloatCore
         + Neg<Output = T>
@@ -1162,7 +1162,7 @@ where
 /// rather than the Hamilton multiplication convention used by the Quaternion class.
 impl<T> From<Matrix3x3<T>> for Quaternion<T>
 where
-    T: Copy + FloatCore + MathFunctions,
+    T: Copy + FloatCore + MathMethods,
 {
     fn from(m: Matrix3x3<T>) -> Self {
         // Choose largest scale factor from 4w, 4x, 4y, and 4z, to avoid a scale factor of zero, or numerical instabilities caused by division of a small scale factor.

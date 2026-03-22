@@ -1,7 +1,7 @@
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{One, Signed, Zero, float::FloatCore};
 
-use crate::{MathConstants, MathFunctions, Vector2d};
+use crate::{MathConstants, MathMethods, Vector2d};
 
 pub type Matrix2x2f32 = Matrix2x2<f32>;
 pub type Matrix2x2f64 = Matrix2x2<f64>;
@@ -856,7 +856,7 @@ where
         + Zero
         + One
         + MathConstants
-        + MathFunctions
+        + MathMethods
         + PartialOrd
         + FloatCore
         + Neg<Output = T>
