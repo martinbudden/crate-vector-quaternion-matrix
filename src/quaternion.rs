@@ -415,23 +415,18 @@ where
 // **** impl norm ****
 impl<T> Quaternion<T>
 where
-    T: Copy
-        + Zero
-        + One
-        + PartialEq
-        + PartialOrd
-        + Neg<Output = T>
-        + Add<Output = T>
-        + Sub<Output = T>
-        + Mul<Output = T>
-        + Div<Output = T>
-        + MathMethods,
+    T: Copy + Zero + Add<Output = T> + Mul<Output = T> + MathMethods,
 {
     /// Return Euclidean norm
     pub fn norm(&self) -> T {
         (self.w * self.w + self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
     }
+}
 
+impl<T> Quaternion<T>
+where
+    T: Copy + Zero + One + PartialOrd + Div<Output = T> + MathMethods,
+{
     /// Return normalized form of the quaternion
     pub fn normalized(&self) -> Self {
         let norm: T = self.norm();
@@ -451,6 +446,12 @@ where
             *self = *self / self.norm();
         }
     }
+}
+
+impl<T> Quaternion<T>
+where
+    T: Copy + Zero + One + PartialOrd + Neg<Output = T> + Sub<Output = T> + Div<Output = T> + MathMethods,
+{
     /// Rotate about the x-axis,
     /// equivalent to *= Quaternion(cos(theta/2), sin(theta/2), 0, 0)
     pub fn rotate_x(&mut self, theta: T) -> Self {

@@ -482,21 +482,18 @@ where
 // **** impl norm ****
 impl<T> Vector2d<T>
 where
-    T: Copy
-        + Zero
-        + One
-        + PartialEq
-        + Add<Output = T>
-        + Sub<Output = T>
-        + Mul<Output = T>
-        + Div<Output = T>
-        + MathMethods,
+    T: Copy + Add<Output = T> + Mul<Output = T> + MathMethods,
 {
     /// Return Euclidean norm
     pub fn norm(&self) -> T {
         (self.x * self.x + self.y * self.y).sqrt()
     }
+}
 
+impl<T> Vector2d<T>
+where
+    T: Copy + Zero + One + PartialEq + Add<Output = T> + Sub<Output = T> + Div<Output = T> + MathMethods,
+{
     /// Return normalized form of the vector
     pub fn normalized(&self) -> Self {
         let norm = self.norm();
@@ -516,7 +513,12 @@ where
             *self = *self / norm;
         }
     }
+}
 
+impl<T> Vector2d<T>
+where
+    T: Copy + Zero + One + Sub<Output = T> + MathMethods,
+{
     // Return distance between two points
     pub fn distance(&self, rhs: Self) -> T {
         self.distance_squared(rhs).sqrt()
