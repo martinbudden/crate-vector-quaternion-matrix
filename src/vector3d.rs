@@ -590,7 +590,7 @@ impl<T> From<Vector3d<T>> for [T; 3] {
     }
 }
 
-/// Vector3d<f32> from Vector3d<i16>
+/// `Vector3d<f32>` from `Vector3d<i16>`
 /// ```
 /// # use vector_quaternion_matrix::Vector3d;
 ///

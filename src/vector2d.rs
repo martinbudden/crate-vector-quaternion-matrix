@@ -579,7 +579,7 @@ impl<T> From<Vector2d<T>> for [T; 2] {
     }
 }
 
-/// Vector2d<f32> from Vector2d<i16>
+/// `Vector2d<f32>` from `Vector2d<i16>`
 /// ```
 /// # use vector_quaternion_matrix::Vector2d;
 ///

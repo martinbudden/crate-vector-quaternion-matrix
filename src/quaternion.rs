@@ -584,7 +584,7 @@ where
         a * (a * a + b * b).reciprocal_sqrt()
     }
     /// Create a Quaternion from roll, pitch, and yaw Euler angles (in radians).
-    /// See: https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Euler_angles_(in_3-2-1_sequence)_to_quaternion_conversion
+    /// See: <https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Euler_angles_(in_3-2-1_sequence)_to_quaternion_conversion>
     pub fn from_roll_pitch_yaw_angles_radians(roll_radians: T, pitch_radians: T, yaw_radians: T) -> Self {
         let half: T = T::one() / (T::one() + T::one());
         let (sin_half_roll, cos_half_roll) = (roll_radians * half).sin_cos();
