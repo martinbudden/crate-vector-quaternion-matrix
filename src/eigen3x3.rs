@@ -1,3 +1,4 @@
+#![allow(unused)]
 use core::ops::{Div, Mul, Neg, Sub};
 use num_traits::{One, Zero, float::FloatCore};
 

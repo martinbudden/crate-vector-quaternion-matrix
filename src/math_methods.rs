@@ -17,6 +17,8 @@ use num_traits::Float;
 // x.ln_1p()
 // x.hypot()
 
+/// `no_std` implementations of mathematical functions in method call syntax<BR>
+/// eg `value.sin()`, `value.cos()` etc.
 pub trait MathMethods: Sized {
     fn sqrt(self) -> Self;
     fn reciprocal_sqrt(self) -> Self;

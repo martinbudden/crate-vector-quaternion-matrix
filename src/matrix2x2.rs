@@ -7,6 +7,9 @@ pub type Matrix2x2f32 = Matrix2x2<f32>;
 pub type Matrix2x2f64 = Matrix2x2<f64>;
 
 // **** Define ****
+/// `Matrix2x2<T>`: 2x2 Matrix of type `T`.<br>
+/// Aliases `Matrix2x2f32` and `Matrix2x2f64` provided.<br>
+/// Internal implementation is a flattened 2x2 matrix: 4 elements in row-major order
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Matrix2x2<T> {
     // Flattened 2x2 matrix: 4 elements in row-major order

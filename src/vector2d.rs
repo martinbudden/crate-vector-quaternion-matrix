@@ -9,6 +9,8 @@ pub type Vector2di32 = Vector2d<i32>;
 pub type Vector2df32 = Vector2d<f32>;
 pub type Vector2df64 = Vector2d<f64>;
 
+/// `Vector2d<T>`: 2D vector of type `T`.<br>
+/// `Vector2d32` and `Vector2df64` and several integer aliases are provided.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Vector2d<T> {
     pub x: T,

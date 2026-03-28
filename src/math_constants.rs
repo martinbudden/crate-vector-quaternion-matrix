@@ -1,5 +1,6 @@
 #![allow(clippy::excessive_precision)]
 
+/// Math constants for use in generic code, eg T:PI, T:SQRT_2 etc.
 pub trait MathConstants {
     const EPSILON: Self;
 

@@ -7,6 +7,9 @@ pub type Matrix3x3f32 = Matrix3x3<f32>;
 pub type Matrix3x3f64 = Matrix3x3<f64>;
 
 // **** Define ****
+/// `Matrix3x3<T>`: 3x3 Matrix of type `T`.<br>
+/// Aliases `Matrix3x3f32` and `Matrix3x3f64` provided.<br>
+/// Internal implementation is a flattened 3x3 matrix: array of 9 elements in row-major order
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Matrix3x3<T> {
     // Flattened 3x3 matrix: 9 elements in row-major order

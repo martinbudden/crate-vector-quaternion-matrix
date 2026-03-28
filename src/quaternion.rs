@@ -25,6 +25,8 @@ pub struct RollPitch<T> {
     pub pitch: T,
 }
 
+/// `Quaternion<T>`: quaternion type `T`.<br>
+/// Aliases `Quaternion32` and `Quaternionf64` are provided.
 // **** Define ****
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Quaternion<T> {

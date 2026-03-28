@@ -9,6 +9,8 @@ pub type Vector3di32 = Vector3d<i32>;
 pub type Vector3df32 = Vector3d<f32>;
 pub type Vector3df64 = Vector3d<f64>;
 
+/// `Vector3d<T>`: 3D vector of type `T`.<br>
+/// `Vector3d32` and `Vector3df64` and several integer aliases are provided.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Vector3d<T> {
     pub x: T,
