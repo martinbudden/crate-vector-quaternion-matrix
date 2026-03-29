@@ -115,11 +115,11 @@ where
 {
     type Output = Self;
     fn neg(self) -> Self::Output {
-        let mut result = self.a;
-        for r in result.iter_mut() {
+        let mut a = self.a;
+        for r in a.iter_mut() {
             *r = -*r;
         }
-        Self { a: result }
+        Self { a }
     }
 }
 
@@ -142,11 +142,11 @@ where
 {
     type Output = Matrix3x3<T>;
     fn neg(self) -> Self::Output {
-        let mut result = self.a;
-        for r in result.iter_mut() {
+        let mut a = self.a;
+        for r in a.iter_mut() {
             *r = -*r;
         }
-        Matrix3x3 { a: result }
+        Matrix3x3 { a }
     }
 }
 
@@ -179,11 +179,11 @@ where
 {
     type Output = Self;
     fn add(self, rhs: Self) -> Self {
-        let mut result = self.a;
-        for (ii, r) in result.iter_mut().enumerate() {
+        let mut a = self.a;
+        for (ii, r) in a.iter_mut().enumerate() {
             *r = *r + rhs.a[ii];
         }
-        Self { a: result }
+        Self { a }
     }
 }
 
@@ -236,11 +236,11 @@ where
 {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self {
-        let mut result = self.a;
-        for (ii, r) in result.iter_mut().enumerate() {
+        let mut a = self.a;
+        for (ii, r) in a.iter_mut().enumerate() {
             *r = *r - rhs.a[ii];
         }
-        Self { a: result }
+        Self { a }
     }
 }
 
@@ -287,22 +287,22 @@ where
 impl Mul<Matrix3x3<f32>> for f32 {
     type Output = Matrix3x3<f32>;
     fn mul(self, rhs: Matrix3x3<f32>) -> Matrix3x3<f32> {
-        let mut result = rhs.a;
-        for r in result.iter_mut() {
+        let mut a = rhs.a;
+        for r in a.iter_mut() {
             *r *= self;
         }
-        Matrix3x3::<f32> { a: result }
+        Matrix3x3::<f32> { a }
     }
 }
 
 impl Mul<Matrix3x3<f64>> for f64 {
     type Output = Matrix3x3<f64>;
     fn mul(self, rhs: Matrix3x3<f64>) -> Matrix3x3<f64> {
-        let mut result = rhs.a;
-        for r in result.iter_mut() {
+        let mut a = rhs.a;
+        for r in a.iter_mut() {
             *r *= self;
         }
-        Matrix3x3::<f64> { a: result }
+        Matrix3x3::<f64> { a }
     }
 }
 
@@ -325,11 +325,11 @@ where
 {
     type Output = Self;
     fn mul(self, k: T) -> Self {
-        let mut result = self.a;
-        for r in result.iter_mut() {
+        let mut a = self.a;
+        for r in a.iter_mut() {
             *r = *r * k;
         }
-        Self { a: result }
+        Self { a }
     }
 }
 
@@ -439,7 +439,7 @@ where
 {
     type Output = Self;
     fn mul(self, rhs: Self) -> Self {
-        let result = [
+        let a = [
             self.a[0] * rhs.a[0] + self.a[1] * rhs.a[3] + self.a[2] * rhs.a[6],
             self.a[0] * rhs.a[1] + self.a[1] * rhs.a[4] + self.a[2] * rhs.a[7],
             self.a[0] * rhs.a[2] + self.a[1] * rhs.a[5] + self.a[2] * rhs.a[8],
@@ -450,7 +450,7 @@ where
             self.a[6] * rhs.a[1] + self.a[7] * rhs.a[4] + self.a[8] * rhs.a[7],
             self.a[6] * rhs.a[2] + self.a[7] * rhs.a[5] + self.a[8] * rhs.a[8],
         ];
-        Matrix3x3::<T> { a: result }
+        Matrix3x3::<T> { a }
     }
 }
 
@@ -499,11 +499,11 @@ where
     type Output = Self;
     fn div(self, k: T) -> Self {
         let reciprocal: T = T::one() / k;
-        let mut result = self.a;
-        for r in result.iter_mut() {
+        let mut a = self.a;
+        for r in a.iter_mut() {
             *r = *r * reciprocal;
         }
-        Matrix3x3::<T> { a: result }
+        Matrix3x3::<T> { a }
     }
 }
 
