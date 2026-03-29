@@ -551,7 +551,7 @@ where
     T: Copy,
 {
     /// Create a matrix
-    pub fn new(input: [T; 4]) -> Self {
+    pub const fn new(input: [T; 4]) -> Self {
         Self { a: input }
     }
 }

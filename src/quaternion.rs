@@ -355,7 +355,7 @@ where
     T: Copy,
 {
     /// Create a quaternion
-    pub fn new(w: T, x: T, y: T, z: T) -> Self {
+    pub const fn new(w: T, x: T, y: T, z: T) -> Self {
         Self { w, x, y, z }
     }
 }

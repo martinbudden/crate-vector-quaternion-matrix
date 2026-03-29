@@ -52,12 +52,13 @@ and self balancing robots and aircraft in particular.
 
 These requirements included:
 
-1. Support for `Vector3di16` and `Vector3di32` for reading data from Inertial Management Units (IMUs).
+1. Ability to align vectors to 16-byte boundaries for performance.
+2. Support for `Vector3di16` and `Vector3di32` for reading data from Inertial Management Units (IMUs).
    Some IMUs can return 20-bit values, hence the need for `Vector3di32`.
-2. Support for conversion between the integer vectors returned by the IMU and the floating point vectors required for mathematical operations.
-3. Ability to work with generic filters.
-4. Quaternion support for sensor fusion.
-5. Matrix support for navigation, in particular "path following" (waypointing), and trilateration.
+3. Support for conversion between the integer vectors returned by the IMU and the floating point vectors required for mathematical operations.
+4. Ability to work with generic filters.
+5. Quaternion support for sensor fusion.
+6. Matrix support for navigation, in particular "path following" (waypointing), and trilateration.
 
 I looked at a number of alternatives including
 [nalgebra](https://crates.io/crates/nalgebra),
@@ -65,6 +66,13 @@ I looked at a number of alternatives including
 and [micromath](https://crates.io/crates/micromath).
 But each one of these fell on one count or another.
 I had previously written a C++ VectorQuaternionMatrix library, so porting that to Rust seemed like the best option.
+
+## Vector alignment
+
+By default Vector3df32 is aligned to a 16-byte boundary. This is controlled by the `align` feature flag. To turn off
+16-bit alignment, build with:
+
+`cargo build --no-default-features --features libm`
 
 ## Original implementation
 

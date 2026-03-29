@@ -8,8 +8,9 @@ readme = "README.md"
 
 [features]
 # Default is now empty (no_std)
-default = ["libm"] 
+default = ["align", "libm"]
 std = []
+align = []
 
 [package.metadata.docs.rs]
 rustdoc-args = ["--html-in-header", "katex-header.html"]

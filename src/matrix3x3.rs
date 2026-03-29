@@ -1,3 +1,4 @@
+use cfg_if::cfg_if;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{One, Signed, Zero, float::FloatCore};
 
@@ -8,15 +9,44 @@ pub type Matrix3x3f32 = Matrix3x3<f32>;
 /// 3x3 matrix of `f64` values
 pub type Matrix3x3f64 = Matrix3x3<f64>;
 
+// **** Align ****
+// ensure vectors are aligned on 16 byte boundaries.
+#[cfg(feature = "align")]
+const _: () = assert!(core::mem::size_of::<Matrix3x3f32>() == 48);
+#[cfg(feature = "align")]
+const _: () = assert!(core::mem::align_of::<Matrix3x3f32>() == 16);
+#[cfg(not(feature = "align"))]
+const _: () = assert!(core::mem::size_of::<Matrix3x3f32>() == 36);
+#[cfg(not(feature = "align"))]
+const _: () = assert!(core::mem::align_of::<Matrix3x3f32>() == 4);
+
 // **** Define ****
+cfg_if! {
+if #[cfg(feature = "align")] {
+// High-performance 16-byte aligned version
 /// `Matrix3x3<T>`: 3x3 Matrix of type `T`.<br>
 /// Aliases `Matrix3x3f32` and `Matrix3x3f64` are provided.<br>
 /// Internal implementation is a flattened 3x3 matrix: an array of 9 elements stored in row-major order<br>
 /// That is the element `m[row][col]` is at array position `[row * 3 + col]`, so element `m12` is at `a[5]`.
+#[repr(C, align(16))]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Matrix3x3<T> {
     // Flattened 3x3 matrix: 9 elements in row-major order
     a: [T; 9],
+}
+} else {
+// Compact 36-byte version
+/// `Matrix3x3<T>`: 3x3 Matrix of type `T`.<br>
+/// Aliases `Matrix3x3f32` and `Matrix3x3f64` are provided.<br>
+/// Internal implementation is a flattened 3x3 matrix: an array of 9 elements stored in row-major order<br>
+/// That is the element `m[row][col]` is at array position `[row * 3 + col]`, so element `m12` is at `a[5]`.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Matrix3x3<T> {
+    // Flattened 3x3 matrix: 9 elements in row-major order
+    a: [T; 9],
+}
+}
 }
 
 // **** Zero ****
@@ -617,7 +647,7 @@ where
     T: Copy,
 {
     /// Create a matrix
-    pub fn new(input: [T; 9]) -> Self {
+    pub const fn new(input: [T; 9]) -> Self {
         Self { a: input }
     }
 }

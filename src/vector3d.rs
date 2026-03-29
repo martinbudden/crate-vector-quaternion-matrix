@@ -1,3 +1,4 @@
+use cfg_if::cfg_if;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{One, Signed, Zero, float::FloatCore};
 
@@ -14,14 +15,42 @@ pub type Vector3df32 = Vector3d<f32>;
 /// 3-dimensional `{x, y, z}` vector of `f64` values
 pub type Vector3df64 = Vector3d<f64>;
 
+// **** Align ****
+// ensure vectors are aligned on 16 byte boundaries.
+#[cfg(feature = "align")]
+const _: () = assert!(core::mem::size_of::<Vector3df32>() == 16);
+#[cfg(feature = "align")]
+const _: () = assert!(core::mem::align_of::<Vector3df32>() == 16);
+#[cfg(not(feature = "align"))]
+const _: () = assert!(core::mem::size_of::<Vector3df32>() == 12);
+#[cfg(not(feature = "align"))]
+const _: () = assert!(core::mem::align_of::<Vector3df32>() == 4);
+
 // **** Define ****
+cfg_if! {
+if #[cfg(feature = "align")] {
+// High-performance 16-byte aligned version
 /// `Vector3d<T>`: 3D vector of type `T`.<br>
 /// `Vector3d32` and `Vector3df64` and several integer aliases are provided.
+#[repr(C, align(16))]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Vector3d<T> {
     pub x: T,
     pub y: T,
     pub z: T,
+}
+} else {
+// Compact 12-byte version
+/// `Vector3d<T>`: 3D vector of type `T`.<br>
+/// `Vector3d32` and `Vector3df64` and several integer aliases are provided.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Vector3d<T> {
+    pub x: T,
+    pub y: T,
+    pub z: T,
+}
+}
 }
 
 // **** Zero ****
@@ -373,7 +402,7 @@ where
     T: Copy,
 {
     /// Create a vector
-    pub fn new(x: T, y: T, z: T) -> Self {
+    pub const fn new(x: T, y: T, z: T) -> Self {
         Self { x, y, z }
     }
 }
@@ -639,6 +668,7 @@ impl From<Vector3d<f32>> for Vector3d<i32> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use core::mem::{align_of, size_of};
 
     fn is_normal<T: Sized + Send + Sync + Unpin>() {}
 
@@ -654,6 +684,21 @@ mod tests {
         //let z: Vector3d = zero();
         assert_eq!(a, z);
         assert!(z.is_zero());
+    }
+    #[test]
+    fn test_vector_memory_layout() {
+        // A 3-axis f32 vector is 12 bytes.
+        // With align(16), the compiler pads it to 16 bytes.
+        #[cfg(feature = "align")]
+        assert_eq!(size_of::<Vector3df32>(), 16);
+        #[cfg(not(feature = "align"))]
+        assert_eq!(size_of::<Vector3df32>(), 12);
+
+        // This ensures the start of every vector is on a 16-byte boundary
+        #[cfg(feature = "align")]
+        assert_eq!(align_of::<Vector3df32>(), 16);
+        #[cfg(not(feature = "align"))]
+        assert_eq!(align_of::<Vector3df32>(), 12);
     }
     #[test]
     fn test_neg_owned() {
