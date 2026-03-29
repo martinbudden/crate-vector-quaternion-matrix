@@ -100,12 +100,12 @@ where
 /// Negate matrix
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
-/// let mut M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
 ///                                 17.0, 19.0, 23.0]);
-/// M = - M;
+/// m = - m;
 ///
-/// assert_eq!(M, Matrix3x3f32::from([ -2.0,  -3.0,  -5.0,
+/// assert_eq!(m, Matrix3x3f32::from([ -2.0,  -3.0,  -5.0,
 ///                                    -7.0, -11.0, -13.0,
 ///                                   -17.0, -19.0, -23.0]));
 /// ```
@@ -127,12 +127,12 @@ where
 /// Negate quaternion reference
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
-/// let mut M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
 ///                                 17.0, 19.0, 23.0]);
-/// M = - M;
+/// m = - m;
 ///
-/// assert_eq!(M, Matrix3x3f32::from([ -2.0,  -3.0,  -5.0,
+/// assert_eq!(m, Matrix3x3f32::from([ -2.0,  -3.0,  -5.0,
 ///                                    -7.0, -11.0, -13.0,
 ///                                   -17.0, -19.0, -23.0]));
 /// ```
@@ -154,24 +154,24 @@ where
 /// Add two matrices
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
-/// let M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                              7.0, 11.0, 13.0,
 ///                             17.0, 19.0, 23.0]);
-/// let N = Matrix3x3f32::from([29.0, 31.0, 37.0,
+/// let n = Matrix3x3f32::from([29.0, 31.0, 37.0,
 ///                             41.0, 43.0, 47.0,
 ///                             53.0, 59.0, 61.0]);
-/// let R = M + N;
+/// let r = m + n;
 ///
-/// assert_eq!(R, Matrix3x3f32::from([31.0, 34.0, 42.0,
+/// assert_eq!(r, Matrix3x3f32::from([31.0, 34.0, 42.0,
 ///                                   48.0, 54.0, 60.0,
 ///                                   70.0, 78.0, 84.0]));
 ///
 /// # use num_traits::Zero;
 ///
-/// let Z = Matrix3x3f32::zero();
-/// let R2 = M + Z;
+/// let z = Matrix3x3f32::zero();
+/// let r2 = m + z;
 ///
-/// assert_eq!(R2, M);
+/// assert_eq!(r2, m);
 /// ```
 impl<T> Add for Matrix3x3<T>
 where
@@ -191,15 +191,15 @@ where
 /// Add one matrix to another
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
-/// let mut M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
 ///                                 17.0, 19.0, 23.0]);
-/// let N = Matrix3x3f32::from([29.0, 31.0, 37.0,
+/// let n = Matrix3x3f32::from([29.0, 31.0, 37.0,
 ///                             41.0, 43.0, 47.0,
 ///                             53.0, 59.0, 61.0]);
-/// M += N;
+/// m += n;
 ///
-/// assert_eq!(M, Matrix3x3f32::from([31.0, 34.0, 42.0,
+/// assert_eq!(m, Matrix3x3f32::from([31.0, 34.0, 42.0,
 ///                                   48.0, 54.0, 60.0,
 ///                                   70.0, 78.0, 84.0]));
 /// ```
@@ -218,15 +218,15 @@ where
 /// Subtract two matrices
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
-/// let M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                              7.0, 11.0, 13.0,
 ///                             17.0, 19.0, 23.0]);
-/// let N = Matrix3x3f32::from([29.0, 31.0, 37.0,
+/// let n = Matrix3x3f32::from([29.0, 31.0, 37.0,
 ///                             41.0, 43.0, 47.0,
 ///                             53.0, 59.0, 61.0]);
-/// let R = M - N;
+/// let r = m - n;
 ///
-/// assert_eq!(R, Matrix3x3f32::from([-27.0, -28.0, -32.0,
+/// assert_eq!(r, Matrix3x3f32::from([-27.0, -28.0, -32.0,
 ///                                   -34.0, -32.0, -34.0,
 ///                                   -36.0, -40.0, -38.0]));
 /// ```
@@ -248,15 +248,15 @@ where
 /// Subtract one matrix from another
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
-/// let mut M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
 ///                                 17.0, 19.0, 23.0]);
-/// let N = Matrix3x3f32::from([29.0, 31.0, 37.0,
+/// let n = Matrix3x3f32::from([29.0, 31.0, 37.0,
 ///                             41.0, 43.0, 47.0,
 ///                             53.0, 59.0, 61.0]);
-/// M -= N;
+/// m -= n;
 ///
-/// assert_eq!(M, Matrix3x3f32::from([-27.0, -28.0, -32.0,
+/// assert_eq!(m, Matrix3x3f32::from([-27.0, -28.0, -32.0,
 ///                                   -34.0, -32.0, -34.0,
 ///                                   -36.0, -40.0, -38.0]));
 /// ```
@@ -275,12 +275,12 @@ where
 /// Pre-multiply a matrix by a constant
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
-/// let M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                               7.0, 11.0, 13.0,
 ///                              17.0, 19.0, 23.0]);
-/// let R = 2.0 * M;
+/// let r = 2.0 * m;
 ///
-/// assert_eq!(R, Matrix3x3f32::from([ 4.0,  6.0, 10.0,
+/// assert_eq!(r, Matrix3x3f32::from([ 4.0,  6.0, 10.0,
 ///                                   14.0, 22.0, 26.0,
 ///                                   34.0, 38.0, 46.0]));
 /// ```
@@ -310,12 +310,12 @@ impl Mul<Matrix3x3<f64>> for f64 {
 /// Multiply a matrix by a constant
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
-/// let M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                              7.0, 11.0, 13.0,
 ///                             17.0, 19.0, 23.0]);
-/// let R = M * 2.0;
+/// let r = m * 2.0;
 ///
-/// assert_eq!(R, Matrix3x3f32::from([ 4.0,  6.0, 10.0,
+/// assert_eq!(r, Matrix3x3f32::from([ 4.0,  6.0, 10.0,
 ///                                   14.0, 22.0, 26.0,
 ///                                   34.0, 38.0, 46.0]));
 /// ```
@@ -337,12 +337,12 @@ where
 /// In-place multiply a matrix by a constant
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
-/// let mut M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
 ///                                 17.0, 19.0, 23.0]);
-/// M *= 2.0;
+/// m *= 2.0;
 ///
-/// assert_eq!(M, Matrix3x3f32::from([ 4.0,  6.0, 10.0,
+/// assert_eq!(m, Matrix3x3f32::from([ 4.0,  6.0, 10.0,
 ///                                   14.0, 22.0, 26.0,
 ///                                   34.0, 38.0, 46.0]));
 /// ```
@@ -362,11 +362,11 @@ where
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
 /// # use vector_quaternion_matrix::Vector3d;
-/// let M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                              7.0, 11.0, 13.0,
 ///                             17.0, 19.0, 23.0]);
 /// let v = Vector3d::<f32>{x:29.0, y:31.0, z:37.0};
-/// let r = M * v;
+/// let r = m * v;
 ///
 /// assert_eq!(r, Vector3d::<f32>{x:336.0, y:1025.0, z:1933.0});
 /// ```
@@ -387,11 +387,11 @@ where
 /// Pre-multiply a vector by a matrix
 /// ```
 /// # use vector_quaternion_matrix::{Matrix3x3f32,Vector3df32};
-/// let M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                              7.0, 11.0, 13.0,
 ///                             17.0, 19.0, 23.0]);
 /// let v = Vector3df32{x:29.0, y:31.0, z:37.0};
-/// let r = v * M;
+/// let r = v * m;
 ///
 /// assert_eq!(r, Vector3df32{x:29.0*2.0 + 31.0*7.0 + 37.0*17.0, y:1131.0, z:1399.0});
 /// ```
@@ -412,15 +412,15 @@ where
 /// Multiply two matrices
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
-/// let M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
 ///                                 17.0, 19.0, 23.0]);
-/// let N = Matrix3x3f32::from([29.0, 31.0, 37.0,
+/// let n = Matrix3x3f32::from([29.0, 31.0, 37.0,
 ///                                 41.0, 43.0, 47.0,
 ///                                 53.0, 59.0, 61.0]);
-/// let R = M * N;
+/// let r = m * n;
 ///
-/// assert_eq!(R, Matrix3x3f32::from([
+/// assert_eq!(r, Matrix3x3f32::from([
 ///    2.0 * 29.0 +  3.0 * 41.0 +  5.0 * 53.0,   2.0 * 31.0 +  3.0 * 43.0 +  5.0 * 59.0,   2.0 * 37.0 +  3.0 * 47.0 +  5.0 * 61.0,
 ///    7.0 * 29.0 + 11.0 * 41.0 + 13.0 * 53.0,   7.0 * 31.0 + 11.0 * 43.0 + 13.0 * 59.0,   7.0 * 37.0 + 11.0 * 47.0 + 13.0 * 61.0,
 ///   17.0 * 29.0 + 19.0 * 41.0 + 23.0 * 53.0,  17.0 * 31.0 + 19.0 * 43.0 + 23.0 * 59.0,  17.0 * 37.0 + 19.0 * 47.0 + 23.0 * 61.0,
@@ -429,9 +429,9 @@ where
 /// # use num_traits::One;
 ///
 /// let I = Matrix3x3f32::one();
-/// let R2 = M * I;
+/// let r2 = m * I;
 ///
-/// assert_eq!(R2, M);
+/// assert_eq!(r2, m);
 /// ```
 impl<T> Mul<Matrix3x3<T>> for Matrix3x3<T>
 where
@@ -457,15 +457,15 @@ where
 /// Multiply one matrix by another
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
-/// let mut M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                      7.0, 11.0, 13.0,
 ///                                     17.0, 19.0, 23.0]);
-/// let N = Matrix3x3f32::from([29.0, 31.0, 37.0,
+/// let n = Matrix3x3f32::from([29.0, 31.0, 37.0,
 ///                                 41.0, 43.0, 47.0,
 ///                                 53.0, 59.0, 61.0]);
-/// M *= N;
+/// m *= n;
 ///
-/// assert_eq!(M, Matrix3x3f32::from([
+/// assert_eq!(m, Matrix3x3f32::from([
 ///    2.0 * 29.0 +  3.0 * 41.0 +  5.0 * 53.0,   2.0 * 31.0 +  3.0 * 43.0 +  5.0 * 59.0,   2.0 * 37.0 +  3.0 * 47.0 +  5.0 * 61.0,
 ///    7.0 * 29.0 + 11.0 * 41.0 + 13.0 * 53.0,   7.0 * 31.0 + 11.0 * 43.0 + 13.0 * 59.0,   7.0 * 37.0 + 11.0 * 47.0 + 13.0 * 61.0,
 ///   17.0 * 29.0 + 19.0 * 41.0 + 23.0 * 53.0,  17.0 * 31.0 + 19.0 * 43.0 + 23.0 * 59.0,  17.0 * 37.0 + 19.0 * 47.0 + 23.0 * 61.0,
@@ -483,12 +483,12 @@ where
 /// Divide a matrix by a constant
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
-/// let M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                              7.0, 11.0, 13.0,
 ///                             17.0, 19.0, 23.0]);
-/// let R = M / 2.0;
+/// let r = m / 2.0;
 ///
-/// assert_eq!(R, Matrix3x3f32::from([ 1.0, 1.5, 2.5,
+/// assert_eq!(r, Matrix3x3f32::from([ 1.0, 1.5, 2.5,
 ///                                    3.5, 5.5, 6.5,
 ///                                    8.5, 9.5, 11.5]));
 /// ```
@@ -511,12 +511,12 @@ where
 /// In-place divide a matrix by a constant
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
-/// let mut M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
 ///                                 17.0, 19.0, 23.0]);
-/// M /= 2.0;
+/// m /= 2.0;
 ///
-/// assert_eq!(M, Matrix3x3f32::from([ 1.0, 1.5, 2.5,
+/// assert_eq!(m, Matrix3x3f32::from([ 1.0, 1.5, 2.5,
 ///                                    3.5, 5.5, 6.5,
 ///                                    8.5, 9.5, 11.5]));
 /// ```
@@ -537,19 +537,19 @@ where
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
 ///
-/// let M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                              7.0, 11.0, 13.0,
 ///                             17.0, 19.0, 23.0]);
 ///
-/// assert_eq!(M[0], 2.0);
-/// assert_eq!(M[1], 3.0);
-/// assert_eq!(M[2], 5.0);
-/// assert_eq!(M[3], 7.0);
-/// assert_eq!(M[4], 11.0);
-/// assert_eq!(M[5], 13.0);
-/// assert_eq!(M[6], 17.0);
-/// assert_eq!(M[7], 19.0);
-/// assert_eq!(M[8], 23.0);
+/// assert_eq!(m[0], 2.0);
+/// assert_eq!(m[1], 3.0);
+/// assert_eq!(m[2], 5.0);
+/// assert_eq!(m[3], 7.0);
+/// assert_eq!(m[4], 11.0);
+/// assert_eq!(m[5], 13.0);
+/// assert_eq!(m[6], 17.0);
+/// assert_eq!(m[7], 19.0);
+/// assert_eq!(m[8], 23.0);
 /// ```
 impl<T> Index<usize> for Matrix3x3<T> {
     type Output = T;
@@ -563,21 +563,21 @@ impl<T> Index<usize> for Matrix3x3<T> {
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
 ///
-/// let mut M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
 ///                                  17.0, 19.0, 23.0]);
 ///
-/// M[0] = 29.0;
-/// M[1] = 31.0;
-/// M[2] = 37.0;
-/// M[3] = 41.0;
-/// M[4] = 43.0;
-/// M[5] = 47.0;
-/// M[6] = 53.0;
-/// M[7] = 59.0;
-/// M[8] = 61.0;
+/// m[0] = 29.0;
+/// m[1] = 31.0;
+/// m[2] = 37.0;
+/// m[3] = 41.0;
+/// m[4] = 43.0;
+/// m[5] = 47.0;
+/// m[6] = 53.0;
+/// m[7] = 59.0;
+/// m[8] = 61.0;
 ///
-/// assert_eq!(M, Matrix3x3f32::from([29.0, 31.0, 37.0,
+/// assert_eq!(m, Matrix3x3f32::from([29.0, 31.0, 37.0,
 ///                                   41.0, 43.0, 47.0,
 ///                                   53.0, 59.0, 61.0]));
 /// ```
@@ -591,19 +591,19 @@ impl<T> IndexMut<usize> for Matrix3x3<T> {
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
 ///
-/// let M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                              7.0, 11.0, 13.0,
 ///                             17.0, 19.0, 23.0]);
 ///
-/// assert_eq!(M[(0,0)], 2.0);
-/// assert_eq!(M[(0,1)], 3.0);
-/// assert_eq!(M[(0,2)], 5.0);
-/// assert_eq!(M[(1,0)], 7.0);
-/// assert_eq!(M[(1,1)], 11.0);
-/// assert_eq!(M[(1,2)], 13.0);
-/// assert_eq!(M[(2,0)], 17.0);
-/// assert_eq!(M[(2,1)], 19.0);
-/// assert_eq!(M[(2,2)], 23.0);
+/// assert_eq!(m[(0,0)], 2.0);
+/// assert_eq!(m[(0,1)], 3.0);
+/// assert_eq!(m[(0,2)], 5.0);
+/// assert_eq!(m[(1,0)], 7.0);
+/// assert_eq!(m[(1,1)], 11.0);
+/// assert_eq!(m[(1,2)], 13.0);
+/// assert_eq!(m[(2,0)], 17.0);
+/// assert_eq!(m[(2,1)], 19.0);
+/// assert_eq!(m[(2,2)], 23.0);
 /// ```
 impl<T> Index<(usize, usize)> for Matrix3x3<T> {
     type Output = T;
@@ -617,21 +617,21 @@ impl<T> Index<(usize, usize)> for Matrix3x3<T> {
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
 ///
-/// let mut M = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+/// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
 ///                                 17.0, 19.0, 23.0]);
 ///
-/// M[(0,0)] = 29.0;
-/// M[(0,1)] = 31.0;
-/// M[(0,2)] = 37.0;
-/// M[(1,0)] = 41.0;
-/// M[(1,1)] = 43.0;
-/// M[(1,2)] = 47.0;
-/// M[(2,0)] = 53.0;
-/// M[(2,1)] = 59.0;
-/// M[(2,2)] = 61.0;
+/// m[(0,0)] = 29.0;
+/// m[(0,1)] = 31.0;
+/// m[(0,2)] = 37.0;
+/// m[(1,0)] = 41.0;
+/// m[(1,1)] = 43.0;
+/// m[(1,2)] = 47.0;
+/// m[(2,0)] = 53.0;
+/// m[(2,1)] = 59.0;
+/// m[(2,2)] = 61.0;
 ///
-/// assert_eq!(M, Matrix3x3f32::from([29.0, 31.0, 37.0,
+/// assert_eq!(m, Matrix3x3f32::from([29.0, 31.0, 37.0,
 ///                                   41.0, 43.0, 47.0,
 ///                                   53.0, 59.0, 61.0]));
 /// ```
