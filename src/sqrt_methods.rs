@@ -2,10 +2,10 @@
 use cfg_if::cfg_if;
 
 /// `no_std` implementations of `sqrt`, `reciprocal_sqrt`, and `half_reciprocal_sqrt` in  method call syntax<br>
+/// ie `x.sqrt()`, `x.reciprocal_sqrt()`
 pub trait SqrtMethods: Sized {
     fn sqrt(self) -> Self;
     fn reciprocal_sqrt(self) -> Self;
-    fn half_reciprocal_sqrt(self) -> Self;
 }
 
 cfg_if! {
@@ -20,10 +20,6 @@ cfg_if! {
             fn reciprocal_sqrt(self) -> f32 {
                 1.0 / self.sqrt()
             }
-            #[inline(always)]
-            fn half_reciprocal_sqrt(self) -> f32 {
-                0.5 / self.sqrt()
-            }
         }
         impl SqrtMethods for f64 {
             #[inline(always)]
@@ -33,10 +29,6 @@ cfg_if! {
             #[inline(always)]
             fn reciprocal_sqrt(self) -> f64 {
                 1.0 / self.sqrt()
-            }
-            #[inline(always)]
-            fn half_reciprocal_sqrt(self) -> f64 {
-                0.5 / self.sqrt()
             }
         }
     } else if #[cfg(all(not(feature = "std"), feature = "libm"))] {
@@ -80,10 +72,6 @@ cfg_if! {
                     1.0 / libm::sqrtf(self)
                 }
             }
-            #[inline(always)]
-            fn half_reciprocal_sqrt(self) -> f32 {
-                0.5 / _sqrtf(self)
-            }
         }
         impl SqrtMethods for f64 {
             #[inline(always)]
@@ -94,10 +82,6 @@ cfg_if! {
             fn reciprocal_sqrt(self) -> f64 {
                 1.0 / libm::sqrt(self)
             }
-            #[inline(always)]
-            fn half_reciprocal_sqrt(self) -> f64 {
-                0.5 / libm::sqrt(self)
-            }
         }
     } else if #[cfg(all(not(feature = "std"), not(feature = "libm")))] {
         impl SqrtMethods for f32 {
@@ -107,18 +91,12 @@ cfg_if! {
             fn reciprocal_sqrt(self) -> f32 {
                 _reciprocal_sqrtf(self)
             }
-            fn half_reciprocal_sqrt(self) -> f32 {
-                0.5 * _reciprocal_sqrtf(self)
-            }
         }
         impl SqrtMethods for f64 {
             fn sqrt(self) -> f64 {
                 compile_error!("Please enable the 'libm' or 'std' feature for math support.")
             }
             fn reciprocal_sqrt(self) -> f64 {
-                compile_error!("Please enable the 'libm' or 'std' feature for math support.")
-            }
-            fn half_reciprocal_sqrt(self) -> f64 {
                 compile_error!("Please enable the 'libm' or 'std' feature for math support.")
             }
         }
