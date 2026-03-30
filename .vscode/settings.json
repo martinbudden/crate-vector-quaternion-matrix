@@ -35,6 +35,7 @@
         "thumbv",
         "trunc",
         "vreg",
+        "vrsqrt",
         "vsqrt",
         "waypointing",
         "Yawf"
