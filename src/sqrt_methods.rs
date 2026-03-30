@@ -43,11 +43,42 @@ cfg_if! {
         impl SqrtMethods for f32 {
             #[inline(always)]
             fn sqrt(self) -> f32 {
-                _sqrtf(self)
+                /*#[cfg(feature = "rp2350")]
+                {
+                    let mut result: f32;
+                    unsafe {
+                        // vsqrt.f32 {destination}, {source}
+                        core::arch::asm!(
+                            "vsqrt.f32 {0:s}, {1:s}",
+                            out(vreg) result,
+                            in(vreg) self,
+                            options(nomem, nostack, preserves_flags)
+                        );
+                    }
+                    result
+                }
+                #[cfg(not(feature = "rp2350"))]*/
+                    {libm::sqrtf(self)
+                }
             }
             #[inline(always)]
             fn reciprocal_sqrt(self) -> f32 {
-                1.0 / _sqrtf(self)
+                /*#[cfg(feature = "rp2350")]
+                {
+                    let mut result: f32;
+                    unsafe {
+                        core::arch::asm!(
+                            "vrsqrt.f32 {0:s}, {1:s}",
+                            out(vreg) result,
+                            in(vreg) self,
+                        );
+                    }
+                    result
+                }
+                #[cfg(not(feature = "rp2350"))]*/
+                {
+                    1.0 / libm::sqrtf(self)
+                }
             }
             #[inline(always)]
             fn half_reciprocal_sqrt(self) -> f32 {
@@ -95,7 +126,7 @@ cfg_if! {
 }
 #[inline(always)]
 fn _sqrtf(x: f32) -> f32 {
-    #[cfg(feature = "rp2350")]
+    /*#[cfg(feature = "rp2350")]
     {
         let mut result: f32;
         unsafe {
@@ -109,7 +140,7 @@ fn _sqrtf(x: f32) -> f32 {
         }
         result
     }
-    #[cfg(not(feature = "rp2350"))]
+    #[cfg(not(feature = "rp2350"))]*/
     {
         #[cfg(feature = "libm")]
         {
@@ -123,6 +154,32 @@ fn _sqrtf(x: f32) -> f32 {
         }
     }
 }
+
+/*pub trait MathExt {
+    fn inv_sqrt(self) -> f32;
+}
+
+impl MathExt for f32 {
+    #[inline(always)]
+    fn inv_sqrt(self) -> f32 {
+        #[cfg(feature = "rp2350")]
+        {
+            let mut result: f32;
+            unsafe {
+                core::arch::asm!(
+                    "vrsqrt.f32 {0:s}, {1:s}",
+                    out(vreg) result,
+                    in(vreg) self,
+                );
+            }
+            result
+        }
+        #[cfg(not(feature = "rp2350"))]
+        {
+            1.0 / self.sqrt() // Fallback for RP2040
+        }
+    }
+}*/
 
 #[inline(always)]
 fn _reciprocal_sqrtf(x: f32) -> f32 {
