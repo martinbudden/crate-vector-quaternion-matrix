@@ -4,7 +4,7 @@ use num_traits::{One, Signed, Zero, float::FloatCore};
 
 use crate::math_methods::TrigonometricMethods;
 use crate::sqrt_methods::SqrtMethods;
-use crate::{QuaternionMath, Vector3d};
+use crate::{QuaternionMath, QuaternionOps, Vector3d};
 
 /// quaternion of `f32` values
 pub type Quaternionf32 = Quaternion<f32>;
@@ -77,7 +77,7 @@ where
 /// ```
 impl<T> Zero for Quaternion<T>
 where
-    T: Zero + PartialEq + QuaternionMath,
+    T: Zero + PartialEq + QuaternionOps,
 {
     fn zero() -> Self {
         Self { w: T::zero(), x: T::zero(), y: T::zero(), z: T::zero() }
@@ -100,7 +100,7 @@ where
 /// ```
 impl<T> One for Quaternion<T>
 where
-    T: Copy + Zero + One + PartialEq + Sub<Output = T> + Mul<Output = T>,
+    T: Copy + Zero + One + PartialEq + Sub<Output = T> + Mul<Output = T> + QuaternionOps,
 {
     fn one() -> Self {
         Self { w: T::one(), x: T::zero(), y: T::zero(), z: T::zero() }
@@ -122,13 +122,13 @@ where
 /// ```
 impl<T> Neg for Quaternion<T>
 where
-    T: QuaternionMath,
+    T: QuaternionOps,
 {
     type Output = Self;
 
     #[inline(always)]
-    fn neg(self) -> Self::Output {
-        QuaternionMath::neg(self)
+    fn neg(self) -> Self {
+        T::neg(self)
     }
 }
 
@@ -144,13 +144,13 @@ where
 /// ```
 impl<T> Add for Quaternion<T>
 where
-    T: Add<Output = T> + QuaternionMath,
+    T: QuaternionOps,
 {
     type Output = Self;
 
     #[inline(always)]
     fn add(self, rhs: Self) -> Self {
-        Self { w: self.w + rhs.w, x: self.x + rhs.x, y: self.y + rhs.y, z: self.z + rhs.z }
+        T::add(self, rhs)
     }
 }
 
@@ -158,7 +158,7 @@ where
 /// Add one quaternion to another
 impl<T> AddAssign for Quaternion<T>
 where
-    T: Copy + Add<Output = T> + QuaternionMath,
+    T: Copy + QuaternionOps,
 {
     #[inline(always)]
     fn add_assign(&mut self, rhs: Self) {
@@ -170,7 +170,7 @@ where
 /// Subtract two quaternions
 impl<T> Sub for Quaternion<T>
 where
-    T: Add<Output = T> + QuaternionMath,
+    T: Add<Output = T> + QuaternionOps,
 {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self::Output {
@@ -183,14 +183,14 @@ where
 /// Subtract one quaternion from another
 impl<T> SubAssign for Quaternion<T>
 where
-    T: Copy + Add<Output = T> + QuaternionMath,
+    T: Copy + Add<Output = T> + QuaternionOps,
 {
     fn sub_assign(&mut self, rhs: Self) {
         *self = *self - rhs;
     }
 }
 
-// **** Pre-multiply ****
+// **** Mul scalar ****
 /// Pre-multiply quaternion by a constant
 impl Mul<Quaternion<f32>> for f32 {
     type Output = Quaternion<f32>;
@@ -209,52 +209,25 @@ impl Mul<Quaternion<f64>> for f64 {
 /// Multiply quaternion by a constant
 impl<T> Mul<T> for Quaternion<T>
 where
-    T: Copy + Mul<Output = T>,
+    T: QuaternionOps,
 {
     type Output = Self;
     fn mul(self, k: T) -> Self {
-        Self { w: self.w * k, x: self.x * k, y: self.y * k, z: self.z * k }
+        T::mul_scalar(self, k)
     }
 }
 
-// **** MulAssign ****
 /// In-place multiply a quaternion by a constant
 impl<T> MulAssign<T> for Quaternion<T>
 where
-    T: Copy + Mul<Output = T>,
+    T: Copy + QuaternionOps,
 {
     fn mul_assign(&mut self, k: T) {
         *self = *self * k;
     }
 }
 
-/// Multiply two quaternions
-impl<T> Mul<Quaternion<T>> for Quaternion<T>
-where
-    T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
-{
-    type Output = Self;
-    fn mul(self, rhs: Self) -> Self {
-        Self {
-            w: self.w * rhs.w - self.x * rhs.x - self.y * rhs.y - self.z * rhs.z,
-            x: self.w * rhs.x + self.x * rhs.w + self.y * rhs.z - self.z * rhs.y,
-            y: self.w * rhs.y - self.x * rhs.z + self.y * rhs.w + self.z * rhs.x,
-            z: self.w * rhs.z + self.x * rhs.y - self.y * rhs.x + self.z * rhs.w,
-        }
-    }
-}
-
-/// Multiply one quaternion by another
-impl<T> MulAssign<Quaternion<T>> for Quaternion<T>
-where
-    T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
-{
-    fn mul_assign(&mut self, rhs: Self) {
-        *self = *self * rhs;
-    }
-}
-
-// **** Div ****
+// **** Div scalar ****
 /// Divide a quaternion by a constant
 /// ```
 /// # use vector_quaternion_matrix::Quaternionf32;
@@ -266,17 +239,15 @@ where
 /// ```
 impl<T> Div<T> for Quaternion<T>
 where
-    T: Copy + One + Div<Output = T>,
+    T: Copy + QuaternionOps,
 {
     type Output = Self;
     fn div(self, k: T) -> Self {
-        let reciprocal: T = T::one() / k;
         // Reuse our existing multiplication logic (which is likely SIMD-optimized)
-        self * reciprocal
+        T::div_scalar(self, k)
     }
 }
 
-// **** DivAssign ****
 /// In-place divide a vector by a constant
 /// ```
 /// # use vector_quaternion_matrix::Quaternionf32;
@@ -288,10 +259,32 @@ where
 /// ```
 impl<T> DivAssign<T> for Quaternion<T>
 where
-    T: Copy + One + Div<Output = T>,
+    T: Copy + Div<Output = T> + QuaternionOps,
 {
     fn div_assign(&mut self, k: T) {
-        *self = *self / k;
+        *self = self.div(k);
+    }
+}
+
+// **** Mul ****
+/// Multiply two quaternions
+impl<T> Mul<Quaternion<T>> for Quaternion<T>
+where
+    T: QuaternionOps,
+{
+    type Output = Self;
+    fn mul(self, rhs: Self) -> Self {
+        T::mul(self, rhs)
+    }
+}
+
+/// Multiply one quaternion by another
+impl<T> MulAssign<Quaternion<T>> for Quaternion<T>
+where
+    T: Copy + QuaternionOps,
+{
+    fn mul_assign(&mut self, rhs: Self) {
+        *self = self.mul(rhs);
     }
 }
 
@@ -396,17 +389,6 @@ where
     }
 }
 
-// **** impl norm_squared ****
-impl<T> Quaternion<T>
-where
-    T: Copy + Add<Output = T> + Mul<Output = T>,
-{
-    /// Return square of Euclidean norm
-    pub fn norm_squared(&self) -> T {
-        self.w * self.w + self.x * self.x + self.y * self.y + self.z * self.z
-    }
-}
-
 // **** impl mean ****
 impl<T> Quaternion<T>
 where
@@ -418,20 +400,32 @@ where
         (self.w + self.x + self.y + self.z) / four
     }
 }
+
+// **** impl norm_squared ****
+impl<T> Quaternion<T>
+where
+    T: Copy + QuaternionOps,
+{
+    /// Return square of Euclidean norm
+    pub fn norm_squared(self) -> T {
+        T::norm_squared(self)
+    }
+}
+
 // **** impl norm ****
 impl<T> Quaternion<T>
 where
-    T: Copy + Zero + Add<Output = T> + Mul<Output = T> + SqrtMethods,
+    T: Copy + SqrtMethods + QuaternionOps,
 {
     /// Return Euclidean norm
-    pub fn norm(&self) -> T {
-        (self.w * self.w + self.x * self.x + self.y * self.y + self.z * self.z).sqrt()
+    pub fn norm(self) -> T {
+        Self::norm_squared(self).sqrt()
     }
 }
 
 impl<T> Quaternion<T>
 where
-    T: Copy + Zero + One + PartialOrd + Div<Output = T> + SqrtMethods,
+    T: Copy + Zero + PartialOrd + SqrtMethods + QuaternionOps,
 {
     /// Return normalized form of the quaternion
     pub fn normalized(&self) -> Self {
@@ -440,18 +434,15 @@ where
         if norm == T::zero() {
             return *self;
         }
-        let norm_reciprocal = T::one() / norm;
-        *self * norm_reciprocal
+        *self * T::reciprocal(norm)
     }
 
     /// Normalize the quaternion in place
     pub fn normalize(&mut self) {
         let norm: T = self.norm();
-        #[allow(clippy::assign_op_pattern)]
         // If norm == 0.0 then the quaternion is already normalized
         if norm != T::zero() {
-            let norm_reciprocal = T::one() / norm;
-            *self = *self * norm_reciprocal;
+            *self *= T::reciprocal(norm);
         }
     }
 }
@@ -627,13 +618,20 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Copy + One + Neg<Output = T> + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Div<Output = T>,
+    T: QuaternionMath,
 {
     // Return the conjugate of the quaternion
-    pub fn conjugate(self) -> Self {
-        Self { w: self.w, x: -self.x, y: -self.y, z: -self.z }
-    }
 
+    #[inline(always)]
+    pub fn conjugate(self) -> Self {
+        T::conjugate(self)
+    }
+}
+
+impl<T> Quaternion<T>
+where
+    T: Copy + One + Neg<Output = T> + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Div<Output = T>,
+{
     /// Return the imaginary part of the quaternion
     pub fn imaginary(self) -> Vector3d<T> {
         Vector3d::<T> { x: self.x, y: self.y, z: self.z }

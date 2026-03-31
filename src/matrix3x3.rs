@@ -2,7 +2,7 @@ use cfg_if::cfg_if;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{One, Signed, Zero, float::FloatCore};
 
-use crate::{MathConstants, Matrix2x2, MatrixError, Quaternion, SqrtMethods, Vector3d};
+use crate::{MathConstants, Matrix2x2, MatrixError, Quaternion, QuaternionOps, SqrtMethods, Vector3d};
 
 /// 3x3 matrix of `f32` values
 pub type Matrix3x3f32 = Matrix3x3<f32>;
@@ -386,11 +386,11 @@ where
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
-///                                  7.0, 11.0, 13.0,
-///                                 17.0, 19.0, 23.0]);
+///                              7.0, 11.0, 13.0,
+///                             17.0, 19.0, 23.0]);
 /// let n = Matrix3x3f32::from([29.0, 31.0, 37.0,
-///                                 41.0, 43.0, 47.0,
-///                                 53.0, 59.0, 61.0]);
+///                             41.0, 43.0, 47.0,
+///                             53.0, 59.0, 61.0]);
 /// let r = m * n;
 ///
 /// assert_eq!(r, Matrix3x3f32::from([
@@ -431,11 +431,11 @@ where
 /// ```
 /// # use vector_quaternion_matrix::Matrix3x3f32;
 /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
-///                                      7.0, 11.0, 13.0,
-///                                     17.0, 19.0, 23.0]);
+///                                  7.0, 11.0, 13.0,
+///                                 17.0, 19.0, 23.0]);
 /// let n = Matrix3x3f32::from([29.0, 31.0, 37.0,
-///                                 41.0, 43.0, 47.0,
-///                                 53.0, 59.0, 61.0]);
+///                             41.0, 43.0, 47.0,
+///                             53.0, 59.0, 61.0]);
 /// m *= n;
 ///
 /// assert_eq!(m, Matrix3x3f32::from([
@@ -1215,7 +1215,7 @@ where
 /// rather than the Hamilton multiplication convention used by the Quaternion class.
 impl<T> From<Matrix3x3<T>> for Quaternion<T>
 where
-    T: Copy + One + FloatCore + SqrtMethods,
+    T: Copy + One + FloatCore + SqrtMethods + QuaternionOps,
 {
     fn from(m: Matrix3x3<T>) -> Self {
         let half = T::one() / (T::one() + T::one());
@@ -1266,7 +1266,7 @@ mod tests {
     #[test]
     fn default() {
         let a: Matrix3x3<f32> = Matrix3x3f32::default();
-        assert_eq!(a, Matrix3x3::<f32> { a: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] });
+        assert_eq!(a, Matrix3x3f32 { a: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] });
         let z = Matrix3x3f32::zero();
         //let z: Matrix3x3 = zero();
         assert_eq!(a, z);
