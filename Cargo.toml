@@ -28,7 +28,7 @@ rustflags = [
 rustdoc-args = ["--html-in-header", "katex-header.html"]
 
 [dependencies]
-libm = { version = "0.2.2",  } # libm is required for sqrt and trigonometric functions in no_std
+libm = { version = "0.2.2" } # libm is required for sqrt and trigonometric functions in no_std
 num-traits = "0.2.19"
 bytemuck = { version = "1.24", features = ["derive"] }
 cfg-if = "1.0"

@@ -256,7 +256,8 @@ impl Vector3dMath for f32 {
     }
     #[inline(always)]
     fn dot(a: Vector3d<Self>, b: Vector3d<Self>) -> Self {
-        #[cfg(feature = "simd")]
+        (a.x * b.x) + (a.y * b.y) + (a.z * b.z)
+        /*#[cfg(feature = "simd")]
         {
             let va = f32x4::from(a);
             let vb = f32x4::from(b);
@@ -275,7 +276,7 @@ impl Vector3dMath for f32 {
         #[cfg(not(feature = "simd"))]
         {
             (a.x * b.x) + (a.y * b.y) + (a.z * b.z)
-        }
+        }*/
     }
 
     #[inline(always)]
