@@ -166,9 +166,9 @@ mod tests {
         assert_eq!([2.0, 3.0, 5.0], i);
     }
     #[test]
-    fn squared_norm() {
+    fn norm_squared() {
         let a = Vector3df32 { x: 2.0, y: 3.0, z: 5.0 };
-        assert_eq!(a.squared_norm(), 38.0);
+        assert_eq!(a.norm_squared(), 38.0);
     }
     #[test]
     fn norm() {

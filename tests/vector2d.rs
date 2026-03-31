@@ -151,9 +151,9 @@ mod tests {
         assert_eq!(b.dot(b), 170.0);
     }
     #[test]
-    fn squared_norm() {
+    fn norm_squared() {
         let a = Vector2df32 { x: 2.0, y: 3.0 };
-        assert_eq!(a.squared_norm(), 13.0);
+        assert_eq!(a.norm_squared(), 13.0);
     }
     #[test]
     fn norm() {

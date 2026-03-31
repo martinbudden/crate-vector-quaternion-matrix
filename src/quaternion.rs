@@ -416,13 +416,13 @@ where
     }
 }
 
-// **** impl squared_norm ****
+// **** impl norm_squared ****
 impl<T> Quaternion<T>
 where
     T: Copy + Add<Output = T> + Mul<Output = T>,
 {
     /// Return square of Euclidean norm
-    pub fn squared_norm(&self) -> T {
+    pub fn norm_squared(&self) -> T {
         self.w * self.w + self.x * self.x + self.y * self.y + self.z * self.z
     }
 }

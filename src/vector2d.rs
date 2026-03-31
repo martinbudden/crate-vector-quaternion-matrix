@@ -413,19 +413,19 @@ where
     }
 }
 
-// **** impl squared_norm ****
+// **** impl norm_squared ****
 impl<T> Vector2d<T>
 where
     T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
 {
     /// Return square of Euclidean norm
-    pub fn squared_norm(&self) -> T {
+    pub fn norm_squared(&self) -> T {
         self.x * self.x + self.y * self.y
     }
 
     /// Return distance between two points, squared
     pub fn distance_squared(&self, rhs: Self) -> T {
-        (*self - rhs).squared_norm()
+        (*self - rhs).norm_squared()
     }
 
     /// Vector dot product

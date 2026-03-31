@@ -432,19 +432,19 @@ where
     }
 }
 
-// **** impl squared_norm ****
+// **** impl norm_squared ****
 impl<T> Vector3d<T>
 where
     T: Copy + Add<Output = T> + Sub<Output = T> + VectorMath,
 {
     /// Return square of Euclidean norm
-    pub fn squared_norm(self) -> T {
+    pub fn norm_squared(self) -> T {
         self.dot(self)
     }
 
     /// Return distance between two points, squared
     pub fn distance_squared(self, rhs: Self) -> T {
-        (self - rhs).squared_norm()
+        (self - rhs).norm_squared()
     }
 }
 
@@ -482,7 +482,7 @@ where
 {
     /// Return Euclidean norm
     pub fn norm(self) -> T {
-        self.squared_norm().sqrt()
+        self.norm_squared().sqrt()
     }
 }
 

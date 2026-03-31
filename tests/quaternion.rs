@@ -115,9 +115,9 @@ mod tests {
         assert_eq!(a, Quaternion { w: 2.0, x: 3.0, y: 5.0, z: 7.0 });
     }
     #[test]
-    fn squared_norm() {
+    fn norm_squared() {
         let a = Quaternion { w: 2.0, x: 3.0, y: 5.0, z: 7.0 };
-        assert_eq!(a.squared_norm(), 87.0);
+        assert_eq!(a.norm_squared(), 87.0);
     }
     #[test]
     fn norm() {
