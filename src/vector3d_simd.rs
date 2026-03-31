@@ -13,7 +13,7 @@ cfg_if! {
 
 /*impl<T> Vector3d<T>
 where
-    T: Copy + VectorMath,
+    T: Copy + Vector3dMath,
 {
     #[inline(always)]
     pub fn dot(&self, other: Self) -> T {
@@ -90,7 +90,7 @@ where
 }*/
 /*
 
-// Inside your VectorMath trait or a specialized impl for f32
+// Inside your Vector3dMath trait or a specialized impl for f32
 #[cfg(feature = "simd")]
 {
     use core::simd::f32x4;

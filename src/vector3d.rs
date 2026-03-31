@@ -2,7 +2,7 @@ use cfg_if::cfg_if;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{One, Signed, Zero, float::FloatCore};
 
-use crate::{SqrtMethods, Vector2d, VectorMath, VectorOps};
+use crate::{SqrtMethods, Vector2d, Vector3dMath, Vector3dOps};
 
 /// 3-dimensional `{x, y, z}` vector of `i8` values
 pub type Vector3di8 = Vector3d<i8>;
@@ -53,7 +53,7 @@ pub struct Vector3d<T> {
 /// ```
 impl<T> Zero for Vector3d<T>
 where
-    T: Zero + PartialEq,
+    T: Zero + PartialEq + Vector3dOps,
 {
     fn zero() -> Self {
         Self { x: T::zero(), y: T::zero(), z: T::zero() }
@@ -75,12 +75,12 @@ where
 /// ```
 impl<T> Neg for Vector3d<T>
 where
-    T: VectorOps,
+    T: Vector3dOps,
 {
     type Output = Self;
     #[inline(always)]
     fn neg(self) -> Self::Output {
-        VectorOps::neg(self)
+        T::neg(self)
     }
 }
 
@@ -96,11 +96,11 @@ where
 /// ```
 impl<T> Add for Vector3d<T>
 where
-    T: Add<Output = T>,
+    T: Vector3dOps,
 {
     type Output = Vector3d<T>;
     fn add(self, rhs: Self) -> Self {
-        Self { x: self.x + rhs.x, y: self.y + rhs.y, z: self.z + rhs.z }
+        T::add(self, rhs)
     }
 }
 
@@ -121,7 +121,7 @@ where
 /// ```
 impl<T> AddAssign for Vector3d<T>
 where
-    T: Copy + Add<Output = T>,
+    T: Copy + Vector3dOps,
 {
     fn add_assign(&mut self, other: Self) {
         *self = *self + other;
@@ -140,11 +140,12 @@ where
 /// ```
 impl<T> Sub for Vector3d<T>
 where
-    T: Sub<Output = T>,
+    T: Add<Output = T> + Vector3dOps,
 {
     type Output = Vector3d<T>;
     fn sub(self, rhs: Self) -> Self {
-        Self { x: self.x - rhs.x, y: self.y - rhs.y, z: self.z - rhs.z }
+        // Reuse our existing SIMD-optimized Add and Neg implementations
+        self + (-rhs)
     }
 }
 
@@ -160,14 +161,14 @@ where
 /// ```
 impl<T> SubAssign for Vector3d<T>
 where
-    T: Copy + Sub<Output = T>,
+    T: Copy + Add<Output = T> + Vector3dOps,
 {
     fn sub_assign(&mut self, other: Self) {
         *self = *self - other;
     }
 }
 
-// **** Pre-multiply ****
+// **** Mul Scalar ****
 /// Pre-multiply vector by a constant
 /// ```
 /// # use vector_quaternion_matrix::Vector3df32;
@@ -201,11 +202,11 @@ impl Mul<Vector3d<f64>> for f64 {
 /// ```
 impl<T> Mul<T> for Vector3d<T>
 where
-    T: Copy + Mul<Output = T>,
+    T: Copy + Vector3dOps,
 {
     type Output = Self;
-    fn mul(self, k: T) -> Self::Output {
-        Self { x: self.x * k, y: self.y * k, z: self.z * k }
+    fn mul(self, k: T) -> Self {
+        T::mul_scalar(self, k)
     }
 }
 
@@ -241,14 +242,14 @@ impl Mul<f32> for Vector3d<i32> {
 /// ```
 impl<T> MulAssign<T> for Vector3d<T>
 where
-    T: Copy + Mul<Output = T>,
+    T: Copy + Vector3dOps,
 {
     fn mul_assign(&mut self, k: T) {
         *self = *self * k;
     }
 }
 
-// **** Div ****
+// **** Div by scalar ****
 /// Divide a vector by a constant
 /// ```
 /// # use vector_quaternion_matrix::Vector3df32;
@@ -259,18 +260,14 @@ where
 /// ```
 impl<T> Div<T> for Vector3d<T>
 where
-    T: Copy + One + Div<Output = T>,
+    T: Copy + Vector3dOps,
 {
     type Output = Self;
     fn div(self, k: T) -> Self {
-        let reciprocal: T = T::one() / k;
-        //Self { x: self.x * r, y: self.y * r, z: self.z * r }
-        // Reuse our existing multiplication logic (which is likely SIMD-optimized)
-        self * reciprocal
+        T::div_scalar(self, k)
     }
 }
 
-// **** DivAssign ****
 /// In-place divide a vector by a constant
 /// ```
 /// # use vector_quaternion_matrix::Vector3df32;
@@ -281,10 +278,10 @@ where
 /// ```
 impl<T> DivAssign<T> for Vector3d<T>
 where
-    T: Copy + One + Div<Output = T>,
+    T: Copy + Div<Output = T> + Vector3dOps,
 {
     fn div_assign(&mut self, k: T) {
-        *self = *self / k;
+        *self = self.div(k);
     }
 }
 
@@ -349,7 +346,7 @@ where
     T: Copy + Signed,
 {
     /// Return a copy of the vector with all components set to their absolute values
-    pub fn abs(&self) -> Self {
+    pub fn abs(self) -> Self {
         Self { x: self.x.abs(), y: self.y.abs(), z: self.z.abs() }
     }
 
@@ -365,7 +362,7 @@ where
     T: Copy + FloatCore,
 {
     /// Return a copy of the vector with all components clamped to the specified range
-    pub fn clamp(&self, min: T, max: T) -> Self {
+    pub fn clamp(self, min: T, max: T) -> Self {
         Self { x: self.x.clamp(min, max), y: self.y.clamp(min, max), z: self.z.clamp(min, max) }
     }
 
@@ -377,9 +374,10 @@ where
     }
 }
 
+// **** impl dot and cross ****
 impl<T> Vector3d<T>
 where
-    T: VectorMath + Copy,
+    T: Vector3dMath + Copy,
 {
     /// Vector dot product
     /// ```
@@ -393,9 +391,9 @@ where
     /// ```
     #[inline(always)]
     pub fn dot(self, other: Self) -> T {
-        // Pass by value
         T::dot(self, other)
     }
+
     /// Vector cross product
     /// ```
     /// # use vector_quaternion_matrix::Vector3df32;
@@ -408,7 +406,6 @@ where
     /// ```
     #[inline(always)]
     pub fn cross(self, other: Self) -> Vector3d<T> {
-        // Pass by value
         T::cross(self, other)
     }
 }
@@ -416,7 +413,7 @@ where
 // **** impl norm_squared ****
 impl<T> Vector3d<T>
 where
-    T: Copy + Add<Output = T> + Sub<Output = T> + VectorMath,
+    T: Copy + Add<Output = T> + Vector3dOps + Vector3dMath,
 {
     /// Return square of Euclidean norm
     pub fn norm_squared(self) -> T {
@@ -450,7 +447,7 @@ where
     T: Copy + One + Add<Output = T> + Div<Output = T>,
 {
     /// Return the mean of all components of the vector
-    pub fn mean(&self) -> T {
+    pub fn mean(self) -> T {
         let three = T::one() + T::one() + T::one();
         (self.x + self.y + self.z) / three
     }
@@ -459,47 +456,46 @@ where
 // **** impl norm ****
 impl<T> Vector3d<T>
 where
-    T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + SqrtMethods + VectorMath,
+    T: Copy + Add<Output = T> + SqrtMethods + Vector3dMath + Vector3dOps,
 {
     /// Return Euclidean norm
     pub fn norm(self) -> T {
-        self.norm_squared().sqrt()
+        Self::norm_squared(self).sqrt()
     }
 }
 
 impl<T> Vector3d<T>
 where
-    T: Copy + Zero + One + PartialEq + Add<Output = T> + Sub<Output = T> + Div<Output = T> + SqrtMethods + VectorMath,
+    T: Copy + Zero + PartialEq + SqrtMethods + Vector3dOps + Vector3dMath,
 {
     /// Return normalized form of the vector
-    pub fn normalized(&self) -> Self {
+    pub fn normalized(self) -> Self {
         let norm = self.norm();
         // If norm == 0.0 then the vector is already normalized
         if norm == T::zero() {
-            return *self;
+            return self;
         }
-        let norm_reciprocal = T::one() / norm;
-        *self * norm_reciprocal
+        self * T::reciprocal(norm)
     }
 
     /// Normalize the vector in place
-    pub fn normalize(&mut self) {
+    pub fn normalize(&mut self) -> Self {
         let norm = self.norm();
-        #[allow(clippy::assign_op_pattern)]
+        //#[allow(clippy::assign_op_pattern)]
         // If norm == 0.0 then the vector is already normalized
         if norm != T::zero() {
-            let norm_reciprocal = T::one() / norm;
-            *self = *self * norm_reciprocal;
+            *self *= T::reciprocal(norm);
         }
+        *self
     }
 }
 
 impl<T> Vector3d<T>
 where
-    T: Copy + Zero + One + Sub<Output = T> + SqrtMethods + VectorMath,
+    T: Copy + Zero + SqrtMethods + Vector3dMath + Vector3dOps,
 {
     // Return distance between two points
-    pub fn distance(&self, rhs: Self) -> T {
+    pub fn distance(self, rhs: Self) -> T {
         self.distance_squared(rhs).sqrt()
     }
 }

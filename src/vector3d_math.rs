@@ -3,11 +3,13 @@ use cfg_if::cfg_if;
 cfg_if! {
     if #[cfg(feature = "align")] {
         use core::{mem::transmute, simd::f32x4};
-        use core::simd::simd_swizzle;
+         use core::simd::{simd_swizzle,num::SimdFloat};
     }
 }
 
 use crate::{SqrtMethods, Vector3d};
+
+// **** From ****
 
 #[cfg(feature = "simd")]
 impl From<Vector3d<f32>> for f32x4 {
@@ -29,14 +31,29 @@ impl From<f32x4> for Vector3d<f32> {
     }
 }
 
-pub trait VectorOps: Sized {
+// **** Ops ****
+
+pub trait Vector3dOps: Sized {
+    fn reciprocal(x: Self) -> Self;
+    fn norm_squared(q: Vector3d<Self>) -> Self;
     fn neg(v: Vector3d<Self>) -> Vector3d<Self>;
     fn add(lhs: Vector3d<Self>, lhs: Vector3d<Self>) -> Vector3d<Self>;
     fn mul_scalar(lhs: Vector3d<Self>, a: Self) -> Vector3d<Self>;
+    fn div_scalar(lhs: Vector3d<Self>, a: Self) -> Vector3d<Self>;
     fn mul_add(lhs: Vector3d<Self>, a: Self, b: Vector3d<Self>) -> Vector3d<Self>;
 }
 
-impl VectorOps for f64 {
+impl Vector3dOps for f64 {
+    #[inline(always)]
+    fn reciprocal(x: Self) -> Self {
+        1.0 / x
+    }
+
+    #[inline(always)]
+    fn norm_squared(v: Vector3d<Self>) -> Self {
+        v.x * v.x + v.y * v.y + v.z * v.z
+    }
+
     #[inline(always)]
     fn neg(v: Vector3d<Self>) -> Vector3d<Self> {
         Vector3d { x: -v.x, y: -v.y, z: -v.z }
@@ -53,25 +70,44 @@ impl VectorOps for f64 {
     }
 
     #[inline(always)]
+    fn div_scalar(lhs: Vector3d<Self>, a: Self) -> Vector3d<Self> {
+        Self::mul_scalar(lhs, 1.0 / a)
+    }
+    #[inline(always)]
     fn mul_add(lhs: Vector3d<Self>, a: Self, b: Vector3d<Self>) -> Vector3d<Self> {
         Vector3d { x: lhs.x * a + b.x, y: lhs.y * a + b.y, z: lhs.z * a + b.z }
     }
 }
 
 // SIMD-accelerated implementation for f32
-impl VectorOps for f32 {
+impl Vector3dOps for f32 {
+    #[inline(always)]
+    fn reciprocal(x: Self) -> Self {
+        1.0 / x
+    }
+
+    #[inline(always)]
+    fn norm_squared(v: Vector3d<Self>) -> Self {
+        #[cfg(feature = "simd")]
+        {
+            let v_simd = f32x4::from(v);
+            (v_simd * v_simd).reduce_sum()
+        }
+        #[cfg(not(feature = "simd"))]
+        {
+            v.x * v.x + v.y * v.y + v.z * v.z
+        }
+    }
+
     #[inline(always)]
     fn neg(v: Vector3d<Self>) -> Vector3d<Self> {
         #[cfg(feature = "simd")]
         {
-            use core::simd::f32x4;
             // Transmute the 16-byte aligned struct to a SIMD register
-            let q_simd: f32x4 = unsafe { core::mem::transmute(v) };
-
+            let v_simd = f32x4::from(v);
             // Negate all 4 lanes (x, y, z, w) simultaneously
-            let res_simd = -q_simd;
-
-            unsafe { core::mem::transmute(res_simd) }
+            let ret_simd = -v_simd;
+            ret_simd.into()
         }
         #[cfg(not(feature = "simd"))]
         {
@@ -117,6 +153,11 @@ impl VectorOps for f32 {
     }
 
     #[inline(always)]
+    fn div_scalar(lhs: Vector3d<Self>, a: Self) -> Vector3d<Self> {
+        Self::mul_scalar(lhs, 1.0 / a)
+    }
+
+    #[inline(always)]
     fn mul_add(lhs: Vector3d<Self>, a: Self, b: Vector3d<Self>) -> Vector3d<Self> {
         #[cfg(feature = "simd")]
         {
@@ -137,24 +178,16 @@ impl VectorOps for f32 {
     }
 }
 
-pub trait VectorMath: Sized {
+// **** Math ****
+
+pub trait Vector3dMath: Sized {
+    fn normalize(v: Vector3d<Self>) -> Vector3d<Self>;
+    fn is_normalized(q: Vector3d<Self>) -> bool;
     fn dot(a: Vector3d<Self>, b: Vector3d<Self>) -> Self;
     fn cross(a: Vector3d<Self>, b: Vector3d<Self>) -> Vector3d<Self>;
-    fn normalize(v: Vector3d<Self>) -> Vector3d<Self>;
 }
 
-// Default/Scalar implementation for f64
-impl VectorMath for f64 {
-    #[inline(always)]
-    fn dot(a: Vector3d<Self>, b: Vector3d<Self>) -> Self {
-        (a.x * b.x) + (a.y * b.y) + (a.z * b.z)
-    }
-
-    #[inline(always)]
-    fn cross(a: Vector3d<Self>, b: Vector3d<Self>) -> Vector3d<Self> {
-        Vector3d { x: a.y * b.z - a.z * b.y, y: a.z * b.x - a.x * b.z, z: a.x * b.y - a.y * b.x }
-    }
-
+impl Vector3dMath for f64 {
     #[inline(always)]
     fn normalize(v: Vector3d<Self>) -> Vector3d<Self> {
         let norm_squared = v.x * v.x + v.y * v.y + v.z * v.z;
@@ -164,10 +197,67 @@ impl VectorMath for f64 {
         let norm_reciprocal = norm_squared.reciprocal_sqrt();
         Vector3d { x: v.x * norm_reciprocal, y: v.y * norm_reciprocal, z: v.z * norm_reciprocal }
     }
+
+    #[inline(always)]
+    fn is_normalized(q: Vector3d<Self>) -> bool {
+        let norm_squared = Self::norm_squared(q);
+        approx::abs_diff_eq!(norm_squared, 1.0, epsilon = 1e-6)
+    }
+
+    #[inline(always)]
+    fn dot(a: Vector3d<Self>, b: Vector3d<Self>) -> Self {
+        (a.x * b.x) + (a.y * b.y) + (a.z * b.z)
+    }
+
+    #[inline(always)]
+    fn cross(a: Vector3d<Self>, b: Vector3d<Self>) -> Vector3d<Self> {
+        Vector3d { x: a.y * b.z - a.z * b.y, y: a.z * b.x - a.x * b.z, z: a.x * b.y - a.y * b.x }
+    }
 }
 
 // SIMD-accelerated implementation for f32
-impl VectorMath for f32 {
+impl Vector3dMath for f32 {
+    #[inline(always)]
+    fn normalize(v: Vector3d<Self>) -> Vector3d<Self> {
+        #[cfg(feature = "simd")]
+        {
+            use core::simd::f32x4;
+
+            // 1. Calculate magnitude squared using our SIMD Dot Product
+            let norm_squared = Self::dot(v, v);
+
+            // 2. Guard against division by zero (Important for sensor glitches!)
+            if norm_squared == 0.0 {
+                return Vector3d::default(); // Return zero vector if magnitude is 0
+            }
+            use crate::SqrtMethods;
+
+            let norm_reciprocal = norm_squared.reciprocal_sqrt(); // Uses hardware vrsqrt
+
+            // 3. Load vector into SIMD and "Splat" the inverse magnitude
+            let mut v_simd: f32x4 = unsafe { core::mem::transmute(v) };
+            let scale = f32x4::splat(norm_reciprocal);
+
+            // 4. Multiply all lanes at once
+            v_simd *= scale;
+
+            unsafe { core::mem::transmute(v_simd) }
+        }
+        #[cfg(not(feature = "simd"))]
+        {
+            let norm_squared = v.x * v.x + v.y * v.y + v.z * v.z;
+            if norm_squared == 0.0 {
+                return Vector3d::default();
+            }
+            let norm_reciprocal = norm_squared.reciprocal_sqrt();
+            Vector3d { x: v.x * norm_reciprocal, y: v.y * norm_reciprocal, z: v.z * norm_reciprocal }
+        }
+    }
+    #[inline(always)]
+    fn is_normalized(q: Vector3d<Self>) -> bool {
+        let norm_squared = Self::norm_squared(q);
+        approx::abs_diff_eq!(norm_squared, 1.0, epsilon = 1e-6)
+    }
     #[inline(always)]
     fn dot(a: Vector3d<Self>, b: Vector3d<Self>) -> Self {
         #[cfg(feature = "simd")]
@@ -223,43 +313,6 @@ impl VectorMath for f32 {
         #[cfg(not(feature = "simd"))]
         {
             Vector3d { x: a.y * b.z - a.z * b.y, y: a.z * b.x - a.x * b.z, z: a.x * b.y - a.y * b.x }
-        }
-    }
-
-    #[inline(always)]
-    fn normalize(v: Vector3d<Self>) -> Vector3d<Self> {
-        #[cfg(feature = "simd")]
-        {
-            use core::simd::f32x4;
-
-            // 1. Calculate magnitude squared using our SIMD Dot Product
-            let norm_squared = Self::dot(v, v);
-
-            // 2. Guard against division by zero (Important for sensor glitches!)
-            if norm_squared == 0.0 {
-                return Vector3d::default(); // Return zero vector if magnitude is 0
-            }
-            use crate::SqrtMethods;
-
-            let norm_reciprocal = norm_squared.reciprocal_sqrt(); // Uses hardware vrsqrt
-
-            // 3. Load vector into SIMD and "Splat" the inverse magnitude
-            let mut v_simd: f32x4 = unsafe { core::mem::transmute(v) };
-            let scale = f32x4::splat(norm_reciprocal);
-
-            // 4. Multiply all lanes at once
-            v_simd *= scale;
-
-            unsafe { core::mem::transmute(v_simd) }
-        }
-        #[cfg(not(feature = "simd"))]
-        {
-            let norm_squared = v.x * v.x + v.y * v.y + v.z * v.z;
-            if norm_squared == 0.0 {
-                return Vector3d::default();
-            }
-            let norm_reciprocal = norm_squared.reciprocal_sqrt();
-            Vector3d { x: v.x * norm_reciprocal, y: v.y * norm_reciprocal, z: v.z * norm_reciprocal }
         }
     }
 }

@@ -170,4 +170,18 @@ mod tests {
         b.clamp_in_place(-1.0, 4.0);
         assert_eq!(b, a.clamp(-1.0, 4.0));
     }
+    #[test]
+    fn test_integration_step() {
+        use approx::assert_abs_diff_eq;
+
+        let mut q = Quaternion { w: 1.0, x: 0.0, y: 0.0, z: 0.0 };
+        let q_dot = Quaternion { w: 0.1, x: 0.2, y: 0.3, z: 0.4 };
+        let dt = 0.01;
+
+        // This line now uses your SIMD Add, Mul, and AddAssign!
+        q += q_dot * dt;
+
+        assert_abs_diff_eq!(q.w, 1.001, epsilon = 1e-6);
+        assert_abs_diff_eq!(q.x, 0.002, epsilon = 1e-6);
+    }
 }

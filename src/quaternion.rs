@@ -162,6 +162,8 @@ where
 {
     #[inline(always)]
     fn add_assign(&mut self, rhs: Self) {
+        // This mutates 'self' in place.
+        // On RP2350, this avoids a stack copy of the current orientation.
         *self = *self + rhs;
     }
 }
@@ -173,7 +175,7 @@ where
     T: Add<Output = T> + QuaternionOps,
 {
     type Output = Self;
-    fn sub(self, rhs: Self) -> Self::Output {
+    fn sub(self, rhs: Self) -> Self {
         // Reuse our existing SIMD-optimized Add and Neg implementations
         self + (-rhs)
     }
@@ -231,7 +233,6 @@ where
 /// Divide a quaternion by a constant
 /// ```
 /// # use vector_quaternion_matrix::Quaternionf32;
-///
 /// let q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
 /// let r = q / 2.0;
 ///
@@ -243,7 +244,6 @@ where
 {
     type Output = Self;
     fn div(self, k: T) -> Self {
-        // Reuse our existing multiplication logic (which is likely SIMD-optimized)
         T::div_scalar(self, k)
     }
 }
@@ -251,7 +251,6 @@ where
 /// In-place divide a vector by a constant
 /// ```
 /// # use vector_quaternion_matrix::Quaternionf32;
-///
 /// let mut q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
 /// q /= 2.0;
 ///
@@ -292,7 +291,6 @@ where
 /// Access quaternion component by index
 /// ```
 /// # use vector_quaternion_matrix::Quaternionf32;
-///
 /// let mut q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
 ///
 /// assert_eq!(q[0], 2.0);
@@ -317,7 +315,6 @@ impl<T> Index<usize> for Quaternion<T> {
 // Set quaternion component by index
 /// ```
 /// # use vector_quaternion_matrix::Quaternionf32;
-///
 /// let mut q = Quaternionf32::new(2.0, 3.0, 5.0, 6.0);
 /// q[0] = 7.0;
 /// q[1] = 11.0;
@@ -467,7 +464,7 @@ where
             z: v.x * (self.x * self.z - self.w * self.y)
                 + v.y * (self.w * self.x + self.y * self.z)
                 + v.z * (half - x2 - y2),
-        } * two
+        } //* two
     }
     pub fn cos_roll(self) -> T {
         let half = T::one() / (T::one() + T::one());
