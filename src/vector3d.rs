@@ -80,7 +80,7 @@ where
     type Output = Self;
     #[inline(always)]
     fn neg(self) -> Self::Output {
-        T::neg(self)
+        T::v3_neg(self)
     }
 }
 
@@ -100,7 +100,7 @@ where
 {
     type Output = Vector3d<T>;
     fn add(self, rhs: Self) -> Self {
-        T::add(self, rhs)
+        T::v3_add(self, rhs)
     }
 }
 
@@ -206,7 +206,7 @@ where
 {
     type Output = Self;
     fn mul(self, k: T) -> Self {
-        T::mul_scalar(self, k)
+        T::v3_mul_scalar(self, k)
     }
 }
 
@@ -264,7 +264,7 @@ where
 {
     type Output = Self;
     fn div(self, k: T) -> Self {
-        T::div_scalar(self, k)
+        T::v3_div_scalar(self, k)
     }
 }
 
@@ -391,7 +391,7 @@ where
     /// ```
     #[inline(always)]
     pub fn dot(self, other: Self) -> T {
-        T::dot(self, other)
+        T::v3_dot(self, other)
     }
 
     /// Vector cross product
@@ -406,7 +406,7 @@ where
     /// ```
     #[inline(always)]
     pub fn cross(self, other: Self) -> Vector3d<T> {
-        T::cross(self, other)
+        T::v3_cross(self, other)
     }
 }
 
@@ -475,7 +475,7 @@ where
         if norm == T::zero() {
             return self;
         }
-        self * T::reciprocal(norm)
+        self * T::v3_reciprocal(norm)
     }
 
     /// Normalize the vector in place
@@ -484,7 +484,7 @@ where
         //#[allow(clippy::assign_op_pattern)]
         // If norm == 0.0 then the vector is already normalized
         if norm != T::zero() {
-            *self *= T::reciprocal(norm);
+            *self *= T::v3_reciprocal(norm);
         }
         *self
     }

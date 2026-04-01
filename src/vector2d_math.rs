@@ -15,7 +15,9 @@ use crate::{SqrtMethods, Vector2d};
 impl From<Vector2d<f32>> for f32x2 {
     #[inline(always)]
     fn from(v: Vector2d<f32>) -> Self {
-        // SAFETY: Both types are 8 bytes and aligned to 8 bytes.
+        // SAFETY: assert f32x2 and Vector2d<f32> have same size and alignment
+        const _: () = assert!(core::mem::size_of::<f32x2>() == core::mem::size_of::<Vector2d<f32>>());
+        const _: () = assert!(core::mem::size_of::<f32x2>() == core::mem::align_of::<Vector2d<f32>>());
         unsafe { transmute(v) }
     }
 }
@@ -24,7 +26,9 @@ impl From<Vector2d<f32>> for f32x2 {
 impl From<f32x2> for Vector2d<f32> {
     #[inline(always)]
     fn from(simd: f32x2) -> Self {
-        // SAFETY: Both types are 8 bytes and aligned to 8 bytes.
+        // SAFETY: assert f32x2 and Vector2d<f32> have same size and alignment
+        const _: () = assert!(core::mem::size_of::<f32x2>() == core::mem::size_of::<Vector2d<f32>>());
+        const _: () = assert!(core::mem::size_of::<f32x2>() == core::mem::align_of::<Vector2d<f32>>());
         unsafe { transmute(simd) }
     }
 }
@@ -32,47 +36,47 @@ impl From<f32x2> for Vector2d<f32> {
 // **** Ops ****
 
 pub trait Vector2dOps: Sized {
-    fn reciprocal(x: Self) -> Self;
-    fn norm_squared(q: Vector2d<Self>) -> Self;
-    fn neg(v: Vector2d<Self>) -> Vector2d<Self>;
-    fn add(lhs: Vector2d<Self>, lhs: Vector2d<Self>) -> Vector2d<Self>;
-    fn mul_scalar(lhs: Vector2d<Self>, a: Self) -> Vector2d<Self>;
-    fn div_scalar(lhs: Vector2d<Self>, a: Self) -> Vector2d<Self>;
-    fn mul_add(lhs: Vector2d<Self>, a: Self, b: Vector2d<Self>) -> Vector2d<Self>;
+    fn v2_reciprocal(x: Self) -> Self;
+    fn v2_norm_squared(q: Vector2d<Self>) -> Self;
+    fn v2_neg(v: Vector2d<Self>) -> Vector2d<Self>;
+    fn v2_add(lhs: Vector2d<Self>, lhs: Vector2d<Self>) -> Vector2d<Self>;
+    fn v2_mul_scalar(lhs: Vector2d<Self>, a: Self) -> Vector2d<Self>;
+    fn v2_div_scalar(lhs: Vector2d<Self>, a: Self) -> Vector2d<Self>;
+    fn v2_mul_add(lhs: Vector2d<Self>, a: Self, b: Vector2d<Self>) -> Vector2d<Self>;
 }
 
 impl Vector2dOps for f64 {
     #[inline(always)]
-    fn reciprocal(x: Self) -> Self {
+    fn v2_reciprocal(x: Self) -> Self {
         1.0 / x
     }
 
     #[inline(always)]
-    fn norm_squared(v: Vector2d<Self>) -> Self {
+    fn v2_norm_squared(v: Vector2d<Self>) -> Self {
         v.x * v.x + v.y * v.y
     }
 
     #[inline(always)]
-    fn neg(v: Vector2d<Self>) -> Vector2d<Self> {
+    fn v2_neg(v: Vector2d<Self>) -> Vector2d<Self> {
         Vector2d { x: -v.x, y: -v.y }
     }
 
     #[inline(always)]
-    fn add(lhs: Vector2d<Self>, rhs: Vector2d<Self>) -> Vector2d<Self> {
+    fn v2_add(lhs: Vector2d<Self>, rhs: Vector2d<Self>) -> Vector2d<Self> {
         Vector2d { x: lhs.x + rhs.x, y: lhs.y + rhs.y }
     }
 
     #[inline(always)]
-    fn mul_scalar(lhs: Vector2d<Self>, a: Self) -> Vector2d<Self> {
+    fn v2_mul_scalar(lhs: Vector2d<Self>, a: Self) -> Vector2d<Self> {
         Vector2d { x: lhs.x * a, y: lhs.y * a }
     }
 
     #[inline(always)]
-    fn div_scalar(lhs: Vector2d<Self>, a: Self) -> Vector2d<Self> {
-        Self::mul_scalar(lhs, 1.0 / a)
+    fn v2_div_scalar(lhs: Vector2d<Self>, a: Self) -> Vector2d<Self> {
+        Self::v2_mul_scalar(lhs, 1.0 / a)
     }
     #[inline(always)]
-    fn mul_add(lhs: Vector2d<Self>, a: Self, b: Vector2d<Self>) -> Vector2d<Self> {
+    fn v2_mul_add(lhs: Vector2d<Self>, a: Self, b: Vector2d<Self>) -> Vector2d<Self> {
         Vector2d { x: lhs.x * a + b.x, y: lhs.y * a + b.y }
     }
 }
@@ -80,12 +84,12 @@ impl Vector2dOps for f64 {
 // SIMD-accelerated implementation for f32
 impl Vector2dOps for f32 {
     #[inline(always)]
-    fn reciprocal(x: Self) -> Self {
+    fn v2_reciprocal(x: Self) -> Self {
         1.0 / x
     }
 
     #[inline(always)]
-    fn norm_squared(v: Vector2d<Self>) -> Self {
+    fn v2_norm_squared(v: Vector2d<Self>) -> Self {
         #[cfg(feature = "simd")]
         {
             let v_simd = f32x2::from(v);
@@ -98,7 +102,7 @@ impl Vector2dOps for f32 {
     }
 
     #[inline(always)]
-    fn neg(v: Vector2d<Self>) -> Vector2d<Self> {
+    fn v2_neg(v: Vector2d<Self>) -> Vector2d<Self> {
         #[cfg(feature = "simd")]
         {
             // Transmute the 16-byte aligned struct to a SIMD register
@@ -114,7 +118,7 @@ impl Vector2dOps for f32 {
     }
 
     #[inline(always)]
-    fn add(lhs: Vector2d<Self>, rhs: Vector2d<Self>) -> Vector2d<Self> {
+    fn v2_add(lhs: Vector2d<Self>, rhs: Vector2d<Self>) -> Vector2d<Self> {
         #[cfg(feature = "simd")]
         {
             let lhs_simd = f32x2::from(lhs);
@@ -132,7 +136,7 @@ impl Vector2dOps for f32 {
     }
 
     #[inline(always)]
-    fn mul_scalar(lhs: Vector2d<Self>, rhs: Self) -> Vector2d<Self> {
+    fn v2_mul_scalar(lhs: Vector2d<Self>, rhs: Self) -> Vector2d<Self> {
         #[cfg(feature = "simd")]
         {
             // 1. Transmute to SIMD
@@ -150,12 +154,12 @@ impl Vector2dOps for f32 {
     }
 
     #[inline(always)]
-    fn div_scalar(lhs: Vector2d<Self>, a: Self) -> Vector2d<Self> {
-        Self::mul_scalar(lhs, 1.0 / a)
+    fn v2_div_scalar(lhs: Vector2d<Self>, a: Self) -> Vector2d<Self> {
+        Self::v2_mul_scalar(lhs, 1.0 / a)
     }
 
     #[inline(always)]
-    fn mul_add(lhs: Vector2d<Self>, a: Self, b: Vector2d<Self>) -> Vector2d<Self> {
+    fn v2_mul_add(lhs: Vector2d<Self>, a: Self, b: Vector2d<Self>) -> Vector2d<Self> {
         #[cfg(feature = "simd")]
         {
             //let v_lhs: f32x2 = lhs.into();
@@ -178,15 +182,15 @@ impl Vector2dOps for f32 {
 // **** Math ****
 
 pub trait Vector2dMath: Sized {
-    fn normalize(v: Vector2d<Self>) -> Vector2d<Self>;
-    fn is_normalized(q: Vector2d<Self>) -> bool;
-    fn dot(a: Vector2d<Self>, b: Vector2d<Self>) -> Self;
-    fn cross(a: Vector2d<Self>, b: Vector2d<Self>) -> Vector2d<Self>;
+    fn v2_normalize(v: Vector2d<Self>) -> Vector2d<Self>;
+    fn v2_is_normalized(q: Vector2d<Self>) -> bool;
+    fn v2_dot(a: Vector2d<Self>, b: Vector2d<Self>) -> Self;
+    fn v2_cross(a: Vector2d<Self>, b: Vector2d<Self>) -> Vector2d<Self>;
 }
 
 impl Vector2dMath for f64 {
     #[inline(always)]
-    fn normalize(v: Vector2d<Self>) -> Vector2d<Self> {
+    fn v2_normalize(v: Vector2d<Self>) -> Vector2d<Self> {
         let norm_squared = v.x * v.x + v.y * v.y;
         if norm_squared == 0.0 {
             return Vector2d::default();
@@ -196,18 +200,18 @@ impl Vector2dMath for f64 {
     }
 
     #[inline(always)]
-    fn is_normalized(q: Vector2d<Self>) -> bool {
-        let norm_squared = Self::norm_squared(q);
+    fn v2_is_normalized(q: Vector2d<Self>) -> bool {
+        let norm_squared = Self::v2_norm_squared(q);
         approx::abs_diff_eq!(norm_squared, 1.0, epsilon = 1e-6)
     }
 
     #[inline(always)]
-    fn dot(a: Vector2d<Self>, b: Vector2d<Self>) -> Self {
+    fn v2_dot(a: Vector2d<Self>, b: Vector2d<Self>) -> Self {
         (a.x * b.x) + (a.y * b.y)
     }
 
     #[inline(always)]
-    fn cross(_a: Vector2d<Self>, _b: Vector2d<Self>) -> Vector2d<Self> {
+    fn v2_cross(_a: Vector2d<Self>, _b: Vector2d<Self>) -> Vector2d<Self> {
         Vector2d { x: 0.0, y: 0.0 }
     }
 }
@@ -215,11 +219,11 @@ impl Vector2dMath for f64 {
 // SIMD-accelerated implementation for f32
 impl Vector2dMath for f32 {
     #[inline(always)]
-    fn normalize(v: Vector2d<Self>) -> Vector2d<Self> {
+    fn v2_normalize(v: Vector2d<Self>) -> Vector2d<Self> {
         #[cfg(feature = "simd")]
         {
             // 1. Calculate magnitude squared using our SIMD Dot Product
-            let norm_squared = Self::dot(v, v);
+            let norm_squared = Self::v2_dot(v, v);
 
             // 2. Guard against division by zero (Important for sensor glitches!)
             if norm_squared == 0.0 {
@@ -248,12 +252,12 @@ impl Vector2dMath for f32 {
         }
     }
     #[inline(always)]
-    fn is_normalized(q: Vector2d<Self>) -> bool {
-        let norm_squared = Self::norm_squared(q);
+    fn v2_is_normalized(q: Vector2d<Self>) -> bool {
+        let norm_squared = Self::v2_norm_squared(q);
         approx::abs_diff_eq!(norm_squared, 1.0, epsilon = 1e-6)
     }
     #[inline(always)]
-    fn dot(a: Vector2d<Self>, b: Vector2d<Self>) -> Self {
+    fn v2_dot(a: Vector2d<Self>, b: Vector2d<Self>) -> Self {
         #[cfg(feature = "simd")]
         {
             let va = f32x2::from(a);
@@ -271,7 +275,7 @@ impl Vector2dMath for f32 {
     }
 
     #[inline(always)]
-    fn cross(_a: Vector2d<Self>, _b: Vector2d<Self>) -> Vector2d<Self> {
+    fn v2_cross(_a: Vector2d<Self>, _b: Vector2d<Self>) -> Vector2d<Self> {
         Vector2d { x: 0.0, y: 0.0 }
     }
 }

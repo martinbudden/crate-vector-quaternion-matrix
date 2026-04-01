@@ -15,9 +15,10 @@ use crate::{SqrtMethods, Vector3d};
 impl From<Vector3d<f32>> for f32x4 {
     #[inline(always)]
     fn from(v: Vector3d<f32>) -> Self {
-        // SAFETY: Both types are 16 bytes and aligned to 16 bytes.
-        // The 'dummy' 4th float in the SIMD lane will be whatever was
-        // in the padding (usually 0.0 if you use Default).
+        // SAFETY: assert f32x4 and Vector3d<f32> have same size and alignment
+        const _: () = assert!(core::mem::size_of::<f32x4>() == core::mem::size_of::<Vector3d<f32>>());
+        const _: () = assert!(core::mem::size_of::<f32x4>() == core::mem::align_of::<Vector3d<f32>>());
+        // The 'filler' 4th float in the SIMD lane will be whatever was in the padding (usually 0.0 if set by Default).
         unsafe { transmute(v) }
     }
 }
@@ -26,7 +27,9 @@ impl From<Vector3d<f32>> for f32x4 {
 impl From<f32x4> for Vector3d<f32> {
     #[inline(always)]
     fn from(simd: f32x4) -> Self {
-        // SAFETY: Same size and alignment.
+        // SAFETY: assert f32x4 and Vector3d<f32> have same size and alignment
+        const _: () = assert!(core::mem::size_of::<f32x4>() == core::mem::size_of::<Vector3d<f32>>());
+        const _: () = assert!(core::mem::size_of::<f32x4>() == core::mem::align_of::<Vector3d<f32>>());
         unsafe { transmute(simd) }
     }
 }
@@ -34,47 +37,47 @@ impl From<f32x4> for Vector3d<f32> {
 // **** Ops ****
 
 pub trait Vector3dOps: Sized {
-    fn reciprocal(x: Self) -> Self;
-    fn norm_squared(q: Vector3d<Self>) -> Self;
-    fn neg(v: Vector3d<Self>) -> Vector3d<Self>;
-    fn add(lhs: Vector3d<Self>, lhs: Vector3d<Self>) -> Vector3d<Self>;
-    fn mul_scalar(lhs: Vector3d<Self>, a: Self) -> Vector3d<Self>;
-    fn div_scalar(lhs: Vector3d<Self>, a: Self) -> Vector3d<Self>;
-    fn mul_add(lhs: Vector3d<Self>, a: Self, b: Vector3d<Self>) -> Vector3d<Self>;
+    fn v3_reciprocal(x: Self) -> Self;
+    fn v3_norm_squared(q: Vector3d<Self>) -> Self;
+    fn v3_neg(v: Vector3d<Self>) -> Vector3d<Self>;
+    fn v3_add(lhs: Vector3d<Self>, lhs: Vector3d<Self>) -> Vector3d<Self>;
+    fn v3_mul_scalar(lhs: Vector3d<Self>, a: Self) -> Vector3d<Self>;
+    fn v3_div_scalar(lhs: Vector3d<Self>, a: Self) -> Vector3d<Self>;
+    fn v3_mul_add(lhs: Vector3d<Self>, a: Self, b: Vector3d<Self>) -> Vector3d<Self>;
 }
 
 impl Vector3dOps for f64 {
     #[inline(always)]
-    fn reciprocal(x: Self) -> Self {
+    fn v3_reciprocal(x: Self) -> Self {
         1.0 / x
     }
 
     #[inline(always)]
-    fn norm_squared(v: Vector3d<Self>) -> Self {
+    fn v3_norm_squared(v: Vector3d<Self>) -> Self {
         v.x * v.x + v.y * v.y + v.z * v.z
     }
 
     #[inline(always)]
-    fn neg(v: Vector3d<Self>) -> Vector3d<Self> {
+    fn v3_neg(v: Vector3d<Self>) -> Vector3d<Self> {
         Vector3d { x: -v.x, y: -v.y, z: -v.z }
     }
 
     #[inline(always)]
-    fn add(lhs: Vector3d<Self>, rhs: Vector3d<Self>) -> Vector3d<Self> {
+    fn v3_add(lhs: Vector3d<Self>, rhs: Vector3d<Self>) -> Vector3d<Self> {
         Vector3d { x: lhs.x + rhs.x, y: lhs.y + rhs.y, z: lhs.z + rhs.z }
     }
 
     #[inline(always)]
-    fn mul_scalar(lhs: Vector3d<Self>, a: Self) -> Vector3d<Self> {
+    fn v3_mul_scalar(lhs: Vector3d<Self>, a: Self) -> Vector3d<Self> {
         Vector3d { x: lhs.x * a, y: lhs.y * a, z: lhs.z * a }
     }
 
     #[inline(always)]
-    fn div_scalar(lhs: Vector3d<Self>, a: Self) -> Vector3d<Self> {
-        Self::mul_scalar(lhs, 1.0 / a)
+    fn v3_div_scalar(lhs: Vector3d<Self>, a: Self) -> Vector3d<Self> {
+        Self::v3_mul_scalar(lhs, 1.0 / a)
     }
     #[inline(always)]
-    fn mul_add(lhs: Vector3d<Self>, a: Self, b: Vector3d<Self>) -> Vector3d<Self> {
+    fn v3_mul_add(lhs: Vector3d<Self>, a: Self, b: Vector3d<Self>) -> Vector3d<Self> {
         Vector3d { x: lhs.x * a + b.x, y: lhs.y * a + b.y, z: lhs.z * a + b.z }
     }
 }
@@ -82,12 +85,12 @@ impl Vector3dOps for f64 {
 // SIMD-accelerated implementation for f32
 impl Vector3dOps for f32 {
     #[inline(always)]
-    fn reciprocal(x: Self) -> Self {
+    fn v3_reciprocal(x: Self) -> Self {
         1.0 / x
     }
 
     #[inline(always)]
-    fn norm_squared(v: Vector3d<Self>) -> Self {
+    fn v3_norm_squared(v: Vector3d<Self>) -> Self {
         #[cfg(feature = "simd")]
         {
             let v_simd = f32x4::from(v);
@@ -100,7 +103,7 @@ impl Vector3dOps for f32 {
     }
 
     #[inline(always)]
-    fn neg(v: Vector3d<Self>) -> Vector3d<Self> {
+    fn v3_neg(v: Vector3d<Self>) -> Vector3d<Self> {
         #[cfg(feature = "simd")]
         {
             // Transmute the 16-byte aligned struct to a SIMD register
@@ -116,7 +119,7 @@ impl Vector3dOps for f32 {
     }
 
     #[inline(always)]
-    fn add(lhs: Vector3d<Self>, rhs: Vector3d<Self>) -> Vector3d<Self> {
+    fn v3_add(lhs: Vector3d<Self>, rhs: Vector3d<Self>) -> Vector3d<Self> {
         #[cfg(feature = "simd")]
         {
             let lhs_simd = f32x4::from(lhs);
@@ -134,7 +137,7 @@ impl Vector3dOps for f32 {
     }
 
     #[inline(always)]
-    fn mul_scalar(lhs: Vector3d<Self>, rhs: Self) -> Vector3d<Self> {
+    fn v3_mul_scalar(lhs: Vector3d<Self>, rhs: Self) -> Vector3d<Self> {
         #[cfg(feature = "simd")]
         {
             // 1. Transmute to SIMD
@@ -152,12 +155,12 @@ impl Vector3dOps for f32 {
     }
 
     #[inline(always)]
-    fn div_scalar(lhs: Vector3d<Self>, a: Self) -> Vector3d<Self> {
-        Self::mul_scalar(lhs, 1.0 / a)
+    fn v3_div_scalar(lhs: Vector3d<Self>, a: Self) -> Vector3d<Self> {
+        Self::v3_mul_scalar(lhs, 1.0 / a)
     }
 
     #[inline(always)]
-    fn mul_add(lhs: Vector3d<Self>, a: Self, b: Vector3d<Self>) -> Vector3d<Self> {
+    fn v3_mul_add(lhs: Vector3d<Self>, a: Self, b: Vector3d<Self>) -> Vector3d<Self> {
         #[cfg(feature = "simd")]
         {
             //let v_lhs: f32x4 = lhs.into();
@@ -180,15 +183,15 @@ impl Vector3dOps for f32 {
 // **** Math ****
 
 pub trait Vector3dMath: Sized {
-    fn normalize(v: Vector3d<Self>) -> Vector3d<Self>;
-    fn is_normalized(q: Vector3d<Self>) -> bool;
-    fn dot(a: Vector3d<Self>, b: Vector3d<Self>) -> Self;
-    fn cross(a: Vector3d<Self>, b: Vector3d<Self>) -> Vector3d<Self>;
+    fn v3_normalize(v: Vector3d<Self>) -> Vector3d<Self>;
+    fn v3_is_normalized(q: Vector3d<Self>) -> bool;
+    fn v3_dot(a: Vector3d<Self>, b: Vector3d<Self>) -> Self;
+    fn v3_cross(a: Vector3d<Self>, b: Vector3d<Self>) -> Vector3d<Self>;
 }
 
 impl Vector3dMath for f64 {
     #[inline(always)]
-    fn normalize(v: Vector3d<Self>) -> Vector3d<Self> {
+    fn v3_normalize(v: Vector3d<Self>) -> Vector3d<Self> {
         let norm_squared = v.x * v.x + v.y * v.y + v.z * v.z;
         if norm_squared == 0.0 {
             return Vector3d::default();
@@ -198,18 +201,18 @@ impl Vector3dMath for f64 {
     }
 
     #[inline(always)]
-    fn is_normalized(q: Vector3d<Self>) -> bool {
-        let norm_squared = Self::norm_squared(q);
+    fn v3_is_normalized(q: Vector3d<Self>) -> bool {
+        let norm_squared = Self::v3_norm_squared(q);
         approx::abs_diff_eq!(norm_squared, 1.0, epsilon = 1e-6)
     }
 
     #[inline(always)]
-    fn dot(a: Vector3d<Self>, b: Vector3d<Self>) -> Self {
+    fn v3_dot(a: Vector3d<Self>, b: Vector3d<Self>) -> Self {
         (a.x * b.x) + (a.y * b.y) + (a.z * b.z)
     }
 
     #[inline(always)]
-    fn cross(a: Vector3d<Self>, b: Vector3d<Self>) -> Vector3d<Self> {
+    fn v3_cross(a: Vector3d<Self>, b: Vector3d<Self>) -> Vector3d<Self> {
         Vector3d { x: a.y * b.z - a.z * b.y, y: a.z * b.x - a.x * b.z, z: a.x * b.y - a.y * b.x }
     }
 }
@@ -217,13 +220,13 @@ impl Vector3dMath for f64 {
 // SIMD-accelerated implementation for f32
 impl Vector3dMath for f32 {
     #[inline(always)]
-    fn normalize(v: Vector3d<Self>) -> Vector3d<Self> {
+    fn v3_normalize(v: Vector3d<Self>) -> Vector3d<Self> {
         #[cfg(feature = "simd")]
         {
             // 1. Calculate magnitude squared using our SIMD Dot Product
-            let norm_squared = Self::dot(v, v);
+            let norm_squared = Self::v3_dot(v, v);
 
-            // 2. Guard against division by zero (Important for sensor glitches!)
+            // 2. Guard against division by zero (Important for sensor glitches)
             if norm_squared == 0.0 {
                 return Vector3d::default(); // Return zero vector if magnitude is 0
             }
@@ -250,12 +253,12 @@ impl Vector3dMath for f32 {
         }
     }
     #[inline(always)]
-    fn is_normalized(q: Vector3d<Self>) -> bool {
-        let norm_squared = Self::norm_squared(q);
+    fn v3_is_normalized(q: Vector3d<Self>) -> bool {
+        let norm_squared = Self::v3_norm_squared(q);
         approx::abs_diff_eq!(norm_squared, 1.0, epsilon = 1e-6)
     }
     #[inline(always)]
-    fn dot(a: Vector3d<Self>, b: Vector3d<Self>) -> Self {
+    fn v3_dot(a: Vector3d<Self>, b: Vector3d<Self>) -> Self {
         (a.x * b.x) + (a.y * b.y) + (a.z * b.z)
         /*#[cfg(feature = "simd")]
         {
@@ -280,7 +283,7 @@ impl Vector3dMath for f32 {
     }
 
     #[inline(always)]
-    fn cross(a: Vector3d<Self>, b: Vector3d<Self>) -> Vector3d<Self> {
+    fn v3_cross(a: Vector3d<Self>, b: Vector3d<Self>) -> Vector3d<Self> {
         #[cfg(feature = "simd")]
         {
             let va = f32x4::from(a);

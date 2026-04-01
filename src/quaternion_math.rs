@@ -15,7 +15,9 @@ use crate::{Quaternion, SqrtMethods};
 impl From<Quaternion<f32>> for f32x4 {
     #[inline(always)]
     fn from(v: Quaternion<f32>) -> Self {
-        // SAFETY: Both types are 16 bytes and aligned to 16 bytes.
+        // SAFETY: assert f32x4 and Quaternion<f32> have same size and alignment
+        const _: () = assert!(core::mem::size_of::<f32x4>() == core::mem::size_of::<Quaternion<f32>>());
+        const _: () = assert!(core::mem::size_of::<f32x4>() == core::mem::align_of::<Quaternion<f32>>());
         unsafe { transmute(v) }
     }
 }
@@ -24,7 +26,9 @@ impl From<Quaternion<f32>> for f32x4 {
 impl From<f32x4> for Quaternion<f32> {
     #[inline(always)]
     fn from(simd: f32x4) -> Self {
-        // SAFETY: Both types are 16 bytes and aligned to 16 bytes.
+        // SAFETY: assert f32x4 and Quaternion<f32> have same size and alignment
+        const _: () = assert!(core::mem::size_of::<f32x4>() == core::mem::size_of::<Quaternion<f32>>());
+        const _: () = assert!(core::mem::size_of::<f32x4>() == core::mem::align_of::<Quaternion<f32>>());
         unsafe { transmute(simd) }
     }
 }
@@ -32,54 +36,54 @@ impl From<f32x4> for Quaternion<f32> {
 // **** Ops ****
 
 pub trait QuaternionOps: Sized {
-    fn reciprocal(x: Self) -> Self;
-    fn norm_squared(q: Quaternion<Self>) -> Self;
-    fn neg(q: Quaternion<Self>) -> Quaternion<Self>;
-    fn add(lhs: Quaternion<Self>, lhs: Quaternion<Self>) -> Quaternion<Self>;
-    fn mul_scalar(lhs: Quaternion<Self>, a: Self) -> Quaternion<Self>;
-    fn div_scalar(lhs: Quaternion<Self>, a: Self) -> Quaternion<Self>;
-    fn mul(rhs: Quaternion<Self>, rhs: Quaternion<Self>) -> Quaternion<Self>;
-    fn mul_add(lhs: Quaternion<Self>, a: Self, b: Quaternion<Self>) -> Quaternion<Self>;
+    fn q_reciprocal(x: Self) -> Self;
+    fn q_norm_squared(q: Quaternion<Self>) -> Self;
+    fn q_neg(q: Quaternion<Self>) -> Quaternion<Self>;
+    fn q_add(lhs: Quaternion<Self>, lhs: Quaternion<Self>) -> Quaternion<Self>;
+    fn q_mul_scalar(lhs: Quaternion<Self>, a: Self) -> Quaternion<Self>;
+    fn q_div_scalar(lhs: Quaternion<Self>, a: Self) -> Quaternion<Self>;
+    fn q_mul(rhs: Quaternion<Self>, rhs: Quaternion<Self>) -> Quaternion<Self>;
+    fn q_mul_add(lhs: Quaternion<Self>, a: Self, b: Quaternion<Self>) -> Quaternion<Self>;
 }
 
 impl QuaternionOps for f64 {
     #[inline(always)]
-    fn reciprocal(x: Self) -> Self {
+    fn q_reciprocal(x: Self) -> Self {
         1.0 / x
     }
 
     #[inline(always)]
-    fn norm_squared(q: Quaternion<Self>) -> Self {
+    fn q_norm_squared(q: Quaternion<Self>) -> Self {
         q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z
     }
 
     #[inline(always)]
-    fn neg(q: Quaternion<Self>) -> Quaternion<Self> {
+    fn q_neg(q: Quaternion<Self>) -> Quaternion<Self> {
         Quaternion { w: -q.w, x: -q.x, y: -q.y, z: -q.z }
     }
 
     #[inline(always)]
-    fn add(lhs: Quaternion<Self>, rhs: Quaternion<Self>) -> Quaternion<Self> {
+    fn q_add(lhs: Quaternion<Self>, rhs: Quaternion<Self>) -> Quaternion<Self> {
         Quaternion { w: lhs.w + rhs.w, x: lhs.x + rhs.x, y: lhs.y + rhs.y, z: lhs.z + rhs.z }
     }
 
     #[inline(always)]
-    fn mul_scalar(lhs: Quaternion<Self>, a: Self) -> Quaternion<Self> {
+    fn q_mul_scalar(lhs: Quaternion<Self>, a: Self) -> Quaternion<Self> {
         Quaternion { w: lhs.w * a, x: lhs.x * a, y: lhs.y * a, z: lhs.z * a }
     }
 
     #[inline(always)]
-    fn div_scalar(lhs: Quaternion<Self>, a: Self) -> Quaternion<Self> {
-        Self::mul_scalar(lhs, 1.0 / a)
+    fn q_div_scalar(lhs: Quaternion<Self>, a: Self) -> Quaternion<Self> {
+        Self::q_mul_scalar(lhs, 1.0 / a)
     }
 
     #[inline(always)]
-    fn mul_add(lhs: Quaternion<Self>, a: Self, b: Quaternion<Self>) -> Quaternion<Self> {
+    fn q_mul_add(lhs: Quaternion<Self>, a: Self, b: Quaternion<Self>) -> Quaternion<Self> {
         Quaternion { w: lhs.w * a + b.w, x: lhs.x * a + b.x, y: lhs.y * a + b.y, z: lhs.z * a + b.z }
     }
 
     #[inline(always)]
-    fn mul(lhs: Quaternion<Self>, rhs: Quaternion<Self>) -> Quaternion<Self> {
+    fn q_mul(lhs: Quaternion<Self>, rhs: Quaternion<Self>) -> Quaternion<Self> {
         Quaternion {
             w: lhs.w * rhs.w - lhs.x * rhs.x - lhs.y * rhs.y - lhs.z * rhs.z,
             x: lhs.w * rhs.x + lhs.x * rhs.w + lhs.y * rhs.z - lhs.z * rhs.y,
@@ -92,12 +96,12 @@ impl QuaternionOps for f64 {
 // SIMD-accelerated implementation for f32
 impl QuaternionOps for f32 {
     #[inline(always)]
-    fn reciprocal(x: Self) -> Self {
+    fn q_reciprocal(x: Self) -> Self {
         1.0 / x
     }
 
     #[inline(always)]
-    fn norm_squared(q: Quaternion<Self>) -> Self {
+    fn q_norm_squared(q: Quaternion<Self>) -> Self {
         #[cfg(feature = "simd")]
         {
             let q_simd = f32x4::from(q);
@@ -110,7 +114,7 @@ impl QuaternionOps for f32 {
     }
 
     #[inline(always)]
-    fn neg(q: Quaternion<Self>) -> Quaternion<Self> {
+    fn q_neg(q: Quaternion<Self>) -> Quaternion<Self> {
         #[cfg(feature = "simd")]
         {
             // Transmute the 16-byte aligned struct to a SIMD register
@@ -126,7 +130,7 @@ impl QuaternionOps for f32 {
     }
 
     #[inline(always)]
-    fn add(lhs: Quaternion<Self>, rhs: Quaternion<Self>) -> Quaternion<Self> {
+    fn q_add(lhs: Quaternion<Self>, rhs: Quaternion<Self>) -> Quaternion<Self> {
         #[cfg(feature = "simd")]
         {
             let lhs_simd = f32x4::from(lhs);
@@ -142,7 +146,7 @@ impl QuaternionOps for f32 {
     }
 
     #[inline(always)]
-    fn mul_scalar(lhs: Quaternion<Self>, rhs: Self) -> Quaternion<Self> {
+    fn q_mul_scalar(lhs: Quaternion<Self>, rhs: Self) -> Quaternion<Self> {
         #[cfg(feature = "simd")]
         {
             let lhs_simd = f32x4::from(lhs);
@@ -156,12 +160,12 @@ impl QuaternionOps for f32 {
     }
 
     #[inline(always)]
-    fn div_scalar(lhs: Quaternion<Self>, a: Self) -> Quaternion<Self> {
-        Self::mul_scalar(lhs, 1.0 / a)
+    fn q_div_scalar(lhs: Quaternion<Self>, a: Self) -> Quaternion<Self> {
+        Self::q_mul_scalar(lhs, 1.0 / a)
     }
 
     #[inline(always)]
-    fn mul_add(lhs: Quaternion<Self>, a: Self, b: Quaternion<Self>) -> Quaternion<Self> {
+    fn q_mul_add(lhs: Quaternion<Self>, a: Self, b: Quaternion<Self>) -> Quaternion<Self> {
         #[cfg(feature = "simd")]
         {
             let v_lhs = f32x4::from(lhs);
@@ -178,7 +182,7 @@ impl QuaternionOps for f32 {
     }
 
     #[inline(always)]
-    fn mul(lhs: Quaternion<Self>, rhs: Quaternion<Self>) -> Quaternion<Self> {
+    fn q_mul(lhs: Quaternion<Self>, rhs: Quaternion<Self>) -> Quaternion<Self> {
         #[cfg(feature = "simd")]
         {
             Quaternion {
@@ -203,15 +207,15 @@ impl QuaternionOps for f32 {
 // **** Math ****
 
 pub trait QuaternionMath: Sized {
-    fn normalize(q: Quaternion<Self>) -> Quaternion<Self>;
-    fn is_normalized(q: Quaternion<Self>) -> bool;
-    fn conjugate(q: Quaternion<Self>) -> Quaternion<Self>;
+    fn q_normalize(q: Quaternion<Self>) -> Quaternion<Self>;
+    fn q_is_normalized(q: Quaternion<Self>) -> bool;
+    fn q_conjugate(q: Quaternion<Self>) -> Quaternion<Self>;
 }
 
 impl QuaternionMath for f64 {
     #[inline(always)]
-    fn normalize(q: Quaternion<Self>) -> Quaternion<Self> {
-        let norm_squared = Self::norm_squared(q);
+    fn q_normalize(q: Quaternion<Self>) -> Quaternion<Self> {
+        let norm_squared = Self::q_norm_squared(q);
         if norm_squared == 0.0 {
             return Quaternion::default();
         }
@@ -225,13 +229,13 @@ impl QuaternionMath for f64 {
     }
 
     #[inline(always)]
-    fn is_normalized(q: Quaternion<Self>) -> bool {
-        let norm_squared = Self::norm_squared(q);
+    fn q_is_normalized(q: Quaternion<Self>) -> bool {
+        let norm_squared = Self::q_norm_squared(q);
         approx::abs_diff_eq!(norm_squared, 1.0, epsilon = 1e-6)
     }
 
     #[inline(always)]
-    fn conjugate(q: Quaternion<Self>) -> Quaternion<Self> {
+    fn q_conjugate(q: Quaternion<Self>) -> Quaternion<Self> {
         Quaternion { w: q.w, x: -q.x, y: -q.y, z: -q.z }
     }
 }
@@ -239,7 +243,7 @@ impl QuaternionMath for f64 {
 // SIMD-accelerated implementation for f32
 impl QuaternionMath for f32 {
     #[inline(always)]
-    fn conjugate(q: Quaternion<Self>) -> Quaternion<Self> {
+    fn q_conjugate(q: Quaternion<Self>) -> Quaternion<Self> {
         #[cfg(feature = "simd")]
         {
             let q_simd = f32x4::from(q);
@@ -256,7 +260,7 @@ impl QuaternionMath for f32 {
     }
 
     #[inline(always)]
-    fn normalize(q: Quaternion<Self>) -> Quaternion<Self> {
+    fn q_normalize(q: Quaternion<Self>) -> Quaternion<Self> {
         #[cfg(feature = "simd")]
         {
             // 1. Transmute to SIMD
@@ -291,7 +295,7 @@ impl QuaternionMath for f32 {
     }
 
     #[inline(always)]
-    fn is_normalized(q: Quaternion<Self>) -> bool {
+    fn q_is_normalized(q: Quaternion<Self>) -> bool {
         // SIMD version only takes ~4-5 clock cycles on the RP2350.
         #[cfg(feature = "simd")]
         {
@@ -317,7 +321,7 @@ impl core::ops::Mul for Quaternion {
     type Output = Self;
 
     #[inline(always)]
-    fn mul(self, rhs: Self) -> Self {
+    fn q_mul(self, rhs: Self) -> Self {
         #[cfg(feature = "simd")]
         {
             let a: f32x4 = unsafe { core::mem::transmute_copy(&self) };
@@ -350,7 +354,7 @@ impl core::ops::Mul for Quaternion {
 
     impl Quaternion {
     #[inline(always)]
-    fn scalar_mul(self, rhs: Self) -> Self {
+    fn q_scalar_mul(self, rhs: Self) -> Self {
         Self {
             w: self.w * rhs.w - self.x * rhs.x - self.y * rhs.y - self.z * rhs.z,
             x: self.w * rhs.x + self.x * rhs.w + self.y * rhs.z - self.z * rhs.y,

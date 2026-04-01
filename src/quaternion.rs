@@ -128,7 +128,7 @@ where
 
     #[inline(always)]
     fn neg(self) -> Self {
-        T::neg(self)
+        T::q_neg(self)
     }
 }
 
@@ -150,7 +150,7 @@ where
 
     #[inline(always)]
     fn add(self, rhs: Self) -> Self {
-        T::add(self, rhs)
+        T::q_add(self, rhs)
     }
 }
 
@@ -215,7 +215,7 @@ where
 {
     type Output = Self;
     fn mul(self, k: T) -> Self {
-        T::mul_scalar(self, k)
+        T::q_mul_scalar(self, k)
     }
 }
 
@@ -244,7 +244,7 @@ where
 {
     type Output = Self;
     fn div(self, k: T) -> Self {
-        T::div_scalar(self, k)
+        T::q_div_scalar(self, k)
     }
 }
 
@@ -273,7 +273,7 @@ where
 {
     type Output = Self;
     fn mul(self, rhs: Self) -> Self {
-        T::mul(self, rhs)
+        T::q_mul(self, rhs)
     }
 }
 
@@ -405,7 +405,7 @@ where
 {
     /// Return square of Euclidean norm
     pub fn norm_squared(self) -> T {
-        T::norm_squared(self)
+        T::q_norm_squared(self)
     }
 }
 
@@ -431,7 +431,7 @@ where
         if norm == T::zero() {
             return *self;
         }
-        *self * T::reciprocal(norm)
+        *self * T::q_reciprocal(norm)
     }
 
     /// Normalize the quaternion in place
@@ -439,7 +439,7 @@ where
         let norm: T = self.norm();
         // If norm == 0.0 then the quaternion is already normalized
         if norm != T::zero() {
-            *self *= T::reciprocal(norm);
+            *self *= T::q_reciprocal(norm);
         }
     }
 }
@@ -621,7 +621,7 @@ where
 
     #[inline(always)]
     pub fn conjugate(self) -> Self {
-        T::conjugate(self)
+        T::q_conjugate(self)
     }
 }
 

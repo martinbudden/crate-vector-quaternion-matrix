@@ -64,7 +64,7 @@ where
     type Output = Self;
     #[inline(always)]
     fn neg(self) -> Self::Output {
-        T::neg(self)
+        T::v2_neg(self)
     }
 }
 
@@ -84,7 +84,7 @@ where
 {
     type Output = Vector2d<T>;
     fn add(self, rhs: Self) -> Self {
-        T::add(self, rhs)
+        T::v2_add(self, rhs)
     }
 }
 
@@ -190,7 +190,7 @@ where
 {
     type Output = Self;
     fn mul(self, k: T) -> Self {
-        T::mul_scalar(self, k)
+        T::v2_mul_scalar(self, k)
     }
 }
 
@@ -248,7 +248,7 @@ where
 {
     type Output = Self;
     fn div(self, k: T) -> Self {
-        T::div_scalar(self, k)
+        T::v2_div_scalar(self, k)
     }
 }
 
@@ -370,7 +370,7 @@ where
     /// ```
     #[inline(always)]
     pub fn dot(self, other: Self) -> T {
-        T::dot(self, other)
+        T::v2_dot(self, other)
     }
 }
 
@@ -458,7 +458,7 @@ where
         if norm == T::zero() {
             return self;
         }
-        self * T::reciprocal(norm)
+        self * T::v2_reciprocal(norm)
     }
 
     /// Normalize the vector in place
@@ -467,7 +467,7 @@ where
         #[allow(clippy::assign_op_pattern)]
         // If norm == 0.0 then the vector is already normalized
         if norm != T::zero() {
-            *self *= T::reciprocal(norm);
+            *self *= T::v2_reciprocal(norm);
         }
         *self
     }
