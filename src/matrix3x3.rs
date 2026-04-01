@@ -2,7 +2,7 @@ use cfg_if::cfg_if;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{One, Signed, Zero, float::FloatCore};
 
-use crate::{MathConstants, Matrix2x2, MatrixError, Quaternion, QuaternionOps, SqrtMethods, Vector3d};
+use crate::{MathConstants, Matrix2x2, MatrixError, Quaternion, QuaternionMath, SqrtMethods, Vector3d};
 
 /// 3x3 matrix of `f32` values
 pub type Matrix3x3f32 = Matrix3x3<f32>;
@@ -1215,7 +1215,7 @@ where
 /// rather than the Hamilton multiplication convention used by the Quaternion class.
 impl<T> From<Matrix3x3<T>> for Quaternion<T>
 where
-    T: Copy + One + FloatCore + SqrtMethods + QuaternionOps,
+    T: Copy + One + FloatCore + SqrtMethods + QuaternionMath,
 {
     fn from(m: Matrix3x3<T>) -> Self {
         let half = T::one() / (T::one() + T::one());

@@ -36,7 +36,7 @@ impl From<f32x4> for Vector3d<f32> {
 
 // **** Ops ****
 
-pub trait Vector3dOps: Sized {
+pub trait Vector3dMath: Sized {
     fn v3_reciprocal(x: Self) -> Self;
     fn v3_norm_squared(q: Vector3d<Self>) -> Self;
     fn v3_neg(v: Vector3d<Self>) -> Vector3d<Self>;
@@ -44,9 +44,13 @@ pub trait Vector3dOps: Sized {
     fn v3_mul_scalar(lhs: Vector3d<Self>, a: Self) -> Vector3d<Self>;
     fn v3_div_scalar(lhs: Vector3d<Self>, a: Self) -> Vector3d<Self>;
     fn v3_mul_add(lhs: Vector3d<Self>, a: Self, b: Vector3d<Self>) -> Vector3d<Self>;
+    fn v3_normalize(v: Vector3d<Self>) -> Vector3d<Self>;
+    fn v3_is_normalized(q: Vector3d<Self>) -> bool;
+    fn v3_dot(a: Vector3d<Self>, b: Vector3d<Self>) -> Self;
+    fn v3_cross(a: Vector3d<Self>, b: Vector3d<Self>) -> Vector3d<Self>;
 }
 
-impl Vector3dOps for f64 {
+impl Vector3dMath for f64 {
     #[inline(always)]
     fn v3_reciprocal(x: Self) -> Self {
         1.0 / x
@@ -80,10 +84,36 @@ impl Vector3dOps for f64 {
     fn v3_mul_add(lhs: Vector3d<Self>, a: Self, b: Vector3d<Self>) -> Vector3d<Self> {
         Vector3d { x: lhs.x * a + b.x, y: lhs.y * a + b.y, z: lhs.z * a + b.z }
     }
+
+    #[inline(always)]
+    fn v3_normalize(v: Vector3d<Self>) -> Vector3d<Self> {
+        let norm_squared = v.x * v.x + v.y * v.y + v.z * v.z;
+        if norm_squared == 0.0 {
+            return Vector3d::default();
+        }
+        let norm_reciprocal = norm_squared.reciprocal_sqrt();
+        Vector3d { x: v.x * norm_reciprocal, y: v.y * norm_reciprocal, z: v.z * norm_reciprocal }
+    }
+
+    #[inline(always)]
+    fn v3_is_normalized(q: Vector3d<Self>) -> bool {
+        let norm_squared = Self::v3_norm_squared(q);
+        approx::abs_diff_eq!(norm_squared, 1.0, epsilon = 1e-6)
+    }
+
+    #[inline(always)]
+    fn v3_dot(a: Vector3d<Self>, b: Vector3d<Self>) -> Self {
+        (a.x * b.x) + (a.y * b.y) + (a.z * b.z)
+    }
+
+    #[inline(always)]
+    fn v3_cross(a: Vector3d<Self>, b: Vector3d<Self>) -> Vector3d<Self> {
+        Vector3d { x: a.y * b.z - a.z * b.y, y: a.z * b.x - a.x * b.z, z: a.x * b.y - a.y * b.x }
+    }
 }
 
 // SIMD-accelerated implementation for f32
-impl Vector3dOps for f32 {
+impl Vector3dMath for f32 {
     #[inline(always)]
     fn v3_reciprocal(x: Self) -> Self {
         1.0 / x
@@ -178,47 +208,7 @@ impl Vector3dOps for f32 {
             Vector3d { x: lhs.x * a + b.x, y: lhs.y * a + b.y, z: lhs.z * a + b.z }
         }
     }
-}
 
-// **** Math ****
-
-pub trait Vector3dMath: Sized {
-    fn v3_normalize(v: Vector3d<Self>) -> Vector3d<Self>;
-    fn v3_is_normalized(q: Vector3d<Self>) -> bool;
-    fn v3_dot(a: Vector3d<Self>, b: Vector3d<Self>) -> Self;
-    fn v3_cross(a: Vector3d<Self>, b: Vector3d<Self>) -> Vector3d<Self>;
-}
-
-impl Vector3dMath for f64 {
-    #[inline(always)]
-    fn v3_normalize(v: Vector3d<Self>) -> Vector3d<Self> {
-        let norm_squared = v.x * v.x + v.y * v.y + v.z * v.z;
-        if norm_squared == 0.0 {
-            return Vector3d::default();
-        }
-        let norm_reciprocal = norm_squared.reciprocal_sqrt();
-        Vector3d { x: v.x * norm_reciprocal, y: v.y * norm_reciprocal, z: v.z * norm_reciprocal }
-    }
-
-    #[inline(always)]
-    fn v3_is_normalized(q: Vector3d<Self>) -> bool {
-        let norm_squared = Self::v3_norm_squared(q);
-        approx::abs_diff_eq!(norm_squared, 1.0, epsilon = 1e-6)
-    }
-
-    #[inline(always)]
-    fn v3_dot(a: Vector3d<Self>, b: Vector3d<Self>) -> Self {
-        (a.x * b.x) + (a.y * b.y) + (a.z * b.z)
-    }
-
-    #[inline(always)]
-    fn v3_cross(a: Vector3d<Self>, b: Vector3d<Self>) -> Vector3d<Self> {
-        Vector3d { x: a.y * b.z - a.z * b.y, y: a.z * b.x - a.x * b.z, z: a.x * b.y - a.y * b.x }
-    }
-}
-
-// SIMD-accelerated implementation for f32
-impl Vector3dMath for f32 {
     #[inline(always)]
     fn v3_normalize(v: Vector3d<Self>) -> Vector3d<Self> {
         #[cfg(feature = "simd")]

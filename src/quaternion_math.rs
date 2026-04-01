@@ -35,7 +35,7 @@ impl From<f32x4> for Quaternion<f32> {
 
 // **** Ops ****
 
-pub trait QuaternionOps: Sized {
+pub trait QuaternionMath: Sized {
     fn q_reciprocal(x: Self) -> Self;
     fn q_norm_squared(q: Quaternion<Self>) -> Self;
     fn q_neg(q: Quaternion<Self>) -> Quaternion<Self>;
@@ -44,9 +44,12 @@ pub trait QuaternionOps: Sized {
     fn q_div_scalar(lhs: Quaternion<Self>, a: Self) -> Quaternion<Self>;
     fn q_mul(rhs: Quaternion<Self>, rhs: Quaternion<Self>) -> Quaternion<Self>;
     fn q_mul_add(lhs: Quaternion<Self>, a: Self, b: Quaternion<Self>) -> Quaternion<Self>;
+    fn q_normalize(q: Quaternion<Self>) -> Quaternion<Self>;
+    fn q_is_normalized(q: Quaternion<Self>) -> bool;
+    fn q_conjugate(q: Quaternion<Self>) -> Quaternion<Self>;
 }
 
-impl QuaternionOps for f64 {
+impl QuaternionMath for f64 {
     #[inline(always)]
     fn q_reciprocal(x: Self) -> Self {
         1.0 / x
@@ -91,10 +94,36 @@ impl QuaternionOps for f64 {
             z: lhs.w * rhs.z + lhs.x * rhs.y - lhs.y * rhs.x + lhs.z * rhs.w,
         }
     }
+
+    #[inline(always)]
+    fn q_normalize(q: Quaternion<Self>) -> Quaternion<Self> {
+        let norm_squared = Self::q_norm_squared(q);
+        if norm_squared == 0.0 {
+            return Quaternion::default();
+        }
+        let norm_reciprocal = norm_squared.reciprocal_sqrt();
+        Quaternion {
+            w: q.x * norm_reciprocal,
+            x: q.x * norm_reciprocal,
+            y: q.y * norm_reciprocal,
+            z: q.z * norm_reciprocal,
+        }
+    }
+
+    #[inline(always)]
+    fn q_is_normalized(q: Quaternion<Self>) -> bool {
+        let norm_squared = Self::q_norm_squared(q);
+        approx::abs_diff_eq!(norm_squared, 1.0, epsilon = 1e-6)
+    }
+
+    #[inline(always)]
+    fn q_conjugate(q: Quaternion<Self>) -> Quaternion<Self> {
+        Quaternion { w: q.w, x: -q.x, y: -q.y, z: -q.z }
+    }
 }
 
 // SIMD-accelerated implementation for f32
-impl QuaternionOps for f32 {
+impl QuaternionMath for f32 {
     #[inline(always)]
     fn q_reciprocal(x: Self) -> Self {
         1.0 / x
@@ -202,46 +231,7 @@ impl QuaternionOps for f32 {
             }
         }
     }
-}
 
-// **** Math ****
-
-pub trait QuaternionMath: Sized {
-    fn q_normalize(q: Quaternion<Self>) -> Quaternion<Self>;
-    fn q_is_normalized(q: Quaternion<Self>) -> bool;
-    fn q_conjugate(q: Quaternion<Self>) -> Quaternion<Self>;
-}
-
-impl QuaternionMath for f64 {
-    #[inline(always)]
-    fn q_normalize(q: Quaternion<Self>) -> Quaternion<Self> {
-        let norm_squared = Self::q_norm_squared(q);
-        if norm_squared == 0.0 {
-            return Quaternion::default();
-        }
-        let norm_reciprocal = norm_squared.reciprocal_sqrt();
-        Quaternion {
-            w: q.x * norm_reciprocal,
-            x: q.x * norm_reciprocal,
-            y: q.y * norm_reciprocal,
-            z: q.z * norm_reciprocal,
-        }
-    }
-
-    #[inline(always)]
-    fn q_is_normalized(q: Quaternion<Self>) -> bool {
-        let norm_squared = Self::q_norm_squared(q);
-        approx::abs_diff_eq!(norm_squared, 1.0, epsilon = 1e-6)
-    }
-
-    #[inline(always)]
-    fn q_conjugate(q: Quaternion<Self>) -> Quaternion<Self> {
-        Quaternion { w: q.w, x: -q.x, y: -q.y, z: -q.z }
-    }
-}
-
-// SIMD-accelerated implementation for f32
-impl QuaternionMath for f32 {
     #[inline(always)]
     fn q_conjugate(q: Quaternion<Self>) -> Quaternion<Self> {
         #[cfg(feature = "simd")]

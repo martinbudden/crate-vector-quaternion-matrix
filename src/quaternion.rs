@@ -4,7 +4,7 @@ use num_traits::{One, Signed, Zero, float::FloatCore};
 
 use crate::math_methods::TrigonometricMethods;
 use crate::sqrt_methods::SqrtMethods;
-use crate::{QuaternionMath, QuaternionOps, Vector3d};
+use crate::{QuaternionMath, Vector3d};
 
 /// quaternion of `f32` values
 pub type Quaternionf32 = Quaternion<f32>;
@@ -77,7 +77,7 @@ where
 /// ```
 impl<T> Zero for Quaternion<T>
 where
-    T: Zero + PartialEq + QuaternionOps,
+    T: Zero + PartialEq + QuaternionMath,
 {
     fn zero() -> Self {
         Self { w: T::zero(), x: T::zero(), y: T::zero(), z: T::zero() }
@@ -100,7 +100,7 @@ where
 /// ```
 impl<T> One for Quaternion<T>
 where
-    T: Copy + Zero + One + PartialEq + Sub<Output = T> + Mul<Output = T> + QuaternionOps,
+    T: Copy + Zero + One + PartialEq + Sub<Output = T> + Mul<Output = T> + QuaternionMath,
 {
     fn one() -> Self {
         Self { w: T::one(), x: T::zero(), y: T::zero(), z: T::zero() }
@@ -122,7 +122,7 @@ where
 /// ```
 impl<T> Neg for Quaternion<T>
 where
-    T: QuaternionOps,
+    T: QuaternionMath,
 {
     type Output = Self;
 
@@ -144,7 +144,7 @@ where
 /// ```
 impl<T> Add for Quaternion<T>
 where
-    T: QuaternionOps,
+    T: QuaternionMath,
 {
     type Output = Self;
 
@@ -158,7 +158,7 @@ where
 /// Add one quaternion to another
 impl<T> AddAssign for Quaternion<T>
 where
-    T: Copy + QuaternionOps,
+    T: Copy + QuaternionMath,
 {
     #[inline(always)]
     fn add_assign(&mut self, rhs: Self) {
@@ -172,7 +172,7 @@ where
 /// Subtract two quaternions
 impl<T> Sub for Quaternion<T>
 where
-    T: Add<Output = T> + QuaternionOps,
+    T: Add<Output = T> + QuaternionMath,
 {
     type Output = Self;
     fn sub(self, rhs: Self) -> Self {
@@ -185,7 +185,7 @@ where
 /// Subtract one quaternion from another
 impl<T> SubAssign for Quaternion<T>
 where
-    T: Copy + Add<Output = T> + QuaternionOps,
+    T: Copy + Add<Output = T> + QuaternionMath,
 {
     fn sub_assign(&mut self, rhs: Self) {
         *self = *self - rhs;
@@ -211,7 +211,7 @@ impl Mul<Quaternion<f64>> for f64 {
 /// Multiply quaternion by a constant
 impl<T> Mul<T> for Quaternion<T>
 where
-    T: QuaternionOps,
+    T: QuaternionMath,
 {
     type Output = Self;
     fn mul(self, k: T) -> Self {
@@ -222,7 +222,7 @@ where
 /// In-place multiply a quaternion by a constant
 impl<T> MulAssign<T> for Quaternion<T>
 where
-    T: Copy + QuaternionOps,
+    T: Copy + QuaternionMath,
 {
     fn mul_assign(&mut self, k: T) {
         *self = *self * k;
@@ -240,7 +240,7 @@ where
 /// ```
 impl<T> Div<T> for Quaternion<T>
 where
-    T: Copy + QuaternionOps,
+    T: Copy + QuaternionMath,
 {
     type Output = Self;
     fn div(self, k: T) -> Self {
@@ -258,7 +258,7 @@ where
 /// ```
 impl<T> DivAssign<T> for Quaternion<T>
 where
-    T: Copy + Div<Output = T> + QuaternionOps,
+    T: Copy + Div<Output = T> + QuaternionMath,
 {
     fn div_assign(&mut self, k: T) {
         *self = self.div(k);
@@ -269,7 +269,7 @@ where
 /// Multiply two quaternions
 impl<T> Mul<Quaternion<T>> for Quaternion<T>
 where
-    T: QuaternionOps,
+    T: QuaternionMath,
 {
     type Output = Self;
     fn mul(self, rhs: Self) -> Self {
@@ -280,7 +280,7 @@ where
 /// Multiply one quaternion by another
 impl<T> MulAssign<Quaternion<T>> for Quaternion<T>
 where
-    T: Copy + QuaternionOps,
+    T: Copy + QuaternionMath,
 {
     fn mul_assign(&mut self, rhs: Self) {
         *self = self.mul(rhs);
@@ -401,7 +401,7 @@ where
 // **** impl norm_squared ****
 impl<T> Quaternion<T>
 where
-    T: Copy + QuaternionOps,
+    T: Copy + QuaternionMath,
 {
     /// Return square of Euclidean norm
     pub fn norm_squared(self) -> T {
@@ -412,7 +412,7 @@ where
 // **** impl norm ****
 impl<T> Quaternion<T>
 where
-    T: Copy + SqrtMethods + QuaternionOps,
+    T: Copy + SqrtMethods + QuaternionMath,
 {
     /// Return Euclidean norm
     pub fn norm(self) -> T {
@@ -422,7 +422,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Copy + Zero + PartialOrd + SqrtMethods + QuaternionOps,
+    T: Copy + Zero + PartialOrd + SqrtMethods + QuaternionMath,
 {
     /// Return normalized form of the quaternion
     pub fn normalized(&self) -> Self {

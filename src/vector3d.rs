@@ -2,7 +2,7 @@ use cfg_if::cfg_if;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{One, Signed, Zero, float::FloatCore};
 
-use crate::{Quaternion, QuaternionMath, SqrtMethods, Vector2d, Vector3dMath, Vector3dOps};
+use crate::{Quaternion, QuaternionMath, SqrtMethods, Vector2d, Vector3dMath};
 
 /// 3-dimensional `{x, y, z}` vector of `i8` values
 pub type Vector3di8 = Vector3d<i8>;
@@ -53,7 +53,7 @@ pub struct Vector3d<T> {
 /// ```
 impl<T> Zero for Vector3d<T>
 where
-    T: Zero + PartialEq + Vector3dOps,
+    T: Zero + PartialEq + Vector3dMath,
 {
     fn zero() -> Self {
         Self { x: T::zero(), y: T::zero(), z: T::zero() }
@@ -75,7 +75,7 @@ where
 /// ```
 impl<T> Neg for Vector3d<T>
 where
-    T: Vector3dOps,
+    T: Vector3dMath,
 {
     type Output = Self;
     #[inline(always)]
@@ -96,7 +96,7 @@ where
 /// ```
 impl<T> Add for Vector3d<T>
 where
-    T: Vector3dOps,
+    T: Vector3dMath,
 {
     type Output = Vector3d<T>;
     fn add(self, rhs: Self) -> Self {
@@ -121,7 +121,7 @@ where
 /// ```
 impl<T> AddAssign for Vector3d<T>
 where
-    T: Copy + Vector3dOps,
+    T: Copy + Vector3dMath,
 {
     fn add_assign(&mut self, other: Self) {
         *self = *self + other;
@@ -140,7 +140,7 @@ where
 /// ```
 impl<T> Sub for Vector3d<T>
 where
-    T: Add<Output = T> + Vector3dOps,
+    T: Add<Output = T> + Vector3dMath,
 {
     type Output = Vector3d<T>;
     fn sub(self, rhs: Self) -> Self {
@@ -161,7 +161,7 @@ where
 /// ```
 impl<T> SubAssign for Vector3d<T>
 where
-    T: Copy + Add<Output = T> + Vector3dOps,
+    T: Copy + Add<Output = T> + Vector3dMath,
 {
     fn sub_assign(&mut self, other: Self) {
         *self = *self - other;
@@ -202,7 +202,7 @@ impl Mul<Vector3d<f64>> for f64 {
 /// ```
 impl<T> Mul<T> for Vector3d<T>
 where
-    T: Copy + Vector3dOps,
+    T: Copy + Vector3dMath,
 {
     type Output = Self;
     fn mul(self, k: T) -> Self {
@@ -242,7 +242,7 @@ impl Mul<f32> for Vector3d<i32> {
 /// ```
 impl<T> MulAssign<T> for Vector3d<T>
 where
-    T: Copy + Vector3dOps,
+    T: Copy + Vector3dMath,
 {
     fn mul_assign(&mut self, k: T) {
         *self = *self * k;
@@ -260,7 +260,7 @@ where
 /// ```
 impl<T> Div<T> for Vector3d<T>
 where
-    T: Copy + Vector3dOps,
+    T: Copy + Vector3dMath,
 {
     type Output = Self;
     fn div(self, k: T) -> Self {
@@ -278,7 +278,7 @@ where
 /// ```
 impl<T> DivAssign<T> for Vector3d<T>
 where
-    T: Copy + Div<Output = T> + Vector3dOps,
+    T: Copy + Div<Output = T> + Vector3dMath,
 {
     fn div_assign(&mut self, k: T) {
         *self = self.div(k);
@@ -413,7 +413,7 @@ where
 // **** impl norm_squared ****
 impl<T> Vector3d<T>
 where
-    T: Copy + Add<Output = T> + Vector3dOps + Vector3dMath,
+    T: Copy + Add<Output = T> + Vector3dMath + Vector3dMath,
 {
     /// Return square of Euclidean norm
     pub fn norm_squared(self) -> T {
@@ -456,7 +456,7 @@ where
 // **** impl norm ****
 impl<T> Vector3d<T>
 where
-    T: Copy + Add<Output = T> + SqrtMethods + Vector3dMath + Vector3dOps,
+    T: Copy + Add<Output = T> + SqrtMethods + Vector3dMath + Vector3dMath,
 {
     /// Return Euclidean norm
     pub fn norm(self) -> T {
@@ -466,7 +466,7 @@ where
 
 impl<T> Vector3d<T>
 where
-    T: Copy + Zero + PartialEq + SqrtMethods + Vector3dOps + Vector3dMath,
+    T: Copy + Zero + PartialEq + SqrtMethods + Vector3dMath + Vector3dMath,
 {
     /// Return normalized form of the vector
     pub fn normalized(self) -> Self {
@@ -492,7 +492,7 @@ where
 
 impl<T> Vector3d<T>
 where
-    T: Copy + Zero + SqrtMethods + Vector3dMath + Vector3dOps,
+    T: Copy + Zero + SqrtMethods + Vector3dMath + Vector3dMath,
 {
     // Return distance between two points
     pub fn distance(self, rhs: Self) -> T {
@@ -501,7 +501,7 @@ where
 }
 impl<T> Vector3d<T>
 where
-    T: Copy + Zero + One + SqrtMethods + Vector3dMath + Vector3dOps + QuaternionMath,
+    T: Copy + Zero + One + SqrtMethods + Vector3dMath + Vector3dMath + QuaternionMath,
 {
     #[inline(always)]
     pub fn rotate_by(self, q: Quaternion<T>) -> Self {

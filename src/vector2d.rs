@@ -3,7 +3,7 @@ use core::convert::TryFrom;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{One, Signed, Zero, float::FloatCore};
 
-use crate::{SqrtMethods, Vector2dMath, Vector2dOps, Vector3d};
+use crate::{SqrtMethods, Vector2dMath, Vector3d};
 
 /// 2-dimensional `{x, y}` vector of `i8` values
 pub type Vector2di8 = Vector2d<i8>;
@@ -37,7 +37,7 @@ pub struct Vector2d<T> {
 /// ```
 impl<T> Zero for Vector2d<T>
 where
-    T: Zero + PartialEq + Vector2dOps,
+    T: Zero + PartialEq + Vector2dMath,
 {
     fn zero() -> Self {
         Self { x: T::zero(), y: T::zero() }
@@ -59,7 +59,7 @@ where
 /// ```
 impl<T> Neg for Vector2d<T>
 where
-    T: Vector2dOps,
+    T: Vector2dMath,
 {
     type Output = Self;
     #[inline(always)]
@@ -80,7 +80,7 @@ where
 /// ```
 impl<T> Add for Vector2d<T>
 where
-    T: Vector2dOps,
+    T: Vector2dMath,
 {
     type Output = Vector2d<T>;
     fn add(self, rhs: Self) -> Self {
@@ -105,7 +105,7 @@ where
 /// ```
 impl<T> AddAssign for Vector2d<T>
 where
-    T: Copy + Vector2dOps,
+    T: Copy + Vector2dMath,
 {
     fn add_assign(&mut self, other: Self) {
         *self = *self + other;
@@ -124,7 +124,7 @@ where
 /// ```
 impl<T> Sub for Vector2d<T>
 where
-    T: Add<Output = T> + Vector2dOps,
+    T: Add<Output = T> + Vector2dMath,
 {
     type Output = Vector2d<T>;
     fn sub(self, rhs: Self) -> Self {
@@ -145,7 +145,7 @@ where
 /// ```
 impl<T> SubAssign for Vector2d<T>
 where
-    T: Copy + Add<Output = T> + Vector2dOps,
+    T: Copy + Add<Output = T> + Vector2dMath,
 {
     fn sub_assign(&mut self, other: Self) {
         *self = *self - other;
@@ -186,7 +186,7 @@ impl Mul<Vector2d<f64>> for f64 {
 /// ```
 impl<T> Mul<T> for Vector2d<T>
 where
-    T: Copy + Vector2dOps,
+    T: Copy + Vector2dMath,
 {
     type Output = Self;
     fn mul(self, k: T) -> Self {
@@ -226,7 +226,7 @@ impl Mul<f32> for Vector2d<i32> {
 /// ```
 impl<T> MulAssign<T> for Vector2d<T>
 where
-    T: Copy + Vector2dOps,
+    T: Copy + Vector2dMath,
 {
     fn mul_assign(&mut self, k: T) {
         *self = *self * k;
@@ -244,7 +244,7 @@ where
 /// ```
 impl<T> Div<T> for Vector2d<T>
 where
-    T: Copy + Vector2dOps,
+    T: Copy + Vector2dMath,
 {
     type Output = Self;
     fn div(self, k: T) -> Self {
@@ -262,7 +262,7 @@ where
 /// ```
 impl<T> DivAssign<T> for Vector2d<T>
 where
-    T: Copy + Div<Output = T> + Vector2dOps,
+    T: Copy + Div<Output = T> + Vector2dMath,
 {
     fn div_assign(&mut self, k: T) {
         *self = self.div(k);
@@ -397,7 +397,7 @@ where
 // **** impl norm_squared ****
 impl<T> Vector2d<T>
 where
-    T: Copy + Add<Output = T> + Vector2dOps + Vector2dMath,
+    T: Copy + Add<Output = T> + Vector2dMath + Vector2dMath,
 {
     /// Return square of Euclidean norm
     pub fn norm_squared(self) -> T {
@@ -439,7 +439,7 @@ where
 // **** impl norm ****
 impl<T> Vector2d<T>
 where
-    T: Copy + Add<Output = T> + SqrtMethods + Vector2dMath + Vector2dOps,
+    T: Copy + Add<Output = T> + SqrtMethods + Vector2dMath + Vector2dMath,
 {
     /// Return Euclidean norm
     pub fn norm(self) -> T {
@@ -449,7 +449,7 @@ where
 
 impl<T> Vector2d<T>
 where
-    T: Copy + Zero + PartialEq + SqrtMethods + Vector2dOps + Vector2dMath,
+    T: Copy + Zero + PartialEq + SqrtMethods + Vector2dMath + Vector2dMath,
 {
     /// Return normalized form of the vector
     pub fn normalized(self) -> Self {
@@ -475,7 +475,7 @@ where
 
 impl<T> Vector2d<T>
 where
-    T: Copy + Zero + SqrtMethods + Vector2dMath + Vector2dOps,
+    T: Copy + Zero + SqrtMethods + Vector2dMath + Vector2dMath,
 {
     // Return distance between two points
     pub fn distance(self, rhs: Self) -> T {
