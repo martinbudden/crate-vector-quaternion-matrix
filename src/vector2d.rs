@@ -376,7 +376,7 @@ where
 
 impl<T> Vector2d<T>
 where
-    T: Copy + Sub<Output = T> + Mul<Output = T>,
+    T: Copy + Vector2dMath,
 {
     /// Z component of vector cross product of self and rhs extended to 3D
     /// ```
@@ -389,8 +389,8 @@ where
     /// assert_eq!(x, 1.0);
     /// ```
     #[inline(always)]
-    pub fn cross(self, rhs: Self) -> T {
-        self.x * rhs.y - self.y * rhs.x
+    pub fn cross(self, other: Self) -> T {
+        T::v2_cross(self, other)
     }
 }
 

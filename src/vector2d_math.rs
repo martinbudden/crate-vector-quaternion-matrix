@@ -33,100 +33,29 @@ impl From<f32x2> for Vector2d<f32> {
     }
 }
 
+// **** Math ****
+
+/// Math functions for Vector2d, using SIMD accelerations for f32.
 pub trait Vector2dMath: Sized {
     fn v2_reciprocal(x: Self) -> Self;
-    fn v2_norm_squared(q: Vector2d<Self>) -> Self;
     fn v2_neg(v: Vector2d<Self>) -> Vector2d<Self>;
     fn v2_add(lhs: Vector2d<Self>, lhs: Vector2d<Self>) -> Vector2d<Self>;
     fn v2_mul_scalar(lhs: Vector2d<Self>, a: Self) -> Vector2d<Self>;
     fn v2_div_scalar(lhs: Vector2d<Self>, a: Self) -> Vector2d<Self>;
     fn v2_mul_add(lhs: Vector2d<Self>, a: Self, b: Vector2d<Self>) -> Vector2d<Self>;
+    fn v2_norm_squared(q: Vector2d<Self>) -> Self;
     fn v2_normalize(v: Vector2d<Self>) -> Vector2d<Self>;
     fn v2_is_normalized(q: Vector2d<Self>) -> bool;
     fn v2_dot(a: Vector2d<Self>, b: Vector2d<Self>) -> Self;
-    fn v2_cross(a: Vector2d<Self>, b: Vector2d<Self>) -> Vector2d<Self>;
+    fn v2_cross(this: Vector2d<Self>, other: Vector2d<Self>) -> Self;
 }
 
-impl Vector2dMath for f64 {
-    #[inline(always)]
-    fn v2_reciprocal(x: Self) -> Self {
-        1.0 / x
-    }
+// **** SIMD-accelerated implementation for f32 ****
 
-    #[inline(always)]
-    fn v2_norm_squared(v: Vector2d<Self>) -> Self {
-        v.x * v.x + v.y * v.y
-    }
-
-    #[inline(always)]
-    fn v2_neg(v: Vector2d<Self>) -> Vector2d<Self> {
-        Vector2d { x: -v.x, y: -v.y }
-    }
-
-    #[inline(always)]
-    fn v2_add(lhs: Vector2d<Self>, rhs: Vector2d<Self>) -> Vector2d<Self> {
-        Vector2d { x: lhs.x + rhs.x, y: lhs.y + rhs.y }
-    }
-
-    #[inline(always)]
-    fn v2_mul_scalar(lhs: Vector2d<Self>, a: Self) -> Vector2d<Self> {
-        Vector2d { x: lhs.x * a, y: lhs.y * a }
-    }
-
-    #[inline(always)]
-    fn v2_div_scalar(lhs: Vector2d<Self>, a: Self) -> Vector2d<Self> {
-        Self::v2_mul_scalar(lhs, 1.0 / a)
-    }
-    #[inline(always)]
-    fn v2_mul_add(lhs: Vector2d<Self>, a: Self, b: Vector2d<Self>) -> Vector2d<Self> {
-        Vector2d { x: lhs.x * a + b.x, y: lhs.y * a + b.y }
-    }
-
-    #[inline(always)]
-    fn v2_normalize(v: Vector2d<Self>) -> Vector2d<Self> {
-        let norm_squared = v.x * v.x + v.y * v.y;
-        if norm_squared == 0.0 {
-            return Vector2d::default();
-        }
-        let norm_reciprocal = norm_squared.reciprocal_sqrt();
-        Vector2d { x: v.x * norm_reciprocal, y: v.y * norm_reciprocal }
-    }
-
-    #[inline(always)]
-    fn v2_is_normalized(q: Vector2d<Self>) -> bool {
-        let norm_squared = Self::v2_norm_squared(q);
-        approx::abs_diff_eq!(norm_squared, 1.0, epsilon = 1e-6)
-    }
-
-    #[inline(always)]
-    fn v2_dot(a: Vector2d<Self>, b: Vector2d<Self>) -> Self {
-        (a.x * b.x) + (a.y * b.y)
-    }
-
-    #[inline(always)]
-    fn v2_cross(_a: Vector2d<Self>, _b: Vector2d<Self>) -> Vector2d<Self> {
-        Vector2d { x: 0.0, y: 0.0 }
-    }
-}
-
-// SIMD-accelerated implementation for f32
 impl Vector2dMath for f32 {
     #[inline(always)]
     fn v2_reciprocal(x: Self) -> Self {
         1.0 / x
-    }
-
-    #[inline(always)]
-    fn v2_norm_squared(v: Vector2d<Self>) -> Self {
-        #[cfg(feature = "simd")]
-        {
-            let v_simd = f32x2::from(v);
-            (v_simd * v_simd).reduce_sum()
-        }
-        #[cfg(not(feature = "simd"))]
-        {
-            v.x * v.x + v.y * v.y + v.z * v.z
-        }
     }
 
     #[inline(always)]
@@ -190,8 +119,6 @@ impl Vector2dMath for f32 {
     fn v2_mul_add(lhs: Vector2d<Self>, a: Self, b: Vector2d<Self>) -> Vector2d<Self> {
         #[cfg(feature = "simd")]
         {
-            //let v_lhs: f32x2 = lhs.into();
-            //let v_b: f32x2 = b.into();
             let v_lhs = f32x2::from(lhs);
             let v_b = f32x2::from(b);
             let v_a = f32x2::splat(a);
@@ -203,6 +130,19 @@ impl Vector2dMath for f32 {
         #[cfg(not(feature = "simd"))]
         {
             Vector2d { x: lhs.x * a + b.x, y: lhs.y * a + b.y }
+        }
+    }
+
+    #[inline(always)]
+    fn v2_norm_squared(v: Vector2d<Self>) -> Self {
+        #[cfg(feature = "simd")]
+        {
+            let v_simd = f32x2::from(v);
+            (v_simd * v_simd).reduce_sum()
+        }
+        #[cfg(not(feature = "simd"))]
+        {
+            v.x * v.x + v.y * v.y + v.z * v.z
         }
     }
 
@@ -239,11 +179,13 @@ impl Vector2dMath for f32 {
             Vector2d { x: v.x * norm_reciprocal, y: v.y * norm_reciprocal }
         }
     }
+
     #[inline(always)]
-    fn v2_is_normalized(q: Vector2d<Self>) -> bool {
-        let norm_squared = Self::v2_norm_squared(q);
+    fn v2_is_normalized(v: Vector2d<Self>) -> bool {
+        let norm_squared = Self::v2_norm_squared(v);
         approx::abs_diff_eq!(norm_squared, 1.0, epsilon = 1e-6)
     }
+
     #[inline(always)]
     fn v2_dot(a: Vector2d<Self>, b: Vector2d<Self>) -> Self {
         #[cfg(feature = "simd")]
@@ -263,7 +205,72 @@ impl Vector2dMath for f32 {
     }
 
     #[inline(always)]
-    fn v2_cross(_a: Vector2d<Self>, _b: Vector2d<Self>) -> Vector2d<Self> {
-        Vector2d { x: 0.0, y: 0.0 }
+    fn v2_cross(this: Vector2d<Self>, other: Vector2d<Self>) -> Self {
+        this.x * other.y - this.y * other.x
+    }
+}
+
+// **** f64 ****
+
+impl Vector2dMath for f64 {
+    #[inline(always)]
+    fn v2_reciprocal(x: Self) -> Self {
+        1.0 / x
+    }
+
+    #[inline(always)]
+    fn v2_neg(v: Vector2d<Self>) -> Vector2d<Self> {
+        Vector2d { x: -v.x, y: -v.y }
+    }
+
+    #[inline(always)]
+    fn v2_add(lhs: Vector2d<Self>, rhs: Vector2d<Self>) -> Vector2d<Self> {
+        Vector2d { x: lhs.x + rhs.x, y: lhs.y + rhs.y }
+    }
+
+    #[inline(always)]
+    fn v2_mul_scalar(lhs: Vector2d<Self>, a: Self) -> Vector2d<Self> {
+        Vector2d { x: lhs.x * a, y: lhs.y * a }
+    }
+
+    #[inline(always)]
+    fn v2_div_scalar(lhs: Vector2d<Self>, a: Self) -> Vector2d<Self> {
+        Self::v2_mul_scalar(lhs, 1.0 / a)
+    }
+
+    #[inline(always)]
+    fn v2_mul_add(lhs: Vector2d<Self>, a: Self, b: Vector2d<Self>) -> Vector2d<Self> {
+        Vector2d { x: lhs.x * a + b.x, y: lhs.y * a + b.y }
+    }
+
+    #[inline(always)]
+    fn v2_norm_squared(v: Vector2d<Self>) -> Self {
+        v.x * v.x + v.y * v.y
+    }
+
+    #[inline(always)]
+    fn v2_normalize(v: Vector2d<Self>) -> Vector2d<Self> {
+        let norm_squared = v.x * v.x + v.y * v.y;
+        if norm_squared == 0.0 {
+            return Vector2d::default();
+        }
+        let norm_reciprocal = norm_squared.reciprocal_sqrt();
+        Vector2d { x: v.x * norm_reciprocal, y: v.y * norm_reciprocal }
+    }
+
+    #[inline(always)]
+    fn v2_is_normalized(q: Vector2d<Self>) -> bool {
+        let norm_squared = Self::v2_norm_squared(q);
+        approx::abs_diff_eq!(norm_squared, 1.0, epsilon = 1e-6)
+    }
+
+    #[inline(always)]
+    fn v2_dot(a: Vector2d<Self>, b: Vector2d<Self>) -> Self {
+        (a.x * b.x) + (a.y * b.y)
+    }
+
+    #[inline(always)]
+    fn v2_cross(this: Vector2d<Self>, other: Vector2d<Self>) -> Self {
+        this.x * other.y - this.y * other.x
     }
 }
