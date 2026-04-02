@@ -1256,9 +1256,6 @@ mod tests {
 
     fn is_normal<T: Sized + Send + Sync + Unpin>() {}
 
-    const A: Matrix3x3<f32> = Matrix3x3::<f32> { a: [2.0, 3.0, 5.0, 7.0, 11.0, 13.0, 17.0, 19.0, 23.0] };
-    const B: Matrix3x3<f32> = Matrix3x3::<f32> { a: [29.0, 31.0, 37.0, 41.0, 43.0, 47.0, 53.0, 59.0, 61.0] };
-
     #[test]
     fn normal_types() {
         is_normal::<Matrix3x3<f32>>();
@@ -1266,7 +1263,7 @@ mod tests {
     #[test]
     fn default() {
         let a: Matrix3x3<f32> = Matrix3x3f32::default();
-        assert_eq!(a, Matrix3x3f32 { a: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0] });
+        assert_eq!(a, Matrix3x3f32::from([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]));
         let z = Matrix3x3f32::zero();
         //let z: Matrix3x3 = zero();
         assert_eq!(a, z);
@@ -1282,30 +1279,34 @@ mod tests {
     }
     #[test]
     fn neg() {
-        assert_eq!(-A, Matrix3x3::<f32> { a: [-2.0, -3.0, -5.0, -7.0, -11.0, -13.0, -17.0, -19.0, -23.0] });
+        let a = Matrix3x3f32::from([2.0, 3.0, 5.0, 7.0, 11.0, 13.0, 17.0, 19.0, 23.0]);
 
-        let b = -A;
-        assert_eq!(b, Matrix3x3::<f32> { a: [-2.0, -3.0, -5.0, -7.0, -11.0, -13.0, -17.0, -19.0, -23.0] });
+        assert_eq!(-a, Matrix3x3f32::from([-2.0, -3.0, -5.0, -7.0, -11.0, -13.0, -17.0, -19.0, -23.0]));
+
+        let b = -a;
+        assert_eq!(b, Matrix3x3f32::from([-2.0, -3.0, -5.0, -7.0, -11.0, -13.0, -17.0, -19.0, -23.0]));
     }
     #[test]
     fn add() {
-        let a_plus_b = Matrix3x3::<f32> {
-            a: [
-                2.0 + 29.0,
-                3.0 + 31.0,
-                5.0 + 37.0,
-                7.0 + 41.0,
-                11.0 + 43.0,
-                13.0 + 47.0,
-                17.0 + 53.0,
-                19.0 + 59.0,
-                23.0 + 61.0,
-            ],
-        };
-        assert_eq!(A + B, a_plus_b);
+        let a = Matrix3x3f32::from([2.0, 3.0, 5.0, 7.0, 11.0, 13.0, 17.0, 19.0, 23.0]);
+        let b = Matrix3x3f32::from([29.0, 31.0, 37.0, 41.0, 43.0, 47.0, 53.0, 59.0, 61.0]);
+        let a_plus_b = Matrix3x3f32::from([
+            2.0 + 29.0,
+            3.0 + 31.0,
+            5.0 + 37.0,
+            7.0 + 41.0,
+            11.0 + 43.0,
+            13.0 + 47.0,
+            17.0 + 53.0,
+            19.0 + 59.0,
+            23.0 + 61.0,
+        ]);
+        assert_eq!(a + b, a_plus_b);
     }
     #[test]
     fn sub() {
+        let a = Matrix3x3f32::from([2.0, 3.0, 5.0, 7.0, 11.0, 13.0, 17.0, 19.0, 23.0]);
+        let b = Matrix3x3f32::from([29.0, 31.0, 37.0, 41.0, 43.0, 47.0, 53.0, 59.0, 61.0]);
         let a_minus_b = Matrix3x3::from([
             2.0 - 29.0,
             3.0 - 31.0,
@@ -1317,10 +1318,12 @@ mod tests {
             19.0 - 59.0,
             23.0 - 61.0,
         ]);
-        assert_eq!(A - B, a_minus_b);
+        assert_eq!(a - b, a_minus_b);
     }
     #[test]
     fn mul() {
+        let a = Matrix3x3f32::from([2.0, 3.0, 5.0, 7.0, 11.0, 13.0, 17.0, 19.0, 23.0]);
+        let b = Matrix3x3f32::from([29.0, 31.0, 37.0, 41.0, 43.0, 47.0, 53.0, 59.0, 61.0]);
         let a_times_b = Matrix3x3::from([
             2.0 * 29.0 + 3.0 * 41.0 + 5.0 * 53.0,
             2.0 * 31.0 + 3.0 * 43.0 + 5.0 * 59.0,
@@ -1333,31 +1336,38 @@ mod tests {
             17.0 * 37.0 + 19.0 * 47.0 + 23.0 * 61.0,
         ]);
 
-        assert_eq!(A * B, a_times_b);
+        assert_eq!(a * b, a_times_b);
     }
     #[test]
     fn new() {
         let a = Matrix3x3::from([2.0, 3.0, 5.0, 7.0, 11.0, 13.0, 17.0, 19.0, 23.0]);
-        assert_eq!(A, a);
         let b = Matrix3x3::from([
             Vector3d { x: 2.0, y: 3.0, z: 5.0 },
             Vector3d { x: 7.0, y: 11.0, z: 13.0 },
             Vector3d { x: 17.0, y: 19.0, z: 23.0 },
         ]);
-        assert_eq!(A, b);
+        assert_eq!(a, b);
         let c = Matrix3x3::from((
             Vector3d { x: 2.0, y: 3.0, z: 5.0 },
             Vector3d { x: 7.0, y: 11.0, z: 13.0 },
             Vector3d { x: 17.0, y: 19.0, z: 23.0 },
         ));
-        assert_eq!(A, c);
+        assert_eq!(a, c);
         let d: Matrix3x3<f32> = Matrix3x3::new([2.0, 3.0, 5.0, 7.0, 11.0, 13.0, 17.0, 19.0, 23.0]);
-        assert_eq!(A, d);
+        assert_eq!(a, d);
     }
     #[test]
     fn from_array() {
         let a = Matrix3x3::from([2.0, 3.0, 5.0, 7.0, 11.0, 13.0, 17.0, 19.0, 23.0]);
-        assert_eq!(A, a)
+        assert_eq!(2.0, a[0]);
+        assert_eq!(3.0, a[1]);
+        assert_eq!(5.0, a[2]);
+        assert_eq!(7.0, a[3]);
+        assert_eq!(11.0, a[4]);
+        assert_eq!(13.0, a[5]);
+        assert_eq!(17.0, a[6]);
+        assert_eq!(19.0, a[7]);
+        assert_eq!(23.0, a[8]);
     }
     #[test]
     fn adjugate() {
