@@ -484,6 +484,7 @@ where
 }
 
 // **** From ****
+
 /// Vector2d from Vector3d, discarding z value.
 /// ```
 /// # use vector_quaternion_matrix::{Vector2df32,Vector3df32};
