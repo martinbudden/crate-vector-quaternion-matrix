@@ -2,7 +2,7 @@ use cfg_if::cfg_if;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{One, Signed, Zero, float::FloatCore};
 
-use crate::{MathConstants, Matrix2x2, MatrixError, Quaternion, QuaternionMath, SqrtMethods, Vector3d};
+use crate::{MathConstants, Matrix2x2, Matrix3x3Math, MatrixError, Quaternion, QuaternionMath, SqrtMethods, Vector3d};
 
 /// 3x3 matrix of `f32` values
 pub type Matrix3x3f32 = Matrix3x3<f32>;
@@ -32,7 +32,7 @@ if #[cfg(feature = "align")] {
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Matrix3x3<T> {
     // Flattened 3x3 matrix: 9 elements in row-major order
-    a: [T; 9],
+    pub(crate) a: [T; 9],
 }
 } else {
 // Compact 36-byte version
@@ -62,7 +62,7 @@ pub struct Matrix3x3<T> {
 /// ```
 impl<T> Zero for Matrix3x3<T>
 where
-    T: Copy + Zero + PartialEq,
+    T: Copy + Zero + PartialEq + Matrix3x3Math,
 {
     fn zero() -> Self {
         Self { a: [T::zero(), T::zero(), T::zero(), T::zero(), T::zero(), T::zero(), T::zero(), T::zero(), T::zero()] }
@@ -85,7 +85,7 @@ where
 /// ```
 impl<T> One for Matrix3x3<T>
 where
-    T: Copy + Zero + One + PartialEq + Sub<Output = T> + Mul<Output = T>,
+    T: Copy + Zero + One + PartialEq + Matrix3x3Math,
 {
     fn one() -> Self {
         Self { a: [T::one(), T::zero(), T::zero(), T::zero(), T::one(), T::zero(), T::zero(), T::zero(), T::one()] }
@@ -111,15 +111,12 @@ where
 /// ```
 impl<T> Neg for Matrix3x3<T>
 where
-    T: Copy + Neg<Output = T>,
+    T: Copy + Matrix3x3Math,
 {
     type Output = Self;
+    #[inline(always)]
     fn neg(self) -> Self::Output {
-        let mut a = self.a;
-        for r in a.iter_mut() {
-            *r = -*r;
-        }
-        Self { a }
+        T::m3x3_neg(self)
     }
 }
 
@@ -148,15 +145,11 @@ where
 /// ```
 impl<T> Add for Matrix3x3<T>
 where
-    T: Copy + Add<Output = T>,
+    T: Copy + Matrix3x3Math,
 {
     type Output = Self;
-    fn add(self, rhs: Self) -> Self {
-        let mut a = self.a;
-        for (ii, r) in a.iter_mut().enumerate() {
-            *r = *r + rhs.a[ii];
-        }
-        Self { a }
+    fn add(self, other: Self) -> Self {
+        T::m3x3_add(self, other)
     }
 }
 
@@ -178,12 +171,10 @@ where
 /// ```
 impl<T> AddAssign for Matrix3x3<T>
 where
-    T: Copy + Add<Output = T>,
+    T: Copy + Matrix3x3Math,
 {
-    fn add_assign(&mut self, rhs: Self) {
-        for (ii, r) in self.a.iter_mut().enumerate() {
-            *r = *r + rhs.a[ii];
-        }
+    fn add_assign(&mut self, other: Self) {
+        *self = *self + other;
     }
 }
 
@@ -205,15 +196,12 @@ where
 /// ```
 impl<T> Sub for Matrix3x3<T>
 where
-    T: Copy + Sub<Output = T>,
+    T: Copy + Matrix3x3Math,
 {
     type Output = Self;
-    fn sub(self, rhs: Self) -> Self {
-        let mut a = self.a;
-        for (ii, r) in a.iter_mut().enumerate() {
-            *r = *r - rhs.a[ii];
-        }
-        Self { a }
+    fn sub(self, other: Self) -> Self {
+        // Reuse our existing SIMD-optimized Add and Neg implementations
+        self + (-other)
     }
 }
 
@@ -235,12 +223,10 @@ where
 /// ```
 impl<T> SubAssign for Matrix3x3<T>
 where
-    T: Copy + Sub<Output = T>,
+    T: Copy + Matrix3x3Math,
 {
-    fn sub_assign(&mut self, rhs: Self) {
-        for (ii, r) in self.a.iter_mut().enumerate() {
-            *r = *r - rhs.a[ii];
-        }
+    fn sub_assign(&mut self, other: Self) {
+        *self = *self - other;
     }
 }
 
@@ -294,15 +280,11 @@ impl Mul<Matrix3x3<f64>> for f64 {
 /// ```
 impl<T> Mul<T> for Matrix3x3<T>
 where
-    T: Copy + Mul<Output = T>,
+    T: Copy + Matrix3x3Math,
 {
     type Output = Self;
-    fn mul(self, k: T) -> Self {
-        let mut a = self.a;
-        for r in a.iter_mut() {
-            *r = *r * k;
-        }
-        Self { a }
+    fn mul(self, other: T) -> Self {
+        T::m3x3_mul_scalar(self, other)
     }
 }
 
@@ -321,13 +303,10 @@ where
 /// ```
 impl<T> MulAssign<T> for Matrix3x3<T>
 where
-    T: Copy + Mul<Output = T>,
+    T: Copy + Matrix3x3Math,
 {
-    fn mul_assign(&mut self, k: T) {
-        #[allow(clippy::assign_op_pattern)]
-        for r in self.a.iter_mut() {
-            *r = *r * k;
-        }
+    fn mul_assign(&mut self, other: T) {
+        *self = *self * other;
     }
 }
 
@@ -345,15 +324,11 @@ where
 /// ```
 impl<T> Mul<Vector3d<T>> for Matrix3x3<T>
 where
-    T: Copy + Add<Output = T> + Mul<Output = T>,
+    T: Copy + Matrix3x3Math,
 {
     type Output = Vector3d<T>;
-    fn mul(self, v: Vector3d<T>) -> Vector3d<T> {
-        Vector3d::<T> {
-            x: self.a[0] * v.x + self.a[1] * v.y + self.a[2] * v.z,
-            y: self.a[3] * v.x + self.a[4] * v.y + self.a[5] * v.z,
-            z: self.a[6] * v.x + self.a[7] * v.y + self.a[8] * v.z,
-        }
+    fn mul(self, other: Vector3d<T>) -> Vector3d<T> {
+        T::m3x3_mul_vector(self, other)
     }
 }
 
@@ -370,15 +345,11 @@ where
 /// ```
 impl<T> Mul<Matrix3x3<T>> for Vector3d<T>
 where
-    T: Copy + Add<Output = T> + Mul<Output = T>,
+    T: Copy + Matrix3x3Math,
 {
     type Output = Self;
-    fn mul(self, rhs: Matrix3x3<T>) -> Self {
-        Self {
-            x: self.x * rhs.a[0] + self.y * rhs.a[3] + self.z * rhs.a[6],
-            y: self.x * rhs.a[1] + self.y * rhs.a[4] + self.z * rhs.a[7],
-            z: self.x * rhs.a[2] + self.y * rhs.a[5] + self.z * rhs.a[8],
-        }
+    fn mul(self, other: Matrix3x3<T>) -> Self {
+        T::m3x3_vector_mul(self, other)
     }
 }
 
@@ -408,22 +379,11 @@ where
 /// ```
 impl<T> Mul<Matrix3x3<T>> for Matrix3x3<T>
 where
-    T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
+    T: Copy + Matrix3x3Math,
 {
     type Output = Self;
-    fn mul(self, rhs: Self) -> Self {
-        let a = [
-            self.a[0] * rhs.a[0] + self.a[1] * rhs.a[3] + self.a[2] * rhs.a[6],
-            self.a[0] * rhs.a[1] + self.a[1] * rhs.a[4] + self.a[2] * rhs.a[7],
-            self.a[0] * rhs.a[2] + self.a[1] * rhs.a[5] + self.a[2] * rhs.a[8],
-            self.a[3] * rhs.a[0] + self.a[4] * rhs.a[3] + self.a[5] * rhs.a[6],
-            self.a[3] * rhs.a[1] + self.a[4] * rhs.a[4] + self.a[5] * rhs.a[7],
-            self.a[3] * rhs.a[2] + self.a[4] * rhs.a[5] + self.a[5] * rhs.a[8],
-            self.a[6] * rhs.a[0] + self.a[7] * rhs.a[3] + self.a[8] * rhs.a[6],
-            self.a[6] * rhs.a[1] + self.a[7] * rhs.a[4] + self.a[8] * rhs.a[7],
-            self.a[6] * rhs.a[2] + self.a[7] * rhs.a[5] + self.a[8] * rhs.a[8],
-        ];
-        Matrix3x3::<T> { a }
+    fn mul(self, other: Self) -> Self {
+        T::m3x3_mul(self, other)
     }
 }
 
@@ -446,10 +406,10 @@ where
 /// ```
 impl<T> MulAssign<Matrix3x3<T>> for Matrix3x3<T>
 where
-    T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
+    T: Copy + Matrix3x3Math,
 {
-    fn mul_assign(&mut self, rhs: Matrix3x3<T>) {
-        *self = *self * rhs;
+    fn mul_assign(&mut self, other: Matrix3x3<T>) {
+        *self = *self * other;
     }
 }
 // **** Div ****
@@ -467,17 +427,11 @@ where
 /// ```
 impl<T> Div<T> for Matrix3x3<T>
 where
-    T: Copy + One + Div<Output = T>,
+    T: Copy + Matrix3x3Math,
 {
     type Output = Self;
-    fn div(self, k: T) -> Self {
-        let reciprocal: T = T::one() / k;
-        /*let mut a = self.a;
-        for r in a.iter_mut() {
-            *r = *r * reciprocal;
-        }
-        Matrix3x3::<T> { a }*/
-        self * reciprocal
+    fn div(self, other: T) -> Self {
+        T::m3x3_div_scalar(self, other)
     }
 }
 
@@ -496,13 +450,10 @@ where
 /// ```
 impl<T> DivAssign<T> for Matrix3x3<T>
 where
-    T: Copy + One + Div<Output = T>,
+    T: Copy + Matrix3x3Math,
 {
-    fn div_assign(&mut self, rhs: T) {
-        let reciprocal: T = T::one() / rhs;
-        for r in self.a.iter_mut() {
-            *r = *r * reciprocal;
-        }
+    fn div_assign(&mut self, other: T) {
+        *self = *self / other;
     }
 }
 
@@ -796,7 +747,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: Copy + Zero + One + Neg<Output = T> + Sub<Output = T> + Mul<Output = T> + Div<Output = T>,
+    T: Copy + Matrix3x3Math + One + Neg<Output = T> + Add<Output = T> + Sub<Output = T>,
 {
     /// Adjugate matrix
     /// ```
@@ -891,10 +842,8 @@ where
     /// assert_eq!(-78.0, d);
     ///
     /// ```
-    pub fn determinant(&self) -> T {
-        self.a[0] * (self.a[4] * self.a[8] - self.a[5] * self.a[7])
-            - self.a[1] * (self.a[3] * self.a[8] - self.a[5] * self.a[6])
-            + self.a[2] * (self.a[3] * self.a[7] - self.a[4] * self.a[6])
+    pub fn determinant(self) -> T {
+        T::m3x3_determinant(self)
     }
 
     /// Matrix top right determinant
@@ -908,12 +857,8 @@ where
     /// assert_eq!(76.0, d);
     ///
     /// ```
-    pub fn top_right_determinant(&self) -> T {
-        //let det_b = b00 * (b11 * b22 - b12 * b12) - b01 * (b01 * b22 - b12 * b02) + b02 * (b01 * b12 - b11 * b02);
-        //             0     4     8     5      5      1      1     8    5     2        2     1    5      4     2
-        self.a[0] * (self.a[4] * self.a[8] - self.a[5] * self.a[5])
-            - self.a[1] * (self.a[1] * self.a[8] - self.a[5] * self.a[2])
-            + self.a[2] * (self.a[1] * self.a[5] - self.a[4] * self.a[2])
+    pub fn top_right_determinant(self) -> T {
+        T::m3x3_top_right_determinant(self)
     }
 
     /// Return the sum of all components of the matrix
@@ -926,8 +871,8 @@ where
     ///
     /// assert_eq!(s, 100.0);
     /// ```
-    pub fn sum(&self) -> T {
-        self.a[0] + self.a[1] + self.a[2] + self.a[3] + self.a[4] + self.a[5] + self.a[6] + self.a[7] + self.a[8]
+    pub fn sum(self) -> T {
+        T::m3x3_sum(self)
     }
 
     /// Return the mean of all components of the matrix
@@ -935,14 +880,13 @@ where
     /// # use vector_quaternion_matrix::Matrix3x3f32;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                              7.0, 11.0, 13.0,
-    ///                             17.0, 19.0, 23.0]);
+    ///                             17.0, 19.0, 13.0]);
     /// let mean = m.mean();
     ///
-    /// assert_eq!(mean, 100.0 / 9.0);
+    /// assert_eq!(mean, 90.0 / 9.0);
     /// ```
-    pub fn mean(&self) -> T {
-        let nine = T::one() + T::one() + T::one() + T::one() + T::one() + T::one() + T::one() + T::one() + T::one();
-        self.sum() / nine
+    pub fn mean(self) -> T {
+        T::m3x3_mean(self)
     }
 
     /// Return the product of all components of the matrix
@@ -955,8 +899,8 @@ where
     ///
     /// assert_eq!(product, 223092860.0);
     /// ```
-    pub fn product(&self) -> T {
-        self.a[0] * self.a[1] * self.a[2] * self.a[3] * self.a[4] * self.a[5] * self.a[6] * self.a[7] * self.a[8]
+    pub fn product(self) -> T {
+        T::m3x3_product(self)
     }
 
     /// Return trace of matrix.
@@ -969,8 +913,8 @@ where
     ///
     /// assert_eq!(t, 36.0);
     /// ```
-    pub fn trace(&self) -> T {
-        self.a[0] + self.a[4] + self.a[8]
+    pub fn trace(self) -> T {
+        T::m3x3_trace(self)
     }
     /// Return the sum of the squares of the trace of the matrix.
     /// ```
@@ -982,23 +926,14 @@ where
     ///
     /// assert_eq!(t, 2.0 * 2.0 + 11.0 *11.0 + 23.0 * 23.0);
     /// ```
-    pub fn trace_sum_squares(&self) -> T {
-        self.a[0] * self.a[0] + self.a[4] * self.a[4] + self.a[8] * self.a[8]
+    pub fn trace_sum_squares(self) -> T {
+        T::m3x3_trace_sum_squares(self)
     }
 }
 
 impl<T> Matrix3x3<T>
 where
-    T: Copy
-        + Zero
-        + One
-        + MathConstants
-        + PartialOrd
-        + Signed
-        + Neg<Output = T>
-        + Sub<Output = T>
-        + Mul<Output = T>
-        + Div<Output = T>,
+    T: Copy + Zero + One + Matrix3x3Math + MathConstants + PartialOrd + Signed,
 {
     /// Invert matrix, in-place
     /// ```
@@ -1095,7 +1030,6 @@ where
     /// ```
     /// # use vector_quaternion_matrix::Matrix3x3f32;
     /// # use num_traits::One;
-    ///
     /// let i = Matrix3x3f32::one();
     /// assert!(i.is_near_identity());
     /// ```
@@ -1196,7 +1130,7 @@ where
 
 /// Create quaternion from a rotation matrix.
 ///
-/// Adapted from [Converting a Rotation Matrix to a Quaternion](https://d3cw3dd2w32x2b.cloudfront.net/wp-content/uploads/2015/01/matrix-to-quat.pdf) by Mike Day.
+/// Adapted from [Converting a Rotation Matrix to a Quaternion](https://d3cw3dd2w33x3b.cloudfront.net/wp-content/uploads/2015/01/matrix-to-quat.pdf) by Mike Day.
 /// Note that Day's paper uses the [Shuster multiplication convention](https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation#Alternative_conventions),
 /// rather than the Hamilton multiplication convention used by the Quaternion class.
 impl<T> From<Matrix3x3<T>> for Quaternion<T>

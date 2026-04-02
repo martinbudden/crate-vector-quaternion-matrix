@@ -747,6 +747,20 @@ where
         T::m2x2_determinant(self)
     }
 
+    /// Matrix top right determinant
+    /// ```
+    /// # use vector_quaternion_matrix::Matrix2x2f32;
+    /// let m = Matrix2x2f32::from([ 2.0,  3.0,
+    ///                              7.0, 11.0]);
+    /// let d = m.top_right_determinant();
+    ///
+    /// assert_eq!(2.0*11.0 - 3.0*3.0, d);
+    ///
+    /// ```
+    pub fn top_right_determinant(self) -> T {
+        T::m2x2_top_right_determinant(self)
+    }
+
     /// Return the sum of all components of the matrix
     /// ```
     /// # use vector_quaternion_matrix::Matrix2x2f32;
@@ -756,8 +770,8 @@ where
     ///
     /// assert_eq!(s, 23.0);
     /// ```
-    pub fn sum(&self) -> T {
-        self.a[0] + self.a[1] + self.a[2] + self.a[3]
+    pub fn sum(self) -> T {
+        T::m2x2_sum(self)
     }
 
     /// Return the mean of all components of the matrix
@@ -769,8 +783,8 @@ where
     ///
     /// assert_eq!(mean, 23.0 / 4.0);
     /// ```
-    pub fn mean(&self) -> T {
-        self.sum() * (T::one() + T::one() + T::one() + T::one()).m2x2_reciprocal()
+    pub fn mean(self) -> T {
+        T::m2x2_mean(self)
     }
 
     /// Return the product of all components of the matrix
@@ -782,8 +796,8 @@ where
     ///
     /// assert_eq!(product, 462.0);
     /// ```
-    pub fn product(&self) -> T {
-        self.a[0] * self.a[1] * self.a[2] * self.a[3]
+    pub fn product(self) -> T {
+        T::m2x2_product(self)
     }
 
     /// Return trace of matrix.
@@ -795,20 +809,27 @@ where
     ///
     /// assert_eq!(trace, 13.0);
     /// ```
-    pub fn trace(&self) -> T {
-        self.a[0] + self.a[3]
+    pub fn trace(self) -> T {
+        T::m2x2_trace(self)
+    }
+
+    /// Return the sum of the squares of the trace of the matrix.
+    /// ```
+    /// # use vector_quaternion_matrix::Matrix2x2f32;
+    /// let m = Matrix2x2f32::from([ 2.0,  3.0,
+    ///                              7.0, 11.0]);
+    /// let t = m.trace_sum_squares();
+    ///
+    /// assert_eq!(t, 2.0 * 2.0 + 11.0 * 11.0);
+    /// ```
+    pub fn trace_sum_squares(self) -> T {
+        T::m2x2_trace_sum_squares(self)
     }
 }
 
 impl<T> Matrix2x2<T>
 where
-    T: Copy
-        + Zero
-        + One
-        + Matrix2x2Math
-        + MathConstants
-        + PartialOrd
-        + Signed,
+    T: Copy + Zero + One + Matrix2x2Math + MathConstants + PartialOrd + Signed,
 {
     /// Invert matrix, in-place
     /// ```

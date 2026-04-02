@@ -46,6 +46,13 @@ pub trait Matrix2x2Math: Sized {
     fn m2x2_vector_mul(this: Vector2d<Self>, other: Matrix2x2<Self>) -> Vector2d<Self>;
     fn m2x2_mul(this: Matrix2x2<Self>, other: Matrix2x2<Self>) -> Matrix2x2<Self>;
     fn m2x2_determinant(this: Matrix2x2<Self>) -> Self;
+    fn m2x2_top_right_determinant(this: Matrix2x2<Self>) -> Self;
+    fn m2x2_top_right_sum_squares(this: Matrix2x2<Self>) -> Self;
+    fn m2x2_trace(this: Matrix2x2<Self>) -> Self;
+    fn m2x2_trace_sum_squares(this: Matrix2x2<Self>) -> Self;
+    fn m2x2_sum(this: Matrix2x2<Self>) -> Self;
+    fn m2x2_mean(this: Matrix2x2<Self>) -> Self;
+    fn m2x2_product(this: Matrix2x2<Self>) -> Self;
     fn m2x2_adjugate(this: Matrix2x2<Self>) -> Matrix2x2<Self>;
 }
 
@@ -112,7 +119,7 @@ impl Matrix2x2Math for f32 {
         {
             let mut a = this.a;
             for r in a.iter_mut() {
-                *r = *r * k;
+                *r = *r * other;
             }
             Matrix2x2::from(a)
         }
@@ -149,6 +156,40 @@ impl Matrix2x2Math for f32 {
         this.a[0] * this.a[3] - this.a[1] * this.a[2]
     }
 
+    #[inline(always)]
+    fn m2x2_top_right_determinant(this: Matrix2x2<Self>) -> Self {
+        this.a[0] * this.a[3] - this.a[1] * this.a[1]
+    }
+
+    #[inline(always)]
+    fn m2x2_top_right_sum_squares(this: Matrix2x2<Self>) -> Self {
+        this.a[1] * this.a[1]
+    }
+
+    #[inline(always)]
+    fn m2x2_trace(this: Matrix2x2<Self>) -> Self {
+        this.a[0] + this.a[3]
+    }
+
+    #[inline(always)]
+    fn m2x2_trace_sum_squares(this: Matrix2x2<Self>) -> Self {
+        this.a[0] * this.a[0] + this.a[3] * this.a[3]
+    }
+
+    #[inline(always)]
+    fn m2x2_sum(this: Matrix2x2<Self>) -> Self {
+        this.a.iter().sum()
+    }
+
+    #[inline(always)]
+    fn m2x2_mean(this: Matrix2x2<Self>) -> Self {
+        this.sum() / 4.0
+    }
+
+    #[inline(always)]
+    fn m2x2_product(this: Matrix2x2<Self>) -> Self {
+        this.a.iter().product()
+    }
     #[inline(always)]
     fn m2x2_adjugate(this: Matrix2x2<Self>) -> Matrix2x2<Self> {
         Matrix2x2::from([this.a[3], -this.a[1], -this.a[2], this.a[0]])
@@ -230,6 +271,40 @@ impl Matrix2x2Math for f64 {
         this.a[0] * this.a[3] - this.a[1] * this.a[2]
     }
 
+    #[inline(always)]
+    fn m2x2_top_right_determinant(this: Matrix2x2<Self>) -> Self {
+        this.a[0] * this.a[3] - this.a[1] * this.a[1]
+    }
+
+    #[inline(always)]
+    fn m2x2_top_right_sum_squares(this: Matrix2x2<Self>) -> Self {
+        this.a[1] * this.a[1]
+    }
+
+    #[inline(always)]
+    fn m2x2_trace(this: Matrix2x2<Self>) -> Self {
+        this.a[0] + this.a[3]
+    }
+
+    #[inline(always)]
+    fn m2x2_trace_sum_squares(this: Matrix2x2<Self>) -> Self {
+        this.a[0] * this.a[0] + this.a[3] * this.a[3]
+    }
+
+    #[inline(always)]
+    fn m2x2_sum(this: Matrix2x2<Self>) -> Self {
+        this.a.iter().sum()
+    }
+
+    #[inline(always)]
+    fn m2x2_mean(this: Matrix2x2<Self>) -> Self {
+        this.sum() / 4.0
+    }
+
+    #[inline(always)]
+    fn m2x2_product(this: Matrix2x2<Self>) -> Self {
+        this.a.iter().product()
+    }
     #[inline(always)]
     fn m2x2_adjugate(this: Matrix2x2<Self>) -> Matrix2x2<Self> {
         Matrix2x2::from([this.a[3], -this.a[1], -this.a[2], this.a[0]])

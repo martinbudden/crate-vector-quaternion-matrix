@@ -15,6 +15,7 @@ mod matrix2x2;
 mod matrix2x2_math;
 
 mod matrix3x3;
+mod matrix3x3_math;
 
 mod quaternion;
 mod quaternion_math;
@@ -36,6 +37,7 @@ pub use matrix2x2::{Matrix2x2, Matrix2x2f32, Matrix2x2f64};
 pub use matrix2x2_math::Matrix2x2Math;
 
 pub use matrix3x3::{Matrix3x3, Matrix3x3f32, Matrix3x3f64};
+pub use matrix3x3_math::Matrix3x3Math;
 
 pub use quaternion::{
     Quaternion, Quaternionf32, Quaternionf64, RollPitchYawf32, RollPitchYawf64, RollPitchf32, RollPitchf64,
