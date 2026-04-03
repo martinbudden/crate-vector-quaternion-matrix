@@ -581,22 +581,16 @@ where
 // **** impl abs ****
 impl<T> Matrix3x3<T>
 where
-    T: Copy + Signed,
+    T: Copy + Matrix3x3Math,
 {
     /// Return a copy of the matrix with all components set to their absolute values
-    pub fn abs(&self) -> Self {
-        let mut data = self.a;
-        for d in data.iter_mut() {
-            *d = d.abs();
-        }
-        Self { a: data }
+    pub fn abs(self) -> Self {
+        T::m3x3_abs(self)
     }
 
     /// Set all components of the matrix to their absolute values
     pub fn abs_in_place(&mut self) {
-        for d in self.a.iter_mut() {
-            *d = d.abs();
-        }
+        *self = self.abs();
     }
 }
 
@@ -616,9 +610,7 @@ where
 
     /// Clamp all components of the matrix to the specified range
     pub fn clamp_in_place(&mut self, min: T, max: T) {
-        for d in self.a.iter_mut() {
-            *d = d.clamp(min, max);
-        }
+        *self = self.clamp(min, max);
     }
 }
 
@@ -760,20 +752,8 @@ where
     ///
     /// assert!((n*m/m.determinant()).is_near_identity());
     /// ```
-    pub fn adjugate(&self) -> Self {
-        Self {
-            a: [
-                self.a[4] * self.a[8] - self.a[5] * self.a[7],    //  (e*i - f*h)
-                -(self.a[1] * self.a[8] - self.a[2] * self.a[7]), // -(b*i - c*h)
-                self.a[1] * self.a[5] - self.a[2] * self.a[4],    //  (b*f - c*e)
-                -(self.a[3] * self.a[8] - self.a[5] * self.a[6]), // -(d*i - f*g)
-                self.a[0] * self.a[8] - self.a[2] * self.a[6],    //  (a*i - c*g)
-                -(self.a[0] * self.a[5] - self.a[2] * self.a[3]), // -(a*f - c*d)
-                self.a[3] * self.a[7] - self.a[4] * self.a[6],    //  (d*h - e*g)
-                -(self.a[0] * self.a[7] - self.a[1] * self.a[6]), // -(a*h - b*g)
-                self.a[0] * self.a[4] - self.a[1] * self.a[3],    //  (a*e - b*d)
-            ],
-        }
+    pub fn adjugate(self) -> Self {
+        T::m3x3_adjugate(self)
     }
 
     /// Adjugate matrix, in-place
@@ -1069,6 +1049,7 @@ where
 }
 
 // **** From ****
+
 /// Matrix3x3 from Matrix2x2
 /// ```
 /// # use vector_quaternion_matrix::{Matrix2x2f32,Matrix3x3f32};
@@ -1104,6 +1085,15 @@ where
     }
 }
 
+/// Matrix3x3 from ([T;4], [T;4], T)
+/// ```
+/// # use vector_quaternion_matrix::{Matrix2x2f32,Matrix3x3f32};
+/// let m = Matrix3x3f32::from(([2.0, 3.0, 5.0, 7.0], [11.0, 13.0, 17.0, 19.0], 23.0));
+///
+/// assert_eq!(m, Matrix3x3f32::from([ 2.0,  3.0,  5.0,
+///                                    7.0, 11.0, 13.0,
+///                                   17.0, 19.0, 23.0]));
+/// ```
 impl<T> From<([T;4], [T;4], T)> for Matrix3x3<T>
 where T: Copy,
 {

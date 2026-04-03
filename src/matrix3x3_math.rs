@@ -229,17 +229,35 @@ impl Matrix3x3Math for f32 {
         {
             let a = this.a;
 
-            let x0 = [ a[4] * a[8], -a[1] * a[8],  a[1] * a[5], -a[3] * a[8] ];
-            let x1 = [-a[5] * a[7],  a[2] * a[7], -a[2] * a[4],  a[5] * a[6] ];
+            let x0a = [a[4], -a[1], a[1], -a[3]];
+            let x0b = [a[8], a[8], a[5], a[8]];
+            let x1a = [-a[5], a[2], -a[2], a[5]];
+            let x1b = [a[7], a[7], a[4], a[6]];
 
-            let x = core::array::from_fn(|i| x0[i] + x1[i]);
+            let y0a = [a[0], -a[0], a[3], -a[0]];
+            let y0b = [a[8], a[5], a[7], a[7]];
+            let y1a = [-a[2], a[2], -a[4], a[1]];
+            let y1b = [a[6], a[3], a[6], a[6]];
 
-            let y0 = [  a[0] * a[8], -a[0] * a[5] , a[3] * a[7], -a[0] * a[7] ];
-            let y1 = [ -a[2] * a[6],  a[2] * a[3], -a[4] * a[6],  a[1] * a[6] ];
+            let x0a_simd = f32x4::from_array(x0a);
+            let x0b_simd = f32x4::from_array(x0b);
+            let x1a_simd = f32x4::from_array(x1a);
+            let x1b_simd = f32x4::from_array(x1b);
 
-            let y = core::array::from_fn(|i| y0[i] + y1[i]);
+            let y0a_simd = f32x4::from_array(y0a);
+            let y0b_simd = f32x4::from_array(y0b);
+            let y1a_simd = f32x4::from_array(y1a);
+            let y1b_simd = f32x4::from_array(y1b);
 
+            let x0_simd = x0a_simd * x0b_simd;
+            let x1_simd = x1a_simd * x1b_simd;
+            let y0_simd = y0a_simd * y0b_simd;
+            let y1_simd = y1a_simd * y1b_simd;
+
+            let x: [f32; 4] = (x0_simd + x1_simd).into();
+            let y = (y0_simd + y1_simd).into();
             let z = a[0] * a[4] - a[1] * a[3];
+
             Matrix3x3::from((x, y, z))
         }
         #[cfg(not(feature = "simd"))]
