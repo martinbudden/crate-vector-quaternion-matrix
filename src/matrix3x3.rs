@@ -1085,23 +1085,6 @@ where
     }
 }
 
-/// Matrix3x3 from ([T;4], [T;4], T)
-/// ```
-/// # use vector_quaternion_matrix::{Matrix2x2f32,Matrix3x3f32};
-/// let m = Matrix3x3f32::from(([2.0, 3.0, 5.0, 7.0], [11.0, 13.0, 17.0, 19.0], 23.0));
-///
-/// assert_eq!(m, Matrix3x3f32::from([ 2.0,  3.0,  5.0,
-///                                    7.0, 11.0, 13.0,
-///                                   17.0, 19.0, 23.0]));
-/// ```
-impl<T> From<([T;4], [T;4], T)> for Matrix3x3<T>
-where T: Copy,
-{
-    fn from(v: ([T;4], [T;4], T)) -> Self {
-        Self { a: [v.0[0], v.0[1], v.0[2], v.0[3], v.1[0], v.1[1], v.1[2], v.1[3], v.2] }
-    }
-}
-
 impl<T> From<[Vector3d<T>; 3]> for Matrix3x3<T>
 where
     T: Copy,

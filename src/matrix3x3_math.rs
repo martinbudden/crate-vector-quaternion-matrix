@@ -2,7 +2,7 @@
 use cfg_if::cfg_if;
 cfg_if! {
     if #[cfg(feature = "simd")] {
-        use core::simd::{f32x4,num::SimdFloat};
+        use core::simd::{f32x4,f32x8,num::SimdFloat};
         const _: () = assert!(core::mem::size_of::<Matrix3x3<f32>>() == 48);
         const _: () = assert!(core::mem::align_of::<Matrix3x3<f32>>() == 16);
     }
@@ -229,36 +229,26 @@ impl Matrix3x3Math for f32 {
         {
             let a = this.a;
 
-            let x0a = [a[4], -a[1], a[1], -a[3]];
-            let x0b = [a[8], a[8], a[5], a[8]];
-            let x1a = [-a[5], a[2], -a[2], a[5]];
-            let x1b = [a[7], a[7], a[4], a[6]];
+            // use SIMD to calculate the first 8 elements of the array, and then manually calculate the 9th element.
+            // TODO: change the 4 loads into 2 loads and use swizzles.
+            let r0a = [a[4], -a[1], a[1], -a[3], a[0], -a[0], a[3], -a[0]];
+            let r0b = [a[8], a[8], a[5], a[8], a[8], a[5], a[7], a[7]];
 
-            let y0a = [a[0], -a[0], a[3], -a[0]];
-            let y0b = [a[8], a[5], a[7], a[7]];
-            let y1a = [-a[2], a[2], -a[4], a[1]];
-            let y1b = [a[6], a[3], a[6], a[6]];
+            let r1a = [-a[5], a[2], -a[2], a[5], -a[2], a[2], -a[4], a[1]];
+            let r1b = [a[7], a[7], a[4], a[6], a[6], a[3], a[6], a[6]];
 
-            let x0a_simd = f32x4::from_array(x0a);
-            let x0b_simd = f32x4::from_array(x0b);
-            let x1a_simd = f32x4::from_array(x1a);
-            let x1b_simd = f32x4::from_array(x1b);
+            let r0a_simd = f32x8::from_array(r0a);
+            let r0b_simd = f32x8::from_array(r0b);
 
-            let y0a_simd = f32x4::from_array(y0a);
-            let y0b_simd = f32x4::from_array(y0b);
-            let y1a_simd = f32x4::from_array(y1a);
-            let y1b_simd = f32x4::from_array(y1b);
+            let r1a_simd = f32x8::from_array(r1a);
+            let r1b_simd = f32x8::from_array(r1b);
 
-            let x0_simd = x0a_simd * x0b_simd;
-            let x1_simd = x1a_simd * x1b_simd;
-            let y0_simd = y0a_simd * y0b_simd;
-            let y1_simd = y1a_simd * y1b_simd;
+            let r0_simd = r0a_simd * r0b_simd;
+            let r1_simd = r1a_simd * r1b_simd;
 
-            let x: [f32; 4] = (x0_simd + x1_simd).into();
-            let y = (y0_simd + y1_simd).into();
-            let z = a[0] * a[4] - a[1] * a[3];
+            let r: [f32; 8] = (r0_simd + r1_simd).into();
 
-            Matrix3x3::from((x, y, z))
+            Matrix3x3::from([r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], a[0] * a[4] - a[1] * a[3]])
         }
         #[cfg(not(feature = "simd"))]
         {
