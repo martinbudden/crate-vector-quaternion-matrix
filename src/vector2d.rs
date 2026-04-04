@@ -27,6 +27,7 @@ where
     T: Copy,
 {
     /// Create a vector
+    #[inline(always)]
     pub const fn new(x: T, y: T) -> Self {
         Self { x, y }
     }
@@ -46,10 +47,12 @@ impl<T> Zero for Vector2d<T>
 where
     T: Copy + Zero + PartialEq + Vector2dMath,
 {
+    #[inline(always)]
     fn zero() -> Self {
         Self { x: T::zero(), y: T::zero() }
     }
 
+    #[inline(always)]
     fn is_zero(&self) -> bool {
         self.x == T::zero() && self.y == T::zero()
     }
@@ -92,6 +95,7 @@ where
     T: Copy + Vector2dMath,
 {
     type Output = Self;
+    #[inline(always)]
     fn add(self, other: Self) -> Self {
         T::v2_add(self, other)
     }
@@ -117,6 +121,7 @@ impl<T> AddAssign for Vector2d<T>
 where
     T: Copy + Vector2dMath,
 {
+    #[inline(always)]
     fn add_assign(&mut self, other: Self) {
         *self = *self + other;
     }
@@ -140,6 +145,7 @@ where
     T: Copy + Vector2dMath,
 {
     type Output = Self;
+    #[inline(always)]
     fn mul_add(self, k: T, other: Self) -> Self {
         T::v2_mul_add(self, k, other)
     }
@@ -162,6 +168,7 @@ impl<T> MulAddAssign<T> for Vector2d<T>
 where
     T: Copy + Vector2dMath,
 {
+    #[inline(always)]
     fn mul_add_assign(&mut self, k: T, other: Self) {
         *self = self.mul_add(k, other);
     }
@@ -183,6 +190,7 @@ where
     T: Copy + Vector2dMath,
 {
     type Output = Self;
+    #[inline(always)]
     fn sub(self, other: Self) -> Self {
         // Reuse our existing SIMD-optimized Add and Neg implementations
         self + (-other)
@@ -251,6 +259,7 @@ where
     T: Copy + Vector2dMath,
 {
     type Output = Self;
+    #[inline(always)]
     fn mul(self, k: T) -> Self {
         T::v2_mul_scalar(self, k)
     }
@@ -270,6 +279,7 @@ impl<T> MulAssign<T> for Vector2d<T>
 where
     T: Copy + Vector2dMath,
 {
+    #[inline(always)]
     fn mul_assign(&mut self, k: T) {
         *self = *self * k;
     }
@@ -290,6 +300,7 @@ where
     T: Copy + Vector2dMath,
 {
     type Output = Self;
+    #[inline(always)]
     fn div(self, k: T) -> Self {
         T::v2_div_scalar(self, k)
     }
@@ -307,6 +318,7 @@ impl<T> DivAssign<T> for Vector2d<T>
 where
     T: Copy + Div<Output = T> + Vector2dMath,
 {
+    #[inline(always)]
     fn div_assign(&mut self, k: T) {
         *self = self.div(k);
     }
@@ -324,6 +336,7 @@ where
 /// ```
 impl<T> Index<usize> for Vector2d<T> {
     type Output = T;
+    #[inline(always)]
     fn index(&self, index: usize) -> &T {
         match index {
             0 => &self.x,
@@ -345,6 +358,7 @@ impl<T> Index<usize> for Vector2d<T> {
 /// assert_eq!(v, Vector2df32 { x:7.0, y:11.0 });
 /// ```
 impl<T> IndexMut<usize> for Vector2d<T> {
+    #[inline(always)]
     fn index_mut(&mut self, index: usize) -> &mut T {
         match index {
             0 => &mut self.x,
@@ -361,11 +375,13 @@ where
     T: Copy + Signed,
 {
     /// Return a copy of the vector with all components set to their absolute values
+    #[inline(always)]
     pub fn abs(self) -> Self {
         Self { x: self.x.abs(), y: self.y.abs() }
     }
 
     /// Set all components of the vector to their absolute values
+    #[inline(always)]
     pub fn abs_in_place(&mut self) {
         *self = self.abs();
     }
@@ -378,11 +394,13 @@ where
     T: Copy + FloatCore,
 {
     /// Return a copy of the vector with all components clamped to the specified range
+    #[inline(always)]
     pub fn clamp(self, min: T, max: T) -> Self {
         Self { x: self.x.clamp(min, max), y: self.y.clamp(min, max) }
     }
 
     /// Clamp all components of the vector to the specified range
+    #[inline(always)]
     pub fn clamp_in_place(&mut self, min: T, max: T) {
         self.x = self.x.clamp(min, max);
         self.y = self.y.clamp(min, max);
@@ -445,6 +463,7 @@ where
     /// let v = Vector2df32::new(2.0, 3.0);
     /// assert_eq!(13.0, v.norm_squared());
     /// ```
+    #[inline(always)]
     pub fn norm_squared(self) -> T {
         self.dot(self)
     }
@@ -456,6 +475,7 @@ where
     /// let w = Vector2df32::new(7.0, 11.0);
     /// assert_eq!(89.0, v.distance_squared(w));
     /// ```
+    #[inline(always)]
     pub fn distance_squared(self, other: Self) -> T {
         (self - other).norm_squared()
     }
@@ -468,6 +488,7 @@ where
     T: Copy + Add<Output = T> + SqrtMethods + Vector2dMath,
 {
     /// Return Euclidean norm
+    #[inline(always)]
     pub fn norm(self) -> T {
         Self::norm_squared(self).sqrt()
     }
@@ -478,6 +499,7 @@ where
     T: Copy + Zero + PartialEq + SqrtMethods + Vector2dMath,
 {
     /// Return normalized form of the vector
+    #[inline(always)]
     pub fn normalized(self) -> Self {
         let norm = self.norm();
         // If norm == 0.0 then the vector is already normalized
@@ -488,6 +510,7 @@ where
     }
 
     /// Normalize the vector in place
+    #[inline(always)]
     pub fn normalize(&mut self) -> Self {
         let norm = self.norm();
         #[allow(clippy::assign_op_pattern)]
@@ -504,6 +527,7 @@ where
     T: Copy + Zero + SqrtMethods + Vector2dMath,
 {
     // Return distance between two points
+    #[inline(always)]
     pub fn distance(self, other: Self) -> T {
         self.distance_squared(other).sqrt()
     }
@@ -519,6 +543,7 @@ where
     /// let v = Vector2df32::new(2.0, 3.0);
     /// assert_eq!(5.0, v.sum());
     /// ```
+    #[inline(always)]
     pub fn sum(self) -> T {
         self.x + self.y
     }
@@ -529,6 +554,7 @@ where
     /// let v = Vector2df32::new(2.0, 3.0);
     /// assert_eq!(6.0, v.product());
     /// ```
+    #[inline(always)]
     pub fn product(self) -> T {
         self.x * self.y
     }
@@ -546,6 +572,7 @@ where
     /// let v = Vector2df32::new(2.0, 3.0);
     /// assert_eq!(2.5, v.mean());
     /// ```
+    #[inline(always)]
     pub fn mean(self) -> T {
         (self.x + self.y) / (T::one() + T::one())
     }
@@ -565,6 +592,7 @@ where
     /// assert_eq!(3.0, v.max());
     /// assert_eq!(3.0, w.max());
     /// ```
+    #[inline(always)]
     pub fn max(self) -> T {
         T::v2_max(self)
     }
@@ -577,6 +605,7 @@ where
     /// assert_eq!(2.0, v.min());
     /// assert_eq!(2.0, w.min());
     /// ```
+    #[inline(always)]
     pub fn min(self) -> T {
         T::v2_min(self)
     }
@@ -596,6 +625,7 @@ where
 /// assert_eq!(w, Vector2df32 { x: 7.0, y: 11.0 });
 /// ```
 impl<T> From<(T, T)> for Vector2d<T> {
+    #[inline(always)]
     fn from((x, y): (T, T)) -> Self {
         Self { x, y }
     }
@@ -616,6 +646,7 @@ impl<T> From<[T; 2]> for Vector2d<T>
 where
     T: Copy,
 {
+    #[inline(always)]
     fn from(v: [T; 2]) -> Self {
         Self { x: v[0], y: v[1] }
     }
@@ -633,6 +664,7 @@ where
 /// assert_eq!(b, [2.0, 3.0]);
 /// ```
 impl<T> From<Vector2d<T>> for [T; 2] {
+    #[inline(always)]
     fn from(v: Vector2d<T>) -> Self {
         [v.x, v.y]
     }
@@ -652,6 +684,7 @@ impl<T> From<Vector3d<T>> for Vector2d<T>
 where
     T: Copy + Zero,
 {
+    #[inline(always)]
     fn from(v: Vector3d<T>) -> Self {
         Vector2d::<T> { x: v.x, y: v.y }
     }

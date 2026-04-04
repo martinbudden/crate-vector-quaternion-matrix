@@ -163,6 +163,7 @@ where
     T: Copy + Vector3dMath,
 {
     type Output = Self;
+    #[inline(always)]
     fn mul_add(self, k: T, other: Self) -> Self {
         T::v3_mul_add(self, k, other)
     }

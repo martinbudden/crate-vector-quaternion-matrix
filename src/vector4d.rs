@@ -28,6 +28,7 @@ where
     T: Copy,
 {
     /// Create a vector
+    #[inline(always)]
     pub const fn new(x: T, y: T, z: T, t: T) -> Self {
         Self { x, y, z, t }
     }
@@ -47,10 +48,12 @@ impl<T> Zero for Vector4d<T>
 where
     T: Copy + Zero + PartialEq + Vector4dMath,
 {
+    #[inline(always)]
     fn zero() -> Self {
         Self { x: T::zero(), y: T::zero(), z: T::zero(), t: T::zero() }
     }
 
+    #[inline(always)]
     fn is_zero(&self) -> bool {
         self.x == T::zero() && self.y == T::zero() && self.z == T::zero() && self.z == T::zero()
     }
@@ -93,6 +96,7 @@ where
     T: Copy + Vector4dMath,
 {
     type Output = Self;
+    #[inline(always)]
     fn add(self, other: Self) -> Self {
         T::v4_add(self, other)
     }
@@ -118,6 +122,7 @@ impl<T> AddAssign for Vector4d<T>
 where
     T: Copy + Vector4dMath,
 {
+    #[inline(always)]
     fn add_assign(&mut self, other: Self) {
         *self = *self + other;
     }
@@ -141,6 +146,7 @@ where
     T: Copy + Vector4dMath,
 {
     type Output = Self;
+    #[inline(always)]
     fn mul_add(self, k: T, other: Self) -> Self {
         T::v4_mul_add(self, k, other)
     }
@@ -163,6 +169,7 @@ impl<T> MulAddAssign<T> for Vector4d<T>
 where
     T: Copy + Vector4dMath,
 {
+    #[inline(always)]
     fn mul_add_assign(&mut self, k: T, other: Self) {
         *self = self.mul_add(k, other);
     }
@@ -184,6 +191,7 @@ where
     T: Copy + Add<Output = T> + Vector4dMath,
 {
     type Output = Vector4d<T>;
+    #[inline(always)]
     fn sub(self, other: Self) -> Self {
         // Reuse our existing SIMD-optimized Add and Neg implementations
         self + (-other)
@@ -205,6 +213,7 @@ impl<T> SubAssign for Vector4d<T>
 where
     T: Copy + Add<Output = T> + Vector4dMath,
 {
+    #[inline(always)]
     fn sub_assign(&mut self, other: Self) {
         *self = *self - other;
     }
@@ -222,6 +231,7 @@ where
 /// ```
 impl Mul<Vector4d<f32>> for f32 {
     type Output = Vector4d<f32>;
+    #[inline(always)]
     fn mul(self, other: Vector4d<f32>) -> Vector4d<f32> {
         f32::v4_mul_scalar(other, self)
     }

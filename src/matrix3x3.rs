@@ -47,6 +47,7 @@ where
     T: Copy,
 {
     /// Create a matrix
+    #[inline(always)]
     pub const fn new(input: [T; 9]) -> Self {
         Self { a: input }
     }
