@@ -28,6 +28,7 @@ pub struct Matrix2x2<T> {
 }
 
 // **** Zero ****
+
 /// Zero matrix
 /// ```
 /// # use vector_quaternion_matrix::Matrix2x2f32;
@@ -41,15 +42,19 @@ impl<T> Zero for Matrix2x2<T>
 where
     T: Copy + Zero + PartialEq + Matrix2x2Math,
 {
+    #[inline(always)]
     fn zero() -> Self {
         Self { a: [T::zero(), T::zero(), T::zero(), T::zero()] }
     }
+
+    #[inline(always)]
     fn is_zero(&self) -> bool {
         self.a.iter().all(|&x| x == T::zero())
     }
 }
 
 // **** One ****
+
 /// Identity matrix
 /// ```
 /// # use vector_quaternion_matrix::Matrix2x2f32;
@@ -63,10 +68,12 @@ impl<T> One for Matrix2x2<T>
 where
     T: Copy + Zero + One + PartialEq + Matrix2x2Math,
 {
+    #[inline(always)]
     fn one() -> Self {
         Self { a: [T::one(), T::zero(), T::zero(), T::one()] }
     }
 
+    #[inline(always)]
     fn is_one(&self) -> bool {
         self.a == [T::one(), T::zero(), T::zero(), T::one()]
     }
@@ -487,7 +494,7 @@ impl<T> IndexMut<(usize, usize)> for Matrix2x2<T> {
     }
 }
 
-// **** impl new ****
+// **** New ****
 impl<T> Matrix2x2<T>
 where
     T: Copy,
@@ -498,7 +505,7 @@ where
     }
 }
 
-// **** impl abs ****
+// **** abs ****
 impl<T> Matrix2x2<T>
 where
     T: Copy + Matrix2x2Math,
@@ -539,7 +546,7 @@ where
     }
 }
 
-// **** impl clamp ****
+// **** clamp ****
 impl<T> Matrix2x2<T>
 where
     T: Copy + FloatCore,

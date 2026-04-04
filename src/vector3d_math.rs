@@ -1,9 +1,13 @@
-#[cfg(feature = "simd")]
 use cfg_if::cfg_if;
 cfg_if! {
-    if #[cfg(feature = "align")] {
+    if #[cfg(feature = "simd")] {
         use core::{mem::transmute};
         use core::simd::{f32x4,num::SimdFloat,simd_swizzle};
+        const _: () = assert!(core::mem::size_of::<Vector3d<f32>>() == 16);
+        const _: () = assert!(core::mem::align_of::<Vector3d<f32>>() == 16);
+    } else {
+        const _: () = assert!(core::mem::size_of::<Vector3d<f32>>() == 36);
+        const _: () = assert!(core::mem::align_of::<Vector3d<f32>>() == 4);
     }
 }
 
@@ -47,8 +51,8 @@ pub trait Vector3dMath: Sized {
     fn v3_norm_squared(this: Vector3d<Self>) -> Self;
     fn v3_normalize(this: Vector3d<Self>) -> Vector3d<Self>;
     fn v3_is_normalized(this: Vector3d<Self>) -> bool;
-    fn v3_min(this: Vector3d<Self>) -> Self;
     fn v3_max(this: Vector3d<Self>) -> Self;
+    fn v3_min(this: Vector3d<Self>) -> Self;
     fn v3_dot(this: Vector3d<Self>, other: Vector3d<Self>) -> Self;
     fn v3_cross(this: Vector3d<Self>, other: Vector3d<Self>) -> Vector3d<Self>;
 }
@@ -95,6 +99,7 @@ impl Vector3dMath for f32 {
         {
             let this_simd = f32x4::from(this);
             let other_simd = f32x4::splat(other);
+
             (this_simd * other_simd).into()
         }
         #[cfg(not(feature = "simd"))]
@@ -154,7 +159,7 @@ impl Vector3dMath for f32 {
         }
         #[cfg(not(feature = "simd"))]
         {
-            let norm_squared = this.x * this.x + this.y * this.y + this.z * this.z;
+            let norm_squared = Self::v3_norm_squared(this);
             if norm_squared == 0.0 {
                 return Vector3d::default();
             }
@@ -171,19 +176,37 @@ impl Vector3dMath for f32 {
 
     #[inline(always)]
     fn v3_max(this: Vector3d<Self>) -> Self {
-        if this.x > this.y {
-            if this.x > this.z { this.x } else { this.z }
-        } else {
-            if this.y > this.z { this.y } else { this.z }
+        #[cfg(feature = "simd")]
+        {
+            // repeat this.z in final lane to allow reduce_max to work correctly
+            let this_simd = f32x4::from_array([this.x, this.y, this.z, this.z]);
+            this_simd.reduce_max()
+        }
+        #[cfg(not(feature = "simd"))]
+        {
+            if this.x > this.y {
+                if this.x > this.z { this.x } else { this.z }
+            } else {
+                if this.y > this.z { this.y } else { this.z }
+            }
         }
     }
 
     #[inline(always)]
     fn v3_min(this: Vector3d<Self>) -> Self {
-        if this.x < this.y {
-            if this.x < this.z { this.x } else { this.z }
-        } else {
-            if this.y < this.z { this.y } else { this.z }
+        #[cfg(feature = "simd")]
+        {
+            // repeat this.z in final lane to allow reduce_min to work correctly
+            let this_simd = f32x4::from_array([this.x, this.y, this.z, this.z]);
+            this_simd.reduce_min()
+        }
+        #[cfg(not(feature = "simd"))]
+        {
+            if this.x < this.y {
+                if this.x < this.z { this.x } else { this.z }
+            } else {
+                if this.y < this.z { this.y } else { this.z }
+            }
         }
     }
 
@@ -196,13 +219,13 @@ impl Vector3dMath for f32 {
             let other_simd = f32x4::from(other);
 
             // Multiply the vectors, masking 4 lane to 0.0
-            let prod = (this_simd * other_simd) * f32x4::from_array([1.0, 1.0, 1.0, 0.0]);
+            let product = (this_simd * other_simd) * f32x4::from_array([1.0, 1.0, 1.0, 0.0]);
 
-            prod.reduce_sum()
+            product.reduce_sum()
         }
         #[cfg(not(feature = "simd"))]
         {
-            (a.x * b.x) + (a.y * b.y) + (a.z * b.z)
+            this.x * other.x + this.y * other.y + this.z * other.z
         }
     }
 
@@ -213,14 +236,14 @@ impl Vector3dMath for f32 {
             let this_simd = f32x4::from(this);
             let other_simd = f32x4::from(other);
 
-            // Swizzle A: [y, z, x, w]
+            // Swizzle: [y, z, x, w]
             let this_yzx = simd_swizzle!(this_simd, [1, 2, 0, 3]);
-            // Swizzle B: [z, x, y, w]
+            // Swizzle: [z, x, y, w]
             let other_zxy = simd_swizzle!(other_simd, [2, 0, 1, 3]);
 
-            // Swizzle A2: [z, x, y, w]
+            // Swizzle: [z, x, y, w]
             let this_zxy = simd_swizzle!(this_simd, [2, 0, 1, 3]);
-            // Swizzle B2: [y, z, x, w]
+            // Swizzle: [y, z, x, w]
             let other_yzx = simd_swizzle!(other_simd, [1, 2, 0, 3]);
 
             // Result = (a_yzx * b_zxy) - (a_zxy * b_yzx)
@@ -231,7 +254,11 @@ impl Vector3dMath for f32 {
         }
         #[cfg(not(feature = "simd"))]
         {
-            Vector3d { x: a.y * b.z - a.z * b.y, y: a.z * b.x - a.x * b.z, z: a.x * b.y - a.y * b.x }
+            Vector3d {
+                x: this.y * other.z - this.z * other.y,
+                y: this.z * other.x - this.x * other.z,
+                z: this.x * other.y - this.y * other.x,
+            }
         }
     }
 }

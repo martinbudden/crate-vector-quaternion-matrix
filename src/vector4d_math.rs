@@ -7,6 +7,9 @@ cfg_if! {
     }
 }
 
+const _: () = assert!(core::mem::size_of::<Vector4d<f32>>() == 16);
+const _: () = assert!(core::mem::align_of::<Vector4d<f32>>() == 16);
+
 use crate::{SqrtMethods, Vector4d};
 
 // **** From ****
@@ -47,8 +50,8 @@ pub trait Vector4dMath: Sized {
     fn v4_norm_squared(this: Vector4d<Self>) -> Self;
     fn v4_normalize(this: Vector4d<Self>) -> Vector4d<Self>;
     fn v4_is_normalized(this: Vector4d<Self>) -> bool;
-    fn v4_min(this: Vector4d<Self>) -> Self;
     fn v4_max(this: Vector4d<Self>) -> Self;
+    fn v4_min(this: Vector4d<Self>) -> Self;
     fn v4_dot(this: Vector4d<Self>, other: Vector4d<Self>) -> Self;
 }
 

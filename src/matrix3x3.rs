@@ -9,27 +9,16 @@ pub type Matrix3x3f32 = Matrix3x3<f32>;
 /// 3x3 matrix of `f64` values<br><br>
 pub type Matrix3x3f64 = Matrix3x3<f64>;
 
-// **** Align ****
-// ensure vectors are aligned on 16 byte boundaries.
-#[cfg(feature = "align")]
-const _: () = assert!(core::mem::size_of::<Matrix3x3f32>() == 48);
-#[cfg(feature = "align")]
-const _: () = assert!(core::mem::align_of::<Matrix3x3f32>() == 16);
-#[cfg(not(feature = "align"))]
-const _: () = assert!(core::mem::size_of::<Matrix3x3f32>() == 36);
-#[cfg(not(feature = "align"))]
-const _: () = assert!(core::mem::align_of::<Matrix3x3f32>() == 4);
-
 // **** Define ****
 cfg_if! {
 if #[cfg(feature = "align")] {
-// High-performance 16-byte aligned version
+// High-performance 32-byte aligned version, allows use of SIMD and f32x8
 /// `Matrix3x3<T>`: 3x3 Matrix of type `T`.<br>
 /// Aliases `Matrix3x3f32` and `Matrix3x3f64` are provided.<br><br>
 /// `Matrix3x3f32` uses **SIMD** accelerations implemented in `Matrix3x3Math`.<br><br>
 /// Internal implementation is using a flattened 1-dimensional array: an array of 9 elements stored in row-major order.
 /// That is the element `m[row][col]` is at array position `[row * 3 + col]`, so element `m12` is at `a[5]`.<br><br>
-#[repr(C, align(16))]
+#[repr(C, align(32))]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Matrix3x3<T> {
     // Flattened 3x3 matrix: 9 elements in row-major order
@@ -567,7 +556,7 @@ impl<T> IndexMut<(usize, usize)> for Matrix3x3<T> {
     }
 }
 
-// **** impl new ****
+// **** New ****
 impl<T> Matrix3x3<T>
 where
     T: Copy,
@@ -578,7 +567,7 @@ where
     }
 }
 
-// **** impl abs ****
+// **** abs ****
 impl<T> Matrix3x3<T>
 where
     T: Copy + Matrix3x3Math,
@@ -594,7 +583,7 @@ where
     }
 }
 
-// **** impl clamp ****
+// **** clamp ****
 impl<T> Matrix3x3<T>
 where
     T: Copy + FloatCore,

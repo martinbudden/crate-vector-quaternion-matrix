@@ -21,7 +21,20 @@ pub struct Vector4d<T> {
     pub t: T,
 }
 
-// **** Zero ****
+// **** New ****
+
+impl<T> Vector4d<T>
+where
+    T: Copy,
+{
+    /// Create a vector
+    pub const fn new(x: T, y: T, z: T, t: T) -> Self {
+        Self { x, y, z, t }
+    }
+}
+
+// **** zero ****
+
 /// Zero vector
 /// ```
 /// # use vector_quaternion_matrix::Vector4df32;
@@ -44,6 +57,7 @@ where
 }
 
 // **** Neg ****
+
 /// Negate vector
 /// ```
 /// # use vector_quaternion_matrix::Vector4df32;
@@ -64,6 +78,7 @@ where
 }
 
 // **** Add ****
+
 /// Add two vectors
 /// ```
 /// # use vector_quaternion_matrix::Vector4df32;
@@ -84,6 +99,7 @@ where
 }
 
 // **** AddAssign ****
+
 /// Add one vector to another
 /// ```
 /// # use vector_quaternion_matrix::Vector4df32;
@@ -108,6 +124,7 @@ where
 }
 
 // **** Sub ****
+
 /// Subtract two vectors
 /// ```
 /// # use vector_quaternion_matrix::Vector4df32;
@@ -129,6 +146,7 @@ where
 }
 
 // **** SubAssign ****
+
 /// Subtract one vector from another
 /// ```
 /// # use vector_quaternion_matrix::Vector4df32;
@@ -147,7 +165,8 @@ where
     }
 }
 
-// **** Mul Scalar ****
+// **** Scalar Mul ****
+
 /// Pre-multiply vector by a constant
 /// ```
 /// # use vector_quaternion_matrix::Vector4df32;
@@ -170,7 +189,8 @@ impl Mul<Vector4d<f64>> for f64 {
     }
 }
 
-// **** Mul ****
+// **** Mul Scalar ****
+
 /// Multiply vector by a constant
 /// ```
 /// # use vector_quaternion_matrix::Vector4df32;
@@ -190,6 +210,7 @@ where
 }
 
 // **** MulAssign ****
+
 /// In-place multiply a vector by a constant
 /// ```
 /// # use vector_quaternion_matrix::Vector4df32;
@@ -208,6 +229,7 @@ where
 }
 
 // **** Div by scalar ****
+
 /// Divide a vector by a constant
 /// ```
 /// # use vector_quaternion_matrix::Vector4df32;
@@ -244,6 +266,7 @@ where
 }
 
 // **** Index ****
+
 /// Access vector component by index
 /// ```
 /// # use vector_quaternion_matrix::Vector4df32;
@@ -284,24 +307,13 @@ impl<T> IndexMut<usize> for Vector4d<T> {
             0 => &mut self.x,
             1 => &mut self.y,
             2 => &mut self.z,
-            3 => &mut self.t,
             _ => &mut self.t, // default to t component if index out of range
         }
     }
 }
 
-// **** impl new ****
-impl<T> Vector4d<T>
-where
-    T: Copy,
-{
-    /// Create a vector
-    pub const fn new(x: T, y: T, z: T, t: T) -> Self {
-        Self { x, y, z, t }
-    }
-}
+// **** abs ****
 
-// **** impl abs ****
 impl<T> Vector4d<T>
 where
     T: Copy + Signed,
@@ -317,7 +329,8 @@ where
     }
 }
 
-// **** impl clamp ****
+// **** clamp ****
+
 impl<T> Vector4d<T>
 where
     T: Copy + FloatCore,
@@ -340,10 +353,11 @@ where
     }
 }
 
-// **** impl dot ****
+// **** dot ****
+
 impl<T> Vector4d<T>
 where
-    T: Vector4dMath + Copy,
+    T: Copy + Vector4dMath,
 {
     /// Vector dot product
     /// ```
@@ -361,10 +375,11 @@ where
     }
 }
 
-// **** impl norm_squared ****
+// **** norm_squared ****
+
 impl<T> Vector4d<T>
 where
-    T: Copy + Add<Output = T> + Vector4dMath + Vector4dMath,
+    T: Copy + Add<Output = T> + Vector4dMath,
 {
     /// Return square of Euclidean norm
     /// ```
@@ -377,14 +392,67 @@ where
     }
 
     /// Return distance between two points, squared
+    /// ```
+    /// # use vector_quaternion_matrix::Vector4df32;
+    /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
+    /// let w = Vector4df32::new(11.0, 13.0, 17.0, 19.0);
+    /// assert_eq!(469.0, v.distance_squared(w));
     pub fn distance_squared(self, other: Self) -> T {
         (self - other).norm_squared()
     }
 }
 
+// **** norm ****
+
 impl<T> Vector4d<T>
 where
-    T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
+    T: Copy + Add<Output = T> + SqrtMethods + Vector4dMath,
+{
+    /// Return Euclidean norm
+    pub fn norm(self) -> T {
+        Self::norm_squared(self).sqrt()
+    }
+}
+
+impl<T> Vector4d<T>
+where
+    T: Copy + Zero + PartialEq + SqrtMethods + Vector4dMath,
+{
+    /// Return normalized form of the vector
+    pub fn normalized(self) -> Self {
+        let norm = self.norm();
+        // If norm == 0.0 then the vector is already normalized
+        if norm == T::zero() {
+            return self;
+        }
+        self * T::v4_reciprocal(norm)
+    }
+
+    /// Normalize the vector in place
+    pub fn normalize(&mut self) -> Self {
+        let norm = self.norm();
+        //#[allow(clippy::assign_op_pattern)]
+        // If norm == 0.0 then the vector is already normalized
+        if norm != T::zero() {
+            *self *= T::v4_reciprocal(norm);
+        }
+        *self
+    }
+}
+
+impl<T> Vector4d<T>
+where
+    T: Copy + Zero + SqrtMethods + Vector4dMath,
+{
+    // Return distance between two points
+    pub fn distance(self, other: Self) -> T {
+        self.distance_squared(other).sqrt()
+    }
+}
+
+impl<T> Vector4d<T>
+where
+    T: Copy + Add<Output = T> + Mul<Output = T>,
 {
     /// Return the sum of all components of the vector
     /// ```
@@ -407,7 +475,8 @@ where
     }
 }
 
-// **** impl mean ****
+// **** mean ****
+
 impl<T> Vector4d<T>
 where
     T: Copy + One + Add<Output = T> + Div<Output = T>,
@@ -457,53 +526,6 @@ where
     }
 }
 
-// **** impl norm ****
-impl<T> Vector4d<T>
-where
-    T: Copy + Add<Output = T> + SqrtMethods + Vector4dMath + Vector4dMath,
-{
-    /// Return Euclidean norm
-    pub fn norm(self) -> T {
-        Self::norm_squared(self).sqrt()
-    }
-}
-
-impl<T> Vector4d<T>
-where
-    T: Copy + Zero + PartialEq + SqrtMethods + Vector4dMath + Vector4dMath,
-{
-    /// Return normalized form of the vector
-    pub fn normalized(self) -> Self {
-        let norm = self.norm();
-        // If norm == 0.0 then the vector is already normalized
-        if norm == T::zero() {
-            return self;
-        }
-        self * T::v4_reciprocal(norm)
-    }
-
-    /// Normalize the vector in place
-    pub fn normalize(&mut self) -> Self {
-        let norm = self.norm();
-        //#[allow(clippy::assign_op_pattern)]
-        // If norm == 0.0 then the vector is already normalized
-        if norm != T::zero() {
-            *self *= T::v4_reciprocal(norm);
-        }
-        *self
-    }
-}
-
-impl<T> Vector4d<T>
-where
-    T: Copy + Zero + SqrtMethods + Vector4dMath + Vector4dMath,
-{
-    // Return distance between two points
-    pub fn distance(self, other: Self) -> T {
-        self.distance_squared(other).sqrt()
-    }
-}
-
 // **** From ****
 
 // **** From Tuple ****
@@ -517,13 +539,16 @@ where
 /// assert_eq!(v, Vector4df32 { x: 2.0, y: 3.0, z: 5.0, t: 7.0 });
 /// assert_eq!(w, Vector4df32 { x: 11.0, y: 13.0, z: 17.0, t: 19.0 });
 /// ```
-impl<T> From<(T, T, T, T)> for Vector4d<T> 
-where T: Copy
+impl<T> From<(T, T, T, T)> for Vector4d<T>
+where
+    T: Copy,
 {
     fn from((x, y, z, t): (T, T, T, T)) -> Self {
         Self { x, y, z, t }
     }
 }
+
+// **** From Array ****
 
 /// Vector from array
 /// ```

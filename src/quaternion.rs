@@ -35,6 +35,7 @@ pub struct RollPitch<T> {
 }
 
 // **** Define ****
+
 /// `Quaternion<T>`: quaternion type `T`.<br>
 /// Aliases `Quaternion32` and `Quaternionf64` are provided.<br><br>
 /// `Quaternionf32` uses **SIMD** accelerations implemented in `QuaternionMath`.<br><br>
@@ -48,6 +49,7 @@ pub struct Quaternion<T> {
 }
 
 // **** Default ****
+
 /// Default quaternion
 /// ```
 /// # use vector_quaternion_matrix::Quaternionf32;
@@ -66,7 +68,20 @@ where
     }
 }
 
+// **** New ****
+
+impl<T> Quaternion<T>
+where
+    T: Copy,
+{
+    /// Create a quaternion
+    pub const fn new(w: T, x: T, y: T, z: T) -> Self {
+        Self { w, x, y, z }
+    }
+}
+
 // **** Zero ****
+
 /// Zero quaternion
 /// ```
 /// # use vector_quaternion_matrix::Quaternionf32;
@@ -90,6 +105,7 @@ where
 }
 
 // **** One ****
+
 /// Unit quaternion
 /// ```
 /// # use vector_quaternion_matrix::Quaternionf32;
@@ -113,6 +129,7 @@ where
 }
 
 // **** Neg ****
+
 /// Negate quaternion
 /// ```
 /// # use vector_quaternion_matrix::Quaternionf32;
@@ -134,6 +151,7 @@ where
 }
 
 // **** Add ****
+
 /// Add two quaternions
 /// ```
 /// # use vector_quaternion_matrix::Quaternionf32;
@@ -156,6 +174,7 @@ where
 }
 
 // **** AddAssign ****
+
 /// Add one quaternion to another
 impl<T> AddAssign for Quaternion<T>
 where
@@ -170,6 +189,7 @@ where
 }
 
 // **** Sub ****
+
 /// Subtract two quaternions
 impl<T> Sub for Quaternion<T>
 where
@@ -183,6 +203,7 @@ where
 }
 
 // **** SubAssign ****
+
 /// Subtract one quaternion from another
 impl<T> SubAssign for Quaternion<T>
 where
@@ -193,7 +214,8 @@ where
     }
 }
 
-// **** Mul scalar ****
+// **** Scalar Mul ****
+
 /// Pre-multiply quaternion by a constant
 impl Mul<Quaternion<f32>> for f32 {
     type Output = Quaternion<f32>;
@@ -209,6 +231,8 @@ impl Mul<Quaternion<f64>> for f64 {
     }
 }
 
+// **** Mul Scalar ****
+
 /// Multiply quaternion by a constant
 impl<T> Mul<T> for Quaternion<T>
 where
@@ -219,6 +243,8 @@ where
         T::q_mul_scalar(self, k)
     }
 }
+
+// **** MulAssign ****
 
 /// In-place multiply a quaternion by a constant
 impl<T> MulAssign<T> for Quaternion<T>
@@ -231,6 +257,7 @@ where
 }
 
 // **** Div scalar ****
+
 /// Divide a quaternion by a constant
 /// ```
 /// # use vector_quaternion_matrix::Quaternionf32;
@@ -267,6 +294,7 @@ where
 }
 
 // **** Mul ****
+
 /// Multiply two quaternions
 impl<T> Mul<Quaternion<T>> for Quaternion<T>
 where
@@ -277,6 +305,8 @@ where
         T::q_mul(self, rhs)
     }
 }
+
+// **** MulAssign ****
 
 /// Multiply one quaternion by another
 impl<T> MulAssign<Quaternion<T>> for Quaternion<T>
@@ -289,6 +319,7 @@ where
 }
 
 // **** Index ****
+
 /// Access quaternion component by index
 /// ```
 /// # use vector_quaternion_matrix::Quaternionf32;
@@ -306,13 +337,13 @@ impl<T> Index<usize> for Quaternion<T> {
             0 => &self.w,
             1 => &self.x,
             2 => &self.y,
-            3 => &self.z,
             _ => &self.z, // default to z component if index out of range
         }
     }
 }
 
 // **** IndexMut ****
+
 // Set quaternion component by index
 /// ```
 /// # use vector_quaternion_matrix::Quaternionf32;
@@ -330,24 +361,13 @@ impl<T> IndexMut<usize> for Quaternion<T> {
             0 => &mut self.w,
             1 => &mut self.x,
             2 => &mut self.y,
-            3 => &mut self.z,
             _ => &mut self.z, // default to z component if index out of range
         }
     }
 }
 
-// **** impl new ****
-impl<T> Quaternion<T>
-where
-    T: Copy,
-{
-    /// Create a quaternion
-    pub const fn new(w: T, x: T, y: T, z: T) -> Self {
-        Self { w, x, y, z }
-    }
-}
+// **** abs ****
 
-// **** impl abs ****
 impl<T> Quaternion<T>
 where
     T: Copy + Signed,
@@ -363,7 +383,8 @@ where
     }
 }
 
-// **** impl clamp ****
+// **** clamp ****
+
 impl<T> Quaternion<T>
 where
     T: Copy + FloatCore,
@@ -387,7 +408,8 @@ where
     }
 }
 
-// **** impl mean ****
+// **** mean ****
+
 impl<T> Quaternion<T>
 where
     T: Copy + One + Add<Output = T> + Div<Output = T>,
@@ -399,7 +421,8 @@ where
     }
 }
 
-// **** impl norm_squared ****
+// **** norm_squared ****
+
 impl<T> Quaternion<T>
 where
     T: Copy + QuaternionMath,
@@ -410,7 +433,8 @@ where
     }
 }
 
-// **** impl norm ****
+// **** norm ****
+
 impl<T> Quaternion<T>
 where
     T: Copy + SqrtMethods + QuaternionMath,
@@ -705,6 +729,7 @@ where
 }
 
 // **** From ****
+
 /// Quaternion from array
 /// ```
 /// # use vector_quaternion_matrix::Quaternionf32;

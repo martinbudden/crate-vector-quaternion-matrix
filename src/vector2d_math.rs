@@ -1,11 +1,13 @@
-#[cfg(feature = "simd")]
 use cfg_if::cfg_if;
 cfg_if! {
-    if #[cfg(feature = "align")] {
+    if #[cfg(feature = "simd")] {
         use core::{mem::transmute};
         use core::simd::{f32x2,num::SimdFloat};
     }
 }
+
+const _: () = assert!(core::mem::size_of::<Vector2d<f32>>() == 8);
+const _: () = assert!(core::mem::align_of::<Vector2d<f32>>() == 8);
 
 use crate::{SqrtMethods, Vector2d};
 
@@ -46,8 +48,8 @@ pub trait Vector2dMath: Sized {
     fn v2_norm_squared(this: Vector2d<Self>) -> Self;
     fn v2_normalize(this: Vector2d<Self>) -> Vector2d<Self>;
     fn v2_is_normalized(this: Vector2d<Self>) -> bool;
-    fn v2_min(this: Vector2d<Self>) -> Self;
     fn v2_max(this: Vector2d<Self>) -> Self;
+    fn v2_min(this: Vector2d<Self>) -> Self;
     fn v2_dot(this: Vector2d<Self>, other: Vector2d<Self>) -> Self;
     fn v2_cross(this: Vector2d<Self>, other: Vector2d<Self>) -> Self;
 }
@@ -64,7 +66,9 @@ impl Vector2dMath for f32 {
     fn v2_neg(this: Vector2d<Self>) -> Vector2d<Self> {
         #[cfg(feature = "simd")]
         {
-            (-f32x2::from(this)).into()
+            let this_simd = f32x2::from(this);
+
+            (-this_simd).into()
         }
         #[cfg(not(feature = "simd"))]
         {
@@ -129,6 +133,7 @@ impl Vector2dMath for f32 {
         #[cfg(feature = "simd")]
         {
             let this_simd = f32x2::from(this);
+
             (this_simd * this_simd).reduce_sum()
         }
         #[cfg(not(feature = "simd"))]
@@ -141,26 +146,22 @@ impl Vector2dMath for f32 {
     fn v2_normalize(this: Vector2d<Self>) -> Vector2d<Self> {
         #[cfg(feature = "simd")]
         {
-            // 1. Calculate magnitude squared using our SIMD Dot Product
-            let norm_squared = Self::v2_dot(this, this);
+            let norm_squared = Self::v2_norm_squared(this);
 
-            // 2. If norm_squared is zero, then this must be zero (default) vector
+            // If norm_squared is zero, then this must be zero (default) vector
             if norm_squared == 0.0 {
                 return Vector2d::default();
             }
 
-            let norm_reciprocal = norm_squared.reciprocal_sqrt(); // Uses hardware vrsqrt
-
-            // 3. Load vector into SIMD and "Splat" the inverse magnitude
             let this_simd = f32x2::from(this);
+            let norm_reciprocal = norm_squared.reciprocal_sqrt(); // Uses hardware vrsqrt
             let scale = f32x2::splat(norm_reciprocal);
 
-            // 4. Multiply all lanes at once
             (this_simd * scale).into()
         }
         #[cfg(not(feature = "simd"))]
         {
-            let norm_squared = this.x * this.x + this.y * this.y + this.z * this.z;
+            let norm_squared = Self::v2_norm_squared(this);
             if norm_squared == 0.0 {
                 return Vector2d::default();
             }

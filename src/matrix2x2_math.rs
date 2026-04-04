@@ -1,8 +1,10 @@
-#[cfg(feature = "simd")]
 use cfg_if::cfg_if;
 cfg_if! {
-    if #[cfg(feature = "align")] {
-        use core::{mem::transmute, simd::f32x4};
+    if #[cfg(feature = "simd")] {
+        use core::{mem::transmute};
+        use core::simd::{f32x2,f32x4,num::SimdFloat};
+        const _: () = assert!(core::mem::size_of::<Matrix2x2<f32>>() == 16);
+        const _: () = assert!(core::mem::align_of::<Matrix2x2<f32>>() == 16);
     }
 }
 
@@ -66,7 +68,9 @@ impl Matrix2x2Math for f32 {
     fn m2x2_neg(this: Matrix2x2<Self>) -> Matrix2x2<Self> {
         #[cfg(feature = "simd")]
         {
-            (-f32x4::from(this)).into()
+            let this_simd = f32x4::from(this);
+
+            (-this_simd).into()
         }
         #[cfg(not(feature = "simd"))]
         {
@@ -110,6 +114,7 @@ impl Matrix2x2Math for f32 {
         {
             let this_simd = f32x4::from(this);
             let other_simd = f32x4::splat(other);
+
             (this_simd * other_simd).into()
         }
         #[cfg(not(feature = "simd"))]
@@ -139,13 +144,30 @@ impl Matrix2x2Math for f32 {
 
     #[inline(always)]
     fn m2x2_mul(this: Matrix2x2<Self>, other: Matrix2x2<Self>) -> Matrix2x2<Self> {
-        let a = [
-            this.a[0] * other.a[0] + this.a[1] * other.a[2],
-            this.a[0] * other.a[1] + this.a[1] * other.a[3],
-            this.a[2] * other.a[0] + this.a[3] * other.a[2],
-            this.a[2] * other.a[1] + this.a[3] * other.a[3],
-        ];
-        Matrix2x2::from(a)
+        #[cfg(feature = "simd")]
+        {
+            let a0_simd = f32x2::from_array([this.a[0], this.a[1]]);
+            let a1_simd = f32x2::from_array([this.a[2], this.a[3]]);
+            let b0_simd = f32x2::from_array([other.a[0], other.a[2]]);
+            let b1_simd = f32x2::from_array([other.a[1], other.a[3]]);
+            let a = [
+                (a0_simd * b0_simd).reduce_sum(),
+                (a0_simd * b1_simd).reduce_sum(),
+                (a1_simd * b0_simd).reduce_sum(),
+                (a1_simd * b1_simd).reduce_sum(),
+            ];
+            Matrix2x2::from(a)
+        }
+        #[cfg(not(feature = "simd"))]
+        {
+            let a = [
+                this.a[0] * other.a[0] + this.a[1] * other.a[2],
+                this.a[0] * other.a[1] + this.a[1] * other.a[3],
+                this.a[2] * other.a[0] + this.a[3] * other.a[2],
+                this.a[2] * other.a[1] + this.a[3] * other.a[3],
+            ];
+            Matrix2x2::from(a)
+        }
     }
 
     #[inline(always)]

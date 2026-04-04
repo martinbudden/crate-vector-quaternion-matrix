@@ -1,5 +1,21 @@
+use cfg_if::cfg_if;
 use num_traits::identities::{One, Zero};
 use vector_quaternion_matrix::{Matrix3x3, Matrix3x3f32, Vector3d};
+
+// **** Align ****
+cfg_if! {
+    if #[cfg(feature = "align")] {
+        const _: () = assert!(core::mem::size_of::<Matrix3x3<f32>>() == 64);
+        const _: () = assert!(core::mem::align_of::<Matrix3x3<f32>>() == 32);
+        const _: () = assert!(core::mem::size_of::<Matrix3x3<f64>>() == 96);
+        const _: () = assert!(core::mem::align_of::<Matrix3x3<f64>>() == 32);
+    } else {
+        const _: () = assert!(core::mem::size_of::<Matrix3x3<f32>>() == 12);
+        const _: () = assert!(core::mem::align_of::<Matrix3x3<f32>>() == 4);
+        const _: () = assert!(core::mem::size_of::<Matrix3x3<f64>>() == 24);
+        const _: () = assert!(core::mem::align_of::<Matrix3x3<f64>>() == 4);
+    }
+}
 
 #[cfg(test)]
 mod tests {

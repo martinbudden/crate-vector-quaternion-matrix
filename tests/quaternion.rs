@@ -1,10 +1,10 @@
 use vector_quaternion_matrix::{Quaternion, Quaternionf32, Quaternionf64};
 
-const _: () = assert!(core::mem::size_of::<Quaternionf32>() == 16);
-const _: () = assert!(core::mem::align_of::<Quaternionf32>() == 16);
+const _: () = assert!(core::mem::size_of::<Quaternion<f32>>() == 16);
+const _: () = assert!(core::mem::align_of::<Quaternion<f32>>() == 16);
 
-const _: () = assert!(core::mem::size_of::<Quaternionf64>() == 32);
-const _: () = assert!(core::mem::align_of::<Quaternionf64>() == 16);
+const _: () = assert!(core::mem::size_of::<Quaternion<f64>>() == 32);
+const _: () = assert!(core::mem::align_of::<Quaternion<f64>>() == 16);
 
 #[cfg(test)]
 mod tests {

@@ -1,6 +1,11 @@
 use num_traits::identities::{One, Zero};
 use vector_quaternion_matrix::{Matrix2x2, Matrix2x2f32, Vector2d};
 
+// **** Align
+
+const _: () = assert!(core::mem::size_of::<Matrix2x2<f32>>() == 16);
+const _: () = assert!(core::mem::align_of::<Matrix2x2<f32>>() == 16);
+
 #[cfg(test)]
 mod tests {
     use super::*;

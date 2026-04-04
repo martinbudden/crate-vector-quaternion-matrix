@@ -1,5 +1,3 @@
-#[allow(unused)]
-use core::convert::TryFrom;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{One, Signed, Zero, float::FloatCore};
 
@@ -11,6 +9,7 @@ pub type Vector2df32 = Vector2d<f32>;
 pub type Vector2df64 = Vector2d<f64>;
 
 // **** Define ****
+
 /// `Vector2d<T>`: 2D vector of type `T`.<br>
 /// Aliases `Vector2df32` and `Vector2df64` are provided.<br><br>
 /// `Vector2df32` uses **SIMD** accelerations implemented in `Vector2dMath`.<br><br>
@@ -21,7 +20,20 @@ pub struct Vector2d<T> {
     pub y: T,
 }
 
+// **** New ****
+
+impl<T> Vector2d<T>
+where
+    T: Copy,
+{
+    /// Create a vector
+    pub const fn new(x: T, y: T) -> Self {
+        Self { x, y }
+    }
+}
+
 // **** Zero ****
+
 /// Zero vector
 /// ```
 /// # use vector_quaternion_matrix::Vector2df32;
@@ -44,6 +56,7 @@ where
 }
 
 // **** Neg ****
+
 /// Negate vector
 /// ```
 /// # use vector_quaternion_matrix::Vector2df32;
@@ -64,6 +77,7 @@ where
 }
 
 // **** Add ****
+
 /// Add two vectors
 /// ```
 /// # use vector_quaternion_matrix::Vector2df32;
@@ -84,6 +98,7 @@ where
 }
 
 // **** AddAssign ****
+
 /// Add one vector to another
 /// ```
 /// # use vector_quaternion_matrix::Vector2df32;
@@ -108,6 +123,7 @@ where
 }
 
 // **** Sub ****
+
 /// Subtract two vectors
 /// ```
 /// # use vector_quaternion_matrix::Vector2df32;
@@ -129,6 +145,7 @@ where
 }
 
 // **** SubAssign ****
+
 /// Subtract one vector from another
 /// ```
 /// # use vector_quaternion_matrix::Vector2df32;
@@ -147,7 +164,8 @@ where
     }
 }
 
-// **** Mul Scalar ****
+// **** Scalar Mul ****
+
 /// Pre-multiply vector by a constant
 /// ```
 /// # use vector_quaternion_matrix::Vector2df32;
@@ -170,7 +188,8 @@ impl Mul<Vector2d<f64>> for f64 {
     }
 }
 
-// **** Mul ****
+// **** Mul Scalar ****
+
 /// Multiply vector by a constant
 /// ```
 /// # use vector_quaternion_matrix::Vector2df32;
@@ -190,6 +209,7 @@ where
 }
 
 // **** MulAssign ****
+
 /// In-place multiply a vector by a constant
 /// ```
 /// # use vector_quaternion_matrix::Vector2df32;
@@ -207,7 +227,8 @@ where
     }
 }
 
-// **** Div by scalar ****
+// **** Div scalar ****
+
 /// Divide a vector by a constant
 /// ```
 /// # use vector_quaternion_matrix::Vector2df32;
@@ -244,6 +265,7 @@ where
 }
 
 // **** Index ****
+
 /// Access vector component by index
 /// ```
 /// # use vector_quaternion_matrix::Vector2df32;
@@ -264,6 +286,7 @@ impl<T> Index<usize> for Vector2d<T> {
 }
 
 // **** IndexMut ****
+
 // Set vector component by index
 /// ```
 /// # use vector_quaternion_matrix::Vector2df32;
@@ -283,18 +306,8 @@ impl<T> IndexMut<usize> for Vector2d<T> {
     }
 }
 
-// **** impl new ****
-impl<T> Vector2d<T>
-where
-    T: Copy,
-{
-    /// Create a vector
-    pub const fn new(x: T, y: T) -> Self {
-        Self { x, y }
-    }
-}
+// **** abs ****
 
-// **** impl abs ****
 impl<T> Vector2d<T>
 where
     T: Copy + Signed,
@@ -310,7 +323,8 @@ where
     }
 }
 
-// **** impl clamp ****
+// **** clamp ****
+
 impl<T> Vector2d<T>
 where
     T: Copy + FloatCore,
@@ -327,7 +341,8 @@ where
     }
 }
 
-// **** impl dot and cross ****
+// **** dot and cross ****
+
 impl<T> Vector2d<T>
 where
     T: Copy + Vector2dMath,
@@ -368,10 +383,11 @@ where
     }
 }
 
-// **** impl norm_squared ****
+// **** norm_squared ****
+
 impl<T> Vector2d<T>
 where
-    T: Copy + Add<Output = T> + Vector2dMath + Vector2dMath,
+    T: Copy + Add<Output = T> + Vector2dMath,
 {
     /// Return square of Euclidean norm
     /// ```
@@ -392,6 +408,54 @@ where
     /// ```
     pub fn distance_squared(self, other: Self) -> T {
         (self - other).norm_squared()
+    }
+}
+
+// **** norm ****
+
+impl<T> Vector2d<T>
+where
+    T: Copy + Add<Output = T> + SqrtMethods + Vector2dMath,
+{
+    /// Return Euclidean norm
+    pub fn norm(self) -> T {
+        Self::norm_squared(self).sqrt()
+    }
+}
+
+impl<T> Vector2d<T>
+where
+    T: Copy + Zero + PartialEq + SqrtMethods + Vector2dMath,
+{
+    /// Return normalized form of the vector
+    pub fn normalized(self) -> Self {
+        let norm = self.norm();
+        // If norm == 0.0 then the vector is already normalized
+        if norm == T::zero() {
+            return self;
+        }
+        self * T::v2_reciprocal(norm)
+    }
+
+    /// Normalize the vector in place
+    pub fn normalize(&mut self) -> Self {
+        let norm = self.norm();
+        #[allow(clippy::assign_op_pattern)]
+        // If norm == 0.0 then the vector is already normalized
+        if norm != T::zero() {
+            *self *= T::v2_reciprocal(norm);
+        }
+        *self
+    }
+}
+
+impl<T> Vector2d<T>
+where
+    T: Copy + Zero + SqrtMethods + Vector2dMath,
+{
+    // Return distance between two points
+    pub fn distance(self, other: Self) -> T {
+        self.distance_squared(other).sqrt()
     }
 }
 
@@ -420,7 +484,8 @@ where
     }
 }
 
-// **** impl mean ****
+// **** mean ****
+
 impl<T> Vector2d<T>
 where
     T: Copy + One + Add<Output = T> + Div<Output = T>,
@@ -435,6 +500,8 @@ where
         (self.x + self.y) / (T::one() + T::one())
     }
 }
+
+// **** max ****
 
 impl<T> Vector2d<T>
 where
@@ -452,7 +519,7 @@ where
         T::v2_max(self)
     }
 
-    /// Return the max element in the vector
+    /// Return the min element in the vector
     /// ```
     /// # use vector_quaternion_matrix::Vector2df32;
     /// let v = Vector2df32::new(2.0, 3.0);
@@ -462,53 +529,6 @@ where
     /// ```
     pub fn min(self) -> T {
         T::v2_min(self)
-    }
-}
-
-// **** impl norm ****
-impl<T> Vector2d<T>
-where
-    T: Copy + Add<Output = T> + SqrtMethods + Vector2dMath + Vector2dMath,
-{
-    /// Return Euclidean norm
-    pub fn norm(self) -> T {
-        Self::norm_squared(self).sqrt()
-    }
-}
-
-impl<T> Vector2d<T>
-where
-    T: Copy + Zero + PartialEq + SqrtMethods + Vector2dMath + Vector2dMath,
-{
-    /// Return normalized form of the vector
-    pub fn normalized(self) -> Self {
-        let norm = self.norm();
-        // If norm == 0.0 then the vector is already normalized
-        if norm == T::zero() {
-            return self;
-        }
-        self * T::v2_reciprocal(norm)
-    }
-
-    /// Normalize the vector in place
-    pub fn normalize(&mut self) -> Self {
-        let norm = self.norm();
-        #[allow(clippy::assign_op_pattern)]
-        // If norm == 0.0 then the vector is already normalized
-        if norm != T::zero() {
-            *self *= T::v2_reciprocal(norm);
-        }
-        *self
-    }
-}
-
-impl<T> Vector2d<T>
-where
-    T: Copy + Zero + SqrtMethods + Vector2dMath + Vector2dMath,
-{
-    // Return distance between two points
-    pub fn distance(self, other: Self) -> T {
-        self.distance_squared(other).sqrt()
     }
 }
 

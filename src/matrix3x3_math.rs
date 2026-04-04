@@ -1,10 +1,12 @@
-#[cfg(feature = "simd")]
 use cfg_if::cfg_if;
 cfg_if! {
     if #[cfg(feature = "simd")] {
         use core::simd::{f32x4,f32x8,num::SimdFloat};
-        const _: () = assert!(core::mem::size_of::<Matrix3x3<f32>>() == 48);
-        const _: () = assert!(core::mem::align_of::<Matrix3x3<f32>>() == 16);
+        const _: () = assert!(core::mem::size_of::<Matrix3x3<f32>>() == 64);
+        const _: () = assert!(core::mem::align_of::<Matrix3x3<f32>>() == 32);
+    } else {
+        const _: () = assert!(core::mem::size_of::<Matrix3x3<f32>>() == 36);
+        const _: () = assert!(core::mem::align_of::<Matrix3x3<f32>>() == 4);
     }
 }
 
@@ -230,7 +232,7 @@ impl Matrix3x3Math for f32 {
             let a = this.a;
 
             // use SIMD to calculate the first 8 elements of the array, and then manually calculate the 9th element.
-            // TODO: change the 4 loads into 2 loads and use swizzles.
+            // TODO: change the 4 from_arrays into 2 from_arrays and use swizzles.
             let r0a = [a[4], -a[1], a[1], -a[3], a[0], -a[0], a[3], -a[0]];
             let r0b = [a[8], a[8], a[5], a[8], a[8], a[5], a[7], a[7]];
 

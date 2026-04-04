@@ -30,7 +30,7 @@ pub struct EigenResult {
 }*/
 
 #[allow(unused)]
-fn sort3<T: PartialOrd + Copy>(arr: [T; 3]) -> [T; 3] {
+fn sort3<T: Copy + PartialOrd>(arr: [T; 3]) -> [T; 3] {
     let mut sorted = arr;
     if sorted[0] > sorted[1] {
         sorted.swap(0, 1);
