@@ -323,23 +323,17 @@ where
 /// ```
 impl Mul<Matrix3x3<f32>> for f32 {
     type Output = Matrix3x3<f32>;
-    fn mul(self, rhs: Matrix3x3<f32>) -> Matrix3x3<f32> {
-        let mut a = rhs.a;
-        for r in a.iter_mut() {
-            *r *= self;
-        }
-        Matrix3x3::<f32> { a }
+    #[inline(always)]
+    fn mul(self, other: Matrix3x3<f32>) -> Matrix3x3<f32> {
+        f32::m3x3_mul_scalar(other, self)
     }
 }
 
 impl Mul<Matrix3x3<f64>> for f64 {
     type Output = Matrix3x3<f64>;
-    fn mul(self, rhs: Matrix3x3<f64>) -> Matrix3x3<f64> {
-        let mut a = rhs.a;
-        for r in a.iter_mut() {
-            *r *= self;
-        }
-        Matrix3x3::<f64> { a }
+    #[inline(always)]
+    fn mul(self, other: Matrix3x3<f64>) -> Matrix3x3<f64> {
+        f64::m3x3_mul_scalar(other, self)
     }
 }
 
@@ -362,6 +356,7 @@ where
     T: Copy + Matrix3x3Math,
 {
     type Output = Self;
+    #[inline(always)]
     fn mul(self, other: T) -> Self {
         T::m3x3_mul_scalar(self, other)
     }
@@ -385,6 +380,7 @@ impl<T> MulAssign<T> for Matrix3x3<T>
 where
     T: Copy + Matrix3x3Math,
 {
+    #[inline(always)]
     fn mul_assign(&mut self, other: T) {
         *self = *self * other;
     }
@@ -407,6 +403,7 @@ where
     T: Copy + Matrix3x3Math,
 {
     type Output = Vector3d<T>;
+    #[inline(always)]
     fn mul(self, other: Vector3d<T>) -> Vector3d<T> {
         T::m3x3_mul_vector(self, other)
     }
@@ -428,6 +425,7 @@ where
     T: Copy + Matrix3x3Math,
 {
     type Output = Self;
+    #[inline(always)]
     fn mul(self, other: Matrix3x3<T>) -> Self {
         T::m3x3_vector_mul(self, other)
     }
@@ -462,6 +460,7 @@ where
     T: Copy + Matrix3x3Math,
 {
     type Output = Self;
+    #[inline(always)]
     fn mul(self, other: Self) -> Self {
         T::m3x3_mul(self, other)
     }
@@ -488,6 +487,7 @@ impl<T> MulAssign<Matrix3x3<T>> for Matrix3x3<T>
 where
     T: Copy + Matrix3x3Math,
 {
+    #[inline(always)]
     fn mul_assign(&mut self, other: Matrix3x3<T>) {
         *self = *self * other;
     }
@@ -511,6 +511,7 @@ where
     T: Copy + Matrix3x3Math,
 {
     type Output = Self;
+    #[inline(always)]
     fn div(self, other: T) -> Self {
         T::m3x3_div_scalar(self, other)
     }
@@ -534,6 +535,7 @@ impl<T> DivAssign<T> for Matrix3x3<T>
 where
     T: Copy + Matrix3x3Math,
 {
+    #[inline(always)]
     fn div_assign(&mut self, other: T) {
         *self = *self / other;
     }
@@ -561,6 +563,7 @@ where
 /// ```
 impl<T> Index<usize> for Matrix3x3<T> {
     type Output = T;
+    #[inline(always)]
     fn index(&self, index: usize) -> &T {
         &self.a[index]
     }
@@ -591,6 +594,7 @@ impl<T> Index<usize> for Matrix3x3<T> {
 ///                                   53.0, 59.0, 61.0]));
 /// ```
 impl<T> IndexMut<usize> for Matrix3x3<T> {
+    #[inline(always)]
     fn index_mut(&mut self, index: usize) -> &mut T {
         &mut self.a[index]
     }
@@ -617,6 +621,7 @@ impl<T> IndexMut<usize> for Matrix3x3<T> {
 impl<T> Index<(usize, usize)> for Matrix3x3<T> {
     type Output = T;
 
+    #[inline(always)]
     fn index(&self, (row, col): (usize, usize)) -> &Self::Output {
         &self.a[row * 3 + col]
     }
@@ -645,6 +650,7 @@ impl<T> Index<(usize, usize)> for Matrix3x3<T> {
 ///                                   53.0, 59.0, 61.0]));
 /// ```
 impl<T> IndexMut<(usize, usize)> for Matrix3x3<T> {
+    #[inline(always)]
     fn index_mut(&mut self, (row, col): (usize, usize)) -> &mut T {
         &mut self.a[row * 3 + col]
     }
@@ -656,11 +662,13 @@ where
     T: Copy + Matrix3x3Math,
 {
     /// Return a copy of the matrix with all components set to their absolute values
+    #[inline(always)]
     pub fn abs(self) -> Self {
         T::m3x3_abs(self)
     }
 
     /// Set all components of the matrix to their absolute values
+    #[inline(always)]
     pub fn abs_in_place(&mut self) {
         *self = self.abs();
     }
@@ -681,6 +689,7 @@ where
     }
 
     /// Clamp all components of the matrix to the specified range
+    #[inline(always)]
     pub fn clamp_in_place(&mut self, min: T, max: T) {
         *self = self.clamp(min, max);
     }
@@ -789,6 +798,7 @@ where
     ///                                    3.0, 11.0, 19.0,
     ///                                    5.0, 13.0, 23.0]));
     /// ```
+    #[inline(always)]
     pub fn transpose(self) -> Self {
         Self { a: [self.a[0], self.a[3], self.a[6], self.a[1], self.a[4], self.a[7], self.a[2], self.a[5], self.a[8]] }
     }
@@ -805,6 +815,7 @@ where
     ///                                    3.0, 11.0, 19.0,
     ///                                    5.0, 13.0, 23.0]));
     /// ```
+    #[inline(always)]
     pub fn transpose_in_place(&mut self) {
         *self = self.transpose();
     }
@@ -824,6 +835,7 @@ where
     ///
     /// assert!((n*m/m.determinant()).is_near_identity());
     /// ```
+    #[inline(always)]
     pub fn adjugate(self) -> Self {
         T::m3x3_adjugate(self)
     }
@@ -839,6 +851,7 @@ where
     ///
     /// assert_eq!(m.adjugate(), n);
     /// ```
+    #[inline(always)]
     pub fn adjugate_in_place(&mut self) {
         *self = self.adjugate();
     }
@@ -857,6 +870,7 @@ where
     ///                                     7.0, 31.0, 13.0,
     ///                                    17.0, 19.0, 53.0]));
     /// ```
+    #[inline(always)]
     pub fn add_to_diagonal_in_place(&mut self, v: Vector3d<T>) {
         self.a[0] = self.a[0] + v.x;
         self.a[4] = self.a[4] + v.y;
@@ -878,6 +892,7 @@ where
     ///                                     7.0, -9.0,  13.0,
     ///                                    17.0, 19.0,  -7.0]));
     /// ```
+    #[inline(always)]
     pub fn subtract_from_diagonal_in_place(&mut self, v: Vector3d<T>) {
         self.a[0] = self.a[0] - v.x;
         self.a[4] = self.a[4] - v.y;
@@ -910,6 +925,7 @@ where
     /// assert_eq!(76.0, d);
     ///
     /// ```
+    #[inline(always)]
     pub fn top_right_determinant(self) -> T {
         T::m3x3_top_right_determinant(self)
     }
@@ -925,6 +941,7 @@ where
     /// assert_eq!(3.0*3.0 + 5.0*5.0 + 13.0*13.0, d);
     ///
     /// ```
+    #[inline(always)]
     pub fn top_right_sum_squares(self) -> T {
         T::m3x3_top_right_sum_squares(self)
     }
@@ -939,6 +956,7 @@ where
     ///
     /// assert_eq!(s, 100.0);
     /// ```
+    #[inline(always)]
     pub fn sum(self) -> T {
         T::m3x3_sum(self)
     }
@@ -953,6 +971,7 @@ where
     ///
     /// assert_eq!(mean, 90.0 / 9.0);
     /// ```
+    #[inline(always)]
     pub fn mean(self) -> T {
         T::m3x3_mean(self)
     }
@@ -967,6 +986,7 @@ where
     ///
     /// assert_eq!(product, 223092860.0);
     /// ```
+    #[inline(always)]
     pub fn product(self) -> T {
         T::m3x3_product(self)
     }
@@ -981,6 +1001,7 @@ where
     ///
     /// assert_eq!(t, 36.0);
     /// ```
+    #[inline(always)]
     pub fn trace(self) -> T {
         T::m3x3_trace(self)
     }
@@ -994,6 +1015,7 @@ where
     ///
     /// assert_eq!(t, 2.0 * 2.0 + 11.0 *11.0 + 23.0 * 23.0);
     /// ```
+    #[inline(always)]
     pub fn trace_sum_squares(self) -> T {
         T::m3x3_trace_sum_squares(self)
     }
@@ -1012,6 +1034,7 @@ where
     /// a.invert_in_place();
     ///
     /// ```
+    #[inline(always)]
     pub fn invert_in_place(&mut self) -> bool {
         let adjugate = self.adjugate();
         let determinant = self.a[0] * adjugate.a[0] + self.a[1] * adjugate.a[3] + self.a[2] * adjugate.a[6];
@@ -1031,6 +1054,7 @@ where
     /// let n = m.inverse();
     ///
     /// ```
+    #[inline(always)]
     pub fn inverse(self) -> Self {
         let adjugate = self.adjugate();
         let determinant = self.a[0] * adjugate.a[0] + self.a[1] * adjugate.a[3] + self.a[2] * adjugate.a[6];
@@ -1140,6 +1164,7 @@ impl<T> From<Matrix2x2<T>> for Matrix3x3<T>
 where
     T: Copy + Zero,
 {
+    #[inline(always)]
     fn from(m: Matrix2x2<T>) -> Self {
         Self { a: [m[0], m[1], T::zero(), m[2], m[3], T::zero(), T::zero(), T::zero(), T::zero()] }
     }
@@ -1152,6 +1177,7 @@ impl<T> From<[T; 9]> for Matrix3x3<T>
 where
     T: Copy,
 {
+    #[inline(always)]
     fn from(input: [T; 9]) -> Self {
         Self { a: input }
     }
@@ -1161,12 +1187,14 @@ impl<T> From<[Vector3d<T>; 3]> for Matrix3x3<T>
 where
     T: Copy,
 {
+    #[inline(always)]
     fn from(v: [Vector3d<T>; 3]) -> Self {
         Self { a: [v[0].x, v[0].y, v[0].z, v[1].x, v[1].y, v[1].z, v[2].x, v[2].y, v[2].z] }
     }
 }
 
 impl<T> From<(Vector3d<T>, Vector3d<T>, Vector3d<T>)> for Matrix3x3<T> {
+    #[inline(always)]
     fn from(v: (Vector3d<T>, Vector3d<T>, Vector3d<T>)) -> Self {
         Self { a: [v.0.x, v.0.y, v.0.z, v.1.x, v.1.y, v.1.z, v.2.x, v.2.y, v.2.z] }
     }
@@ -1180,6 +1208,7 @@ impl<T> From<Quaternion<T>> for Matrix3x3<T>
 where
     T: Copy + Zero + One + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
 {
+    #[inline(always)]
     fn from(q: Quaternion<T>) -> Self {
         let two = T::one() + T::one();
         Self {

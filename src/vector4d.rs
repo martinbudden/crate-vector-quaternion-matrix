@@ -45,7 +45,7 @@ where
 /// ```
 impl<T> Zero for Vector4d<T>
 where
-    T: Zero + PartialEq + Vector4dMath,
+    T: Copy + Zero + PartialEq + Vector4dMath,
 {
     fn zero() -> Self {
         Self { x: T::zero(), y: T::zero(), z: T::zero(), t: T::zero() }
@@ -68,7 +68,7 @@ where
 /// ```
 impl<T> Neg for Vector4d<T>
 where
-    T: Vector4dMath,
+    T: Copy + Vector4dMath,
 {
     type Output = Self;
     #[inline(always)]
@@ -90,9 +90,9 @@ where
 /// ```
 impl<T> Add for Vector4d<T>
 where
-    T: Vector4dMath,
+    T: Copy + Vector4dMath,
 {
-    type Output = Vector4d<T>;
+    type Output = Self;
     fn add(self, other: Self) -> Self {
         T::v4_add(self, other)
     }
@@ -140,7 +140,7 @@ impl<T> MulAdd<T> for Vector4d<T>
 where
     T: Copy + Vector4dMath,
 {
-    type Output = Vector4d<T>;
+    type Output = Self;
     fn mul_add(self, k: T, other: Self) -> Self {
         T::v4_mul_add(self, k, other)
     }
@@ -181,7 +181,7 @@ where
 /// ```
 impl<T> Sub for Vector4d<T>
 where
-    T: Add<Output = T> + Vector4dMath,
+    T: Copy + Add<Output = T> + Vector4dMath,
 {
     type Output = Vector4d<T>;
     fn sub(self, other: Self) -> Self {
@@ -223,14 +223,15 @@ where
 impl Mul<Vector4d<f32>> for f32 {
     type Output = Vector4d<f32>;
     fn mul(self, other: Vector4d<f32>) -> Vector4d<f32> {
-        Vector4d { x: self * other.x, y: self * other.y, z: self * other.z, t: self * other.t }
+        f32::v4_mul_scalar(other, self)
     }
 }
 
 impl Mul<Vector4d<f64>> for f64 {
     type Output = Vector4d<f64>;
+    #[inline(always)]
     fn mul(self, other: Vector4d<f64>) -> Vector4d<f64> {
-        Vector4d { x: self * other.x, y: self * other.y, z: self * other.z, t: self * other.t }
+        f64::v4_mul_scalar(other, self)
     }
 }
 
@@ -249,6 +250,7 @@ where
     T: Copy + Vector4dMath,
 {
     type Output = Self;
+    #[inline(always)]
     fn mul(self, k: T) -> Self {
         T::v4_mul_scalar(self, k)
     }
@@ -268,6 +270,7 @@ impl<T> MulAssign<T> for Vector4d<T>
 where
     T: Copy + Vector4dMath,
 {
+    #[inline(always)]
     fn mul_assign(&mut self, k: T) {
         *self = *self * k;
     }
@@ -288,6 +291,7 @@ where
     T: Copy + Vector4dMath,
 {
     type Output = Self;
+    #[inline(always)]
     fn div(self, k: T) -> Self {
         T::v4_div_scalar(self, k)
     }
@@ -305,6 +309,7 @@ impl<T> DivAssign<T> for Vector4d<T>
 where
     T: Copy + Div<Output = T> + Vector4dMath,
 {
+    #[inline(always)]
     fn div_assign(&mut self, k: T) {
         *self = self.div(k);
     }
@@ -324,6 +329,7 @@ where
 /// ```
 impl<T> Index<usize> for Vector4d<T> {
     type Output = T;
+    #[inline(always)]
     fn index(&self, index: usize) -> &T {
         match index {
             0 => &self.x,
@@ -347,6 +353,7 @@ impl<T> Index<usize> for Vector4d<T> {
 /// assert_eq!(v, Vector4df32 { x:7.0, y:11.0, z:13.0, t: 17.0 });
 /// ```
 impl<T> IndexMut<usize> for Vector4d<T> {
+    #[inline(always)]
     fn index_mut(&mut self, index: usize) -> &mut T {
         match index {
             0 => &mut self.x,
@@ -364,11 +371,13 @@ where
     T: Copy + Signed,
 {
     /// Return a copy of the vector with all components set to their absolute values
+    #[inline(always)]
     pub fn abs(self) -> Self {
         Self { x: self.x.abs(), y: self.y.abs(), z: self.z.abs(), t: self.t.abs() }
     }
 
     /// Set all components of the vector to their absolute values
+    #[inline(always)]
     pub fn abs_in_place(&mut self) {
         *self = self.abs();
     }
@@ -381,6 +390,7 @@ where
     T: Copy + FloatCore,
 {
     /// Return a copy of the vector with all components clamped to the specified range
+    #[inline(always)]
     pub fn clamp(self, min: T, max: T) -> Self {
         Self {
             x: self.x.clamp(min, max),
@@ -391,6 +401,7 @@ where
     }
 
     /// Clamp all components of the vector to the specified range
+    #[inline(always)]
     pub fn clamp_in_place(&mut self, min: T, max: T) {
         self.x = self.x.clamp(min, max);
         self.y = self.y.clamp(min, max);
@@ -432,6 +443,7 @@ where
     /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
     /// assert_eq!(87.0, v.norm_squared());
     /// ```
+    #[inline(always)]
     pub fn norm_squared(self) -> T {
         self.dot(self)
     }
@@ -443,6 +455,7 @@ where
     /// let w = Vector4df32::new(11.0, 13.0, 17.0, 19.0);
     /// assert_eq!(469.0, v.distance_squared(w));
     /// ```
+    #[inline(always)]
     pub fn distance_squared(self, other: Self) -> T {
         (self - other).norm_squared()
     }
@@ -455,6 +468,7 @@ where
     T: Copy + Add<Output = T> + SqrtMethods + Vector4dMath,
 {
     /// Return Euclidean norm
+    #[inline(always)]
     pub fn norm(self) -> T {
         Self::norm_squared(self).sqrt()
     }
@@ -465,6 +479,7 @@ where
     T: Copy + Zero + PartialEq + SqrtMethods + Vector4dMath,
 {
     /// Return normalized form of the vector
+    #[inline(always)]
     pub fn normalized(self) -> Self {
         let norm = self.norm();
         // If norm == 0.0 then the vector is already normalized
@@ -475,6 +490,7 @@ where
     }
 
     /// Normalize the vector in place
+    #[inline(always)]
     pub fn normalize(&mut self) -> Self {
         let norm = self.norm();
         //#[allow(clippy::assign_op_pattern)]
@@ -491,6 +507,7 @@ where
     T: Copy + Zero + SqrtMethods + Vector4dMath,
 {
     // Return distance between two points
+    #[inline(always)]
     pub fn distance(self, other: Self) -> T {
         self.distance_squared(other).sqrt()
     }
@@ -506,6 +523,7 @@ where
     /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
     /// assert_eq!(17.0, v.sum());
     /// ```
+    #[inline(always)]
     pub fn sum(self) -> T {
         self.x + self.y + self.z + self.t
     }
@@ -516,6 +534,7 @@ where
     /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
     /// assert_eq!(210.0, v.product());
     /// ```
+    #[inline(always)]
     pub fn product(self) -> T {
         self.x * self.y * self.z * self.t
     }
@@ -533,6 +552,7 @@ where
     /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
     /// assert_eq!(4.25, v.mean());
     /// ```
+    #[inline(always)]
     pub fn mean(self) -> T {
         let four = T::one() + T::one() + T::one() + T::one();
         self.sum() / four
@@ -553,6 +573,7 @@ where
     /// assert_eq!(7.0, w.max());
     /// assert_eq!(7.0, x.max());
     /// ```
+    #[inline(always)]
     pub fn max(self) -> T {
         T::v4_max(self)
     }
@@ -567,6 +588,7 @@ where
     /// assert_eq!(2.0, w.min());
     /// assert_eq!(2.0, x.min());
     /// ```
+    #[inline(always)]
     pub fn min(self) -> T {
         T::v4_min(self)
     }
@@ -589,6 +611,7 @@ impl<T> From<(T, T, T, T)> for Vector4d<T>
 where
     T: Copy,
 {
+    #[inline(always)]
     fn from((x, y, z, t): (T, T, T, T)) -> Self {
         Self { x, y, z, t }
     }
@@ -609,6 +632,7 @@ impl<T> From<[T; 4]> for Vector4d<T>
 where
     T: Copy,
 {
+    #[inline(always)]
     fn from(v: [T; 4]) -> Self {
         Self { x: v[0], y: v[1], z: v[2], t: v[3] }
     }
@@ -626,6 +650,7 @@ where
 /// assert_eq!(b, [2.0, 3.0, 5.0, 7.0]);
 /// ```
 impl<T> From<Vector4d<T>> for [T; 4] {
+    #[inline(always)]
     fn from(v: Vector4d<T>) -> Self {
         [v.x, v.y, v.z, v.t]
     }
@@ -646,6 +671,7 @@ impl<T> From<Vector3d<T>> for Vector4d<T>
 where
     T: Copy + Zero,
 {
+    #[inline(always)]
     fn from(other: Vector3d<T>) -> Self {
         Self { x: other.x, y: other.y, z: other.z, t: T::zero() }
     }
@@ -664,6 +690,7 @@ impl<T> From<Vector2d<T>> for Vector4d<T>
 where
     T: Copy + Zero,
 {
+    #[inline(always)]
     fn from(other: Vector2d<T>) -> Self {
         Self { x: other.x, y: other.y, z: T::zero(), t: T::zero() }
     }

@@ -190,7 +190,7 @@ impl<T> MulAdd<T> for Matrix2x2<T>
 where
     T: Copy + Matrix2x2Math,
 {
-    type Output = Matrix2x2<T>;
+    type Output = Self;
     #[inline(always)]
     fn mul_add(self, k: T, other: Self) -> Self {
         T::m2x2_mul_add(self, k, other)
@@ -287,6 +287,7 @@ where
 /// ```
 impl Mul<Matrix2x2<f32>> for f32 {
     type Output = Matrix2x2<f32>;
+    #[inline(always)]
     fn mul(self, other: Matrix2x2<f32>) -> Matrix2x2<f32> {
         f32::m2x2_mul_scalar(other, self)
     }
@@ -294,6 +295,7 @@ impl Mul<Matrix2x2<f32>> for f32 {
 
 impl Mul<Matrix2x2<f64>> for f64 {
     type Output = Matrix2x2<f64>;
+    #[inline(always)]
     fn mul(self, other: Matrix2x2<f64>) -> Matrix2x2<f64> {
         f64::m2x2_mul_scalar(other, self)
     }
@@ -316,6 +318,7 @@ where
     T: Copy + Matrix2x2Math,
 {
     type Output = Self;
+    #[inline(always)]
     fn mul(self, other: T) -> Self {
         T::m2x2_mul_scalar(self, other)
     }
@@ -337,6 +340,7 @@ impl<T> MulAssign<T> for Matrix2x2<T>
 where
     T: Copy + Matrix2x2Math,
 {
+    #[inline(always)]
     fn mul_assign(&mut self, other: T) {
         *self = *self * other;
     }
@@ -358,6 +362,7 @@ where
     T: Copy + Matrix2x2Math,
 {
     type Output = Vector2d<T>;
+    #[inline(always)]
     fn mul(self, other: Vector2d<T>) -> Vector2d<T> {
         T::m2x2_mul_vector(self, other)
     }
@@ -379,6 +384,7 @@ where
     T: Copy + Matrix2x2Math,
 {
     type Output = Self;
+    #[inline(always)]
     fn mul(self, other: Matrix2x2<T>) -> Self {
         T::m2x2_vector_mul(self, other)
     }
@@ -410,6 +416,7 @@ where
     T: Copy + Matrix2x2Math,
 {
     type Output = Self;
+    #[inline(always)]
     fn mul(self, other: Self) -> Self {
         T::m2x2_mul(self, other)
     }
@@ -435,6 +442,7 @@ impl<T> MulAssign<Matrix2x2<T>> for Matrix2x2<T>
 where
     T: Copy + Matrix2x2Math,
 {
+    #[inline(always)]
     fn mul_assign(&mut self, other: Matrix2x2<T>) {
         *self = *self * other;
     }
@@ -456,6 +464,7 @@ where
     T: Copy + Matrix2x2Math,
 {
     type Output = Self;
+    #[inline(always)]
     fn div(self, other: T) -> Self {
         T::m2x2_div_scalar(self, other)
     }
@@ -477,6 +486,7 @@ impl<T> DivAssign<T> for Matrix2x2<T>
 where
     T: Copy + Matrix2x2Math,
 {
+    #[inline(always)]
     fn div_assign(&mut self, other: T) {
         *self = *self / other;
     }
@@ -498,6 +508,7 @@ where
 /// ```
 impl<T> Index<usize> for Matrix2x2<T> {
     type Output = T;
+    #[inline(always)]
     fn index(&self, index: usize) -> &T {
         &self.a[index]
     }
@@ -521,6 +532,7 @@ impl<T> Index<usize> for Matrix2x2<T> {
 ///                                       37.0, 41.0]));
 /// ```
 impl<T> IndexMut<usize> for Matrix2x2<T> {
+    #[inline(always)]
     fn index_mut(&mut self, index: usize) -> &mut T {
         &mut self.a[index]
     }
@@ -541,6 +553,7 @@ impl<T> IndexMut<usize> for Matrix2x2<T> {
 impl<T> Index<(usize, usize)> for Matrix2x2<T> {
     type Output = T;
 
+    #[inline(always)]
     fn index(&self, (row, col): (usize, usize)) -> &Self::Output {
         &self.a[row * 2 + col]
     }
@@ -562,6 +575,7 @@ impl<T> Index<(usize, usize)> for Matrix2x2<T> {
 ///                                   41.0, 43.0]));
 /// ```
 impl<T> IndexMut<(usize, usize)> for Matrix2x2<T> {
+    #[inline(always)]
     fn index_mut(&mut self, (row, col): (usize, usize)) -> &mut T {
         &mut self.a[row * 2 + col]
     }
@@ -573,11 +587,13 @@ where
     T: Copy + Matrix2x2Math,
 {
     /// Return a copy of the matrix with all components set to their absolute values
+    #[inline(always)]
     pub fn abs(self) -> Self {
         T::m2x2_abs(self)
     }
 
     /// Set all components of the matrix to their absolute values
+    #[inline(always)]
     pub fn abs_in_place(&mut self) {
         *self = self.abs();
     }
@@ -614,6 +630,7 @@ where
     T: Copy + FloatCore,
 {
     /// Return a copy of the matrix with all components clamped to the specified range
+    #[inline(always)]
     pub fn clamp(self, min: T, max: T) -> Self {
         let mut a = self.a;
         for a in a.iter_mut() {
@@ -623,6 +640,7 @@ where
     }
 
     /// Clamp all components of the matrix to the specified range
+    #[inline(always)]
     pub fn clamp_in_place(&mut self, min: T, max: T) {
         for a in self.a.iter_mut() {
             *a = a.clamp(min, max);
@@ -713,6 +731,7 @@ where
     /// assert_eq!(n, Matrix2x2f32::from([ 2.0,  7.0,
     ///                                    3.0, 11.0]));
     /// ```
+    #[inline(always)]
     pub fn transpose(self) -> Self {
         Self { a: [self.a[0], self.a[2], self.a[1], self.a[3]] }
     }
@@ -727,6 +746,7 @@ where
     /// assert_eq!(m, Matrix2x2f32::from([ 2.0,  7.0,
     ///                                    3.0, 11.0]));
     /// ```
+    #[inline(always)]
     pub fn transpose_in_place(&mut self) {
         *self = self.transpose();
     }
@@ -745,6 +765,7 @@ where
     ///
     /// assert!((n*m/m.determinant()).is_near_identity());
     /// ```
+    #[inline(always)]
     pub fn adjugate(self) -> Self {
         T::m2x2_adjugate(self)
     }
@@ -759,6 +780,7 @@ where
     ///
     /// assert_eq!(m.adjugate(), n);
     /// ```
+    #[inline(always)]
     pub fn adjugate_in_place(&mut self) {
         *self = self.adjugate();
     }
@@ -775,6 +797,7 @@ where
     /// assert_eq!(m, Matrix2x2f32::from([ 12.0,  3.0,
     ///                                     7.0, 31.0]));
     /// ```
+    #[inline(always)]
     pub fn add_to_diagonal_in_place(&mut self, v: Vector2d<T>) {
         self.a[0] = self.a[0] + v.x;
         self.a[3] = self.a[3] + v.y;
@@ -793,6 +816,7 @@ where
     /// assert_eq!(m, Matrix2x2f32::from([ -8.0,  3.0,
     ///                                     7.0, -9.0]));
     /// ```
+    #[inline(always)]
     pub fn subtract_from_diagonal_in_place(&mut self, v: Vector2d<T>) {
         self.a[0] = self.a[0] + (-v.x);
         self.a[3] = self.a[3] + (-v.y);
@@ -808,6 +832,7 @@ where
     /// assert_eq!(2.0*11.0 - 3.0*7.0, d);
     ///
     /// ```
+    #[inline(always)]
     pub fn determinant(self) -> T {
         T::m2x2_determinant(self)
     }
@@ -822,6 +847,7 @@ where
     /// assert_eq!(2.0*11.0 - 3.0*3.0, d);
     ///
     /// ```
+    #[inline(always)]
     pub fn top_right_determinant(self) -> T {
         T::m2x2_top_right_determinant(self)
     }
@@ -836,6 +862,7 @@ where
     /// assert_eq!(3.0*3.0, d);
     ///
     /// ```
+    #[inline(always)]
     pub fn top_right_sum_squares(self) -> T {
         T::m2x2_top_right_sum_squares(self)
     }
@@ -849,6 +876,7 @@ where
     ///
     /// assert_eq!(s, 23.0);
     /// ```
+    #[inline(always)]
     pub fn sum(self) -> T {
         T::m2x2_sum(self)
     }
@@ -862,6 +890,7 @@ where
     ///
     /// assert_eq!(mean, 23.0 / 4.0);
     /// ```
+    #[inline(always)]
     pub fn mean(self) -> T {
         T::m2x2_mean(self)
     }
@@ -875,6 +904,7 @@ where
     ///
     /// assert_eq!(product, 462.0);
     /// ```
+    #[inline(always)]
     pub fn product(self) -> T {
         T::m2x2_product(self)
     }
@@ -888,6 +918,7 @@ where
     ///
     /// assert_eq!(trace, 13.0);
     /// ```
+    #[inline(always)]
     pub fn trace(self) -> T {
         T::m2x2_trace(self)
     }
@@ -901,6 +932,7 @@ where
     ///
     /// assert_eq!(t, 2.0 * 2.0 + 11.0 * 11.0);
     /// ```
+    #[inline(always)]
     pub fn trace_sum_squares(self) -> T {
         T::m2x2_trace_sum_squares(self)
     }
@@ -918,6 +950,7 @@ where
     /// m.invert_in_place();
     ///
     /// ```
+    #[inline(always)]
     pub fn invert_in_place(&mut self) -> bool {
         let adjugate = self.adjugate();
         let determinant = self.determinant();
@@ -936,6 +969,7 @@ where
     /// let n = m.inverse();
     ///
     /// ```
+    #[inline(always)]
     pub fn inverse(self) -> Self {
         let adjugate = self.adjugate();
         let determinant = self.determinant();
@@ -1021,6 +1055,7 @@ impl<T> From<[T; 4]> for Matrix2x2<T>
 where
     T: Copy,
 {
+    #[inline(always)]
     fn from(input: [T; 4]) -> Self {
         Self { a: input }
     }
@@ -1031,6 +1066,7 @@ impl<T> From<[Vector2d<T>; 2]> for Matrix2x2<T>
 where
     T: Copy,
 {
+    #[inline(always)]
     fn from(v: [Vector2d<T>; 2]) -> Self {
         Self { a: [v[0].x, v[0].y, v[1].x, v[1].y] }
     }
@@ -1038,6 +1074,7 @@ where
 
 /// Matrix2x2 from 2 vectors
 impl<T> From<(Vector2d<T>, Vector2d<T>)> for Matrix2x2<T> {
+    #[inline(always)]
     fn from(v: (Vector2d<T>, Vector2d<T>)) -> Self {
         Self { a: [v.0.x, v.0.y, v.1.x, v.1.y] }
     }
@@ -1057,6 +1094,7 @@ impl<T> From<Matrix3x3<T>> for Matrix2x2<T>
 where
     T: Copy,
 {
+    #[inline(always)]
     fn from(m: Matrix3x3<T>) -> Self {
         Self { a: [m.a[0], m.a[1], m.a[3], m.a[4]] }
     }

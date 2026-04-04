@@ -91,7 +91,7 @@ impl<T> Add for Vector2d<T>
 where
     T: Copy + Vector2dMath,
 {
-    type Output = Vector2d<T>;
+    type Output = Self;
     fn add(self, other: Self) -> Self {
         T::v2_add(self, other)
     }
@@ -139,7 +139,7 @@ impl<T> MulAdd<T> for Vector2d<T>
 where
     T: Copy + Vector2dMath,
 {
-    type Output = Vector2d<T>;
+    type Output = Self;
     fn mul_add(self, k: T, other: Self) -> Self {
         T::v2_mul_add(self, k, other)
     }
@@ -182,7 +182,7 @@ impl<T> Sub for Vector2d<T>
 where
     T: Copy + Vector2dMath,
 {
-    type Output = Vector2d<T>;
+    type Output = Self;
     fn sub(self, other: Self) -> Self {
         // Reuse our existing SIMD-optimized Add and Neg implementations
         self + (-other)
@@ -204,6 +204,7 @@ impl<T> SubAssign for Vector2d<T>
 where
     T: Copy + Vector2dMath,
 {
+    #[inline(always)]
     fn sub_assign(&mut self, other: Self) {
         *self = *self - other;
     }
@@ -221,15 +222,17 @@ where
 /// ```
 impl Mul<Vector2d<f32>> for f32 {
     type Output = Vector2d<f32>;
+    #[inline(always)]
     fn mul(self, other: Vector2d<f32>) -> Vector2d<f32> {
-        Vector2d { x: self * other.x, y: self * other.y }
+        f32::v2_mul_scalar(other, self)
     }
 }
 
 impl Mul<Vector2d<f64>> for f64 {
     type Output = Vector2d<f64>;
+    #[inline(always)]
     fn mul(self, other: Vector2d<f64>) -> Vector2d<f64> {
-        Vector2d { x: self * other.x, y: self * other.y }
+        f64::v2_mul_scalar(other, self)
     }
 }
 

@@ -45,6 +45,7 @@ where
     T: Copy,
 {
     /// Create a vector
+    #[inline(always)]
     pub const fn new(x: T, y: T, z: T) -> Self {
         Self { x, y, z }
     }
@@ -62,12 +63,14 @@ where
 /// ```
 impl<T> Zero for Vector3d<T>
 where
-    T: Zero + PartialEq + Vector3dMath,
+    T: Copy + Zero + PartialEq + Vector3dMath,
 {
+    #[inline(always)]
     fn zero() -> Self {
         Self { x: T::zero(), y: T::zero(), z: T::zero() }
     }
 
+    #[inline(always)]
     fn is_zero(&self) -> bool {
         self.x == T::zero() && self.y == T::zero() && self.z == T::zero()
     }
@@ -85,7 +88,7 @@ where
 /// ```
 impl<T> Neg for Vector3d<T>
 where
-    T: Vector3dMath,
+    T: Copy + Vector3dMath,
 {
     type Output = Self;
     #[inline(always)]
@@ -107,9 +110,10 @@ where
 /// ```
 impl<T> Add for Vector3d<T>
 where
-    T: Vector3dMath,
+    T: Copy + Vector3dMath,
 {
-    type Output = Vector3d<T>;
+    type Output = Self;
+    #[inline(always)]
     fn add(self, other: Self) -> Self {
         T::v3_add(self, other)
     }
@@ -135,6 +139,7 @@ impl<T> AddAssign for Vector3d<T>
 where
     T: Copy + Vector3dMath,
 {
+    #[inline(always)]
     fn add_assign(&mut self, other: Self) {
         *self = *self + other;
     }
@@ -157,7 +162,7 @@ impl<T> MulAdd<T> for Vector3d<T>
 where
     T: Copy + Vector3dMath,
 {
-    type Output = Vector3d<T>;
+    type Output = Self;
     fn mul_add(self, k: T, other: Self) -> Self {
         T::v3_mul_add(self, k, other)
     }
@@ -180,6 +185,7 @@ impl<T> MulAddAssign<T> for Vector3d<T>
 where
     T: Copy + Vector3dMath,
 {
+    #[inline(always)]
     fn mul_add_assign(&mut self, k: T, other: Self) {
         *self = self.mul_add(k, other);
     }
@@ -198,9 +204,10 @@ where
 /// ```
 impl<T> Sub for Vector3d<T>
 where
-    T: Add<Output = T> + Vector3dMath,
+    T: Copy + Add<Output = T> + Vector3dMath,
 {
-    type Output = Vector3d<T>;
+    type Output = Self;
+    #[inline(always)]
     fn sub(self, other: Self) -> Self {
         // Reuse our existing SIMD-optimized Add and Neg implementations
         self + (-other)
@@ -222,6 +229,7 @@ impl<T> SubAssign for Vector3d<T>
 where
     T: Copy + Add<Output = T> + Vector3dMath,
 {
+    #[inline(always)]
     fn sub_assign(&mut self, other: Self) {
         *self = *self - other;
     }
@@ -239,15 +247,17 @@ where
 /// ```
 impl Mul<Vector3d<f32>> for f32 {
     type Output = Vector3d<f32>;
+    #[inline(always)]
     fn mul(self, other: Vector3d<f32>) -> Vector3d<f32> {
-        Vector3d { x: self * other.x, y: self * other.y, z: self * other.z }
+        f32::v3_mul_scalar(other, self)
     }
 }
 
 impl Mul<Vector3d<f64>> for f64 {
     type Output = Vector3d<f64>;
+    #[inline(always)]
     fn mul(self, other: Vector3d<f64>) -> Vector3d<f64> {
-        Vector3d { x: self * other.x, y: self * other.y, z: self * other.z }
+        f64::v3_mul_scalar(other, self)
     }
 }
 
@@ -266,6 +276,7 @@ where
     T: Copy + Vector3dMath,
 {
     type Output = Self;
+    #[inline(always)]
     fn mul(self, k: T) -> Self {
         T::v3_mul_scalar(self, k)
     }
@@ -285,6 +296,7 @@ impl<T> MulAssign<T> for Vector3d<T>
 where
     T: Copy + Vector3dMath,
 {
+    #[inline(always)]
     fn mul_assign(&mut self, k: T) {
         *self = *self * k;
     }
@@ -305,6 +317,7 @@ where
     T: Copy + Vector3dMath,
 {
     type Output = Self;
+    #[inline(always)]
     fn div(self, k: T) -> Self {
         T::v3_div_scalar(self, k)
     }
@@ -322,6 +335,7 @@ impl<T> DivAssign<T> for Vector3d<T>
 where
     T: Copy + Div<Output = T> + Vector3dMath,
 {
+    #[inline(always)]
     fn div_assign(&mut self, k: T) {
         *self = self.div(k);
     }
@@ -340,6 +354,7 @@ where
 /// ```
 impl<T> Index<usize> for Vector3d<T> {
     type Output = T;
+    #[inline(always)]
     fn index(&self, index: usize) -> &T {
         match index {
             0 => &self.x,
@@ -362,6 +377,7 @@ impl<T> Index<usize> for Vector3d<T> {
 /// assert_eq!(v, Vector3df32 { x:7.0, y:11.0, z:13.0 });
 /// ```
 impl<T> IndexMut<usize> for Vector3d<T> {
+    #[inline(always)]
     fn index_mut(&mut self, index: usize) -> &mut T {
         match index {
             0 => &mut self.x,
@@ -379,11 +395,13 @@ where
     T: Copy + Signed,
 {
     /// Return a copy of the vector with all components set to their absolute values
+    #[inline(always)]
     pub fn abs(self) -> Self {
         Self { x: self.x.abs(), y: self.y.abs(), z: self.z.abs() }
     }
 
     /// Set all components of the vector to their absolute values
+    #[inline(always)]
     pub fn abs_in_place(&mut self) {
         *self = self.abs();
     }
@@ -396,11 +414,13 @@ where
     T: Copy + FloatCore,
 {
     /// Return a copy of the vector with all components clamped to the specified range
+    #[inline(always)]
     pub fn clamp(self, min: T, max: T) -> Self {
         Self { x: self.x.clamp(min, max), y: self.y.clamp(min, max), z: self.z.clamp(min, max) }
     }
 
     /// Clamp all components of the vector to the specified range
+    #[inline(always)]
     pub fn clamp_in_place(&mut self, min: T, max: T) {
         self.x = self.x.clamp(min, max);
         self.y = self.y.clamp(min, max);
@@ -464,6 +484,7 @@ where
     /// let v = Vector3df32::new(2.0, 3.0, 5.0);
     /// assert_eq!(38.0, v.norm_squared());
     /// ```
+    #[inline(always)]
     pub fn norm_squared(self) -> T {
         self.dot(self)
     }
@@ -475,6 +496,7 @@ where
     /// let w = Vector3df32::new(7.0, 11.0, 13.0);
     /// assert_eq!(153.0, v.distance_squared(w));
     /// ```
+    #[inline(always)]
     pub fn distance_squared(self, other: Self) -> T {
         (self - other).norm_squared()
     }
@@ -487,6 +509,7 @@ where
     T: Copy + Add<Output = T> + SqrtMethods + Vector3dMath,
 {
     /// Return Euclidean norm
+    #[inline(always)]
     pub fn norm(self) -> T {
         Self::norm_squared(self).sqrt()
     }
@@ -497,6 +520,7 @@ where
     T: Copy + Zero + PartialEq + SqrtMethods + Vector3dMath,
 {
     /// Return normalized form of the vector
+    #[inline(always)]
     pub fn normalized(self) -> Self {
         let norm = self.norm();
         // If norm == 0.0 then the vector is already normalized
@@ -507,6 +531,7 @@ where
     }
 
     /// Normalize the vector in place
+    #[inline(always)]
     pub fn normalize(&mut self) -> Self {
         let norm = self.norm();
         //#[allow(clippy::assign_op_pattern)]
@@ -523,6 +548,7 @@ where
     T: Copy + Zero + SqrtMethods + Vector3dMath,
 {
     // Return distance between two points
+    #[inline(always)]
     pub fn distance(self, other: Self) -> T {
         self.distance_squared(other).sqrt()
     }
@@ -538,6 +564,7 @@ where
     /// let v = Vector3df32::new(2.0, 3.0, 5.0);
     /// assert_eq!(10.0, v.sum());
     /// ```
+    #[inline(always)]
     pub fn sum(self) -> T {
         self.x + self.y + self.z
     }
@@ -548,6 +575,7 @@ where
     /// let v = Vector3df32::new(2.0, 3.0, 5.0);
     /// assert_eq!(30.0, v.product());
     /// ```
+    #[inline(always)]
     pub fn product(self) -> T {
         self.x * self.y * self.z
     }
@@ -565,6 +593,7 @@ where
     /// let v = Vector3df32::new(2.0, 3.0, 7.0);
     /// assert_eq!(4.0, v.mean());
     /// ```
+    #[inline(always)]
     pub fn mean(self) -> T {
         let three = T::one() + T::one() + T::one();
         self.sum() / three
@@ -587,6 +616,7 @@ where
     /// assert_eq!(5.0, w.max());
     /// assert_eq!(5.0, x.max());
     /// ```
+    #[inline(always)]
     pub fn max(self) -> T {
         T::v3_max(self)
     }
@@ -601,6 +631,7 @@ where
     /// assert_eq!(2.0, w.min());
     /// assert_eq!(2.0, x.min());
     /// ```
+    #[inline(always)]
     pub fn min(self) -> T {
         T::v3_min(self)
     }
@@ -655,6 +686,7 @@ where
 /// assert_eq!(w, Vector3df32 { x: 7.0, y: 11.0, z: 13.0 });
 /// ```
 impl<T> From<(T, T, T)> for Vector3d<T> {
+    #[inline(always)]
     fn from((x, y, z): (T, T, T)) -> Self {
         Self { x, y, z }
     }
@@ -675,6 +707,7 @@ impl<T> From<[T; 3]> for Vector3d<T>
 where
     T: Copy,
 {
+    #[inline(always)]
     fn from(v: [T; 3]) -> Self {
         Self { x: v[0], y: v[1], z: v[2] }
     }
@@ -692,6 +725,7 @@ where
 /// assert_eq!(b, [2.0, 3.0, 5.0]);
 /// ```
 impl<T> From<Vector3d<T>> for [T; 3] {
+    #[inline(always)]
     fn from(v: Vector3d<T>) -> Self {
         [v.x, v.y, v.z]
     }
@@ -710,8 +744,9 @@ impl<T> From<Vector3d<T>> for [T; 3] {
 /// ```
 impl<T> From<Vector2d<T>> for Vector3d<T>
 where
-    T: Zero,
+    T: Copy + Zero,
 {
+    #[inline(always)]
     fn from(other: Vector2d<T>) -> Self {
         Self { x: other.x, y: other.y, z: T::zero() }
     }
@@ -722,6 +757,7 @@ pub type Vector3di16 = Vector3d<i16>;
 
 impl Mul<f32> for Vector3d<i16> {
     type Output = Self;
+    #[inline(always)]
     fn mul(self, k: f32) -> Self {
         Self { x: (self.x as f32 * k) as i16, y: (self.y as f32 * k) as i16, z: (self.z as f32 * k) as i16 }
     }
@@ -740,12 +776,14 @@ impl Mul<f32> for Vector3d<i16> {
 /// assert_eq!(w_i16, Vector3di16 { x: 7, y: 11, z: 13 });
 /// ```
 impl From<Vector3d<i16>> for Vector3d<f32> {
+    #[inline(always)]
     fn from(v: Vector3d<i16>) -> Self {
         Self { x: v.x as f32, y: v.y as f32, z: v.z as f32 }
     }
 }
 
 impl From<Vector3d<f32>> for Vector3d<i16> {
+    #[inline(always)]
     fn from(v: Vector3d<f32>) -> Self {
         Self { x: v.x as i16, y: v.y as i16, z: v.z as i16 }
     }

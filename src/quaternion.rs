@@ -63,6 +63,7 @@ impl<T> Default for Quaternion<T>
 where
     T: Copy + Zero + One,
 {
+    #[inline(always)]
     fn default() -> Self {
         Self { w: T::one(), x: T::zero(), y: T::zero(), z: T::zero() }
     }
@@ -75,6 +76,7 @@ where
     T: Copy,
 {
     /// Create a quaternion
+    #[inline(always)]
     pub const fn new(w: T, x: T, y: T, z: T) -> Self {
         Self { w, x, y, z }
     }
@@ -95,10 +97,12 @@ impl<T> Zero for Quaternion<T>
 where
     T: Copy + Zero + PartialEq + QuaternionMath,
 {
+    #[inline(always)]
     fn zero() -> Self {
         Self { w: T::zero(), x: T::zero(), y: T::zero(), z: T::zero() }
     }
 
+    #[inline(always)]
     fn is_zero(&self) -> bool {
         self.w == T::zero() && self.x == T::zero() && self.y == T::zero() && self.z == T::zero()
     }
@@ -119,10 +123,12 @@ impl<T> One for Quaternion<T>
 where
     T: Copy + Zero + One + PartialEq + Sub<Output = T> + Mul<Output = T> + QuaternionMath,
 {
+    #[inline(always)]
     fn one() -> Self {
         Self { w: T::one(), x: T::zero(), y: T::zero(), z: T::zero() }
     }
 
+    #[inline(always)]
     fn is_one(&self) -> bool {
         self.w == T::one() && self.x == T::zero() && self.y == T::zero() && self.z == T::zero()
     }
@@ -205,7 +211,8 @@ impl<T> MulAdd<T> for Quaternion<T>
 where
     T: Copy + QuaternionMath,
 {
-    type Output = Quaternion<T>;
+    type Output = Self;
+    #[inline(always)]
     fn mul_add(self, k: T, other: Self) -> Self {
         T::q_mul_add(self, k, other)
     }
@@ -228,6 +235,7 @@ impl<T> MulAddAssign<T> for Quaternion<T>
 where
     T: Copy + QuaternionMath,
 {
+    #[inline(always)]
     fn mul_add_assign(&mut self, k: T, other: Self) {
         *self = self.mul_add(k, other);
     }
@@ -241,6 +249,7 @@ where
     T: Copy + Add<Output = T> + QuaternionMath,
 {
     type Output = Self;
+    #[inline(always)]
     fn sub(self, rhs: Self) -> Self {
         // Reuse our existing SIMD-optimized Add and Neg implementations
         self + (-rhs)
@@ -254,6 +263,7 @@ impl<T> SubAssign for Quaternion<T>
 where
     T: Copy + Add<Output = T> + QuaternionMath,
 {
+    #[inline(always)]
     fn sub_assign(&mut self, rhs: Self) {
         *self = *self - rhs;
     }
@@ -264,15 +274,17 @@ where
 /// Pre-multiply quaternion by a constant
 impl Mul<Quaternion<f32>> for f32 {
     type Output = Quaternion<f32>;
-    fn mul(self, rhs: Quaternion<f32>) -> Quaternion<f32> {
-        Quaternion { w: self * rhs.w, x: self * rhs.x, y: self * rhs.y, z: self * rhs.z }
+    #[inline(always)]
+    fn mul(self, other: Quaternion<f32>) -> Quaternion<f32> {
+        f32::q_mul_scalar(other, self)
     }
 }
 
 impl Mul<Quaternion<f64>> for f64 {
     type Output = Quaternion<f64>;
-    fn mul(self, rhs: Quaternion<f64>) -> Quaternion<f64> {
-        Quaternion { w: self * rhs.w, x: self * rhs.x, y: self * rhs.y, z: self * rhs.z }
+    #[inline(always)]
+    fn mul(self, other: Quaternion<f64>) -> Quaternion<f64> {
+        f64::q_mul_scalar(other, self)
     }
 }
 
@@ -284,6 +296,7 @@ where
     T: Copy + QuaternionMath,
 {
     type Output = Self;
+    #[inline(always)]
     fn mul(self, k: T) -> Self {
         T::q_mul_scalar(self, k)
     }
@@ -296,6 +309,7 @@ impl<T> MulAssign<T> for Quaternion<T>
 where
     T: Copy + QuaternionMath,
 {
+    #[inline(always)]
     fn mul_assign(&mut self, k: T) {
         *self = *self * k;
     }
@@ -316,6 +330,7 @@ where
     T: Copy + QuaternionMath,
 {
     type Output = Self;
+    #[inline(always)]
     fn div(self, k: T) -> Self {
         T::q_div_scalar(self, k)
     }
@@ -333,6 +348,7 @@ impl<T> DivAssign<T> for Quaternion<T>
 where
     T: Copy + Div<Output = T> + QuaternionMath,
 {
+    #[inline(always)]
     fn div_assign(&mut self, k: T) {
         *self = self.div(k);
     }
@@ -348,6 +364,7 @@ where
     T: Copy + QuaternionMath,
 {
     type Output = Self;
+    #[inline(always)]
     fn mul(self, rhs: Self) -> Self {
         T::q_mul(self, rhs)
     }
@@ -360,6 +377,7 @@ impl<T> MulAssign<Quaternion<T>> for Quaternion<T>
 where
     T: Copy + QuaternionMath,
 {
+    #[inline(always)]
     fn mul_assign(&mut self, rhs: Self) {
         *self = self.mul(rhs);
     }
@@ -379,6 +397,7 @@ where
 /// ```
 impl<T> Index<usize> for Quaternion<T> {
     type Output = T;
+    #[inline(always)]
     fn index(&self, index: usize) -> &T {
         match index {
             0 => &self.w,
@@ -403,6 +422,7 @@ impl<T> Index<usize> for Quaternion<T> {
 /// assert_eq!(q, Quaternionf32 { w:7.0, x:11.0, y:13.0, z: 17.0 });
 /// ```
 impl<T> IndexMut<usize> for Quaternion<T> {
+    #[inline(always)]
     fn index_mut(&mut self, index: usize) -> &mut T {
         match index {
             0 => &mut self.w,
@@ -420,11 +440,13 @@ where
     T: Copy + Signed,
 {
     /// Return a copy of the quaternion with all components set to their absolute values
+    #[inline(always)]
     pub fn abs(self) -> Self {
         Self { w: self.w.abs(), x: self.x.abs(), y: self.y.abs(), z: self.z.abs() }
     }
 
     /// Set all components of the quaternion to their absolute values
+    #[inline(always)]
     pub fn abs_in_place(&mut self) {
         *self = self.abs();
     }
@@ -437,6 +459,7 @@ where
     T: Copy + FloatCore,
 {
     /// Return a copy of the quaternion with all components clamped to the specified range
+    #[inline(always)]
     pub fn clamp(self, min: T, max: T) -> Self {
         Self {
             w: self.w.clamp(min, max),
@@ -447,6 +470,7 @@ where
     }
 
     /// Clamp all components of the quaternion to the specified range
+    #[inline(always)]
     pub fn clamp_in_place(&mut self, min: T, max: T) {
         self.w = self.w.clamp(min, max);
         self.x = self.x.clamp(min, max);
@@ -462,6 +486,7 @@ where
     T: Copy + One + Add<Output = T> + Div<Output = T>,
 {
     /// Return the mean of all components of the quaternion
+    #[inline(always)]
     pub fn mean(self) -> T {
         let four = T::one() + T::one() + T::one() + T::one();
         (self.w + self.x + self.y + self.z) / four
@@ -475,6 +500,7 @@ where
     T: Copy + QuaternionMath,
 {
     /// Return square of Euclidean norm
+    #[inline(always)]
     pub fn norm_squared(self) -> T {
         T::q_norm_squared(self)
     }
@@ -487,6 +513,7 @@ where
     T: Copy + SqrtMethods + QuaternionMath,
 {
     /// Return Euclidean norm
+    #[inline(always)]
     pub fn norm(self) -> T {
         Self::norm_squared(self).sqrt()
     }
@@ -497,6 +524,7 @@ where
     T: Copy + Zero + PartialOrd + SqrtMethods + QuaternionMath,
 {
     /// Return normalized form of the quaternion
+    #[inline(always)]
     pub fn normalized(self) -> Self {
         let norm: T = self.norm();
         // If norm == 0.0 then the quaternion is already normalized
@@ -507,6 +535,7 @@ where
     }
 
     /// Normalize the quaternion in place
+    #[inline(always)]
     pub fn normalize(&mut self) {
         let norm: T = self.norm();
         // If norm == 0.0 then the quaternion is already normalized
@@ -641,15 +670,18 @@ where
         *self
     }
 
+    #[inline(always)]
     pub fn calculate_roll_radians(self) -> T {
         let half = T::one() / (T::one() + T::one());
         (self.w * self.x + self.y * self.z).atan2(half - self.x * self.x - self.y * self.y)
     }
 
+    #[inline(always)]
     pub fn calculate_pitch_radians(self) -> T {
         (self.w * self.y - self.x * self.z).asin()
     }
 
+    #[inline(always)]
     pub fn calculate_yaw_radians(self) -> T {
         let half = T::one() / (T::one() + T::one());
         (self.w * self.z + self.x * self.y).atan2(half - self.y * self.y - self.z * self.z)
@@ -702,10 +734,12 @@ where
     T: Copy + One + Neg<Output = T> + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Div<Output = T>,
 {
     /// Return the imaginary part of the quaternion
+    #[inline(always)]
     pub fn imaginary(self) -> Vector3d<T> {
         Vector3d::<T> { x: self.x, y: self.y, z: self.z }
     }
     /// Return the last column of the equivalent rotation matrix, but calculated more efficiently than a full conversion
+    #[inline(always)]
     pub fn direction_cosine_matrix_z(self) -> Vector3d<T> {
         let two = T::one() + T::one();
         Vector3d::<T> {
@@ -715,6 +749,7 @@ where
         }
     }
 
+    #[inline(always)]
     pub fn gravity(self) -> Vector3d<T> {
         let two = T::one() + T::one();
         Vector3d::<T> {
@@ -724,6 +759,7 @@ where
         }
     }
 
+    #[inline(always)]
     pub fn half_gravity(self) -> Vector3d<T> {
         let half: T = T::one() / (T::one() + T::one());
         Vector3d::<T> {
@@ -748,19 +784,23 @@ where
         + TrigonometricMethods
         + FloatCore,
 {
+    #[inline(always)]
     pub fn calculate_roll_degrees(self) -> T {
         self.calculate_roll_radians().to_degrees()
     }
 
+    #[inline(always)]
     pub fn calculate_pitch_degrees(self) -> T {
         self.calculate_pitch_radians().to_degrees()
     }
 
+    #[inline(always)]
     pub fn calculate_yaw_degrees(self) -> T {
         self.calculate_yaw_radians().to_degrees()
     }
 
     /// Create a Quaternion from roll, pitch, and yaw Euler angles (in degrees).
+    #[inline(always)]
     pub fn from_roll_pitch_yaw_angles_degrees(roll_degrees: T, pitch_degrees: T, yaw_degrees: T) -> Self {
         Self::from_roll_pitch_yaw_angles_radians(
             roll_degrees.to_radians(),
@@ -770,6 +810,7 @@ where
     }
 
     /// Create a Quaternion from roll and pitch Euler angles (in degrees), assumes yaw angle is zero.
+    #[inline(always)]
     pub fn from_roll_pitch_angles_degrees(roll_degrees: T, pitch_degrees: T) -> Self {
         Self::from_roll_pitch_angles_radians(roll_degrees.to_radians(), pitch_degrees.to_radians())
     }
@@ -791,6 +832,7 @@ impl<T> From<[T; 4]> for Quaternion<T>
 where
     T: Copy,
 {
+    #[inline(always)]
     fn from(q: [T; 4]) -> Self {
         Self { w: q[0], x: q[1], y: q[2], z: q[3] }
     }
@@ -809,6 +851,7 @@ where
 /// assert_eq!(b, [2.0, 3.0, 5.0, 7.0]);
 /// ```
 impl<T> From<Quaternion<T>> for [T; 4] {
+    #[inline(always)]
     fn from(q: Quaternion<T>) -> Self {
         [q.w, q.x, q.y, q.z]
     }
@@ -828,6 +871,7 @@ where
         + TrigonometricMethods
         + FloatCore,
 {
+    #[inline(always)]
     fn from((roll_radians, pitch_radians): (T, T)) -> Self {
         Quaternion::from_roll_pitch_angles_radians(roll_radians, pitch_radians)
     }
@@ -847,6 +891,7 @@ where
         + TrigonometricMethods
         + FloatCore,
 {
+    #[inline(always)]
     fn from((roll_radians, pitch_radians, yaw_radians): (T, T, T)) -> Self {
         Quaternion::from_roll_pitch_yaw_angles_radians(roll_radians, pitch_radians, yaw_radians)
     }
@@ -885,6 +930,7 @@ where
         + TrigonometricMethods
         + FloatCore,
 {
+    #[inline(always)]
     fn from(angles: RollPitch<T>) -> Self {
         Quaternion::from_roll_pitch_angles_radians(angles.roll, angles.pitch)
     }
