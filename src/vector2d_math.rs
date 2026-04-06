@@ -139,7 +139,7 @@ impl Vector2dMath for f32 {
         }
         #[cfg(not(feature = "simd"))]
         {
-            this.x * this.x + this.y * this.y + this.z * this.z
+            this.x * this.x + this.y * this.y
         }
     }
 
@@ -214,7 +214,7 @@ impl Vector2dMath for f32 {
         }
         #[cfg(not(feature = "simd"))]
         {
-            (a.x * b.x) + (a.y * b.y)
+            this.x * other.x + this.y * other.y
         }
     }
 

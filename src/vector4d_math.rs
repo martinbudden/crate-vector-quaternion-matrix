@@ -86,7 +86,7 @@ impl Vector4dMath for f32 {
         }
         #[cfg(not(feature = "simd"))]
         {
-            Vector4d { x: this.x + other.x, y: this.y + other.y, z: this.z + other.z }
+            Vector4d { x: this.x + other.x, y: this.y + other.y, z: this.z + other.z, t: this.t + other.t }
         }
     }
 
@@ -101,7 +101,7 @@ impl Vector4dMath for f32 {
         }
         #[cfg(not(feature = "simd"))]
         {
-            Vector4d { x: this.x * k, y: this.y * k, z: this.z * k }
+            Vector4d { x: this.x * k, y: this.y * k, z: this.z * k, t: this.t * k }
         }
     }
 
@@ -123,7 +123,12 @@ impl Vector4dMath for f32 {
         }
         #[cfg(not(feature = "simd"))]
         {
-            Vector3d { x: this.x * k + other.x, y: this.y * k + other.y, z: this.z * k + other.z }
+            Vector4d {
+                x: this.x * k + other.x,
+                y: this.y * k + other.y,
+                z: this.z * k + other.z,
+                t: this.t * k + other.t,
+            }
         }
     }
 
@@ -157,12 +162,17 @@ impl Vector4dMath for f32 {
         }
         #[cfg(not(feature = "simd"))]
         {
-            let norm_squared = Self::v3_norm_squared(this);
+            let norm_squared = Self::v4_norm_squared(this);
             if norm_squared == 0.0 {
                 return Vector4d::default();
             }
             let norm_reciprocal = norm_squared.sqrt_reciprocal();
-            Vector4d { x: this.x * norm_reciprocal, y: this.y * norm_reciprocal, z: this.z * norm_reciprocal }
+            Vector4d {
+                x: this.x * norm_reciprocal,
+                y: this.y * norm_reciprocal,
+                z: this.z * norm_reciprocal,
+                t: this.t * norm_reciprocal,
+            }
         }
     }
 
@@ -236,12 +246,7 @@ impl Vector4dMath for f32 {
         }
         #[cfg(not(feature = "simd"))]
         {
-            Vector3d {
-                x: this.y * other.z - this.z * other.y,
-                y: this.z * other.x - this.x * other.z,
-                z: this.x * other.y - this.y * other.x,
-                t: this.t * other.t - this.t * other.t,
-            }
+            this.x * other.x + this.y * other.y + this.z * other.z + this.t * other.t
         }
     }
 }

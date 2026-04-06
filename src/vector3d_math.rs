@@ -4,10 +4,14 @@ cfg_if! {
     if #[cfg(feature = "simd")] {
         use core::{mem::transmute};
         use core::simd::{f32x4,num::SimdFloat,simd_swizzle};
+        // must be aligned if using SIMD
+        const _: () = assert!(core::mem::size_of::<Vector3d<f32>>() == 16);
+        const _: () = assert!(core::mem::align_of::<Vector3d<f32>>() == 16);
+    } else if #[cfg(feature = "align")] {
         const _: () = assert!(core::mem::size_of::<Vector3d<f32>>() == 16);
         const _: () = assert!(core::mem::align_of::<Vector3d<f32>>() == 16);
     } else {
-        const _: () = assert!(core::mem::size_of::<Vector3d<f32>>() == 36);
+        const _: () = assert!(core::mem::size_of::<Vector3d<f32>>() == 12);
         const _: () = assert!(core::mem::align_of::<Vector3d<f32>>() == 4);
     }
 }

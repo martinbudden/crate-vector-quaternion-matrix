@@ -10,10 +10,10 @@ cfg_if! {
         const _: () = assert!(core::mem::size_of::<Matrix3x3<f64>>() == 96);
         const _: () = assert!(core::mem::align_of::<Matrix3x3<f64>>() == 32);
     } else {
-        const _: () = assert!(core::mem::size_of::<Matrix3x3<f32>>() == 12);
+        const _: () = assert!(core::mem::size_of::<Matrix3x3<f32>>() == 36);
         const _: () = assert!(core::mem::align_of::<Matrix3x3<f32>>() == 4);
-        const _: () = assert!(core::mem::size_of::<Matrix3x3<f64>>() == 24);
-        const _: () = assert!(core::mem::align_of::<Matrix3x3<f64>>() == 4);
+        const _: () = assert!(core::mem::size_of::<Matrix3x3<f64>>() == 72);
+        const _: () = assert!(core::mem::align_of::<Matrix3x3<f64>>() == 8);
     }
 }
 

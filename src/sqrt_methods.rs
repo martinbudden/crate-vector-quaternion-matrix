@@ -35,39 +35,44 @@ cfg_if! {
         impl SqrtMethods for f32 {
             #[inline(always)]
             fn sqrt(self) -> f32 {
-                /*#[cfg(feature = "rp2350")]
+                // Use hardware ASM for ARM chips with an FPU
+                #[cfg(all(target_arch = "arm", target_feature = "vfp2"))]
                 {
                     let mut result: f32;
                     unsafe {
-                        // vsqrt.f32 {destination}, {source}
                         core::arch::asm!(
-                            "vsqrt.f32 {0:s}, {1:s}",
-                            out(vreg) result,
-                            in(vreg) self,
+                            "vsqrt.f32 {res}, {val}",
+                            res = out(vreg) result,
+                            val = in(vreg) self,
                             options(nomem, nostack, preserves_flags)
                         );
                     }
                     result
                 }
-                #[cfg(not(feature = "rp2350"))]*/
-                    {libm::sqrtf(self)
+                // Fallback for non-ARM, non-FPU target
+                #[cfg(not(all(target_arch = "arm", target_feature = "vfp2")))]
+                {
+                    libm::sqrtf(self)
                 }
             }
             #[inline(always)]
             fn sqrt_reciprocal(self) -> f32 {
-                /*#[cfg(feature = "rp2350")]
+                // Use hardware ASM for ARM chips with an FPU
+                #[cfg(all(target_arch = "arm", target_feature = "vfp2"))]
                 {
                     let mut result: f32;
                     unsafe {
                         core::arch::asm!(
-                            "vrsqrt.f32 {0:s}, {1:s}",
-                            out(vreg) result,
-                            in(vreg) self,
+                            "vrsqrt.f32 {res}, {val}",
+                            res = out(vreg) result,
+                            val = in(vreg) self,
+                            options(nomem, nostack)
                         );
                     }
                     result
                 }
-                #[cfg(not(feature = "rp2350"))]*/
+                // Fallback for non-ARM, non-FPU target
+                #[cfg(not(all(target_arch = "arm", target_feature = "vfp2")))]
                 {
                     1.0 / libm::sqrtf(self)
                 }
@@ -102,63 +107,6 @@ cfg_if! {
         }
     }
 }
-
-#[inline(always)]
-fn _sqrtf(x: f32) -> f32 {
-    /*#[cfg(feature = "rp2350")]
-    {
-        let mut result: f32;
-        unsafe {
-            // vsqrt.f32 {destination}, {source}
-            core::arch::asm!(
-                "vsqrt.f32 {0:s}, {1:s}",
-                out(vreg) result,
-                in(vreg) self,
-                options(nomem, nostack, preserves_flags)
-            );
-        }
-        result
-    }
-    #[cfg(not(feature = "rp2350"))]*/
-    {
-        #[cfg(feature = "libm")]
-        {
-            let result: f32 = libm::sqrtf(x);
-            result
-        }
-        #[cfg(not(feature = "libm"))]
-        {
-            let result: f32 = 1.0 / _sqrt_reciprocalf(x);
-            result
-        }
-    }
-}
-
-/*pub trait MathExt {
-    fn inv_sqrt(self) -> f32;
-}
-
-impl MathExt for f32 {
-    #[inline(always)]
-    fn inv_sqrt(self) -> f32 {
-        #[cfg(feature = "rp2350")]
-        {
-            let mut result: f32;
-            unsafe {
-                core::arch::asm!(
-                    "vrsqrt.f32 {0:s}, {1:s}",
-                    out(vreg) result,
-                    in(vreg) self,
-                );
-            }
-            result
-        }
-        #[cfg(not(feature = "rp2350"))]
-        {
-            1.0 / self.sqrt() // Fallback for RP2040
-        }
-    }
-}*/
 
 #[inline(always)]
 fn _sqrt_reciprocalf(x: f32) -> f32 {

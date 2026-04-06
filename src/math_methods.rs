@@ -18,7 +18,7 @@ use num_traits::Float;
 // x.ln_1p()
 // x.hypot()
 
-/// `no_std` implementations of mathematical functions in method call syntax<br>
+/// `no_std` implementations of trigonometric functions in method call syntax<br>
 /// eg `x.sin()`, `x.cos()` etc.<br><br>
 pub trait TrigonometricMethods: Sized {
     fn sin_cos(self) -> (Self, Self);
@@ -36,7 +36,6 @@ cfg_if! {
         impl TrigonometricMethods for f32 {
             #[inline(always)]
             fn sin_cos(self) -> (Self, Self) {
-                // (libm::sinf(self), libm::cosf(self))
                 sin_cos(self)
             }
             #[inline(always)]
@@ -67,7 +66,6 @@ cfg_if! {
         impl TrigonometricMethods for f64 {
             #[inline(always)]
             fn sin_cos(self) -> (Self, Self) {
-                // (libm::sinf(self), libm::cosf(self))
                 sin_cos(self)
             }
             #[inline(always)]
@@ -130,16 +128,13 @@ cfg_if! {
             #[inline(always)]
             fn sin_cos(self) -> (Self, Self) {
                 (libm::sin(self), libm::cos(self))
-                //sin_cos(self)
             }
             #[inline(always)]
             fn sin(self) -> Self {
-                //sin(self)
                 libm::sin(self)
             }
             #[inline(always)]
             fn cos(self) -> Self {
-                //cos(self)
                 libm::cos(self)
             }
             #[inline(always)]
@@ -171,7 +166,8 @@ cfg_if! {
                 _cos(self)
             }
             fn tan(self) -> Self {
-                _sin(self) / _cos(self)
+                (sin, cos) = _sin_cos(self);
+                sin / cos
             }
             fn asin(self) -> Self {
                 compile_error!("Please enable the 'libm' or 'std' feature for math support.")

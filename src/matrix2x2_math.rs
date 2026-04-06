@@ -105,7 +105,7 @@ impl Matrix2x2Math for f32 {
         {
             let mut a = this.a;
             for (ii, r) in a.iter_mut().enumerate() {
-                *r = *r + other.a[ii];
+                *r += other.a[ii];
             }
             Matrix2x2::from(a)
         }
@@ -124,7 +124,7 @@ impl Matrix2x2Math for f32 {
         {
             let mut a = this.a;
             for r in a.iter_mut() {
-                *r = *r * other;
+                *r *= other;
             }
             Matrix2x2::from(a)
         }

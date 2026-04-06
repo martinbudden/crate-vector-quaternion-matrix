@@ -16,7 +16,7 @@ cfg_if! {
         const _: () = assert!(core::mem::size_of::<Vector3df32>() == 12);
         const _: () = assert!(core::mem::align_of::<Vector3df32>() == 4);
         const _: () = assert!(core::mem::size_of::<Vector3df64>() == 24);
-        const _: () = assert!(core::mem::align_of::<Vector3df64>() == 4);
+        const _: () = assert!(core::mem::align_of::<Vector3df64>() == 8);
     }
 }
 

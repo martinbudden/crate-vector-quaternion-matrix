@@ -7,8 +7,8 @@ cfg_if! {
     }
 }
 
-const _: () = assert!(core::mem::size_of::<Quaternion<f32>>() == 8);
-const _: () = assert!(core::mem::align_of::<Quaternion<f32>>() == 8);
+const _: () = assert!(core::mem::size_of::<Quaternion<f32>>() == 16);
+const _: () = assert!(core::mem::align_of::<Quaternion<f32>>() == 16);
 
 use crate::{Quaternion, SqrtMethods};
 
@@ -90,23 +90,23 @@ impl QuaternionMath for f32 {
     }
 
     #[inline(always)]
-    fn q_mul_scalar(this: Quaternion<Self>, other: Self) -> Quaternion<Self> {
+    fn q_mul_scalar(this: Quaternion<Self>, k: Self) -> Quaternion<Self> {
         #[cfg(feature = "simd")]
         {
             let this_simd = f32x4::from(this);
-            let other_simd = f32x4::splat(other);
+            let k_simd = f32x4::splat(k);
 
-            (this_simd * other_simd).into()
+            (this_simd * k_simd).into()
         }
         #[cfg(not(feature = "simd"))]
         {
-            Quaternion { w: this.w * a, x: this.x * a, y: this.y * a, z: this.z * a }
+            Quaternion { w: this.w * k, x: this.x * k, y: this.y * k, z: this.z * k }
         }
     }
 
     #[inline(always)]
-    fn q_div_scalar(this: Quaternion<Self>, other: Self) -> Quaternion<Self> {
-        Self::q_mul_scalar(this, 1.0 / other)
+    fn q_div_scalar(this: Quaternion<Self>, k: Self) -> Quaternion<Self> {
+        Self::q_mul_scalar(this, 1.0 / k)
     }
 
     #[inline(always)]

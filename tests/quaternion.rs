@@ -1,4 +1,4 @@
-use vector_quaternion_matrix::{Quaternion, Quaternionf32, Quaternionf64};
+use vector_quaternion_matrix::{Quaternion, Quaternionf32};
 
 const _: () = assert!(core::mem::size_of::<Quaternion<f32>>() == 16);
 const _: () = assert!(core::mem::align_of::<Quaternion<f32>>() == 16);
@@ -18,13 +18,14 @@ mod tests {
     }
     #[test]
     fn default() {
+        use num_traits::{One, Zero};
         let a = Quaternionf32::default();
         assert_eq!(a, Quaternion { w: 1.0, x: 0.0, y: 0.0, z: 0.0 });
-        /*assert!(a.is_one());
+        assert!(a.is_one());
         let z = Quaternionf32::zero();
         assert!(z.is_zero());
         let i = Quaternionf32::one();
-        assert!(i.is_one());*/
+        assert!(i.is_one());
     }
     #[test]
     fn from() {

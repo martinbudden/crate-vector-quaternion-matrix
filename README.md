@@ -24,6 +24,19 @@ The methods `sqrt` and `sqrt_reciprocal` are also provided.
 The `MathConstants` trait provides a the standard mathematical constants in a form that can be used in generic code
 ie `T:PI`.
 
+## SIMD support
+
+**SIMD** support can be enabled with the `simd` feature.
+
+This uses [portable simd](https://doc.rust-lang.org/core/simd/index.html), which requires the nightly compiler, since it is still
+unstable in rust.
+
+This can be invoked using `rustup`, eg:
+
+```sh
+rustup run nightly cargo build --features simd --target thumbv8m.main-none-eabi
+```
+
 ## Wider system
 
 This crates is part of a wider system of crates designed to work together to provide support for stabilized vehicles
@@ -62,7 +75,7 @@ I looked at a number of alternatives including
 [nalgebra](https://crates.io/crates/nalgebra),
 [glam](https://crates.io/crates/glam),
 and [micromath](https://crates.io/crates/micromath).
-But each one of these fell on one count or another.
+But none of these precisely satisfied my needs.
 I had previously written a C++ VectorQuaternionMatrix library, so porting that to Rust seemed like the best option.
 
 ## Vector alignment

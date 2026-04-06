@@ -650,27 +650,15 @@ where
 {
     #[inline(always)]
     pub fn rotate_by(self, q: Quaternion<T>) -> Self {
-        #[cfg(feature = "simd")]
-        {
-            // Extract the vector part of the quaternion (x, y, z)
-            let q_xyz = Vector3d { x: q.x, y: q.y, z: q.z };
+        // Extract the vector part of the quaternion (x, y, z)
+        let q_xyz = Vector3d { x: q.x, y: q.y, z: q.z };
 
-            // 1. t = 2 * (q_xyz cross v)
-            let t = q_xyz.cross(self) * (T::one() + T::one());
+        // 1. uv = 2 * (q_xyz cross v)
+        let uv = q_xyz.cross(self) * (T::one() + T::one());
 
-            // 2. res = v + w * t + (q_xyz cross t)
-            // This is the optimized Rodrigues form
-            self + (t * q.w) + q_xyz.cross(t)
-        }
-        #[cfg(not(feature = "simd"))]
-        {
-            // Scalar fallback (Standard Hamilton product logic)
-            let q_vec = Vector3d { x: q.x, y: q.y, z: q.z };
-            let uv = q_vec.cross(self);
-            let uuv = q_vec.cross(uv);
-
-            self + (uv * 2.0 * q.w) + (uuv * 2.0)
-        }
+        // 2. res = v + w * uv + (q_xyz cross t)
+        // This is the optimized Rodrigues form
+        self + (uv * q.w) + q_xyz.cross(uv)
     }
     #[inline(always)]
     pub fn rotate_back_by(self, q: Quaternion<T>) -> Self {
