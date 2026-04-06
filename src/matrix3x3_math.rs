@@ -1,4 +1,5 @@
 use cfg_if::cfg_if;
+
 cfg_if! {
     if #[cfg(feature = "simd")] {
         use core::simd::{f32x4,f32x8,num::SimdFloat};

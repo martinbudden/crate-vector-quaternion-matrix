@@ -109,6 +109,7 @@ where
     T: Copy + Matrix2x2Math,
 {
     type Output = Self;
+
     #[inline(always)]
     fn neg(self) -> Self::Output {
         T::m2x2_neg(self)
@@ -141,6 +142,7 @@ where
     T: Copy + Matrix2x2Math,
 {
     type Output = Self;
+
     #[inline(always)]
     fn add(self, other: Self) -> Self {
         T::m2x2_add(self, other)
@@ -192,6 +194,7 @@ where
     T: Copy + Matrix2x2Math,
 {
     type Output = Self;
+
     #[inline(always)]
     fn mul_add(self, k: T, other: Self) -> Self {
         T::m2x2_mul_add(self, k, other)
@@ -243,6 +246,7 @@ where
     T: Copy + Matrix2x2Math,
 {
     type Output = Self;
+
     #[inline(always)]
     fn sub(self, other: Self) -> Self {
         // Reuse our existing SIMD-optimized Add and Neg implementations
@@ -288,6 +292,7 @@ where
 /// ```
 impl Mul<Matrix2x2<f32>> for f32 {
     type Output = Matrix2x2<f32>;
+
     #[inline(always)]
     fn mul(self, other: Matrix2x2<f32>) -> Matrix2x2<f32> {
         f32::m2x2_mul_scalar(other, self)
@@ -319,6 +324,7 @@ where
     T: Copy + Matrix2x2Math,
 {
     type Output = Self;
+
     #[inline(always)]
     fn mul(self, other: T) -> Self {
         T::m2x2_mul_scalar(self, other)
@@ -363,6 +369,7 @@ where
     T: Copy + Matrix2x2Math,
 {
     type Output = Vector2d<T>;
+
     #[inline(always)]
     fn mul(self, other: Vector2d<T>) -> Vector2d<T> {
         T::m2x2_mul_vector(self, other)
@@ -385,6 +392,7 @@ where
     T: Copy + Matrix2x2Math,
 {
     type Output = Self;
+
     #[inline(always)]
     fn mul(self, other: Matrix2x2<T>) -> Self {
         T::m2x2_vector_mul(self, other)
@@ -417,6 +425,7 @@ where
     T: Copy + Matrix2x2Math,
 {
     type Output = Self;
+
     #[inline(always)]
     fn mul(self, other: Self) -> Self {
         T::m2x2_mul(self, other)
@@ -465,6 +474,7 @@ where
     T: Copy + Matrix2x2Math,
 {
     type Output = Self;
+
     #[inline(always)]
     fn div(self, other: T) -> Self {
         T::m2x2_div_scalar(self, other)

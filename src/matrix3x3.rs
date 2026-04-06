@@ -126,6 +126,7 @@ where
     T: Copy + Matrix3x3Math,
 {
     type Output = Self;
+
     #[inline(always)]
     fn neg(self) -> Self::Output {
         T::m3x3_neg(self)
@@ -161,6 +162,7 @@ where
     T: Copy + Matrix3x3Math,
 {
     type Output = Self;
+
     #[inline(always)]
     fn add(self, other: Self) -> Self {
         T::m3x3_add(self, other)
@@ -217,6 +219,7 @@ where
     T: Copy + Matrix3x3Math,
 {
     type Output = Self;
+
     #[inline(always)]
     fn mul_add(self, k: T, other: Self) -> Self {
         T::m3x3_mul_add(self, k, other)
@@ -274,6 +277,7 @@ where
     T: Copy + Matrix3x3Math,
 {
     type Output = Self;
+
     #[inline(always)]
     fn sub(self, other: Self) -> Self {
         // Reuse our existing SIMD-optimized Add and Neg implementations
@@ -357,6 +361,7 @@ where
     T: Copy + Matrix3x3Math,
 {
     type Output = Self;
+
     #[inline(always)]
     fn mul(self, other: T) -> Self {
         T::m3x3_mul_scalar(self, other)
@@ -426,6 +431,7 @@ where
     T: Copy + Matrix3x3Math,
 {
     type Output = Self;
+
     #[inline(always)]
     fn mul(self, other: Matrix3x3<T>) -> Self {
         T::m3x3_vector_mul(self, other)
@@ -461,6 +467,7 @@ where
     T: Copy + Matrix3x3Math,
 {
     type Output = Self;
+
     #[inline(always)]
     fn mul(self, other: Self) -> Self {
         T::m3x3_mul(self, other)
@@ -512,6 +519,7 @@ where
     T: Copy + Matrix3x3Math,
 {
     type Output = Self;
+
     #[inline(always)]
     fn div(self, other: T) -> Self {
         T::m3x3_div_scalar(self, other)

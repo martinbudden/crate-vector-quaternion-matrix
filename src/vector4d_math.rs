@@ -1,7 +1,7 @@
-#[cfg(feature = "simd")]
 use cfg_if::cfg_if;
+
 cfg_if! {
-    if #[cfg(feature = "align")] {
+    if #[cfg(feature = "simd")] {
         use core::{mem::transmute};
         use core::simd::{f32x4,num::SimdFloat};
     }

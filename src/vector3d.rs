@@ -91,6 +91,7 @@ where
     T: Copy + Vector3dMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn neg(self) -> Self::Output {
         T::v3_neg(self)
@@ -113,6 +114,7 @@ where
     T: Copy + Vector3dMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn add(self, other: Self) -> Self {
         T::v3_add(self, other)
@@ -163,6 +165,7 @@ where
     T: Copy + Vector3dMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn mul_add(self, k: T, other: Self) -> Self {
         T::v3_mul_add(self, k, other)
@@ -208,6 +211,7 @@ where
     T: Copy + Add<Output = T> + Vector3dMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn sub(self, other: Self) -> Self {
         // Reuse our existing SIMD-optimized Add and Neg implementations
@@ -277,6 +281,7 @@ where
     T: Copy + Vector3dMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn mul(self, k: T) -> Self {
         T::v3_mul_scalar(self, k)
@@ -318,6 +323,7 @@ where
     T: Copy + Vector3dMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn div(self, k: T) -> Self {
         T::v3_div_scalar(self, k)
@@ -758,6 +764,7 @@ pub type Vector3di16 = Vector3d<i16>;
 
 impl Mul<f32> for Vector3d<i16> {
     type Output = Self;
+
     #[inline(always)]
     fn mul(self, k: f32) -> Self {
         Self { x: (self.x as f32 * k) as i16, y: (self.y as f32 * k) as i16, z: (self.z as f32 * k) as i16 }

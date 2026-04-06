@@ -1,11 +1,14 @@
-#[cfg(feature = "simd")]
 use cfg_if::cfg_if;
+
 cfg_if! {
-    if #[cfg(feature = "align")] {
+    if #[cfg(feature = "simd")] {
         use core::{mem::transmute};
         use core::simd::{f32x4,num::SimdFloat};
     }
 }
+
+const _: () = assert!(core::mem::size_of::<Quaternion<f32>>() == 8);
+const _: () = assert!(core::mem::align_of::<Quaternion<f32>>() == 8);
 
 use crate::{Quaternion, SqrtMethods};
 
@@ -92,6 +95,7 @@ impl QuaternionMath for f32 {
         {
             let this_simd = f32x4::from(this);
             let other_simd = f32x4::splat(other);
+
             (this_simd * other_simd).into()
         }
         #[cfg(not(feature = "simd"))]
@@ -154,6 +158,7 @@ impl QuaternionMath for f32 {
         #[cfg(feature = "simd")]
         {
             let this_simd = f32x4::from(this);
+
             (this_simd * this_simd).reduce_sum()
         }
         #[cfg(not(feature = "simd"))]
@@ -174,6 +179,7 @@ impl QuaternionMath for f32 {
             }
             let norm_reciprocal = norm_squared.sqrt_reciprocal(); // Uses our hardware vrsqrt
             let scale = f32x4::splat(norm_reciprocal);
+
             (this_simd * scale).into()
         }
         #[cfg(not(feature = "simd"))]
@@ -205,6 +211,7 @@ impl QuaternionMath for f32 {
             let this_simd = f32x4::from(this);
             // Negate x, y, z but keep w positive
             let ret_simd = this_simd * f32x4::from_array([1.0, -1.0, -1.0, -1.0]);
+
             ret_simd.into()
         }
         #[cfg(not(feature = "simd"))]

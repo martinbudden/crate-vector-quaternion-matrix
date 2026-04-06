@@ -74,6 +74,7 @@ where
     T: Copy + Vector4dMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn neg(self) -> Self::Output {
         T::v4_neg(self)
@@ -96,6 +97,7 @@ where
     T: Copy + Vector4dMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn add(self, other: Self) -> Self {
         T::v4_add(self, other)
@@ -146,6 +148,7 @@ where
     T: Copy + Vector4dMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn mul_add(self, k: T, other: Self) -> Self {
         T::v4_mul_add(self, k, other)
@@ -190,7 +193,8 @@ impl<T> Sub for Vector4d<T>
 where
     T: Copy + Add<Output = T> + Vector4dMath,
 {
-    type Output = Vector4d<T>;
+    type Output = Self;
+
     #[inline(always)]
     fn sub(self, other: Self) -> Self {
         // Reuse our existing SIMD-optimized Add and Neg implementations
@@ -260,6 +264,7 @@ where
     T: Copy + Vector4dMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn mul(self, k: T) -> Self {
         T::v4_mul_scalar(self, k)
@@ -301,6 +306,7 @@ where
     T: Copy + Vector4dMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn div(self, k: T) -> Self {
         T::v4_div_scalar(self, k)

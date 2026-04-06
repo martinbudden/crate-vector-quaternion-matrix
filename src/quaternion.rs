@@ -212,6 +212,7 @@ where
     T: Copy + QuaternionMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn mul_add(self, k: T, other: Self) -> Self {
         T::q_mul_add(self, k, other)
@@ -249,6 +250,7 @@ where
     T: Copy + Add<Output = T> + QuaternionMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn sub(self, rhs: Self) -> Self {
         // Reuse our existing SIMD-optimized Add and Neg implementations
@@ -296,6 +298,7 @@ where
     T: Copy + QuaternionMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn mul(self, k: T) -> Self {
         T::q_mul_scalar(self, k)
@@ -330,6 +333,7 @@ where
     T: Copy + QuaternionMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn div(self, k: T) -> Self {
         T::q_div_scalar(self, k)
@@ -364,6 +368,7 @@ where
     T: Copy + QuaternionMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn mul(self, rhs: Self) -> Self {
         T::q_mul(self, rhs)

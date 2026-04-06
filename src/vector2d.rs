@@ -73,6 +73,7 @@ where
     T: Copy + Vector2dMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn neg(self) -> Self::Output {
         T::v2_neg(self)
@@ -95,6 +96,7 @@ where
     T: Copy + Vector2dMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn add(self, other: Self) -> Self {
         T::v2_add(self, other)
@@ -145,6 +147,7 @@ where
     T: Copy + Vector2dMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn mul_add(self, k: T, other: Self) -> Self {
         T::v2_mul_add(self, k, other)
@@ -190,6 +193,7 @@ where
     T: Copy + Vector2dMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn sub(self, other: Self) -> Self {
         // Reuse our existing SIMD-optimized Add and Neg implementations
@@ -259,6 +263,7 @@ where
     T: Copy + Vector2dMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn mul(self, k: T) -> Self {
         T::v2_mul_scalar(self, k)
@@ -300,6 +305,7 @@ where
     T: Copy + Vector2dMath,
 {
     type Output = Self;
+
     #[inline(always)]
     fn div(self, k: T) -> Self {
         T::v2_div_scalar(self, k)
