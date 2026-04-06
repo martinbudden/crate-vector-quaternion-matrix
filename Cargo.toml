@@ -7,11 +7,11 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 
 [features]
-#default = ["align", "libm", "simd",]
-default = ["align", "libm",]
-#default = ["libm",]
+default = ["libm",]
+#default = ["libm", "simd",]
+#default = ["libm", "no_align"]
 std = []
-align = []
+no_align = []
 simd = []
 libm = []
 

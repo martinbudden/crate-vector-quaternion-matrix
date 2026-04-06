@@ -4,16 +4,16 @@ use vector_quaternion_matrix::{Matrix3x3, Matrix3x3f32, Vector3d};
 
 // **** Align ****
 cfg_if! {
-    if #[cfg(feature = "align")] {
-        const _: () = assert!(core::mem::size_of::<Matrix3x3<f32>>() == 64);
-        const _: () = assert!(core::mem::align_of::<Matrix3x3<f32>>() == 32);
-        const _: () = assert!(core::mem::size_of::<Matrix3x3<f64>>() == 96);
-        const _: () = assert!(core::mem::align_of::<Matrix3x3<f64>>() == 32);
-    } else {
+    if #[cfg(feature = "no_align")] {
         const _: () = assert!(core::mem::size_of::<Matrix3x3<f32>>() == 36);
         const _: () = assert!(core::mem::align_of::<Matrix3x3<f32>>() == 4);
         const _: () = assert!(core::mem::size_of::<Matrix3x3<f64>>() == 72);
         const _: () = assert!(core::mem::align_of::<Matrix3x3<f64>>() == 8);
+    } else {
+        const _: () = assert!(core::mem::size_of::<Matrix3x3<f32>>() == 64);
+        const _: () = assert!(core::mem::align_of::<Matrix3x3<f32>>() == 32);
+        const _: () = assert!(core::mem::size_of::<Matrix3x3<f64>>() == 96);
+        const _: () = assert!(core::mem::align_of::<Matrix3x3<f64>>() == 32);
     }
 }
 

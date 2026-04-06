@@ -12,7 +12,21 @@ pub type Matrix3x3f64 = Matrix3x3<f64>;
 // **** Define ****
 
 cfg_if! {
-if #[cfg(feature = "align")] {
+if #[cfg(feature = "no_align")] {
+// Compact 36-byte version
+
+/// `Matrix3x3<T>`: 3x3 Matrix of type `T`.<br>
+/// Aliases `Matrix3x3f32` and `Matrix3x3f64` are provided.<br>
+/// Internal implementation is a flattened 3x3 matrix: an array of 9 elements stored in row-major order<br>
+/// That is the element `m[row][col]` is at array position `[row * 3 + col]`, so element `m12` is at `a[5]`.
+#[repr(C)]
+#[derive(Clone, Copy, Debug, Default, PartialEq)]
+pub struct Matrix3x3<T> {
+    // Flattened 3x3 matrix: 9 elements in row-major order
+    pub(crate) a: [T; 9],
+}
+
+} else {
 // High-performance 32-byte aligned version, allows use of SIMD and f32x8
 
 /// `Matrix3x3<T>`: 3x3 Matrix of type `T`.<br>
@@ -21,18 +35,6 @@ if #[cfg(feature = "align")] {
 /// Internal implementation is using a flattened 1-dimensional array: an array of 9 elements stored in row-major order.
 /// That is the element `m[row][col]` is at array position `[row * 3 + col]`, so element `m12` is at `a[5]`.<br><br>
 #[repr(C, align(32))]
-#[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct Matrix3x3<T> {
-    // Flattened 3x3 matrix: 9 elements in row-major order
-    pub(crate) a: [T; 9],
-}
-} else {
-// Compact 36-byte version
-/// `Matrix3x3<T>`: 3x3 Matrix of type `T`.<br>
-/// Aliases `Matrix3x3f32` and `Matrix3x3f64` are provided.<br>
-/// Internal implementation is a flattened 3x3 matrix: an array of 9 elements stored in row-major order<br>
-/// That is the element `m[row][col]` is at array position `[row * 3 + col]`, so element `m12` is at `a[5]`.
-#[repr(C)]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Matrix3x3<T> {
     // Flattened 3x3 matrix: 9 elements in row-major order
