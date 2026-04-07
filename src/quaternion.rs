@@ -87,10 +87,9 @@ where
 /// Zero quaternion
 /// ```
 /// # use vector_quaternion_matrix::Quaternionf32;
-/// # use num_traits::Zero;
-///
+/// # use num_traits::{zero,Zero};
 /// let z = Quaternionf32::zero();
-///
+/// assert!(z.is_zero());
 /// assert_eq!(z, Quaternionf32 { w:0.0, x: 0.0, y: 0.0, z: 0.0 });
 /// ```
 impl<T> Zero for Quaternion<T>
@@ -247,7 +246,7 @@ where
 /// Subtract two quaternions
 impl<T> Sub for Quaternion<T>
 where
-    T: Copy + Add<Output = T> + QuaternionMath,
+    T: Copy + QuaternionMath,
 {
     type Output = Self;
 
@@ -263,7 +262,7 @@ where
 /// Subtract one quaternion from another
 impl<T> SubAssign for Quaternion<T>
 where
-    T: Copy + Add<Output = T> + QuaternionMath,
+    T: Copy + QuaternionMath,
 {
     #[inline(always)]
     fn sub_assign(&mut self, other: Self) {
@@ -350,7 +349,7 @@ where
 /// ```
 impl<T> DivAssign<T> for Quaternion<T>
 where
-    T: Copy + Div<Output = T> + QuaternionMath,
+    T: Copy + QuaternionMath,
 {
     #[inline(always)]
     fn div_assign(&mut self, k: T) {
@@ -359,8 +358,6 @@ where
 }
 
 // **** Mul ****
-
-// **** MulAdd ****
 
 /// Multiply two quaternions
 impl<T> Mul<Quaternion<T>> for Quaternion<T>
@@ -526,7 +523,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Copy + Zero + PartialOrd + SqrtMethods + QuaternionMath,
+    T: Copy + Zero + PartialEq + SqrtMethods + QuaternionMath,
 {
     /// Return normalized form of the quaternion
     #[inline(always)]
@@ -553,7 +550,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Copy + Zero + One + PartialOrd + Neg<Output = T> + Sub<Output = T> + Div<Output = T> + SqrtMethods,
+    T: Copy + Zero + One + Sub<Output = T> + Div<Output = T> + SqrtMethods,
 {
     pub fn rotate(self, v: &Vector3d<T>) -> Vector3d<T> {
         let two: T = T::one() + T::one();
@@ -615,7 +612,12 @@ where
         let b: T = half - self.x * self.x - self.y * self.y;
         a * (a * a + b * b).sqrt_reciprocal()
     }
+}
 
+impl<T> Quaternion<T>
+where
+    T: Copy + Zero + One + PartialOrd + Neg<Output = T> + Sub<Output = T> + Div<Output = T> + SqrtMethods,
+{
     /// clip sin(roll_angle) to +/-1.0 when roll angle outside range [-90 degrees, 90 degrees]
     pub fn sin_roll_clipped(self) -> T {
         let half = T::one() / (T::one() + T::one());

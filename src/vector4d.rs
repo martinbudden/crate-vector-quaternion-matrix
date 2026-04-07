@@ -39,9 +39,9 @@ where
 /// Zero vector
 /// ```
 /// # use vector_quaternion_matrix::Vector4df32;
-/// # use num_traits::zero;
+/// # use num_traits::{zero,Zero};
 /// let z: Vector4df32 = zero();
-///
+/// assert!(z.is_zero());
 /// assert_eq!(z, Vector4df32 { x: 0.0, y: 0.0, z: 0.0, t: 0.0 });
 /// ```
 impl<T> Zero for Vector4d<T>
@@ -191,7 +191,7 @@ where
 /// ```
 impl<T> Sub for Vector4d<T>
 where
-    T: Copy + Add<Output = T> + Vector4dMath,
+    T: Copy + Vector4dMath,
 {
     type Output = Self;
 
@@ -215,7 +215,7 @@ where
 /// ```
 impl<T> SubAssign for Vector4d<T>
 where
-    T: Copy + Add<Output = T> + Vector4dMath,
+    T: Copy + Vector4dMath,
 {
     #[inline(always)]
     fn sub_assign(&mut self, other: Self) {
@@ -323,7 +323,7 @@ where
 /// ```
 impl<T> DivAssign<T> for Vector4d<T>
 where
-    T: Copy + Div<Output = T> + Vector4dMath,
+    T: Copy + Vector4dMath,
 {
     #[inline(always)]
     fn div_assign(&mut self, k: T) {
@@ -452,7 +452,7 @@ where
 
 impl<T> Vector4d<T>
 where
-    T: Copy + Add<Output = T> + Vector4dMath,
+    T: Copy + Vector4dMath,
 {
     /// Return square of Euclidean norm
     /// ```
@@ -482,7 +482,7 @@ where
 
 impl<T> Vector4d<T>
 where
-    T: Copy + Add<Output = T> + SqrtMethods + Vector4dMath,
+    T: Copy + SqrtMethods + Vector4dMath,
 {
     /// Return Euclidean norm
     #[inline(always)]

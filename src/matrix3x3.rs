@@ -680,8 +680,9 @@ where
 
     /// Set all components of the matrix to their absolute values
     #[inline(always)]
-    pub fn abs_in_place(&mut self) {
+    pub fn abs_in_place(&mut self) -> Self {
         *self = self.abs();
+        *self
     }
 }
 
@@ -691,18 +692,20 @@ where
     T: Copy + FloatCore,
 {
     /// Return a copy of the matrix with all components clamped to the specified range
+    #[inline(always)]
     pub fn clamp(self, min: T, max: T) -> Self {
-        let mut data = self.a;
-        for d in data.iter_mut() {
-            *d = d.clamp(min, max);
+        let mut a = self.a;
+        for it in a.iter_mut() {
+            *it = it.clamp(min, max);
         }
-        Self { a: data }
+        Self { a }
     }
 
     /// Clamp all components of the matrix to the specified range
     #[inline(always)]
-    pub fn clamp_in_place(&mut self, min: T, max: T) {
+    pub fn clamp_in_place(&mut self, min: T, max: T) -> Self {
         *self = self.clamp(min, max);
+        *self
     }
 }
 
@@ -827,8 +830,9 @@ where
     ///                                    5.0, 13.0, 23.0]));
     /// ```
     #[inline(always)]
-    pub fn transpose_in_place(&mut self) {
+    pub fn transpose_in_place(&mut self) -> Self {
         *self = self.transpose();
+        *self
     }
 }
 
@@ -863,8 +867,9 @@ where
     /// assert_eq!(m.adjugate(), n);
     /// ```
     #[inline(always)]
-    pub fn adjugate_in_place(&mut self) {
+    pub fn adjugate_in_place(&mut self) -> Self {
         *self = self.adjugate();
+        *self
     }
     /// Add vector to diagonal of matrix, in-place
     /// ```
@@ -882,10 +887,11 @@ where
     ///                                    17.0, 19.0, 53.0]));
     /// ```
     #[inline(always)]
-    pub fn add_to_diagonal_in_place(&mut self, v: Vector3d<T>) {
+    pub fn add_to_diagonal_in_place(&mut self, v: Vector3d<T>) -> Self {
         self.a[0] = self.a[0] + v.x;
         self.a[4] = self.a[4] + v.y;
         self.a[8] = self.a[8] + v.z;
+        *self
     }
 
     /// Subtract vector from diagonal of matrix, in-place
@@ -904,10 +910,11 @@ where
     ///                                    17.0, 19.0,  -7.0]));
     /// ```
     #[inline(always)]
-    pub fn subtract_from_diagonal_in_place(&mut self, v: Vector3d<T>) {
+    pub fn subtract_from_diagonal_in_place(&mut self, v: Vector3d<T>) -> Self {
         self.a[0] = self.a[0] - v.x;
         self.a[4] = self.a[4] - v.y;
         self.a[8] = self.a[8] - v.z;
+        *self
     }
 
     /// Matrix determinant
@@ -1116,7 +1123,6 @@ where
     /// ```
     /// # use vector_quaternion_matrix::Matrix3x3f32;
     /// # use num_traits::Zero;
-    ///
     /// let z = Matrix3x3f32::zero();
     /// assert!(z.is_near_zero());
     /// ```

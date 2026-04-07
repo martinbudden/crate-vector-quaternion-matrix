@@ -58,9 +58,9 @@ where
 /// Zero vector
 /// ```
 /// # use vector_quaternion_matrix::Vector3df32;
-/// # use num_traits::zero;
+/// # use num_traits::{zero,Zero};
 /// let z: Vector3df32 = zero();
-///
+/// assert!(z.is_zero());
 /// assert_eq!(z, Vector3df32 { x: 0.0, y: 0.0, z: 0.0 });
 /// ```
 impl<T> Zero for Vector3d<T>
@@ -210,7 +210,7 @@ where
 /// ```
 impl<T> Sub for Vector3d<T>
 where
-    T: Copy + Add<Output = T> + Vector3dMath,
+    T: Copy + Vector3dMath,
 {
     type Output = Self;
 
@@ -234,7 +234,7 @@ where
 /// ```
 impl<T> SubAssign for Vector3d<T>
 where
-    T: Copy + Add<Output = T> + Vector3dMath,
+    T: Copy + Vector3dMath,
 {
     #[inline(always)]
     fn sub_assign(&mut self, other: Self) {
@@ -310,7 +310,7 @@ where
     }
 }
 
-// **** Div scalar ****
+// **** Div by scalar ****
 
 /// Divide a vector by a constant
 /// ```
@@ -342,7 +342,7 @@ where
 /// ```
 impl<T> DivAssign<T> for Vector3d<T>
 where
-    T: Copy + Div<Output = T> + Vector3dMath,
+    T: Copy + Vector3dMath,
 {
     #[inline(always)]
     fn div_assign(&mut self, k: T) {
@@ -485,7 +485,7 @@ where
 
 impl<T> Vector3d<T>
 where
-    T: Copy + Add<Output = T> + Vector3dMath,
+    T: Copy + Vector3dMath,
 {
     /// Return square of Euclidean norm
     /// ```
@@ -515,7 +515,7 @@ where
 
 impl<T> Vector3d<T>
 where
-    T: Copy + Add<Output = T> + SqrtMethods + Vector3dMath,
+    T: Copy + SqrtMethods + Vector3dMath,
 {
     /// Return Euclidean norm
     #[inline(always)]

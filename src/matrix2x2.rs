@@ -605,8 +605,9 @@ where
 
     /// Set all components of the matrix to their absolute values
     #[inline(always)]
-    pub fn abs_in_place(&mut self) {
+    pub fn abs_in_place(&mut self) -> Self {
         *self = self.abs();
+        *self
     }
 }
 
@@ -644,18 +645,17 @@ where
     #[inline(always)]
     pub fn clamp(self, min: T, max: T) -> Self {
         let mut a = self.a;
-        for a in a.iter_mut() {
-            *a = a.clamp(min, max);
+        for it in a.iter_mut() {
+            *it = it.clamp(min, max);
         }
         Self { a }
     }
 
     /// Clamp all components of the matrix to the specified range
     #[inline(always)]
-    pub fn clamp_in_place(&mut self, min: T, max: T) {
-        for a in self.a.iter_mut() {
-            *a = a.clamp(min, max);
-        }
+    pub fn clamp_in_place(&mut self, min: T, max: T) -> Self {
+        *self = self.clamp(min, max);
+        *self
     }
 }
 
@@ -758,8 +758,9 @@ where
     ///                                    3.0, 11.0]));
     /// ```
     #[inline(always)]
-    pub fn transpose_in_place(&mut self) {
+    pub fn transpose_in_place(&mut self) -> Self {
         *self = self.transpose();
+        *self
     }
 }
 
@@ -792,8 +793,9 @@ where
     /// assert_eq!(m.adjugate(), n);
     /// ```
     #[inline(always)]
-    pub fn adjugate_in_place(&mut self) {
+    pub fn adjugate_in_place(&mut self) -> Self {
         *self = self.adjugate();
+        *self
     }
     /// Add vector to diagonal of matrix, in-place
     /// ```
@@ -809,9 +811,10 @@ where
     ///                                     7.0, 31.0]));
     /// ```
     #[inline(always)]
-    pub fn add_to_diagonal_in_place(&mut self, v: Vector2d<T>) {
+    pub fn add_to_diagonal_in_place(&mut self, v: Vector2d<T>) -> Self {
         self.a[0] = self.a[0] + v.x;
         self.a[3] = self.a[3] + v.y;
+        *self
     }
 
     /// Subtract vector from diagonal of matrix, in-place
@@ -828,9 +831,10 @@ where
     ///                                     7.0, -9.0]));
     /// ```
     #[inline(always)]
-    pub fn subtract_from_diagonal_in_place(&mut self, v: Vector2d<T>) {
+    pub fn subtract_from_diagonal_in_place(&mut self, v: Vector2d<T>) -> Self {
         self.a[0] = self.a[0] + (-v.x);
         self.a[3] = self.a[3] + (-v.y);
+        *self
     }
 
     /// Matrix determinant
@@ -1017,13 +1021,13 @@ where
     /// assert_eq!(None, n);
     ///
     /// ```
-    pub fn try_inverse(self) -> Option<Self> {
+    pub fn try_inverse(self) -> Result<Self, MatrixError> {
         let determinant = self.determinant();
         if determinant.abs() < T::EPSILON {
-            return None;
+            return Err(MatrixError::ZeroDeterminant);
         }
         let adjugate = self.adjugate();
-        Some(adjugate / determinant)
+        Ok(adjugate / determinant)
     }
     /// Return true if matrix is near zero
     /// ```

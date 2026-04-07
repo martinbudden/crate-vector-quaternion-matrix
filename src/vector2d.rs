@@ -38,9 +38,9 @@ where
 /// Zero vector
 /// ```
 /// # use vector_quaternion_matrix::Vector2df32;
-/// # use num_traits::zero;
+/// # use num_traits::{zero,Zero};
 /// let z: Vector2df32 = zero();
-///
+/// assert!(z.is_zero());
 /// assert_eq!(z, Vector2df32 { x: 0.0, y: 0.0 });
 /// ```
 impl<T> Zero for Vector2d<T>
@@ -322,7 +322,7 @@ where
 /// ```
 impl<T> DivAssign<T> for Vector2d<T>
 where
-    T: Copy + Div<Output = T> + Vector2dMath,
+    T: Copy + Vector2dMath,
 {
     #[inline(always)]
     fn div_assign(&mut self, k: T) {
@@ -461,7 +461,7 @@ where
 
 impl<T> Vector2d<T>
 where
-    T: Copy + Add<Output = T> + Vector2dMath,
+    T: Copy + Vector2dMath,
 {
     /// Return square of Euclidean norm
     /// ```
@@ -491,7 +491,7 @@ where
 
 impl<T> Vector2d<T>
 where
-    T: Copy + Add<Output = T> + SqrtMethods + Vector2dMath,
+    T: Copy + SqrtMethods + Vector2dMath,
 {
     /// Return Euclidean norm
     #[inline(always)]
