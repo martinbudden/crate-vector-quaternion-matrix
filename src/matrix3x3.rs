@@ -840,7 +840,8 @@ impl<T> Matrix3x3<T>
 where
     T: Copy + Matrix3x3Math + One + Neg<Output = T> + Add<Output = T> + Sub<Output = T>,
 {
-    /// Adjugate matrix
+    /// Adjugate of this matrix, ie the transpose of the cofactor matrix.
+    /// Equivalent to the inverse but without dividing by the determinant of the matrix.
     /// ```
     /// # use vector_quaternion_matrix::Matrix3x3f32;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
