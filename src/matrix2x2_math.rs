@@ -40,7 +40,6 @@ impl From<f32x4> for Matrix2x2<f32> {
 
 /// Math functions for Matrix2x2, using **SIMD** accelerations for `f32`.
 pub trait Matrix2x2Math: Sized {
-    fn m2x2_reciprocal(self) -> Self;
     fn m2x2_neg(this: Matrix2x2<Self>) -> Matrix2x2<Self>;
     fn m2x2_abs(this: Matrix2x2<Self>) -> Matrix2x2<Self>;
     fn m2x2_add(this: Matrix2x2<Self>, this: Matrix2x2<Self>) -> Matrix2x2<Self>;
@@ -62,11 +61,6 @@ pub trait Matrix2x2Math: Sized {
 }
 
 impl Matrix2x2Math for f32 {
-    #[inline(always)]
-    fn m2x2_reciprocal(self) -> Self {
-        1.0 / self
-    }
-
     #[inline(always)]
     fn m2x2_neg(this: Matrix2x2<Self>) -> Matrix2x2<Self> {
         #[cfg(feature = "simd")]
@@ -228,11 +222,6 @@ impl Matrix2x2Math for f32 {
 // **** f64 ****
 
 impl Matrix2x2Math for f64 {
-    #[inline(always)]
-    fn m2x2_reciprocal(self) -> Self {
-        1.0 / self
-    }
-
     #[inline(always)]
     fn m2x2_neg(this: Matrix2x2<Self>) -> Matrix2x2<Self> {
         let mut a = this.a;

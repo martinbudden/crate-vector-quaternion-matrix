@@ -21,7 +21,6 @@ use crate::{Matrix3x3, Vector3d};
 
 /// Math functions for Matrix3x3, using **SIMD** accelerations for `f32`.<br><br>
 pub trait Matrix3x3Math: Sized {
-    fn m3x3_reciprocal(self) -> Self;
     fn m3x3_neg(this: Matrix3x3<Self>) -> Matrix3x3<Self>;
     fn m3x3_abs(this: Matrix3x3<Self>) -> Matrix3x3<Self>;
     fn m3x3_add(this: Matrix3x3<Self>, this: Matrix3x3<Self>) -> Matrix3x3<Self>;
@@ -43,11 +42,6 @@ pub trait Matrix3x3Math: Sized {
 }
 
 impl Matrix3x3Math for f32 {
-    #[inline(always)]
-    fn m3x3_reciprocal(self) -> Self {
-        1.0 / self
-    }
-
     #[inline(always)]
     fn m3x3_neg(this: Matrix3x3<Self>) -> Matrix3x3<Self> {
         let ret = core::array::from_fn(|ii| -this.a[ii]);
@@ -284,11 +278,6 @@ impl Matrix3x3Math for f32 {
 // **** f64 ****
 
 impl Matrix3x3Math for f64 {
-    #[inline(always)]
-    fn m3x3_reciprocal(self) -> Self {
-        1.0 / self
-    }
-
     #[inline(always)]
     fn m3x3_neg(this: Matrix3x3<Self>) -> Matrix3x3<Self> {
         let mut a = this.a;

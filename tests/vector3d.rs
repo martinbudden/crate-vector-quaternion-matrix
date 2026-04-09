@@ -175,7 +175,7 @@ mod tests {
         let b = a / 38.0_f32.sqrt();
         assert_eq!(a.normalized(), b);
         let z = Vector3d { x: 0.0, y: 0.0, z: 0.0 };
-        assert_eq!(z.normalized(), z);
+        assert_eq!(z.normalized_checked(), z);
     }
     #[test]
     fn abs() {
@@ -239,7 +239,7 @@ mod tests {
         assert_eq!(b, a_normalized);
         let z = Vector3df32 { x: 0.0, y: 0.0, z: 0.0 };
         let mut y = z;
-        y.normalize();
+        y.normalize_checked();
         assert_eq!(z, y);
     }
 

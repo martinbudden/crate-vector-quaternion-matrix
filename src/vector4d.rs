@@ -529,25 +529,59 @@ impl<T> Vector4d<T>
 where
     T: Copy + Zero + PartialEq + SqrtMethods + Vector4dMath,
 {
-    /// Return normalized form of the vector
+    /// Return normalized form of the vector, checking if the norm is zero.
+    /// ```
+    /// # use vector_quaternion_matrix::Vector4df32;
+    /// let v = Vector4df32::new(0.0, 0.0, 0.0, 0.0);
+    /// let n = v.normalized_checked();
+    /// assert_eq!(Vector4df32 { x: 0.0, y: 0.0, z: 0.0, t: 0.0 }, n);
+    /// ```
     #[inline(always)]
-    pub fn normalized(self) -> Self {
-        let norm = self.norm();
+    pub fn normalized_checked(self) -> Self {
+        let norm_squared = self.norm_squared();
         // If norm == 0.0 then the vector is already normalized
-        if norm == T::zero() {
+        if norm_squared == T::zero() {
             return self;
         }
-        self * T::v4_reciprocal(norm)
+        self * norm_squared.sqrt_reciprocal()
+    }
+
+    /// Normalize the vector in place, checking if the norm is zero.
+    /// ```
+    /// # use vector_quaternion_matrix::Vector4df32;
+    /// let mut v = Vector4df32::new(0.0, 0.0, 0.0, 0.0);
+    /// v.normalize_checked();
+    /// assert_eq!(Vector4df32 { x: 0.0, y: 0.0, z: 0.0, t: 0.0 }, v);
+    /// ```
+    #[inline(always)]
+    pub fn normalize_checked(&mut self) -> &mut Self {
+        *self = self.normalized_checked();
+        self
+    }
+
+    /// Return normalized form of the vector
+    /// ```
+    /// # use vector_quaternion_matrix::Vector4df32;
+    /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
+    /// let n = v.normalized();
+    /// assert_eq!(Vector4df32 { x: 0.21442251, y: 0.32163376, z: 0.5360563, t: 0.7504788 }, n);
+    /// ```
+    #[inline(always)]
+    pub fn normalized(self) -> Self {
+        let norm_squared = self.norm_squared();
+        self * norm_squared.sqrt_reciprocal()
     }
 
     /// Normalize the vector in place
+    /// ```
+    /// # use vector_quaternion_matrix::Vector4df32;
+    /// let mut v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
+    /// v.normalize();
+    /// assert_eq!(Vector4df32 { x: 0.21442251, y: 0.32163376, z: 0.5360563, t: 0.7504788 }, v);
+    /// ```
     #[inline(always)]
     pub fn normalize(&mut self) -> &mut Self {
-        let norm = self.norm();
-        // If norm == 0.0 then the vector is already normalized
-        if norm != T::zero() {
-            *self *= T::v4_reciprocal(norm);
-        }
+        *self = self.normalized();
         self
     }
 }

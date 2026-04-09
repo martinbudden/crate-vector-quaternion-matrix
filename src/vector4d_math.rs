@@ -41,7 +41,6 @@ impl From<f32x4> for Vector4d<f32> {
 
 /// Math functions for Vector4d, using **SIMD** accelerations for `f32`.<br><br>
 pub trait Vector4dMath: Sized {
-    fn v4_reciprocal(self) -> Self;
     fn v4_neg(this: Vector4d<Self>) -> Vector4d<Self>;
     fn v4_add(this: Vector4d<Self>, this: Vector4d<Self>) -> Vector4d<Self>;
     fn v4_mul_scalar(this: Vector4d<Self>, k: Self) -> Vector4d<Self>;
@@ -58,11 +57,6 @@ pub trait Vector4dMath: Sized {
 // **** SIMD-accelerated implementation for f32 ****
 
 impl Vector4dMath for f32 {
-    #[inline(always)]
-    fn v4_reciprocal(self) -> Self {
-        1.0 / self
-    }
-
     #[inline(always)]
     fn v4_neg(this: Vector4d<Self>) -> Vector4d<Self> {
         #[cfg(feature = "simd")]
@@ -254,11 +248,6 @@ impl Vector4dMath for f32 {
 // **** f64 ****
 
 impl Vector4dMath for f64 {
-    #[inline(always)]
-    fn v4_reciprocal(self) -> Self {
-        1.0 / self
-    }
-
     #[inline(always)]
     fn v4_neg(this: Vector4d<Self>) -> Vector4d<Self> {
         Vector4d { x: -this.x, y: -this.y, z: -this.z, t: -this.t }

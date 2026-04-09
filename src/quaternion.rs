@@ -525,25 +525,58 @@ impl<T> Quaternion<T>
 where
     T: Copy + Zero + PartialEq + SqrtMethods + QuaternionMath,
 {
-    /// Return normalized form of the quaternion
+    /// Return normalized form of the quaternion, checking if the magnitude is zero
     #[inline(always)]
-    pub fn normalized(self) -> Self {
-        let norm: T = self.norm();
-        // If norm == 0.0 then the quaternion is already normalized
-        if norm == T::zero() {
+    /// ```
+    /// # use vector_quaternion_matrix::Quaternionf32;
+    /// let q = Quaternionf32::new(0.0, 0.0, 0.0, 0.0);
+    /// let r = q.normalized_checked();
+    /// assert_eq!(Quaternionf32 { w: 0.0, x: 0.0, y: 0.0, z: 0.0 }, r);
+    /// ```
+    pub fn normalized_checked(self) -> Self {
+        let norm_squared = self.norm_squared();
+        // If norm == 0.0 then the vector is already normalized
+        if norm_squared == T::zero() {
             return self;
         }
-        self * T::q_reciprocal(norm)
+        self * norm_squared.sqrt_reciprocal()
+    }
+
+    /// Normalize the quaternion in place, checking if the magnitude is zero
+    /// ```
+    /// # use vector_quaternion_matrix::Quaternionf32;
+    /// let mut q = Quaternionf32::new(0.0, 0.0, 0.0, 0.0);
+    /// q.normalize_checked();
+    /// assert_eq!(Quaternionf32 { w: 0.0, x: 0.0, y: 0.0, z: 0.0 }, q);
+    /// ```
+    #[inline(always)]
+    pub fn normalize_checked(&mut self) -> &mut Self {
+        *self = self.normalized_checked();
+        self
+    }
+
+    /// Return normalized form of the quaternion
+    /// ```
+    /// # use vector_quaternion_matrix::Quaternionf32;
+    /// let q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
+    /// let r = q.normalized();
+    /// assert_eq!(Quaternionf32 { w: 0.21442251, x: 0.32163376, y: 0.5360563, z: 0.7504788 }, r);
+    /// ```
+    pub fn normalized(self) -> Self {
+        let norm_squared = self.norm_squared();
+        self * norm_squared.sqrt_reciprocal()
     }
 
     /// Normalize the quaternion in place
+    /// ```
+    /// # use vector_quaternion_matrix::Quaternionf32;
+    /// let mut q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
+    /// q.normalize();
+    /// assert_eq!(Quaternionf32 { w: 0.21442251, x: 0.32163376, y: 0.5360563, z: 0.7504788 }, q);
+    /// ```
     #[inline(always)]
     pub fn normalize(&mut self) -> &mut Self {
-        let norm: T = self.norm();
-        // If norm == 0.0 then the quaternion is already normalized
-        if norm != T::zero() {
-            *self *= T::q_reciprocal(norm);
-        }
+        *self = self.normalized();
         self
     }
 }

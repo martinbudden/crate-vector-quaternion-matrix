@@ -40,7 +40,6 @@ impl From<f32x2> for Vector2d<f32> {
 
 /// Math functions for Vector2d, using **SIMD** accelerations for `f32`.<br>
 pub trait Vector2dMath: Sized {
-    fn v2_reciprocal(self) -> Self;
     fn v2_neg(this: Vector2d<Self>) -> Vector2d<Self>;
     fn v2_add(this: Vector2d<Self>, this: Vector2d<Self>) -> Vector2d<Self>;
     fn v2_mul_scalar(this: Vector2d<Self>, k: Self) -> Vector2d<Self>;
@@ -58,11 +57,6 @@ pub trait Vector2dMath: Sized {
 // **** SIMD-accelerated implementation for f32 ****
 
 impl Vector2dMath for f32 {
-    #[inline(always)]
-    fn v2_reciprocal(self) -> Self {
-        1.0 / self
-    }
-
     #[inline(always)]
     fn v2_neg(this: Vector2d<Self>) -> Vector2d<Self> {
         #[cfg(feature = "simd")]
@@ -227,11 +221,6 @@ impl Vector2dMath for f32 {
 // **** f64 ****
 
 impl Vector2dMath for f64 {
-    #[inline(always)]
-    fn v2_reciprocal(self) -> Self {
-        1.0 / self
-    }
-
     #[inline(always)]
     fn v2_neg(this: Vector2d<Self>) -> Vector2d<Self> {
         Vector2d { x: -this.x, y: -this.y }
