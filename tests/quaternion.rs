@@ -128,23 +128,23 @@ mod tests {
         assert_eq!(z.norm(), 0.0);
     }
     #[test]
-    fn normalized() {
+    fn normalized_unchecked() {
         let a = Quaternionf32 { w: 2.0, x: 3.0, y: 5.0, z: 7.0 };
         let b = a / 87.0_f32.sqrt();
-        assert_eq!(a.normalized(), b);
+        assert_eq!(a.normalized_unchecked(), b);
         let z = Quaternion { w: 0.0, x: 0.0, y: 0.0, z: 0.0 };
-        assert_eq!(z.normalized_checked(), z);
+        assert_eq!(z.normalized(), z);
     }
     #[test]
-    fn normalize() {
+    fn normalize_unchecked() {
         let a = Quaternion { w: 2.0, x: 3.0, y: 5.0, z: 7.0 };
-        let a_normalized = a.normalized();
+        let a_normalized = a.normalized_unchecked();
         let mut b = a;
-        b.normalize();
+        b.normalize_unchecked();
         assert_eq!(b, a_normalized);
         let z = Quaternion { w: 0.0, x: 0.0, y: 0.0, z: 0.0 };
         let mut y = z;
-        y.normalize_checked();
+        y.normalize();
         assert_eq!(z, y);
     }
     #[test]

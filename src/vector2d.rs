@@ -543,11 +543,11 @@ where
     /// ```
     /// # use vector_quaternion_matrix::Vector2df32;
     /// let v = Vector2df32::new(0.0, 0.0);
-    /// let n = v.normalized_checked();
+    /// let n = v.normalized();
     /// assert_eq!(Vector2df32 { x: 0.0, y: 0.0 }, n);
     /// ```
     #[inline(always)]
-    pub fn normalized_checked(self) -> Self {
+    pub fn normalized(self) -> Self {
         let norm_squared = self.norm_squared();
         // If norm == 0.0 then the vector is already normalized
         if norm_squared == T::zero() {
@@ -560,38 +560,38 @@ where
     /// ```
     /// # use vector_quaternion_matrix::Vector2df32;
     /// let mut v = Vector2df32::new(3.0, 4.0);
-    /// v.normalize_checked();
-    /// assert_eq!(Vector2df32 { x: 0.6, y: 0.8 }, v);
-    /// ```
-    #[inline(always)]
-    pub fn normalize_checked(&mut self) -> &mut Self {
-        *self = self.normalized_checked();
-        self
-    }
-
-    /// Return normalized form of the vector
-    /// ```
-    /// # use vector_quaternion_matrix::Vector2df32;
-    /// let v = Vector2df32::new(3.0, 4.0);
-    /// let n = v.normalized();
-    /// assert_eq!(Vector2df32 { x: 0.6, y: 0.8 }, n);
-    /// ```
-    #[inline(always)]
-    pub fn normalized(self) -> Self {
-        let norm_squared = self.norm_squared();
-        self * norm_squared.sqrt_reciprocal()
-    }
-
-    /// Normalize the vector in place
-    /// ```
-    /// # use vector_quaternion_matrix::Vector2df32;
-    /// let mut v = Vector2df32::new(3.0, 4.0);
     /// v.normalize();
     /// assert_eq!(Vector2df32 { x: 0.6, y: 0.8 }, v);
     /// ```
     #[inline(always)]
     pub fn normalize(&mut self) -> &mut Self {
         *self = self.normalized();
+        self
+    }
+
+    /// Return normalized form of the vector, not checking if the norm is zero.
+    /// ```
+    /// # use vector_quaternion_matrix::Vector2df32;
+    /// let v = Vector2df32::new(3.0, 4.0);
+    /// let n = v.normalized_unchecked();
+    /// assert_eq!(Vector2df32 { x: 0.6, y: 0.8 }, n);
+    /// ```
+    #[inline(always)]
+    pub fn normalized_unchecked(self) -> Self {
+        let norm_squared = self.norm_squared();
+        self * norm_squared.sqrt_reciprocal()
+    }
+
+    /// Normalize the vector in place, not checking if the norm is zero.
+    /// ```
+    /// # use vector_quaternion_matrix::Vector2df32;
+    /// let mut v = Vector2df32::new(3.0, 4.0);
+    /// v.normalize_unchecked();
+    /// assert_eq!(Vector2df32 { x: 0.6, y: 0.8 }, v);
+    /// ```
+    #[inline(always)]
+    pub fn normalize_unchecked(&mut self) -> &mut Self {
+        *self = self.normalized_unchecked();
         self
     }
 }

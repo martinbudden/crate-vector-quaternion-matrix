@@ -170,12 +170,12 @@ mod tests {
         assert_eq!(z.norm(), 0.0);
     }
     #[test]
-    fn normalized() {
+    fn normalized_unchecked() {
         let a = Vector3d { x: 2.0, y: 3.0, z: 5.0 };
         let b = a / 38.0_f32.sqrt();
-        assert_eq!(a.normalized(), b);
+        assert_eq!(a.normalized_unchecked(), b);
         let z = Vector3d { x: 0.0, y: 0.0, z: 0.0 };
-        assert_eq!(z.normalized_checked(), z);
+        assert_eq!(z.normalized(), z);
     }
     #[test]
     fn abs() {
@@ -230,16 +230,16 @@ mod tests {
         assert_eq!(v1.dot(v2), 32.0);
     }
     #[test]
-    fn normalize() {
+    fn normalize_unchecked() {
         let a = Vector3df32 { x: 2.0, y: 3.0, z: 5.0 };
-        let a_normalized = a.normalized();
+        let a_normalized = a.normalized_unchecked();
         let mut b = a;
-        b.normalize();
-        //b.normalize();
+        b.normalize_unchecked();
+        //b.normalize_unchecked();
         assert_eq!(b, a_normalized);
         let z = Vector3df32 { x: 0.0, y: 0.0, z: 0.0 };
         let mut y = z;
-        y.normalize_checked();
+        y.normalize();
         assert_eq!(z, y);
     }
 
