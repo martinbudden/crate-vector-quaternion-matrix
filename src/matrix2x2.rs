@@ -849,11 +849,11 @@ where
     /// # use vector_quaternion_matrix::Matrix2x2f32;
     /// let mut m = Matrix2x2f32::from([ 2.0,  3.0,
     ///                                  7.0, 11.0]);
-    /// m.inverse();
+    /// m.invert();
     ///
     /// ```
     #[inline(always)]
-    pub fn inverse(&mut self) -> &mut Self {
+    pub fn invert(&mut self) -> &mut Self {
         let adjugate = self.adjugated();
         let determinant = self.determinant();
         *self = adjugate / determinant;
