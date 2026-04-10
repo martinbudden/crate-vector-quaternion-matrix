@@ -60,7 +60,7 @@ approx = "0.5.1"
 [dev-dependencies]
 criterion = { version = "0.8.2", features = ["html_reports"] }
 rand = "0.10.0" 
-# assert_float_eq = "1.2.0" # used for test
+approx = { version = "0.5", default-features = false }
 
 # see https://doc.rust-lang.org/cargo/reference/profiles.html
 [profile.dev]

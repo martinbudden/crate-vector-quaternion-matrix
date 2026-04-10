@@ -142,5 +142,6 @@ mod tests {
     #[test]
     fn sqrt() {
         assert_eq!(0.0_f32.sqrt(), libm::sqrtf(0.0));
+        assert_eq!(4.0_f32.sqrt(), libm::sqrtf(4.0));
     }
 }

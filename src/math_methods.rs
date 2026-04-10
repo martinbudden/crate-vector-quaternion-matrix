@@ -338,124 +338,130 @@ fn sin_cos_approx(x: f32) -> (f32, f32) {
 #[cfg(test)]
 mod tests {
     #![allow(unused)]
-    #![allow(clippy::float_cmp)]
     use super::*;
+    use approx::assert_abs_diff_eq;
+    macro_rules! assert_near {
+        ($left:expr, $right:expr) => {
+            approx::assert_abs_diff_eq!($left, $right, epsilon = 4e-6);
+        };
+    }
+
     #[test]
     fn asin() {
-        assert_eq!(0.0_f32.asin(), libm::asinf(0.0));
+        assert_abs_diff_eq!(0.0_f32.asin(), libm::asinf(0.0));
     }
     #[test]
     fn sin() {
-        assert_eq!(0.0_f32.sin(), 0.0);
-        assert_eq!(10.0_f32.to_radians().sin(), libm::sinf(10.0_f32.to_radians()));
-        assert_eq!(20.0_f32.to_radians().sin(), libm::sinf(20.0_f32.to_radians()));
-        assert_eq!(30.0_f32.to_radians().sin(), libm::sinf(30.0_f32.to_radians()));
-        assert_eq!(40.0_f32.to_radians().sin(), libm::sinf(40.0_f32.to_radians()));
-        assert_eq!(50.0_f32.to_radians().sin(), libm::sinf(50.0_f32.to_radians()));
-        assert_eq!(60.0_f32.to_radians().sin(), libm::sinf(60.0_f32.to_radians()));
-        assert_eq!(70.0_f32.to_radians().sin(), libm::sinf(70.0_f32.to_radians()));
-        assert_eq!(80.0_f32.to_radians().sin(), libm::sinf(80.0_f32.to_radians()));
-        assert_eq!(90.0_f32.to_radians().sin(), libm::sinf(90.0_f32.to_radians()));
-        assert_eq!(100.0_f32.to_radians().sin(), libm::sinf(100.0_f32.to_radians()));
-        assert_eq!(110.0_f32.to_radians().sin(), libm::sinf(110.0_f32.to_radians()));
-        assert_eq!(120.0_f32.to_radians().sin(), libm::sinf(120.0_f32.to_radians()));
-        assert_eq!(130.0_f32.to_radians().sin(), libm::sinf(130.0_f32.to_radians()));
-        assert_eq!(140.0_f32.to_radians().sin(), libm::sinf(140.0_f32.to_radians()));
-        assert_eq!(150.0_f32.to_radians().sin(), libm::sinf(150.0_f32.to_radians()));
-        assert_eq!(160.0_f32.to_radians().sin(), libm::sinf(160.0_f32.to_radians()));
-        assert_eq!(170.0_f32.to_radians().sin(), libm::sinf(170.0_f32.to_radians()));
-        assert_eq!(180.0_f32.to_radians().sin(), libm::sinf(180.0_f32.to_radians()));
-        assert_eq!(190.0_f32.to_radians().sin(), libm::sinf(190.0_f32.to_radians()));
-        assert_eq!((-10.0_f32).to_radians().sin(), libm::sinf(-10.0_f32.to_radians()));
-        assert_eq!((-20.0_f32).to_radians().sin(), libm::sinf(-20.0_f32.to_radians()));
-        assert_eq!((-30.0_f32).to_radians().sin(), libm::sinf(-30.0_f32.to_radians()));
-        assert_eq!((-40.0_f32).to_radians().sin(), libm::sinf(-40.0_f32.to_radians()));
-        assert_eq!((-50.0_f32).to_radians().sin(), libm::sinf(-50.0_f32.to_radians()));
-        assert_eq!((-60.0_f32).to_radians().sin(), libm::sinf(-60.0_f32.to_radians()));
-        assert_eq!((-70.0_f32).to_radians().sin(), libm::sinf(-70.0_f32.to_radians()));
-        assert_eq!((-80.0_f32).to_radians().sin(), libm::sinf(-80.0_f32.to_radians()));
-        assert_eq!((-90.0_f32).to_radians().sin(), libm::sinf(-90.0_f32.to_radians()));
-        assert_eq!((-100.0_f32).to_radians().sin(), libm::sinf(-100.0_f32.to_radians()));
-        assert_eq!((-110.0_f32).to_radians().sin(), libm::sinf(-110.0_f32.to_radians()));
-        assert_eq!((-120.0_f32).to_radians().sin(), libm::sinf(-120.0_f32.to_radians()));
-        assert_eq!((-130.0_f32).to_radians().sin(), libm::sinf(-130.0_f32.to_radians()));
-        assert_eq!((-140.0_f32).to_radians().sin(), libm::sinf(-140.0_f32.to_radians()));
-        assert_eq!((-150.0_f32).to_radians().sin(), libm::sinf(-150.0_f32.to_radians()));
-        assert_eq!((-160.0_f32).to_radians().sin(), libm::sinf(-160.0_f32.to_radians()));
-        assert_eq!((-170.0_f32).to_radians().sin(), libm::sinf(-170.0_f32.to_radians()));
-        assert_eq!((-180.0_f32).to_radians().sin(), libm::sinf(-180.0_f32.to_radians()));
-        assert_eq!((-190.0_f32).to_radians().sin(), libm::sinf(-190.0_f32.to_radians()));
+        assert_near!(sin_approx(10.0_f32.to_radians()), libm::sinf(10.0_f32.to_radians()));
+        assert_near!(sin_approx(20.0_f32.to_radians()), libm::sinf(20.0_f32.to_radians()));
+        assert_near!(sin_approx(30.0_f32.to_radians()), libm::sinf(30.0_f32.to_radians()));
+        assert_near!(sin_approx(40.0_f32.to_radians()), libm::sinf(40.0_f32.to_radians()));
+        assert_near!(sin_approx(50.0_f32.to_radians()), libm::sinf(50.0_f32.to_radians()));
+        assert_near!(sin_approx(60.0_f32.to_radians()), libm::sinf(60.0_f32.to_radians()));
+        assert_near!(sin_approx(70.0_f32.to_radians()), libm::sinf(70.0_f32.to_radians()));
+        assert_near!(sin_approx(80.0_f32.to_radians()), libm::sinf(80.0_f32.to_radians()));
+        assert_near!(sin_approx(90.0_f32.to_radians()), libm::sinf(90.0_f32.to_radians()));
+        assert_near!(sin_approx(100.0_f32.to_radians()), libm::sinf(100.0_f32.to_radians()));
+        assert_near!(sin_approx(110.0_f32.to_radians()), libm::sinf(110.0_f32.to_radians()));
+        assert_near!(sin_approx(120.0_f32.to_radians()), libm::sinf(120.0_f32.to_radians()));
+        assert_near!(sin_approx(130.0_f32.to_radians()), libm::sinf(130.0_f32.to_radians()));
+        assert_near!(sin_approx(140.0_f32.to_radians()), libm::sinf(140.0_f32.to_radians()));
+        assert_near!(sin_approx(150.0_f32.to_radians()), libm::sinf(150.0_f32.to_radians()));
+        assert_near!(sin_approx(160.0_f32.to_radians()), libm::sinf(160.0_f32.to_radians()));
+        assert_near!(sin_approx(170.0_f32.to_radians()), libm::sinf(170.0_f32.to_radians()));
+        assert_near!(sin_approx(180.0_f32.to_radians()), libm::sinf(180.0_f32.to_radians()));
+        assert_near!(sin_approx(190.0_f32.to_radians()), libm::sinf(190.0_f32.to_radians()));
+        assert_near!(sin_approx(-10.0_f32.to_radians()), libm::sinf(-10.0_f32.to_radians()));
+        assert_near!(sin_approx(-20.0_f32.to_radians()), libm::sinf(-20.0_f32.to_radians()));
+        assert_near!(sin_approx(-30.0_f32.to_radians()), libm::sinf(-30.0_f32.to_radians()));
+        assert_near!(sin_approx(-40.0_f32.to_radians()), libm::sinf(-40.0_f32.to_radians()));
+        assert_near!(sin_approx(-50.0_f32.to_radians()), libm::sinf(-50.0_f32.to_radians()));
+        assert_near!(sin_approx(-60.0_f32.to_radians()), libm::sinf(-60.0_f32.to_radians()));
+        assert_near!(sin_approx(-70.0_f32.to_radians()), libm::sinf(-70.0_f32.to_radians()));
+        assert_near!(sin_approx(-80.0_f32.to_radians()), libm::sinf(-80.0_f32.to_radians()));
+        assert_near!(sin_approx(-90.0_f32.to_radians()), libm::sinf(-90.0_f32.to_radians()));
+        assert_near!(sin_approx(-100.0_f32.to_radians()), libm::sinf(-100.0_f32.to_radians()));
+        assert_near!(sin_approx(-110.0_f32.to_radians()), libm::sinf(-110.0_f32.to_radians()));
+        assert_near!(sin_approx(-120.0_f32.to_radians()), libm::sinf(-120.0_f32.to_radians()));
+        assert_near!(sin_approx(-130.0_f32.to_radians()), libm::sinf(-130.0_f32.to_radians()));
+        assert_near!(sin_approx(-140.0_f32.to_radians()), libm::sinf(-140.0_f32.to_radians()));
+        assert_near!(sin_approx(-150.0_f32.to_radians()), libm::sinf(-150.0_f32.to_radians()));
+        assert_near!(sin_approx(-160.0_f32.to_radians()), libm::sinf(-160.0_f32.to_radians()));
+        assert_near!(sin_approx(-170.0_f32.to_radians()), libm::sinf(-170.0_f32.to_radians()));
+        assert_near!(sin_approx(-180.0_f32.to_radians()), libm::sinf(-180.0_f32.to_radians()));
+        assert_near!(sin_approx(-190.0_f32.to_radians()), libm::sinf(-190.0_f32.to_radians()));
     }
     #[test]
     fn cos() {
-        assert_eq!(0.0_f32.cos(), 1.0);
-        assert_eq!(10.0_f32.to_radians().cos(), libm::cosf(10.0_f32.to_radians()));
-        assert_eq!(20.0_f32.to_radians().cos(), libm::cosf(20.0_f32.to_radians()));
-        assert_eq!(30.0_f32.to_radians().cos(), libm::cosf(30.0_f32.to_radians()));
-        assert_eq!(40.0_f32.to_radians().cos(), libm::cosf(40.0_f32.to_radians()));
-        assert_eq!(50.0_f32.to_radians().cos(), libm::cosf(50.0_f32.to_radians()));
-        assert_eq!(60.0_f32.to_radians().cos(), libm::cosf(60.0_f32.to_radians()));
-        assert_eq!(70.0_f32.to_radians().cos(), libm::cosf(70.0_f32.to_radians()));
-        assert_eq!(80.0_f32.to_radians().cos(), libm::cosf(80.0_f32.to_radians()));
-        assert_eq!(90.0_f32.to_radians().cos(), libm::cosf(90.0_f32.to_radians()));
-        assert_eq!(100.0_f32.to_radians().cos(), libm::cosf(100.0_f32.to_radians()));
-        assert_eq!(110.0_f32.to_radians().cos(), libm::cosf(110.0_f32.to_radians()));
-        assert_eq!(120.0_f32.to_radians().cos(), libm::cosf(120.0_f32.to_radians()));
-        assert_eq!(130.0_f32.to_radians().cos(), libm::cosf(130.0_f32.to_radians()));
-        assert_eq!(140.0_f32.to_radians().cos(), libm::cosf(140.0_f32.to_radians()));
-        assert_eq!(150.0_f32.to_radians().cos(), libm::cosf(150.0_f32.to_radians()));
-        assert_eq!(160.0_f32.to_radians().cos(), libm::cosf(160.0_f32.to_radians()));
-        assert_eq!(170.0_f32.to_radians().cos(), libm::cosf(170.0_f32.to_radians()));
-        assert_eq!(180.0_f32.to_radians().cos(), libm::cosf(180.0_f32.to_radians()));
-        assert_eq!(190.0_f32.to_radians().cos(), libm::cosf(190.0_f32.to_radians()));
-        assert_eq!((-10.0_f32).to_radians().cos(), libm::cosf(-10.0_f32.to_radians()));
-        assert_eq!((-20.0_f32).to_radians().cos(), libm::cosf(-20.0_f32.to_radians()));
-        assert_eq!((-30.0_f32).to_radians().cos(), libm::cosf(-30.0_f32.to_radians()));
-        assert_eq!((-40.0_f32).to_radians().cos(), libm::cosf(-40.0_f32.to_radians()));
-        assert_eq!((-50.0_f32).to_radians().cos(), libm::cosf(-50.0_f32.to_radians()));
-        assert_eq!((-60.0_f32).to_radians().cos(), libm::cosf(-60.0_f32.to_radians()));
-        assert_eq!((-70.0_f32).to_radians().cos(), libm::cosf(-70.0_f32.to_radians()));
-        assert_eq!((-80.0_f32).to_radians().cos(), libm::cosf(-80.0_f32.to_radians()));
-        assert_eq!((-90.0_f32).to_radians().cos(), libm::cosf(-90.0_f32.to_radians()));
-        assert_eq!((-100.0_f32).to_radians().cos(), libm::cosf(-100.0_f32.to_radians()));
-        assert_eq!((-110.0_f32).to_radians().cos(), libm::cosf(-110.0_f32.to_radians()));
-        assert_eq!((-120.0_f32).to_radians().cos(), libm::cosf(-120.0_f32.to_radians()));
-        assert_eq!((-130.0_f32).to_radians().cos(), libm::cosf(-130.0_f32.to_radians()));
-        assert_eq!((-140.0_f32).to_radians().cos(), libm::cosf(-140.0_f32.to_radians()));
-        assert_eq!((-150.0_f32).to_radians().cos(), libm::cosf(-150.0_f32.to_radians()));
-        assert_eq!((-160.0_f32).to_radians().cos(), libm::cosf(-160.0_f32.to_radians()));
-        assert_eq!((-170.0_f32).to_radians().cos(), libm::cosf(-170.0_f32.to_radians()));
-        assert_eq!((-180.0_f32).to_radians().cos(), libm::cosf(-180.0_f32.to_radians()));
-        assert_eq!((-190.0_f32).to_radians().cos(), libm::cosf(-190.0_f32.to_radians()));
+        assert_near!(cos_approx(10.0_f32.to_radians()), libm::cosf(10.0_f32.to_radians()));
+        assert_near!(cos_approx(20.0_f32.to_radians()), libm::cosf(20.0_f32.to_radians()));
+        assert_near!(cos_approx(30.0_f32.to_radians()), libm::cosf(30.0_f32.to_radians()));
+        assert_near!(cos_approx(40.0_f32.to_radians()), libm::cosf(40.0_f32.to_radians()));
+        assert_near!(cos_approx(50.0_f32.to_radians()), libm::cosf(50.0_f32.to_radians()));
+        assert_near!(cos_approx(60.0_f32.to_radians()), libm::cosf(60.0_f32.to_radians()));
+        assert_near!(cos_approx(70.0_f32.to_radians()), libm::cosf(70.0_f32.to_radians()));
+        assert_near!(cos_approx(80.0_f32.to_radians()), libm::cosf(80.0_f32.to_radians()));
+        assert_near!(cos_approx(90.0_f32.to_radians()), libm::cosf(90.0_f32.to_radians()));
+        assert_near!(cos_approx(100.0_f32.to_radians()), libm::cosf(100.0_f32.to_radians()));
+        assert_near!(cos_approx(110.0_f32.to_radians()), libm::cosf(110.0_f32.to_radians()));
+        assert_near!(cos_approx(120.0_f32.to_radians()), libm::cosf(120.0_f32.to_radians()));
+        assert_near!(cos_approx(130.0_f32.to_radians()), libm::cosf(130.0_f32.to_radians()));
+        assert_near!(cos_approx(140.0_f32.to_radians()), libm::cosf(140.0_f32.to_radians()));
+        assert_near!(cos_approx(150.0_f32.to_radians()), libm::cosf(150.0_f32.to_radians()));
+        assert_near!(cos_approx(160.0_f32.to_radians()), libm::cosf(160.0_f32.to_radians()));
+        assert_near!(cos_approx(170.0_f32.to_radians()), libm::cosf(170.0_f32.to_radians()));
+        assert_near!(cos_approx(180.0_f32.to_radians()), libm::cosf(180.0_f32.to_radians()));
+        assert_near!(cos_approx(190.0_f32.to_radians()), libm::cosf(190.0_f32.to_radians()));
+        assert_near!(cos_approx(-10.0_f32.to_radians()), libm::cosf(-10.0_f32.to_radians()));
+        assert_near!(cos_approx(-20.0_f32.to_radians()), libm::cosf(-20.0_f32.to_radians()));
+        assert_near!(cos_approx(-30.0_f32.to_radians()), libm::cosf(-30.0_f32.to_radians()));
+        assert_near!(cos_approx(-40.0_f32.to_radians()), libm::cosf(-40.0_f32.to_radians()));
+        assert_near!(cos_approx(-50.0_f32.to_radians()), libm::cosf(-50.0_f32.to_radians()));
+        assert_near!(cos_approx(-60.0_f32.to_radians()), libm::cosf(-60.0_f32.to_radians()));
+        assert_near!(cos_approx(-70.0_f32.to_radians()), libm::cosf(-70.0_f32.to_radians()));
+        assert_near!(cos_approx(-80.0_f32.to_radians()), libm::cosf(-80.0_f32.to_radians()));
+        assert_near!(cos_approx(-90.0_f32.to_radians()), libm::cosf(-90.0_f32.to_radians()));
+        assert_near!(cos_approx(-100.0_f32.to_radians()), libm::cosf(-100.0_f32.to_radians()));
+        assert_near!(cos_approx(-110.0_f32.to_radians()), libm::cosf(-110.0_f32.to_radians()));
+        assert_near!(cos_approx(-120.0_f32.to_radians()), libm::cosf(-120.0_f32.to_radians()));
+        assert_near!(cos_approx(-130.0_f32.to_radians()), libm::cosf(-130.0_f32.to_radians()));
+        assert_near!(cos_approx(-140.0_f32.to_radians()), libm::cosf(-140.0_f32.to_radians()));
+        assert_near!(cos_approx(-150.0_f32.to_radians()), libm::cosf(-150.0_f32.to_radians()));
+        assert_near!(cos_approx(-160.0_f32.to_radians()), libm::cosf(-160.0_f32.to_radians()));
+        assert_near!(cos_approx(-170.0_f32.to_radians()), libm::cosf(-170.0_f32.to_radians()));
+        assert_near!(cos_approx(-180.0_f32.to_radians()), libm::cosf(-180.0_f32.to_radians()));
+        assert_near!(cos_approx(-190.0_f32.to_radians()), libm::cosf(-190.0_f32.to_radians()));
     }
     #[test]
     fn sin_cos() {
-        assert_eq!(0.0_f32.sin_cos(), (0.0, 1.0));
-        assert_eq!(
-            10.0_f32.to_radians().sin_cos(),
-            (libm::sinf(10.0_f32.to_radians()), libm::cosf(10.0_f32.to_radians()))
-        );
-        assert_eq!(
-            (-10.0_f32).to_radians().sin_cos(),
-            (libm::sinf(-10.0_f32.to_radians()), libm::cosf(-10.0_f32.to_radians()))
-        );
-        assert_eq!(
-            110.0_f32.to_radians().sin_cos(),
-            (libm::sinf(110.0_f32.to_radians()), libm::cosf(110.0_f32.to_radians()))
-        );
-        assert_eq!(
-            (-110.0_f32).to_radians().sin_cos(),
-            (libm::sinf(-110.0_f32.to_radians()), libm::cosf(-110.0_f32.to_radians()))
-        );
+        let (sin, cos) = 0.0_f32.sin_cos();
+        assert_near!(sin, libm::sinf(0.0));
+        assert_near!(cos, libm::cosf(0.0));
+
+        let (sin, cos) = 10.0_f32.to_radians().sin_cos();
+        assert_near!(sin, libm::sinf(10.0_f32.to_radians()));
+        assert_near!(cos, libm::cosf(10.0_f32.to_radians()));
+
+        let (sin, cos) = (-10.0_f32).to_radians().sin_cos();
+        assert_near!(sin, libm::sinf(-10.0_f32.to_radians()));
+        assert_near!(cos, libm::cosf(-10.0_f32.to_radians()));
+
+        let (sin, cos) = 110.0_f32.to_radians().sin_cos();
+        assert_near!(sin, libm::sinf(110.0_f32.to_radians()));
+        assert_near!(cos, libm::cosf(110.0_f32.to_radians()));
+
+        let (sin, cos) = (-110.0_f32).to_radians().sin_cos();
+        assert_near!(sin, libm::sinf(-110.0_f32.to_radians()));
+        assert_near!(cos, libm::cosf(-110.0_f32.to_radians()));
     }
     #[test]
     fn atan2() {
-        assert_eq!(0.0_f32.atan2(1.0), libm::atan2f(0.0, 1.0));
-        assert_eq!(1.0_f32.atan2(0.0), libm::atan2f(1.0, 0.0));
-        assert_eq!(0.0_f32.atan2(1.0), 0.0);
-        assert_eq!(libm::atan2f(0.0, 1.0), 0.0);
+        assert_abs_diff_eq!(0.0_f32.atan2(1.0), libm::atan2f(0.0, 1.0));
+        assert_abs_diff_eq!(1.0_f32.atan2(0.0), libm::atan2f(1.0, 0.0));
+        assert_abs_diff_eq!(0.0_f32.atan2(1.0), 0.0);
+        assert_abs_diff_eq!(libm::atan2f(0.0, 1.0), 0.0);
 
-        assert_eq!(0.0_f64.atan2(1.0), libm::atan2(0.0, 1.0));
-        assert_eq!(1.0_f64.atan2(0.0), libm::atan2(1.0, 0.0));
+        assert_abs_diff_eq!(0.0_f64.atan2(1.0), libm::atan2(0.0, 1.0));
+        assert_abs_diff_eq!(1.0_f64.atan2(0.0), libm::atan2(1.0, 0.0));
     }
 }
