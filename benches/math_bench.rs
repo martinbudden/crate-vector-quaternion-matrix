@@ -7,7 +7,7 @@ use rand::{RngExt, rng};
 //use rand::{Rng, SeedableRng, rngs::SmallRng};
 use std::hint::black_box; // Use core::f32 for no_std
 
-use vector_quaternion_matrix::{cos_approx, sin_approx, sin_cos_approx};
+use vqm::{cos_approx, sin_approx, sin_cos_approx};
 
 // See: target/criterion/Matrix%20Math/report/index.html for results
 

@@ -1,6 +1,6 @@
-# vector-quaternion-matrix Rust Crate<br>![license](https://img.shields.io/badge/license-MIT-green) [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![open source](https://badgen.net/badge/open/source/blue?icon=github)
+# `vqm` Rust Crate<br>![license](https://img.shields.io/badge/license-MIT-green) [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![open source](https://badgen.net/badge/open/source/blue?icon=github)
 
-A vector, quaternion, and matrix library targeted at embedded systems and robotics.
+A **vector**, **quaternion**, and **matrix** (**VQM**) library targeted at embedded systems and robotics.
 (In particular stabilized vehicles including self-balancing robots and aircraft).
 
 This crate is `no_std`, that it does not link to the standard library and so does not depend on an operating system
@@ -69,7 +69,7 @@ The convention used is that the verbal name (eg `normalize`) is used for the in-
 is used for the return form. So we have:
 
 ```rust
-# use vector_quaternion_matrix::Vector3df32;
+# use vqm::Vector3df32;
 // return form:
     let v = Vector3df32::new(2.0, 3.0, 5.0);
     let n = v.normalized();

@@ -52,7 +52,7 @@ pub struct Quaternion<T> {
 
 /// Default quaternion
 /// ```
-/// # use vector_quaternion_matrix::Quaternionf32;
+/// # use vqm::Quaternionf32;
 /// # use num_traits::Zero;
 ///
 /// let d = Quaternionf32::default();
@@ -86,7 +86,7 @@ where
 
 /// Zero quaternion
 /// ```
-/// # use vector_quaternion_matrix::Quaternionf32;
+/// # use vqm::Quaternionf32;
 /// # use num_traits::{zero,Zero};
 /// let z = Quaternionf32::zero();
 /// assert!(z.is_zero());
@@ -111,7 +111,7 @@ where
 
 /// Unit quaternion
 /// ```
-/// # use vector_quaternion_matrix::Quaternionf32;
+/// # use vqm::Quaternionf32;
 /// # use num_traits::One;
 ///
 /// let i = Quaternionf32::one();
@@ -137,7 +137,7 @@ where
 
 /// Negate quaternion
 /// ```
-/// # use vector_quaternion_matrix::Quaternionf32;
+/// # use vqm::Quaternionf32;
 /// let mut q = Quaternionf32 { w: 2.0, x: -3.0, y: -5.0, z: 7.0 };
 /// q = -q;
 ///
@@ -159,7 +159,7 @@ where
 
 /// Add two quaternions
 /// ```
-/// # use vector_quaternion_matrix::Quaternionf32;
+/// # use vqm::Quaternionf32;
 /// let u = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
 /// let v = Quaternionf32::new(11.0, 13.0, 17.0, 19.0);
 /// let r = u + v;
@@ -197,7 +197,7 @@ where
 
 /// Multiply quaternion by constant and add another quaternion
 /// ```
-/// # use vector_quaternion_matrix::Quaternionf32;
+/// # use vqm::Quaternionf32;
 /// # use num_traits::MulAdd;
 /// let mut q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
 /// let w = Quaternionf32::new(11.0, 13.0, 17.0, 19.0);
@@ -222,7 +222,7 @@ where
 
 /// Multiply quaternion by constant and add another quaternion in place
 /// ```
-/// # use vector_quaternion_matrix::Quaternionf32;
+/// # use vqm::Quaternionf32;
 /// # use num_traits::MulAddAssign;
 /// let mut q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
 /// let w = Quaternionf32::new(11.0, 13.0, 17.0, 19.0);
@@ -321,7 +321,7 @@ where
 
 /// Divide a quaternion by a constant
 /// ```
-/// # use vector_quaternion_matrix::Quaternionf32;
+/// # use vqm::Quaternionf32;
 /// let q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
 /// let r = q / 2.0;
 ///
@@ -341,7 +341,7 @@ where
 
 /// In-place divide a quaternion by a constant
 /// ```
-/// # use vector_quaternion_matrix::Quaternionf32;
+/// # use vqm::Quaternionf32;
 /// let mut q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
 /// q /= 2.0;
 ///
@@ -389,7 +389,7 @@ where
 
 /// Access quaternion component by index
 /// ```
-/// # use vector_quaternion_matrix::Quaternionf32;
+/// # use vqm::Quaternionf32;
 /// let mut q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
 ///
 /// assert_eq!(q[0], 2.0);
@@ -414,7 +414,7 @@ impl<T> Index<usize> for Quaternion<T> {
 
 // Set quaternion component by index
 /// ```
-/// # use vector_quaternion_matrix::Quaternionf32;
+/// # use vqm::Quaternionf32;
 /// let mut q = Quaternionf32::new(2.0, 3.0, 5.0, 6.0);
 /// q[0] = 7.0;
 /// q[1] = 11.0;
@@ -527,7 +527,7 @@ where
 {
     /// Return normalized form of the quaternion, checking if the magnitude is zero
     /// ```
-    /// # use vector_quaternion_matrix::Quaternionf32;
+    /// # use vqm::Quaternionf32;
     /// let q = Quaternionf32::new(0.0, 0.0, 0.0, 0.0);
     /// let r = q.normalized();
     /// assert_eq!(Quaternionf32 { w: 0.0, x: 0.0, y: 0.0, z: 0.0 }, r);
@@ -544,7 +544,7 @@ where
 
     /// Normalize the quaternion in place, checking if the magnitude is zero
     /// ```
-    /// # use vector_quaternion_matrix::Quaternionf32;
+    /// # use vqm::Quaternionf32;
     /// let mut q = Quaternionf32::new(0.0, 0.0, 0.0, 0.0);
     /// q.normalize();
     /// assert_eq!(Quaternionf32 { w: 0.0, x: 0.0, y: 0.0, z: 0.0 }, q);
@@ -557,7 +557,7 @@ where
 
     /// Return normalized form of the quaternion, not checking if the magnitude is zero.
     /// ```
-    /// # use vector_quaternion_matrix::Quaternionf32;
+    /// # use vqm::Quaternionf32;
     /// let q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
     /// let r = q.normalized_unchecked();
     /// assert_eq!(Quaternionf32 { w: 0.21442251, x: 0.32163376, y: 0.5360563, z: 0.7504788 }, r);
@@ -570,7 +570,7 @@ where
 
     /// Normalize the quaternion in place, not checking if the magnitude is zero.
     /// ```
-    /// # use vector_quaternion_matrix::Quaternionf32;
+    /// # use vqm::Quaternionf32;
     /// let mut q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
     /// q.normalize_unchecked();
     /// assert_eq!(Quaternionf32 { w: 0.21442251, x: 0.32163376, y: 0.5360563, z: 0.7504788 }, q);
@@ -588,7 +588,7 @@ where
 {
     // Return true if the vector is normalized.
     /// ```
-    /// # use vector_quaternion_matrix::Quaternionf32;
+    /// # use vqm::Quaternionf32;
     /// let v = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
     /// let n = v.normalized();
     /// assert!(n.is_normalized());
@@ -869,7 +869,7 @@ where
 
 /// Quaternion from array
 /// ```
-/// # use vector_quaternion_matrix::Quaternionf32;
+/// # use vqm::Quaternionf32;
 ///
 /// let v = Quaternionf32::from([2.0, 3.0, 5.0, 6.0]);
 /// let w: Quaternionf32 = [7.0, 11.0, 13.0, 17.0].into();
@@ -889,7 +889,7 @@ where
 
 /// Array from quaternion
 /// ```
-/// # use vector_quaternion_matrix::Quaternionf32;
+/// # use vqm::Quaternionf32;
 ///
 /// let q = Quaternionf32 { w: 2.0, x: 3.0, y: 5.0, z: 7.0 };
 ///

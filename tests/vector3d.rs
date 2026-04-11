@@ -1,5 +1,5 @@
 use cfg_if::cfg_if;
-use vector_quaternion_matrix::{Vector3d, Vector3df32, Vector3df64, Vector3di16};
+use vqm::{Vector3d, Vector3df32, Vector3df64, Vector3di16};
 
 // **** Align ****
 cfg_if! {
@@ -26,7 +26,7 @@ mod tests {
     use crate::Vector3df32;
     use approx::assert_abs_diff_eq;
     use core::mem::{align_of, size_of};
-    use vector_quaternion_matrix::Quaternionf32;
+    use vqm::Quaternionf32;
 
     #[allow(unused)]
     fn is_normal<T: Sized + Send + Sync + Unpin>() {}

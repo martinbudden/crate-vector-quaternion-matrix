@@ -47,7 +47,7 @@ pub struct Matrix3x3<T> {
 
 /// Create a matrix.
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 /// let m = Matrix3x3f32::new([ 2.0,  3.0,  5.0,
 ///                             7.0, 11.0, 13.0,
 ///                            17.0, 19.0, 23.0]);
@@ -70,7 +70,7 @@ where
 
 /// Zero matrix
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 /// # use num_traits::Zero;
 /// let z = Matrix3x3f32::zero();
 ///
@@ -97,7 +97,7 @@ where
 
 /// Identity matrix
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 /// # use num_traits::One;
 /// let i = Matrix3x3f32::one();
 ///
@@ -124,7 +124,7 @@ where
 
 /// Negate matrix
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
 ///                                 17.0, 19.0, 23.0]);
@@ -150,7 +150,7 @@ where
 
 /// Add two matrices
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                              7.0, 11.0, 13.0,
 ///                             17.0, 19.0, 23.0]);
@@ -186,7 +186,7 @@ where
 
 /// Add one matrix to another
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
 ///                                 17.0, 19.0, 23.0]);
@@ -213,7 +213,7 @@ where
 
 /// Multiply vector by constant and add another vector
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 /// # use num_traits::MulAdd;
 /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
@@ -243,7 +243,7 @@ where
 
 /// Multiply vector by constant and add another vector in place
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 /// # use num_traits::MulAddAssign;
 /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
@@ -272,7 +272,7 @@ where
 
 /// Subtract two matrices
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                              7.0, 11.0, 13.0,
 ///                             17.0, 19.0, 23.0]);
@@ -302,7 +302,7 @@ where
 
 /// Subtract one matrix from another
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
 ///                                 17.0, 19.0, 23.0]);
@@ -329,7 +329,7 @@ where
 
 /// Pre-multiply a matrix by a constant
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                               7.0, 11.0, 13.0,
 ///                              17.0, 19.0, 23.0]);
@@ -359,7 +359,7 @@ impl Mul<Matrix3x3<f64>> for f64 {
 
 /// Multiply a matrix by a constant
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                              7.0, 11.0, 13.0,
 ///                             17.0, 19.0, 23.0]);
@@ -385,7 +385,7 @@ where
 
 /// In-place multiply a matrix by a constant
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
 ///                                 17.0, 19.0, 23.0]);
@@ -407,8 +407,8 @@ where
 
 /// Multiply a vector by a matrix
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
-/// # use vector_quaternion_matrix::Vector3d;
+/// # use vqm::Matrix3x3f32;
+/// # use vqm::Vector3d;
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                              7.0, 11.0, 13.0,
 ///                             17.0, 19.0, 23.0]);
@@ -430,7 +430,7 @@ where
 
 /// Pre-multiply a vector by a matrix
 /// ```
-/// # use vector_quaternion_matrix::{Matrix3x3f32,Vector3df32};
+/// # use vqm::{Matrix3x3f32,Vector3df32};
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                              7.0, 11.0, 13.0,
 ///                             17.0, 19.0, 23.0]);
@@ -453,7 +453,7 @@ where
 
 /// Multiply two matrices
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                              7.0, 11.0, 13.0,
 ///                             17.0, 19.0, 23.0]);
@@ -489,7 +489,7 @@ where
 
 /// Multiply one matrix by another
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
 ///                                 17.0, 19.0, 23.0]);
@@ -517,7 +517,7 @@ where
 
 /// Divide a matrix by a constant
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                              7.0, 11.0, 13.0,
 ///                             17.0, 19.0, 23.0]);
@@ -543,7 +543,7 @@ where
 
 /// In-place divide a matrix by a constant
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
 ///                                 17.0, 19.0, 23.0]);
@@ -567,7 +567,7 @@ where
 
 /// Access matrix element by index
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 ///
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                              7.0, 11.0, 13.0,
@@ -595,7 +595,7 @@ impl<T> Index<usize> for Matrix3x3<T> {
 
 /// Set matrix element by index
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 ///
 /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
@@ -624,7 +624,7 @@ impl<T> IndexMut<usize> for Matrix3x3<T> {
 
 /// Access matrix element by ordered pair (row, column)
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 ///
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                              7.0, 11.0, 13.0,
@@ -651,7 +651,7 @@ impl<T> Index<(usize, usize)> for Matrix3x3<T> {
 
 /// Set matrix element by ordered pair (row, column)
 /// ```
-/// # use vector_quaternion_matrix::Matrix3x3f32;
+/// # use vqm::Matrix3x3f32;
 ///
 /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
 ///                                  7.0, 11.0, 13.0,
@@ -704,7 +704,7 @@ where
 
     /// Return matrix row as a vector
     /// ```
-    /// # use vector_quaternion_matrix::{Matrix3x3f32,Vector3df32};
+    /// # use vqm::{Matrix3x3f32,Vector3df32};
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                              7.0, 11.0, 13.0,
     ///                             17.0, 19.0, 23.0]);
@@ -745,7 +745,7 @@ where
 
     /// Return matrix column as a vector
     /// ```
-    /// # use vector_quaternion_matrix::{Matrix3x3f32,Vector3df32};
+    /// # use vqm::{Matrix3x3f32,Vector3df32};
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                              7.0, 11.0, 13.0,
     ///                             17.0, 19.0, 23.0]);
@@ -766,7 +766,7 @@ where
 
     /// Return matrix diagonal as a vector
     /// ```
-    /// # use vector_quaternion_matrix::{Matrix3x3f32,Vector3df32};
+    /// # use vqm::{Matrix3x3f32,Vector3df32};
     ///
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                              7.0, 11.0, 13.0,
@@ -788,7 +788,7 @@ where
 {
     /// Return a copy of the matrix with all components set to their absolute values
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::new([ 2.0,  -3.0,   5.0,
     ///                             7.0, -11.0,  13.0,
     ///                            17.0,  19.0, -23.0]);
@@ -805,7 +805,7 @@ where
 
     /// Set all components of the matrix to their absolute values
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// let mut m = Matrix3x3f32::new([ 2.0,  -3.0,   5.0,
     ///                                 7.0, -11.0,  13.0,
     ///                                17.0,  19.0, -23.0]);
@@ -830,7 +830,7 @@ where
 {
     /// Return a copy of the matrix with all components clamped to the specified range
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::new([ 2.0,  3.0,  -5.0,
     ///                             7.0, 11.0,  13.0,
     ///                            17.0, 19.0,  23.0]);
@@ -851,7 +851,7 @@ where
 
     /// Clamp all components of the matrix to the specified range
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// let mut m = Matrix3x3f32::new([ 2.0,  3.0,  -5.0,
     ///                                 7.0, 11.0,  13.0,
     ///                                17.0, 19.0,  23.0]);
@@ -874,7 +874,7 @@ where
 {
     /// Return the transpose of this matrix.
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                              7.0, 11.0, 13.0,
     ///                             17.0, 19.0, 23.0]);
@@ -891,7 +891,7 @@ where
 
     /// Transpose matrix, in-place
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                                  7.0, 11.0, 13.0,
     ///                                 17.0, 19.0, 23.0]);
@@ -915,7 +915,7 @@ where
     /// Return the adjugate of this matrix, ie the transpose of the cofactor matrix.
     /// Equivalent to the inverse but without dividing by the determinant of the matrix.
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                              7.0, 11.0, 13.0,
     ///                             17.0, 19.0, 23.0]);
@@ -930,7 +930,7 @@ where
 
     /// Adjugate matrix, in-place
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                              7.0, 11.0, 13.0,
     ///                             17.0, 19.0, 23.0]);
@@ -946,7 +946,7 @@ where
     }
     /// Return the inverse of this matrix. Does not check if the determinant is non-zero before inverting.
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                              7.0, 11.0, 13.0,
     ///                             17.0, 19.0, 23.0]);
@@ -962,7 +962,7 @@ where
 
     /// Invert this matrix, in-place. Does not check if the determinant is non-zero before inverting.
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                                  7.0, 11.0, 13.0,
     ///                                 17.0, 19.0, 23.0]);
@@ -979,7 +979,7 @@ where
 
     /// Matrix determinant
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                              7.0, 11.0, 13.0,
     ///                             17.0, 19.0, 23.0]);
@@ -995,7 +995,7 @@ where
 
     /// Return trace of matrix.
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                              7.0, 11.0, 13.0,
     ///                             17.0, 19.0, 23.0]);
@@ -1015,7 +1015,7 @@ where
 {
     /// Return inverse of matrix or `T::zero()` if not invertible.
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// # use num_traits::Zero;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                              2.0,  3.0,  5.0,
@@ -1037,7 +1037,7 @@ where
 
     /// Return inverse of matrix or `None` if not invertible.
     /// ```
-    /// # use vector_quaternion_matrix::{Matrix3x3f32};
+    /// # use vqm::{Matrix3x3f32};
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                              2.0,  3.0,  5.0,
     ///                             17.0, 19.0, 23.0]);
@@ -1058,7 +1058,7 @@ where
 
     /// Return the sum of all components of the matrix
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                              7.0, 11.0, 13.0,
     ///                             17.0, 19.0, 23.0]);
@@ -1073,7 +1073,7 @@ where
 
     /// Return the mean of all components of the matrix
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                              7.0, 11.0, 13.0,
     ///                             17.0, 19.0, 13.0]);
@@ -1088,7 +1088,7 @@ where
 
     /// Return the product of all components of the matrix
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                              7.0, 11.0, 13.0,
     ///                             17.0, 19.0, 23.0]);
@@ -1103,7 +1103,7 @@ where
 
     /// Return the sum of the squares of the trace of the matrix.
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
     ///                              7.0, 11.0, 13.0,
     ///                             17.0, 19.0, 23.0]);
@@ -1118,7 +1118,7 @@ where
 
     /// Return true if matrix is near zero
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// # use num_traits::Zero;
     /// let z = Matrix3x3f32::zero();
     /// assert!(z.is_near_zero());
@@ -1134,7 +1134,7 @@ where
 
     /// Return true if matrix is near identity
     /// ```
-    /// # use vector_quaternion_matrix::Matrix3x3f32;
+    /// # use vqm::Matrix3x3f32;
     /// # use num_traits::One;
     /// let i = Matrix3x3f32::one();
     /// assert!(i.is_near_identity());
@@ -1162,7 +1162,7 @@ where
 
 /// Matrix3x3 from Matrix2x2
 /// ```
-/// # use vector_quaternion_matrix::{Matrix2x2f32,Matrix3x3f32};
+/// # use vqm::{Matrix2x2f32,Matrix3x3f32};
 /// let m2 = Matrix2x2f32::from([ 2.0,  3.0,
 ///                               7.0, 11.0]);
 /// let n2 = Matrix2x2f32::from([ 13.0, 17.0,
@@ -1186,7 +1186,7 @@ where
 
 /// Matrix2x2 from Matrix3x3. Takes top left of m3x3, discarding other values.
 /// ```
-/// # use vector_quaternion_matrix::{Matrix2x2f32,Matrix3x3f32};
+/// # use vqm::{Matrix2x2f32,Matrix3x3f32};
 /// let m2 = Matrix2x2f32::from([ 2.0,  3.0,
 ///                               7.0, 11.0]);
 /// let m3 = Matrix3x3f32::from([ 2.0,  3.0,  5.0,

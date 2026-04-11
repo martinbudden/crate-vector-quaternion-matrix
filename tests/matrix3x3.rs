@@ -1,6 +1,6 @@
 use cfg_if::cfg_if;
 use num_traits::identities::{One, Zero};
-use vector_quaternion_matrix::{Matrix3x3, Matrix3x3f32, Vector3d};
+use vqm::{Matrix3x3, Matrix3x3f32, Vector3d};
 
 // **** Align ****
 cfg_if! {

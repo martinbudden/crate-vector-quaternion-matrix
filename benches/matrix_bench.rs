@@ -5,7 +5,7 @@ use criterion::{BatchSize, Criterion, Throughput, criterion_group, criterion_mai
 use rand::{RngExt, rng};
 use std::hint::black_box;
 
-use vector_quaternion_matrix::{Matrix2x2f32, Matrix3x3f32};
+use vqm::{Matrix2x2f32, Matrix3x3f32};
 
 // See: target/criterion/Matrix%20Math/report/index.html for results
 

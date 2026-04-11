@@ -1,4 +1,4 @@
-use vector_quaternion_matrix::{Quaternion, Quaternionf32};
+use vqm::{Quaternion, Quaternionf32};
 
 const _: () = assert!(core::mem::size_of::<Quaternion<f32>>() == 16);
 const _: () = assert!(core::mem::align_of::<Quaternion<f32>>() == 16);

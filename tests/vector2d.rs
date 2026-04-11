@@ -1,4 +1,4 @@
-use vector_quaternion_matrix::{Vector2d, Vector2df32, Vector2df64};
+use vqm::{Vector2d, Vector2df32, Vector2df64};
 
 const _: () = assert!(core::mem::size_of::<Vector2df32>() == 8);
 const _: () = assert!(core::mem::align_of::<Vector2df32>() == 8);

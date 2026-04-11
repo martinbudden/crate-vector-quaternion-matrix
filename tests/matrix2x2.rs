@@ -1,5 +1,5 @@
 use num_traits::identities::{One, Zero};
-use vector_quaternion_matrix::{Matrix2x2, Matrix2x2f32, Vector2d};
+use vqm::{Matrix2x2, Matrix2x2f32, Vector2d};
 
 // **** Align
 

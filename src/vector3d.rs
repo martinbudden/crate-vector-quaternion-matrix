@@ -44,7 +44,7 @@ pub struct Vector3d<T> {
 
 /// Create a vector.
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// let v = Vector3df32::new(2.0,  3.0, 7.0);
 /// assert_eq!(v, Vector3df32 { x:2.0, y:3.0, z: 7.0 });
 /// ```
@@ -63,7 +63,7 @@ where
 
 /// Zero vector
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// # use num_traits::{zero,Zero};
 /// let z: Vector3df32 = zero();
 /// assert!(z.is_zero());
@@ -88,7 +88,7 @@ where
 
 /// Negate vector
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// let v = Vector3df32 { x: 2.0, y: 3.0, z: 5.0 };
 /// let r = -v;
 ///
@@ -110,7 +110,7 @@ where
 
 /// Add two vectors
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// let u = Vector3df32::new(2.0, 3.0, 5.0);
 /// let v = Vector3df32::new(7.0, 11.0, 13.0);
 /// let r = u + v;
@@ -133,7 +133,7 @@ where
 
 /// Add one vector to another
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// let mut r = Vector3df32::new(2.0, 3.0, 5.0);
 /// let u = Vector3df32::new(7.0, 11.0, 13.0);
 /// r += u;
@@ -159,7 +159,7 @@ where
 
 /// Multiply vector by constant and add another vector
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// # use num_traits::MulAdd;
 /// let mut v = Vector3df32::new(2.0, 3.0, 5.0);
 /// let w = Vector3df32::new(7.0, 11.0, 13.0);
@@ -212,7 +212,7 @@ impl MulAdd<f32> for Vector3d<i16> {
 
 /// Multiply vector by constant and add another vector in place
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// # use num_traits::MulAddAssign;
 /// let mut v = Vector3df32::new(2.0, 3.0, 5.0);
 /// let w = Vector3df32::new(7.0, 11.0, 13.0);
@@ -235,7 +235,7 @@ where
 
 /// Subtract two vectors
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// let u = Vector3df32::new(2.0, 3.0, 5.0);
 /// let v = Vector3df32::new(7.0, 11.0, 13.0);
 /// let r = u - v;
@@ -259,7 +259,7 @@ where
 
 /// Subtract one vector from another
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// let mut r = Vector3df32::new(2.0, 3.0, 5.0);
 /// let v = Vector3df32::new(7.0, 11.0, 17.0);
 /// r -= v;
@@ -280,7 +280,7 @@ where
 
 /// Pre-multiply vector by a constant
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// let v = Vector3df32::new(2.0, 3.0, 5.0);
 /// let r = 2.0 * v;
 ///
@@ -306,7 +306,7 @@ impl Mul<Vector3d<f64>> for f64 {
 
 /// Multiply vector by a constant
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// let v = Vector3df32::new(2.0, 3.0, 5.0);
 /// let r = v * 2.0;
 ///
@@ -356,7 +356,7 @@ impl Mul<i32> for Vector3d<f32> {
 
 /// In-place multiply a vector by a constant
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// let mut v = Vector3df32::new(2.0, 3.0, 5.0);
 /// v *= 2.0;
 ///
@@ -376,7 +376,7 @@ where
 
 /// Divide a vector by a constant
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// let v = Vector3df32::new(2.0, 3.0, 5.0);
 /// let r = v / 2.0;
 ///
@@ -396,7 +396,7 @@ where
 
 /// In-place divide a vector by a constant
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// let mut v = Vector3df32::new(2.0, 3.0, 5.0);
 /// v /= 2.0;
 ///
@@ -416,7 +416,7 @@ where
 
 /// Access vector component by index
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// let v = Vector3df32::new(2.0, 3.0, 5.0);
 ///
 /// assert_eq!(v[0], 2.0);
@@ -439,7 +439,7 @@ impl<T> Index<usize> for Vector3d<T> {
 
 // Set vector component by index
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// let mut v = Vector3df32::new(2.0, 3.0, 5.0);
 /// v[0] = 7.0;
 /// v[1] = 11.0;
@@ -466,7 +466,7 @@ where
 {
     /// Return a copy of the vector with all components set to their absolute values
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let v = Vector3df32::new(2.0, -3.0, -5.0);
     /// let u = v.abs();
     ///
@@ -479,7 +479,7 @@ where
 
     /// Set all components of the vector to their absolute values
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let mut v = Vector3df32::new(2.0, -3.0, -5.0);
     /// v.abs_mut();
     ///
@@ -500,7 +500,7 @@ where
 {
     /// Return a copy of the matrix with all components clamped to the specified range
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let v = Vector3df32::new(2.0, 3.0, 11.0);
     /// let u = v.clamped(2.5, 7.5);
     ///
@@ -513,7 +513,7 @@ where
 
     /// Clamp all components of the vector to the specified range
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let mut v = Vector3df32::new(2.0, 3.0, 11.0);
     /// v.clamp(2.5, 7.5);
     ///
@@ -534,7 +534,7 @@ where
 {
     /// Vector dot product
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let v = Vector3df32::new(2.0, 3.0, 5.0);
     /// let w = Vector3df32::new(7.0, 11.0, 13.0);
     ///
@@ -556,7 +556,7 @@ where
 {
     /// Vector cross product
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let v = Vector3df32::new(2.0, 3.0, 5.0);
     /// let w = Vector3df32::new(7.0, 11.0, 13.0);
     ///
@@ -578,7 +578,7 @@ where
 {
     /// Return square of Euclidean norm
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let v = Vector3df32::new(2.0, 3.0, 5.0);
     /// assert_eq!(38.0, v.norm_squared());
     /// ```
@@ -589,7 +589,7 @@ where
 
     /// Return distance between two points, squared
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let v = Vector3df32::new(2.0, 3.0, 5.0);
     /// let w = Vector3df32::new(7.0, 11.0, 13.0);
     /// assert_eq!(153.0, v.distance_squared(w));
@@ -619,7 +619,7 @@ where
 {
     /// Return normalized form of the vector, checking if the norm is zero.
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let v = Vector3df32::new(0.0, 0.0, 0.0);
     /// let n = v.normalized();
     /// assert_eq!(Vector3df32 { x: 0.0, y: 0.0, z: 0.0 }, n);
@@ -636,7 +636,7 @@ where
 
     /// Normalize the vector in place, checking if the norm is zero.
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let mut v = Vector3df32::new(0.0, 0.0, 0.0);
     /// v.normalize();
     /// assert_eq!(Vector3df32 { x: 0.0, y: 0.0, z: 0.0 }, v);
@@ -649,7 +649,7 @@ where
 
     /// Return normalized form of the vector, not checking if the norm is zero.
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let v = Vector3df32::new(1.0, 4.0, 8.0);
     /// let n = v.normalized_unchecked();
     /// assert_eq!(Vector3df32 { x: 0.11111111, y: 0.44444445, z: 0.8888889 }, n);
@@ -662,7 +662,7 @@ where
 
     /// Normalize the vector in place, not checking if the norm is zero.
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let mut v = Vector3df32::new(1.0, 4.0, 8.0);
     /// v.normalize_unchecked();
     /// assert_eq!(Vector3df32 { x: 0.11111111, y: 0.44444445, z: 0.8888889 }, v);
@@ -680,7 +680,7 @@ where
 {
     // Return true if the vector is normalized.
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let v = Vector3df32::new(2.0, 3.0, 5.0);
     /// let n = v.normalized();
     /// assert!(n.is_normalized());
@@ -708,7 +708,7 @@ where
 {
     /// Return the sum of all components of the vector
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let v = Vector3df32::new(2.0, 3.0, 5.0);
     /// assert_eq!(10.0, v.sum());
     /// ```
@@ -719,7 +719,7 @@ where
 
     /// Return the product of all components of the vector
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let v = Vector3df32::new(2.0, 3.0, 5.0);
     /// assert_eq!(30.0, v.product());
     /// ```
@@ -737,7 +737,7 @@ where
 {
     /// Return the mean of all components of the vector
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let v = Vector3df32::new(2.0, 3.0, 7.0);
     /// assert_eq!(4.0, v.mean());
     /// ```
@@ -756,7 +756,7 @@ where
 {
     /// Return the max element in the vector
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let v = Vector3df32::new(2.0, 3.0, 5.0);
     /// let w = Vector3df32::new(3.0, 5.0, 2.0);
     /// let x = Vector3df32::new(5.0, 3.0, 2.0);
@@ -771,7 +771,7 @@ where
 
     /// Return the min element in the vector
     /// ```
-    /// # use vector_quaternion_matrix::Vector3df32;
+    /// # use vqm::Vector3df32;
     /// let v = Vector3df32::new(2.0, 3.0, 5.0);
     /// let w = Vector3df32::new(3.0, 5.0, 2.0);
     /// let x = Vector3df32::new(5.0, 3.0, 2.0);
@@ -814,7 +814,7 @@ where
 
 /// Vector from tuple
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// let v = Vector3df32::from((2.0, 3.0, 5.0));
 /// let w: Vector3df32 = (7.0, 11.0, 13.0).into();
 ///
@@ -832,7 +832,7 @@ impl<T> From<(T, T, T)> for Vector3d<T> {
 
 /// Vector from array
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// let v = Vector3df32::from([2.0, 3.0, 5.0]);
 /// let w: Vector3df32 = [7.0, 11.0, 13.0].into();
 ///
@@ -851,7 +851,7 @@ where
 
 /// Array from vector
 /// ```
-/// # use vector_quaternion_matrix::Vector3df32;
+/// # use vqm::Vector3df32;
 /// let v = Vector3df32 { x: 2.0, y: 3.0, z: 5.0 };
 ///
 /// let a = <[f32; 3]>::from(v);
@@ -871,7 +871,7 @@ impl<T> From<Vector3d<T>> for [T; 3] {
 
 /// Vector3d from Vector2d
 /// ```
-/// # use vector_quaternion_matrix::{Vector2df32,Vector3df32};
+/// # use vqm::{Vector2df32,Vector3df32};
 /// let v = Vector3df32::from(Vector2df32 { x: 2.0, y: 3.0 });
 /// let w: Vector3df32 = Vector2df32 { x: 7.0, y: 11.0 }.into();
 ///
@@ -892,7 +892,7 @@ where
 
 /// Vector2d from Vector3d, discarding z value.
 /// ```
-/// # use vector_quaternion_matrix::{Vector2df32,Vector3df32};
+/// # use vqm::{Vector2df32,Vector3df32};
 /// let v: Vector2df32 = Vector3df32 { x: 2.0, y: 3.0, z: 5.0 }.into();
 /// let u = Vector2df32::from(Vector3df32{ x: 7.0, y: 11.0, z: 13.0 });
 ///
@@ -933,7 +933,7 @@ impl Mul<f32> for Vector3d<i32> {
 
 /// `Vector3d<f32>` from `Vector3d<i16>`
 /// ```
-/// # use vector_quaternion_matrix::{Vector3df32,Vector3di16};
+/// # use vqm::{Vector3df32,Vector3di16};
 /// let v_i16 = Vector3di16{x: 2, y: 3, z: 5};
 /// let v_f32 = Vector3df32::from(v_i16);
 ///
