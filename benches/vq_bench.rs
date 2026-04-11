@@ -46,7 +46,7 @@ fn bench_vq(c: &mut Criterion) {
         );
     });
 
-    _ = group.bench_function("v3d_*_+", |b| {
+    _ = group.bench_function("v3d_mu_add_*_+", |b| {
         b.iter_batched(
             || {
                 // Setup: Generate two random vectors

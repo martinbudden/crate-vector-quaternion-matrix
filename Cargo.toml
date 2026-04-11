@@ -60,13 +60,14 @@ approx = "0.5.1"
 [dev-dependencies]
 criterion = { version = "0.8.2", features = ["html_reports"] }
 rand = "0.10.1" 
+#rand = { version = "0.10.1", features = ["small_rng"] }
 approx = { version = "0.5", default-features = false }
 filters = { git = "https://github.com/martinbudden/crate-filters"}
 
 # see https://doc.rust-lang.org/cargo/reference/profiles.html
 [profile.dev]
 opt-level = 0
-debug = true
+debug = "line-tables-only"
 # split-debuginfo = '...'  # Platform-specific.
 strip = "none"
 debug-assertions = true
@@ -76,6 +77,13 @@ panic = 'unwind'
 incremental = true
 codegen-units = 256
 rpath = false
+
+[profile.dev.package."*"]
+debug = false
+
+[profile.debugging]
+inherits = "dev"
+debug = true
 
 [profile.release]
 opt-level = 3
@@ -100,4 +108,8 @@ harness = false
 
 [[bench]]
 name = "vq_bench"
+harness = false
+
+[[bench]]
+name = "math_bench"
 harness = false

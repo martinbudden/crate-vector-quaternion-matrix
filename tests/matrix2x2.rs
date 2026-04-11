@@ -10,11 +10,13 @@ const _: () = assert!(core::mem::align_of::<Matrix2x2<f32>>() == 16);
 mod tests {
     use super::*;
 
+    #[allow(unused)]
     fn is_normal<T: Sized + Send + Sync + Unpin>() {}
+    fn is_full<T: Sized + Send + Sync + Unpin + Copy + Clone + Default + PartialEq>() {}
 
     #[test]
     fn normal_types() {
-        is_normal::<Matrix2x2<f32>>();
+        is_full::<Matrix2x2<f32>>();
     }
     #[test]
     fn default() {

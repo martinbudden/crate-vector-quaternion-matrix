@@ -1,7 +1,7 @@
 #![warn(clippy::pedantic)]
 #![warn(unused_results)]
 
-use criterion::{BatchSize, Criterion, criterion_group, criterion_main};
+use criterion::{BatchSize, Criterion, Throughput, criterion_group, criterion_main};
 use rand::{RngExt, rng};
 use std::hint::black_box;
 
@@ -11,6 +11,8 @@ use vector_quaternion_matrix::{Matrix2x2f32, Matrix3x3f32};
 
 fn bench_matrix(c: &mut Criterion) {
     let mut group = c.benchmark_group("Matrix");
+
+    _ = group.throughput(Throughput::Elements(1));
 
     _ = group.bench_function("m2x2 determinant", |b| {
         b.iter_batched(

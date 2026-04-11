@@ -21,11 +21,13 @@ cfg_if! {
 mod tests {
     use super::*;
 
+    #[allow(unused)]
     fn is_normal<T: Sized + Send + Sync + Unpin>() {}
+    fn is_full<T: Sized + Send + Sync + Unpin + Copy + Clone + Default + PartialEq>() {}
 
     #[test]
     fn normal_types() {
-        is_normal::<Matrix3x3<f32>>();
+        is_full::<Matrix3x3<f32>>();
     }
     #[test]
     fn default() {

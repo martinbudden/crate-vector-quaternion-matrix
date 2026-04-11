@@ -127,7 +127,7 @@ cfg_if! {
         impl TrigonometricMethods for f64 {
             #[inline(always)]
             fn sin_cos(self) -> (Self, Self) {
-                (libm::sin(self), libm::cos(self))
+                libm::sincos(self)
             }
             #[inline(always)]
             fn sin(self) -> Self {
@@ -311,7 +311,7 @@ where
     if q & 2 == 0 { sin_cos } else { (-sin_cos.0, -sin_cos.1) }
 }
 
-fn sin_approx(x: f32) -> f32 {
+pub fn sin_approx(x: f32) -> f32 {
     let t = x * core::f32::consts::FRAC_2_PI; // so remainder will be scaled from range [-PI/4, PI/4] ([-45, 45] degrees) to [-0.5, 0.5]
     let q = libm::roundf(t); // nearest quadrant
     let r = t - q;
@@ -319,7 +319,7 @@ fn sin_approx(x: f32) -> f32 {
     sin_quadrant(r, q as i32)
 }
 
-fn cos_approx(x: f32) -> f32 {
+pub fn cos_approx(x: f32) -> f32 {
     let t = x * core::f32::consts::FRAC_2_PI; // so remainder will be scaled from range [-PI/4, PI/4] ([-45, 45] degrees) to [-0.5, 0.5]
     let q = libm::roundf(t); // nearest quadrant
     let r = t - q; // remainder in range [-0.5, 0.5]
@@ -327,7 +327,7 @@ fn cos_approx(x: f32) -> f32 {
     cos_quadrant(r, q as i32)
 }
 
-fn sin_cos_approx(x: f32) -> (f32, f32) {
+pub fn sin_cos_approx(x: f32) -> (f32, f32) {
     let t = x * core::f32::consts::FRAC_2_PI; // so remainder will be scaled from range [-PI/4, PI/4] ([-45, 45] degrees) to [-0.5, 0.5]
     let q = libm::roundf(t); // nearest quadrant
     let r = t - q; // remainder in range [-0.5, 0.5]

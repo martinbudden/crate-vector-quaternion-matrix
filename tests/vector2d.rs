@@ -10,11 +10,13 @@ const _: () = assert!(core::mem::align_of::<Vector2df64>() == 8);
 mod tests {
     use super::*;
 
+    #[allow(unused)]
     fn is_normal<T: Sized + Send + Sync + Unpin>() {}
+    fn is_full<T: Sized + Send + Sync + Unpin + Copy + Clone + Default + PartialEq>() {}
 
     #[test]
     fn normal_types() {
-        is_normal::<Vector2d<f32>>();
+        is_full::<Vector2d<f32>>();
     }
     #[test]
     fn default() {
