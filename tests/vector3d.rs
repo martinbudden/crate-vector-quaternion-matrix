@@ -327,7 +327,7 @@ mod tests {
     /*#[test]
     fn filter_vector3di32_i32() {
         use filters::{Pt1Filter, SignalFilter};
-        pub type Vector3di32 = Vector3d<i32>;
+        type Vector3di32 = Vector3d<i32>;
 
         let mut filter = Pt1Filter::<Vector3d<i32>, i32>::new(1);
 
@@ -338,7 +338,7 @@ mod tests {
     #[test]
     fn pt1_filter_vector3di32_f32() {
         use filters::{Pt1Filter, SignalFilter};
-        pub type Vector3di32 = Vector3d<i32>;
+        type Vector3di32 = Vector3d<i32>;
 
         let mut filter = Pt1Filter::<Vector3di32, f32>::new(1.0);
 
