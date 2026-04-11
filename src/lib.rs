@@ -34,7 +34,7 @@ pub mod quaternion_math;
 
 pub use math_constants::MathConstants;
 pub use math_methods::TrigonometricMethods;
-pub use math_methods::{sin_approx, cos_approx, sin_cos_approx};
+pub use math_methods::{cos_approx, sin_approx, sin_cos_approx};
 pub use sqrt_methods::SqrtMethods;
 
 pub use vector2d::{Vector2d, Vector2df32, Vector2df64};
