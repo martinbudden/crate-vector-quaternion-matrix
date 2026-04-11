@@ -920,6 +920,17 @@ impl Mul<f32> for Vector3d<i16> {
     }
 }
 
+impl Mul<f32> for Vector3d<i32> {
+    type Output = Self;
+
+    #[inline(always)]
+    fn mul(self, k: f32) -> Self {
+        #[allow(clippy::cast_precision_loss)]
+        #[allow(clippy::cast_possible_truncation)]
+        Self { x: ((self.x as f32) * k) as i32, y: ((self.y as f32) * k) as i32, z: ((self.z as f32) * k) as i32 }
+    }
+}
+
 /// `Vector3d<f32>` from `Vector3d<i16>`
 /// ```
 /// # use vector_quaternion_matrix::{Vector3df32,Vector3di16};
