@@ -9,11 +9,10 @@ repository = "https://github.com/martinbudden/crate-vector-quaternion-matrix"
 description = "A vector, quaternion, and matrix library targeted at embedded systems and robotics."
 keywords = ["vector", "quaternion", "matrix", "no_std"]
 categories = [
-    "Embedded development",
-    "Mathematics",
-    "No standard library",
-    "Robotics",
-    "Science",
+    "embedded",
+    "mathematics",
+    "no-std::no-alloc",
+    "science::robotics",
 ]
 
 [features]
