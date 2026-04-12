@@ -50,7 +50,7 @@ pub struct Quaternion<T> {
 
 // **** Default ****
 
-/// Default quaternion
+/// Default quaternion.
 /// ```
 /// # use vqm::Quaternionf32;
 /// # use num_traits::Zero;
@@ -75,7 +75,7 @@ impl<T> Quaternion<T>
 where
     T: Copy,
 {
-    /// Create a quaternion
+    /// Create a quaternion.
     #[inline(always)]
     pub const fn new(w: T, x: T, y: T, z: T) -> Self {
         Self { w, x, y, z }
@@ -84,7 +84,7 @@ where
 
 // **** Zero ****
 
-/// Zero quaternion
+/// Zero quaternion.
 /// ```
 /// # use vqm::Quaternionf32;
 /// # use num_traits::{zero,Zero};
@@ -109,7 +109,7 @@ where
 
 // **** One ****
 
-/// Unit quaternion
+/// Unit quaternion.
 /// ```
 /// # use vqm::Quaternionf32;
 /// # use num_traits::One;
@@ -135,7 +135,7 @@ where
 
 // **** Neg ****
 
-/// Negate quaternion
+/// Negate quaternion.
 /// ```
 /// # use vqm::Quaternionf32;
 /// let mut q = Quaternionf32 { w: 2.0, x: -3.0, y: -5.0, z: 7.0 };
@@ -157,7 +157,7 @@ where
 
 // **** Add ****
 
-/// Add two quaternions
+/// Add two quaternions.
 /// ```
 /// # use vqm::Quaternionf32;
 /// let u = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
@@ -180,7 +180,7 @@ where
 
 // **** AddAssign ****
 
-/// Add one quaternion to another
+/// Add one quaternion to another.
 impl<T> AddAssign for Quaternion<T>
 where
     T: Copy + QuaternionMath,
@@ -195,7 +195,7 @@ where
 
 // **** MulAdd ****
 
-/// Multiply quaternion by constant and add another quaternion
+/// Multiply quaternion by constant and add another quaternion.
 /// ```
 /// # use vqm::Quaternionf32;
 /// # use num_traits::MulAdd;
@@ -220,7 +220,7 @@ where
 
 // **** MulAddAssign ****
 
-/// Multiply quaternion by constant and add another quaternion in place
+/// Multiply quaternion by constant and add another quaternion in place.
 /// ```
 /// # use vqm::Quaternionf32;
 /// # use num_traits::MulAddAssign;
@@ -243,7 +243,7 @@ where
 
 // **** Sub ****
 
-/// Subtract two quaternions
+/// Subtract two quaternions.
 impl<T> Sub for Quaternion<T>
 where
     T: Copy + QuaternionMath,
@@ -259,7 +259,7 @@ where
 
 // **** SubAssign ****
 
-/// Subtract one quaternion from another
+/// Subtract one quaternion from another.
 impl<T> SubAssign for Quaternion<T>
 where
     T: Copy + QuaternionMath,
@@ -272,7 +272,7 @@ where
 
 // **** Scalar Mul ****
 
-/// Pre-multiply quaternion by a constant
+/// Pre-multiply quaternion by a constant.
 impl Mul<Quaternion<f32>> for f32 {
     type Output = Quaternion<f32>;
     #[inline(always)]
@@ -291,7 +291,7 @@ impl Mul<Quaternion<f64>> for f64 {
 
 // **** Mul Scalar ****
 
-/// Multiply quaternion by a constant
+/// Multiply quaternion by a constant.
 impl<T> Mul<T> for Quaternion<T>
 where
     T: Copy + QuaternionMath,
@@ -306,7 +306,7 @@ where
 
 // **** MulAssign ****
 
-/// In-place multiply a quaternion by a constant
+/// In-place multiply a quaternion by a constant.
 impl<T> MulAssign<T> for Quaternion<T>
 where
     T: Copy + QuaternionMath,
@@ -319,7 +319,7 @@ where
 
 // **** Div by scalar ****
 
-/// Divide a quaternion by a constant
+/// Divide a quaternion by a constant.
 /// ```
 /// # use vqm::Quaternionf32;
 /// let q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
@@ -339,7 +339,7 @@ where
     }
 }
 
-/// In-place divide a quaternion by a constant
+/// In-place divide a quaternion by a constant.
 /// ```
 /// # use vqm::Quaternionf32;
 /// let mut q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
@@ -359,7 +359,7 @@ where
 
 // **** Mul ****
 
-/// Multiply two quaternions
+/// Multiply two quaternions.
 impl<T> Mul<Quaternion<T>> for Quaternion<T>
 where
     T: Copy + QuaternionMath,
@@ -374,7 +374,7 @@ where
 
 // **** MulAssign ****
 
-/// Multiply one quaternion by another
+/// Multiply one quaternion by another.
 impl<T> MulAssign<Quaternion<T>> for Quaternion<T>
 where
     T: Copy + QuaternionMath,
@@ -387,7 +387,7 @@ where
 
 // **** Index ****
 
-/// Access quaternion component by index
+/// Access quaternion component by index.
 /// ```
 /// # use vqm::Quaternionf32;
 /// let mut q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
@@ -412,7 +412,7 @@ impl<T> Index<usize> for Quaternion<T> {
 
 // **** IndexMut ****
 
-// Set quaternion component by index
+// Set quaternion component by index.
 /// ```
 /// # use vqm::Quaternionf32;
 /// let mut q = Quaternionf32::new(2.0, 3.0, 5.0, 6.0);
@@ -441,15 +441,15 @@ impl<T> Quaternion<T>
 where
     T: Copy + Signed,
 {
-    /// Return a copy of the quaternion with all components set to their absolute values
+    /// Return a copy of the quaternion with all components set to their absolute values.
     #[inline(always)]
     pub fn abs(self) -> Self {
         Self { w: self.w.abs(), x: self.x.abs(), y: self.y.abs(), z: self.z.abs() }
     }
 
-    /// Set all components of the quaternion to their absolute values
+    /// Set all components of the quaternion to their absolute values.
     #[inline(always)]
-    pub fn abs_in_place(&mut self) {
+    pub fn abs_mut(&mut self) {
         *self = self.abs();
     }
 }
@@ -460,9 +460,9 @@ impl<T> Quaternion<T>
 where
     T: Copy + FloatCore,
 {
-    /// Return a copy of the quaternion with all components clamped to the specified range
+    /// Return a copy of the quaternion with all components clamped to the specified range.
     #[inline(always)]
-    pub fn clamp(self, min: T, max: T) -> Self {
+    pub fn clamped(self, min: T, max: T) -> Self {
         Self {
             w: self.w.clamp(min, max),
             x: self.x.clamp(min, max),
@@ -471,9 +471,9 @@ where
         }
     }
 
-    /// Clamp all components of the quaternion to the specified range
+    /// Clamp all components of the quaternion to the specified range.
     #[inline(always)]
-    pub fn clamp_in_place(&mut self, min: T, max: T) {
+    pub fn clamp(&mut self, min: T, max: T) {
         self.w = self.w.clamp(min, max);
         self.x = self.x.clamp(min, max);
         self.y = self.y.clamp(min, max);
@@ -487,7 +487,7 @@ impl<T> Quaternion<T>
 where
     T: Copy + One + Add<Output = T> + Div<Output = T>,
 {
-    /// Return the mean of all components of the quaternion
+    /// Return the mean of all components of the quaternion.
     #[inline(always)]
     pub fn mean(self) -> T {
         let four = T::one() + T::one() + T::one() + T::one();
@@ -501,7 +501,7 @@ impl<T> Quaternion<T>
 where
     T: Copy + QuaternionMath,
 {
-    /// Return square of Euclidean norm
+    /// Return square of Euclidean norm.
     #[inline(always)]
     pub fn norm_squared(self) -> T {
         T::q_norm_squared(self)
@@ -514,7 +514,7 @@ impl<T> Quaternion<T>
 where
     T: Copy + SqrtMethods + QuaternionMath,
 {
-    /// Return Euclidean norm
+    /// Return Euclidean norm.
     #[inline(always)]
     pub fn norm(self) -> T {
         Self::norm_squared(self).sqrt()
@@ -525,7 +525,7 @@ impl<T> Quaternion<T>
 where
     T: Copy + Zero + PartialEq + SqrtMethods + QuaternionMath,
 {
-    /// Return normalized form of the quaternion, checking if the magnitude is zero
+    /// Return normalized form of the quaternion, checking if the magnitude is zero.
     /// ```
     /// # use vqm::Quaternionf32;
     /// let q = Quaternionf32::new(0.0, 0.0, 0.0, 0.0);
@@ -542,7 +542,7 @@ where
         self * norm_squared.sqrt_reciprocal()
     }
 
-    /// Normalize the quaternion in place, checking if the magnitude is zero
+    /// Normalize the quaternion in place, checking if the magnitude is zero.
     /// ```
     /// # use vqm::Quaternionf32;
     /// let mut q = Quaternionf32::new(0.0, 0.0, 0.0, 0.0);
@@ -669,7 +669,7 @@ impl<T> Quaternion<T>
 where
     T: Copy + Zero + One + PartialOrd + Neg<Output = T> + Sub<Output = T> + Div<Output = T> + SqrtMethods,
 {
-    /// clip `sin(roll_angle)` to +/-1.0 when roll angle outside range [-90 degrees, 90 degrees]
+    /// clip `sin(roll_angle)` to +/-1.0 when roll angle outside range [-90 degrees, 90 degrees].
     pub fn sin_roll_clipped(self) -> T {
         let half = T::one() / (T::one() + T::one());
         let a: T = self.w * self.x + self.y * self.z;
@@ -689,7 +689,7 @@ where
     T: Copy + Zero + One + Neg<Output = T> + Sub<Output = T> + Div<Output = T> + TrigonometricMethods,
 {
     /// Rotate about the x-axis,
-    /// equivalent to *= Quaternion(cos(theta/2), sin(theta/2), 0, 0)
+    /// equivalent to *= Quaternion(cos(theta/2), sin(theta/2), 0, 0).
     pub fn rotate_x(&mut self, theta: T) -> &mut Self {
         let two = T::one() + T::one();
         let (sin, cos) = (theta / two).sin_cos();
@@ -702,7 +702,7 @@ where
         self
     }
     /// Rotate about the y-axis,
-    /// equivalent to *= Quaternion(cos(theta/2), 0, sin(theta/2), 0)
+    /// equivalent to *= Quaternion(cos(theta/2), 0, sin(theta/2), 0).
     pub fn rotate_y(&mut self, theta: T) -> &mut Self {
         let two = T::one() + T::one();
         let (sin, cos) = (theta / two).sin_cos();
@@ -716,7 +716,7 @@ where
     }
 
     /// Rotate about the z-axis,
-    /// equivalent to *= Quaternion(cos(theta/2), 0, 0, sin(theta/2))
+    /// equivalent to *= Quaternion(cos(theta/2), 0, 0, sin(theta/2)).
     pub fn rotate_z(&mut self, theta: T) -> &mut Self {
         let two = T::one() + T::one();
         let (sin, cos) = (theta / two).sin_cos();
@@ -747,7 +747,7 @@ where
     }
 
     /// Create a Quaternion from roll, pitch, and yaw Euler angles (in radians).
-    /// See: <https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Euler_angles_(in_3-2-1_sequence)_to_quaternion_conversion>
+    /// See: <https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Euler_angles_(in_3-2-1_sequence)_to_quaternion_conversion>.
     pub fn from_roll_pitch_yaw_angles_radians(roll_radians: T, pitch_radians: T, yaw_radians: T) -> Self {
         let half: T = T::one() / (T::one() + T::one());
         let (sin_half_roll, cos_half_roll) = (roll_radians * half).sin_cos();
@@ -780,7 +780,7 @@ impl<T> Quaternion<T>
 where
     T: Copy + QuaternionMath,
 {
-    // Return the conjugate of the quaternion
+    // Return the conjugate of the quaternion.
 
     #[inline(always)]
     pub fn conjugate(self) -> Self {
@@ -792,12 +792,12 @@ impl<T> Quaternion<T>
 where
     T: Copy + One + Neg<Output = T> + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Div<Output = T>,
 {
-    /// Return the imaginary part of the quaternion
+    /// Return the imaginary part of the quaternion.
     #[inline(always)]
     pub fn imaginary(self) -> Vector3d<T> {
         Vector3d::<T> { x: self.x, y: self.y, z: self.z }
     }
-    /// Return the last column of the equivalent rotation matrix, but calculated more efficiently than a full conversion
+    /// Return the last column of the equivalent rotation matrix, but calculated more efficiently than a full conversion.
     #[inline(always)]
     pub fn direction_cosine_matrix_z(self) -> Vector3d<T> {
         let two = T::one() + T::one();
@@ -867,7 +867,7 @@ where
 
 // **** From Array ****
 
-/// Quaternion from array
+/// Quaternion from array.
 /// ```
 /// # use vqm::Quaternionf32;
 ///
@@ -887,7 +887,7 @@ where
     }
 }
 
-/// Array from quaternion
+/// Array from quaternion.
 /// ```
 /// # use vqm::Quaternionf32;
 ///

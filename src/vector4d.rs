@@ -33,7 +33,7 @@ impl<T> Vector4d<T>
 where
     T: Copy,
 {
-    /// Create a vector
+    /// Create a vector.
     #[inline(always)]
     pub const fn new(x: T, y: T, z: T, t: T) -> Self {
         Self { x, y, z, t }
@@ -42,7 +42,7 @@ where
 
 // **** Zero ****
 
-/// Zero vector
+/// Zero vector.
 /// ```
 /// # use vqm::Vector4df32;
 /// # use num_traits::{zero,Zero};
@@ -67,7 +67,7 @@ where
 
 // **** Neg ****
 
-/// Negate vector
+/// Negate vector.
 /// ```
 /// # use vqm::Vector4df32;
 /// let v = Vector4df32 { x: 2.0, y: 3.0, z: 5.0, t: 7.0 };
@@ -89,7 +89,7 @@ where
 
 // **** Add ****
 
-/// Add two vectors
+/// Add two vectors.
 /// ```
 /// # use vqm::Vector4df32;
 /// let u = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -112,7 +112,7 @@ where
 
 // **** AddAssign ****
 
-/// Add one vector to another
+/// Add one vector to another.
 /// ```
 /// # use vqm::Vector4df32;
 /// let mut r = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -138,7 +138,7 @@ where
 
 // **** MulAdd ****
 
-/// Multiply vector by constant and add another vector
+/// Multiply vector by constant and add another vector.
 /// ```
 /// # use vqm::Vector4df32;
 /// # use num_traits::MulAdd;
@@ -163,7 +163,7 @@ where
 
 // **** MulAddAssign ****
 
-/// Multiply vector by constant and add another vector in place
+/// Multiply vector by constant and add another vector in place.
 /// ```
 /// # use vqm::Vector4df32;
 /// # use num_traits::MulAddAssign;
@@ -186,7 +186,7 @@ where
 
 // **** Sub ****
 
-/// Subtract two vectors
+/// Subtract two vectors.
 /// ```
 /// # use vqm::Vector4df32;
 /// let u = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -210,7 +210,7 @@ where
 
 // **** SubAssign ****
 
-/// Subtract one vector from another
+/// Subtract one vector from another.
 /// ```
 /// # use vqm::Vector4df32;
 /// let mut r = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -231,7 +231,7 @@ where
 
 // **** Scalar Mul ****
 
-/// Pre-multiply vector by a constant
+/// Pre-multiply vector by a constant.
 /// ```
 /// # use vqm::Vector4df32;
 /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -257,7 +257,7 @@ impl Mul<Vector4d<f64>> for f64 {
 
 // **** Mul Scalar ****
 
-/// Multiply vector by a constant
+/// Multiply vector by a constant.
 /// ```
 /// # use vqm::Vector4df32;
 /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -279,7 +279,7 @@ where
 
 // **** MulAssign ****
 
-/// In-place multiply a vector by a constant
+/// In-place multiply a vector by a constant.
 /// ```
 /// # use vqm::Vector4df32;
 /// let mut v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -299,7 +299,7 @@ where
 
 // **** Div by scalar ****
 
-/// Divide a vector by a constant
+/// Divide a vector by a constant.
 /// ```
 /// # use vqm::Vector4df32;
 /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -319,7 +319,7 @@ where
     }
 }
 
-/// In-place divide a vector by a constant
+/// In-place divide a vector by a constant.
 /// ```
 /// # use vqm::Vector4df32;
 /// let mut v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -339,7 +339,7 @@ where
 
 // **** Index ****
 
-/// Access vector component by index
+/// Access vector component by index.
 /// ```
 /// # use vqm::Vector4df32;
 /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -364,7 +364,7 @@ impl<T> Index<usize> for Vector4d<T> {
 
 // **** IndexMut ****
 
-// Set vector component by index
+// Set vector component by index.
 /// ```
 /// # use vqm::Vector4df32;
 /// let mut v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -393,7 +393,7 @@ impl<T> Vector4d<T>
 where
     T: Copy + Signed,
 {
-    /// Return a copy of the vector with all components set to their absolute values
+    /// Return a copy of the vector with all components set to their absolute values.
     /// ```
     /// # use vqm::Vector4df32;
     /// let v = Vector4df32::new(2.0, -3.0, -5.0, 7.0);
@@ -406,7 +406,7 @@ where
         Self { x: self.x.abs(), y: self.y.abs(), z: self.z.abs(), t: self.t.abs() }
     }
 
-    /// Set all components of the vector to their absolute values
+    /// Set all components of the vector to their absolute values.
     /// ```
     /// # use vqm::Vector4df32;
     /// let mut v = Vector4df32::new(2.0, -3.0, -5.0, 7.0);
@@ -427,7 +427,7 @@ impl<T> Vector4d<T>
 where
     T: Copy + FloatCore,
 {
-    /// Return a copy of the matrix with all components clamped to the specified range
+    /// Return a copy of the matrix with all components clamped to the specified range.
     /// ```
     /// # use vqm::Vector4df32;
     /// let v = Vector4df32::new(2.0, 3.0, 7.0, 11.0);
@@ -445,7 +445,7 @@ where
         }
     }
 
-    /// Clamp all components of the vector to the specified range
+    /// Clamp all components of the vector to the specified range.
     /// ```
     /// # use vqm::Vector4df32;
     /// let mut v = Vector4df32::new(2.0, 3.0, 7.0, 11.0);
@@ -466,7 +466,7 @@ impl<T> Vector4d<T>
 where
     T: Copy + Vector4dMath,
 {
-    /// Vector dot product
+    /// Vector dot product.
     /// ```
     /// # use vqm::Vector4df32;
     /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -488,7 +488,7 @@ impl<T> Vector4d<T>
 where
     T: Copy + Vector4dMath,
 {
-    /// Return square of Euclidean norm
+    /// Return square of Euclidean norm.
     /// ```
     /// # use vqm::Vector4df32;
     /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -499,7 +499,7 @@ where
         T::v4_norm_squared(self)
     }
 
-    /// Return distance between two points, squared
+    /// Return distance between two points, squared.
     /// ```
     /// # use vqm::Vector4df32;
     /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -518,7 +518,7 @@ impl<T> Vector4d<T>
 where
     T: Copy + SqrtMethods + Vector4dMath,
 {
-    /// Return Euclidean norm
+    /// Return Euclidean norm.
     #[inline(always)]
     pub fn norm(self) -> T {
         Self::norm_squared(self).sqrt()
@@ -620,7 +620,7 @@ impl<T> Vector4d<T>
 where
     T: Copy + Add<Output = T> + Mul<Output = T>,
 {
-    /// Return the sum of all components of the vector
+    /// Return the sum of all components of the vector.
     /// ```
     /// # use vqm::Vector4df32;
     /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -631,7 +631,7 @@ where
         self.x + self.y + self.z + self.t
     }
 
-    /// Return the product of all components of the vector
+    /// Return the product of all components of the vector.
     /// ```
     /// # use vqm::Vector4df32;
     /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -649,7 +649,7 @@ impl<T> Vector4d<T>
 where
     T: Copy + One + Add<Output = T> + Div<Output = T>,
 {
-    /// Return the mean of all components of the vector
+    /// Return the mean of all components of the vector.
     /// ```
     /// # use vqm::Vector4df32;
     /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -666,7 +666,7 @@ impl<T> Vector4d<T>
 where
     T: Copy + Vector4dMath,
 {
-    /// Return the max element in the vector
+    /// Return the max element in the vector.
     /// ```
     /// # use vqm::Vector4df32;
     /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -681,7 +681,7 @@ where
         T::v4_max(self)
     }
 
-    /// Return the max element in the vector
+    /// Return the max element in the vector.
     /// ```
     /// # use vqm::Vector4df32;
     /// let v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
@@ -701,7 +701,7 @@ where
 
 // **** From Tuple ****
 
-/// Vector from tuple
+/// Vector from tuple.
 /// ```
 /// # use vqm::Vector4df32;
 /// let v = Vector4df32::from((2.0, 3.0, 5.0, 7.0));
@@ -722,7 +722,7 @@ where
 
 // **** From Array ****
 
-/// Vector from array
+/// Vector from array.
 /// ```
 /// # use vqm::Vector4df32;
 /// let v = Vector4df32::from([2.0, 3.0, 5.0, 7.0]);
@@ -741,7 +741,7 @@ where
     }
 }
 
-/// Array from vector
+/// Array from vector.
 /// ```
 /// # use vqm::Vector4df32;
 /// let v = Vector4df32 { x: 2.0, y: 3.0, z: 5.0, t: 7.0 };
@@ -761,7 +761,7 @@ impl<T> From<Vector4d<T>> for [T; 4] {
 
 // **** From Vector ****
 
-/// Vector4d from Vector3d
+/// Vector4d from Vector3d.
 /// ```
 /// # use vqm::{Vector3df32,Vector4df32};
 /// let v = Vector4df32::from(Vector3df32 { x: 2.0, y: 3.0, z: 5.0 });
@@ -780,7 +780,7 @@ where
     }
 }
 
-/// Vector4d from Vector2d
+/// Vector4d from Vector2d.
 /// ```
 /// # use vqm::{Vector2df32,Vector4df32};
 /// let v = Vector4df32::from(Vector2df32 { x: 2.0, y: 3.0 });

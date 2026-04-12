@@ -4,14 +4,14 @@
 pub trait MathConstants {
     const EPSILON: Self;
 
-    /// Archimedes’ constant (π)
+    /// Archimedes’ constant (π).
     const PI: Self;
-    /// The full circle constant (τ = 2π)
+    /// The full circle constant (τ = 2π).
     const TAU: Self;
-    const E: Self; // Euler’s number (e)
-    /// Natural logarithm of 2
+    const E: Self; // Euler’s number (e).
+    /// Natural logarithm of 2.
     const LN_2: Self;
-    /// Natural logarithm of 10
+    /// Natural logarithm of 10.
     const LN_10: Self;
     // Logarithm of e
     const LOG2_E: Self;
@@ -19,21 +19,21 @@ pub trait MathConstants {
     // Logarithms of 10
     const LOG2_10: Self;
     const LOG10_2: Self;
-    /// Reciprocals of π: 1/π
+    /// Reciprocals of π: 1/π.
     const FRAC_1_PI: Self;
-    /// 2/π
+    /// 2/π.
     const FRAC_2_PI: Self;
     const FRAC_2_SQRT_PI: Self;
     // Fractions of π
-    /// π/2
+    /// π/2.
     const FRAC_PI_2: Self;
-    /// π/3
+    /// π/3.
     const FRAC_PI_3: Self;
-    /// π/4
+    /// π/4.
     const FRAC_PI_4: Self;
-    /// π/6
+    /// π/6.
     const FRAC_PI_6: Self;
-    /// π/8
+    /// π/8.
     const FRAC_PI_8: Self;
     // Square roots
     const SQRT_2: Self;
@@ -62,7 +62,7 @@ pub trait MathConstants {
 impl MathConstants for f32 {
     const EPSILON: Self = f32::EPSILON;
 
-    /// Archimedes’ constant (π)
+    /// Archimedes’ constant (π).
     const PI: Self = core::f32::consts::PI;
     const TAU: Self = core::f32::consts::TAU;
     const E: Self = core::f32::consts::E;

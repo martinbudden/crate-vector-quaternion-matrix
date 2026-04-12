@@ -155,26 +155,26 @@ mod tests {
         assert_eq!(a.abs(), Quaternion { w: 2.0, x: 3.0, y: 5.0, z: 7.0 });
     }
     #[test]
-    fn abs_in_place() {
+    fn abs_mut() {
         let a = Quaternion { w: -2.0, x: -3.0, y: 5.0, z: 7.0 };
         let mut b = a;
-        b.abs_in_place();
+        b.abs_mut();
         assert_eq!(b, a.abs());
+    }
+    #[test]
+    fn clamped() {
+        let a = Quaternion { w: -5.0, x: -2.0, y: 3.0, z: 5.0 };
+        assert_eq!(a.clamped(-1.0, 4.0), Quaternion { w: -1.0, x: -1.0, y: 3.0, z: 4.0 });
     }
     #[test]
     fn clamp() {
         let a = Quaternion { w: -5.0, x: -2.0, y: 3.0, z: 5.0 };
-        assert_eq!(a.clamp(-1.0, 4.0), Quaternion { w: -1.0, x: -1.0, y: 3.0, z: 4.0 });
-    }
-    #[test]
-    fn clamp_in_place() {
-        let a = Quaternion { w: -5.0, x: -2.0, y: 3.0, z: 5.0 };
         let mut b = a;
-        b.clamp_in_place(-1.0, 4.0);
-        assert_eq!(b, a.clamp(-1.0, 4.0));
+        b.clamp(-1.0, 4.0);
+        assert_eq!(b, a.clamped(-1.0, 4.0));
     }
     #[test]
-    fn test_integration_step() {
+    fn integration_step() {
         use approx::assert_abs_diff_eq;
 
         let mut q = Quaternion { w: 1.0, x: 0.0, y: 0.0, z: 0.0 };

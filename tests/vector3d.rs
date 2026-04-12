@@ -49,7 +49,7 @@ mod tests {
         //assert!(z.is_zero());
     }
     #[test]
-    fn test_vector_memory_layout() {
+    fn vector_memory_layout() {
         // A 3-axis f32 vector is 12 bytes.
         // With align(16), the compiler pads it to 16 bytes.
         #[cfg(feature = "no_align")]
@@ -64,7 +64,7 @@ mod tests {
         assert_eq!(align_of::<Vector3df32>(), 16);
     }
     #[test]
-    fn test_neg_owned() {
+    fn neg_owned() {
         let v = Vector3d { x: 1.0, y: -2.0, z: 3.0 };
         let neg_v = -v;
         assert_eq!(neg_v.x, -1.0);
@@ -184,7 +184,7 @@ mod tests {
         assert_eq!(a.abs(), Vector3d { x: 2.0, y: 3.0, z: 5.0 });
     }
     #[test]
-    fn abs_in_place() {
+    fn abs_mut() {
         let a = Vector3df32 { x: -2.0, y: -3.0, z: -5.0 };
         let mut b = a;
         b.abs_mut();
@@ -262,7 +262,7 @@ mod tests {
     }
 
     #[test]
-    fn test_quaternion_rotation_90_deg() {
+    fn quaternion_rotation_90_deg() {
         let v = Vector3d::new(1.0, 0.0, 0.0);
         let half_angle = core::f32::consts::FRAC_PI_4;
         let q = Quaternionf32 { x: 0.0, y: 0.0, z: half_angle.sin(), w: half_angle.cos() };
@@ -276,7 +276,7 @@ mod tests {
     }
 
     #[test]
-    fn test_quaternion_rotation_arbitrary() {
+    fn quaternion_rotation_arbitrary() {
         let v = Vector3d::new(1.2, -3.4, 5.6);
         let q = Quaternionf32 { x: 0.1, y: 0.2, z: 0.3, w: 0.9273618 };
 
@@ -288,7 +288,7 @@ mod tests {
         //assert_abs_diff_eq!(result.z, 5.378873, epsilon = 1e-4);
     }
     #[test]
-    fn test_rotation_round_trip() {
+    fn rotation_round_trip() {
         use approx::assert_abs_diff_eq;
 
         let original_v = Vector3d::new(10.5, -2.0, 44.1);

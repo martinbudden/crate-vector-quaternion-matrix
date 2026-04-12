@@ -12,6 +12,7 @@ use vqm::{Quaternionf32, Vector3df32};
 // # Replace 'v3d_bench' with the name defined in your Cargo.toml [[bench]] section
 // RUSTFLAGS="-C target-cpu=native" cargo asm --bench vq_bench "mul_add"
 
+#[allow(clippy::too_many_lines)]
 fn bench_vq(c: &mut Criterion) {
     let mut group = c.benchmark_group("VQ");
 
@@ -96,8 +97,14 @@ fn bench_vq(c: &mut Criterion) {
     _ = group.bench_function("v3d normalized_u", |b| {
         b.iter_batched(
             || {
-                let a: [f32; 3] = rng().random();
-                Vector3df32::from(a)
+                loop {
+                    let a: [f32; 3] = rng().random();
+                    let v = Vector3df32::from(a);
+                    // ensure that v is normalizable.
+                    if v.norm_squared() > 4.0 * f32::EPSILON {
+                        break v;
+                    }
+                }
             },
             |v| black_box(v).normalized_unchecked(),
             BatchSize::SmallInput,
@@ -115,11 +122,27 @@ fn bench_vq(c: &mut Criterion) {
         );
     });
 
-    _ = group.bench_function("q normalized_u", |b| {
+    _ = group.bench_function("q normalize", |b| {
         b.iter_batched(
             || {
                 let a: [f32; 4] = rng().random();
                 Quaternionf32::from(a)
+            },
+            |q| black_box(*black_box(q).normalize()),
+            BatchSize::SmallInput,
+        );
+    });
+    _ = group.bench_function("q normalized_u", |b| {
+        b.iter_batched(
+            || {
+                loop {
+                    let a: [f32; 4] = rng().random();
+                    let q = Quaternionf32::from(a);
+                    // ensure that q is normalizable.
+                    if q.norm_squared() > 4.0 * f32::EPSILON {
+                        break q;
+                    }
+                }
             },
             |q| black_box(q).normalized_unchecked(),
             BatchSize::SmallInput,

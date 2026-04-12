@@ -31,14 +31,12 @@ mod tests {
         //assert!(z.is_zero());
     }
     #[test]
-    fn test_neg() {
+    fn neg() {
         let v = Vector2d { x: 1.0, y: -2.0 };
         let neg_v = -v;
         assert_eq!(neg_v.x, -1.0);
         assert_eq!(neg_v.y, 2.0);
-    }
-    #[test]
-    fn neg() {
+
         let a = Vector2df32 { x: 2.0, y: 3.0 };
         assert_eq!(-a, Vector2d { x: -2.0, y: -3.0 });
 

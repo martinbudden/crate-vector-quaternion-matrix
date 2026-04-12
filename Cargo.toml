@@ -7,7 +7,7 @@ license = "MIT OR Apache-2.0"
 readme = "README.md"
 repository = "https://github.com/martinbudden/crate-vector-quaternion-matrix"
 description = "A vector, quaternion, and matrix library targeted at embedded systems and robotics."
-keywords = ["3D", "vector", "quaternion", "matrix", "Euler angles", "no-std"]
+keywords = ["vector", "quaternion", "matrix", "Euler angles", "no_std"]
 categories = [
     "Embedded development",
     "Mathematics",

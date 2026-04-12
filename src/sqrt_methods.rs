@@ -2,7 +2,7 @@
 use cfg_if::cfg_if;
 
 /// `no_std` implementations of `sqrt` and `sqrt_reciprocal` in  method call syntax<br>
-/// ie `x.sqrt()`, `x.sqrt_reciprocal()`
+/// ie `x.sqrt()`, `x.sqrt_reciprocal()`.
 pub trait SqrtMethods: Sized {
     fn sqrt(self) -> Self;
     fn sqrt_reciprocal(self) -> Self;

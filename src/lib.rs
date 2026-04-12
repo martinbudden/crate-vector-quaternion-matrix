@@ -7,6 +7,7 @@
 #![deny(unused_must_use)]
 #![warn(unused_results)]
 #![warn(clippy::pedantic)]
+#![warn(clippy::doc_paragraphs_missing_punctuation)]
 #![allow(clippy::inline_always)]
 #![allow(clippy::return_self_not_must_use)]
 
@@ -34,6 +35,8 @@ mod quaternion_math;
 
 pub use math_constants::MathConstants;
 pub use math_methods::TrigonometricMethods;
+#[doc(hidden)]
+// the trigonometric approximation functions need to be pub for benchmarking, but are not documented for general use
 pub use math_methods::{cos_approx, sin_approx, sin_cos_approx};
 pub use sqrt_methods::SqrtMethods;
 

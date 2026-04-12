@@ -1,10 +1,10 @@
 # Architecture
 
-This document describes the overall design goals of `vector-quaternion-matrix` (`vqm`)
+This document describes the overall design goals of `vqm` (`vector-quaternion-matrix`).
 
 ## Design goals
 
-`vqm` was primarily designed to support the implementation a self-balancing robot a flight controller.
+`vqm` was primarily designed to support the implementation a self-balancing robot and a flight controller.
 
 This means being fast enough to run a 8kHz "gyro-PID" loop on a single core microcontroller with enough spare
 bandwidth to do other tasks (such as receive commands from a radio, update and OSD, blackbox recording, etc).
@@ -25,7 +25,7 @@ That is a significant amount of work to perform in 125 microseconds. So:
 1. Performance is key.
 2. Support for other libraries (including the filter library and the sensor fusion library) is key.
 
-My previous C++ library had shown this was possible.
+My previous C++ library had shown this was possible (even without SIMD).
 
 ### Align parameters and pass by value, not by reference
 

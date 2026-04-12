@@ -59,7 +59,7 @@ impl<T> Matrix3x3<T>
 where
     T: Copy,
 {
-    /// Create a matrix
+    /// Create a matrix.
     #[inline(always)]
     pub const fn new(input: [T; 9]) -> Self {
         Self { a: input }
@@ -68,7 +68,7 @@ where
 
 // **** Zero ****
 
-/// Zero matrix
+/// Zero matrix.
 /// ```
 /// # use vqm::Matrix3x3f32;
 /// # use num_traits::Zero;
@@ -95,7 +95,7 @@ where
 
 // **** One ****
 
-/// Identity matrix
+/// Identity matrix.
 /// ```
 /// # use vqm::Matrix3x3f32;
 /// # use num_traits::One;
@@ -122,7 +122,7 @@ where
 
 // **** Neg ****
 
-/// Negate matrix
+/// Negate matrix.
 /// ```
 /// # use vqm::Matrix3x3f32;
 /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -148,7 +148,7 @@ where
 
 // **** Add ****
 
-/// Add two matrices
+/// Add two matrices.
 /// ```
 /// # use vqm::Matrix3x3f32;
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -184,7 +184,7 @@ where
 
 // **** AddAssign ****
 
-/// Add one matrix to another
+/// Add one matrix to another.
 /// ```
 /// # use vqm::Matrix3x3f32;
 /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -211,7 +211,7 @@ where
 
 // **** MulAdd ****
 
-/// Multiply vector by constant and add another vector
+/// Multiply vector by constant and add another vector.
 /// ```
 /// # use vqm::Matrix3x3f32;
 /// # use num_traits::MulAdd;
@@ -241,7 +241,7 @@ where
 
 // **** MulAddAssign ****
 
-/// Multiply vector by constant and add another vector in place
+/// Multiply vector by constant and add another vector in place.
 /// ```
 /// # use vqm::Matrix3x3f32;
 /// # use num_traits::MulAddAssign;
@@ -270,7 +270,7 @@ where
 
 // **** Sub ****
 
-/// Subtract two matrices
+/// Subtract two matrices.
 /// ```
 /// # use vqm::Matrix3x3f32;
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -300,7 +300,7 @@ where
 
 // **** SubAssign ****
 
-/// Subtract one matrix from another
+/// Subtract one matrix from another.
 /// ```
 /// # use vqm::Matrix3x3f32;
 /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -327,7 +327,7 @@ where
 
 // **** Pre-multiply ****
 
-/// Pre-multiply a matrix by a constant
+/// Pre-multiply a matrix by a constant.
 /// ```
 /// # use vqm::Matrix3x3f32;
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -357,7 +357,7 @@ impl Mul<Matrix3x3<f64>> for f64 {
 
 // **** Mul ****
 
-/// Multiply a matrix by a constant
+/// Multiply a matrix by a constant.
 /// ```
 /// # use vqm::Matrix3x3f32;
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -383,7 +383,7 @@ where
 
 // **** MulAssign ****
 
-/// In-place multiply a matrix by a constant
+/// In-place multiply a matrix by a constant.
 /// ```
 /// # use vqm::Matrix3x3f32;
 /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -405,7 +405,7 @@ where
     }
 }
 
-/// Multiply a vector by a matrix
+/// Multiply a vector by a matrix.
 /// ```
 /// # use vqm::Matrix3x3f32;
 /// # use vqm::Vector3d;
@@ -428,7 +428,7 @@ where
     }
 }
 
-/// Pre-multiply a vector by a matrix
+/// Pre-multiply a vector by a matrix.
 /// ```
 /// # use vqm::{Matrix3x3f32,Vector3df32};
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -451,7 +451,7 @@ where
     }
 }
 
-/// Multiply two matrices
+/// Multiply two matrices.
 /// ```
 /// # use vqm::Matrix3x3f32;
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -487,7 +487,7 @@ where
     }
 }
 
-/// Multiply one matrix by another
+/// Multiply one matrix by another.
 /// ```
 /// # use vqm::Matrix3x3f32;
 /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -515,7 +515,7 @@ where
 }
 // **** Div ****
 
-/// Divide a matrix by a constant
+/// Divide a matrix by a constant.
 /// ```
 /// # use vqm::Matrix3x3f32;
 /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -541,7 +541,7 @@ where
 
 // **** DivAssign ****
 
-/// In-place divide a matrix by a constant
+/// In-place divide a matrix by a constant.
 /// ```
 /// # use vqm::Matrix3x3f32;
 /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -565,7 +565,7 @@ where
 
 // **** Index ****
 
-/// Access matrix element by index
+/// Access matrix element by index.
 /// ```
 /// # use vqm::Matrix3x3f32;
 ///
@@ -593,7 +593,7 @@ impl<T> Index<usize> for Matrix3x3<T> {
 
 // **** IndexMut ****
 
-/// Set matrix element by index
+/// Set matrix element by index.
 /// ```
 /// # use vqm::Matrix3x3f32;
 ///
@@ -622,7 +622,7 @@ impl<T> IndexMut<usize> for Matrix3x3<T> {
     }
 }
 
-/// Access matrix element by ordered pair (row, column)
+/// Access matrix element by ordered pair (row, column).
 /// ```
 /// # use vqm::Matrix3x3f32;
 ///
@@ -649,7 +649,7 @@ impl<T> Index<(usize, usize)> for Matrix3x3<T> {
     }
 }
 
-/// Set matrix element by ordered pair (row, column)
+/// Set matrix element by ordered pair (row, column).
 /// ```
 /// # use vqm::Matrix3x3f32;
 ///
@@ -702,7 +702,7 @@ where
         }
     }
 
-    /// Return matrix row as a vector
+    /// Return matrix row as a vector.
     /// ```
     /// # use vqm::{Matrix3x3f32,Vector3df32};
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -743,7 +743,7 @@ where
         }
     }
 
-    /// Return matrix column as a vector
+    /// Return matrix column as a vector.
     /// ```
     /// # use vqm::{Matrix3x3f32,Vector3df32};
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -764,7 +764,7 @@ where
         }
     }
 
-    /// Return matrix diagonal as a vector
+    /// Return matrix diagonal as a vector.
     /// ```
     /// # use vqm::{Matrix3x3f32,Vector3df32};
     ///
@@ -786,7 +786,7 @@ impl<T> Matrix3x3<T>
 where
     T: Copy + Matrix3x3Math,
 {
-    /// Return a copy of the matrix with all components set to their absolute values
+    /// Return a copy of the matrix with all components set to their absolute values.
     /// ```
     /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::new([ 2.0,  -3.0,   5.0,
@@ -803,7 +803,7 @@ where
         T::m3x3_abs(self)
     }
 
-    /// Set all components of the matrix to their absolute values
+    /// Set all components of the matrix to their absolute values.
     /// ```
     /// # use vqm::Matrix3x3f32;
     /// let mut m = Matrix3x3f32::new([ 2.0,  -3.0,   5.0,
@@ -828,7 +828,7 @@ impl<T> Matrix3x3<T>
 where
     T: Copy + FloatCore,
 {
-    /// Return a copy of the matrix with all components clamped to the specified range
+    /// Return a copy of the matrix with all components clamped to the specified range.
     /// ```
     /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::new([ 2.0,  3.0,  -5.0,
@@ -849,7 +849,7 @@ where
         Self { a }
     }
 
-    /// Clamp all components of the matrix to the specified range
+    /// Clamp all components of the matrix to the specified range.
     /// ```
     /// # use vqm::Matrix3x3f32;
     /// let mut m = Matrix3x3f32::new([ 2.0,  3.0,  -5.0,
@@ -889,7 +889,7 @@ where
         Self { a: [self.a[0], self.a[3], self.a[6], self.a[1], self.a[4], self.a[7], self.a[2], self.a[5], self.a[8]] }
     }
 
-    /// Transpose matrix, in-place
+    /// Transpose matrix, in-place.
     /// ```
     /// # use vqm::Matrix3x3f32;
     /// let mut m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -928,7 +928,7 @@ where
         T::m3x3_adjugate(self)
     }
 
-    /// Adjugate matrix, in-place
+    /// Adjugate matrix, in-place.
     /// ```
     /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -977,7 +977,7 @@ where
         self
     }
 
-    /// Matrix determinant
+    /// Matrix determinant.
     /// ```
     /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -1056,7 +1056,7 @@ where
         Some(adjugate / determinant)
     }
 
-    /// Return the sum of all components of the matrix
+    /// Return the sum of all components of the matrix.
     /// ```
     /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -1071,7 +1071,7 @@ where
         T::m3x3_sum(self)
     }
 
-    /// Return the mean of all components of the matrix
+    /// Return the mean of all components of the matrix.
     /// ```
     /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -1086,7 +1086,7 @@ where
         T::m3x3_mean(self)
     }
 
-    /// Return the product of all components of the matrix
+    /// Return the product of all components of the matrix.
     /// ```
     /// # use vqm::Matrix3x3f32;
     /// let m = Matrix3x3f32::from([ 2.0,  3.0,  5.0,
@@ -1116,7 +1116,7 @@ where
         T::m3x3_trace_sum_squares(self)
     }
 
-    /// Return true if matrix is near zero
+    /// Return true if matrix is near zero.
     /// ```
     /// # use vqm::Matrix3x3f32;
     /// # use num_traits::Zero;
@@ -1132,7 +1132,7 @@ where
         true
     }
 
-    /// Return true if matrix is near identity
+    /// Return true if matrix is near identity.
     /// ```
     /// # use vqm::Matrix3x3f32;
     /// # use num_traits::One;
@@ -1160,7 +1160,7 @@ where
 
 // **** From ****
 
-/// Matrix3x3 from Matrix2x2
+/// Matrix3x3 from Matrix2x2.
 /// ```
 /// # use vqm::{Matrix2x2f32,Matrix3x3f32};
 /// let m2 = Matrix2x2f32::from([ 2.0,  3.0,
@@ -1206,7 +1206,7 @@ where
 
 // **** From Array ****
 
-/// Matrix from array
+/// Matrix from array.
 impl<T> From<[T; 9]> for Matrix3x3<T>
 where
     T: Copy,

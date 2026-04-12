@@ -36,7 +36,7 @@ impl<T> Matrix2x2<T>
 where
     T: Copy,
 {
-    /// Create a matrix
+    /// Create a matrix.
     #[inline(always)]
     pub const fn new(input: [T; 4]) -> Self {
         Self { a: input }
@@ -45,7 +45,7 @@ where
 
 // **** Zero ****
 
-/// Zero matrix
+/// Zero matrix.
 /// ```
 /// # use vqm::Matrix2x2f32;
 /// # use num_traits::{Zero,zero};
@@ -72,7 +72,7 @@ where
 
 // **** One ****
 
-/// Identity matrix
+/// Identity matrix.
 /// ```
 /// # use vqm::Matrix2x2f32;
 /// # use num_traits::One;
@@ -98,7 +98,7 @@ where
 
 // **** Neg ****
 
-/// Negate matrix
+/// Negate matrix.
 /// ```
 /// # use vqm::Matrix2x2f32;
 /// let mut m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -122,7 +122,7 @@ where
 
 // **** Add ****
 
-/// Add two matrices
+/// Add two matrices.
 /// ```
 /// # use vqm::Matrix2x2f32;
 /// let m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -155,7 +155,7 @@ where
 
 // **** AddAssign ****
 
-/// Add one matrix to another
+/// Add one matrix to another.
 /// ```
 /// # use vqm::Matrix2x2f32;
 /// let mut m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -179,7 +179,7 @@ where
 
 // **** MulAdd ****
 
-/// Multiply vector by constant and add another vector
+/// Multiply vector by constant and add another vector.
 /// ```
 /// # use vqm::Matrix2x2f32;
 /// # use num_traits::MulAdd;
@@ -207,7 +207,7 @@ where
 
 // **** MulAddAssign ****
 
-/// Multiply vector by constant and add another vector in place
+/// Multiply vector by constant and add another vector in place.
 /// ```
 /// # use vqm::Matrix2x2f32;
 /// # use num_traits::MulAddAssign;
@@ -233,7 +233,7 @@ where
 
 // **** Sub ****
 
-/// Subtract two matrices
+/// Subtract two matrices.
 /// ```
 /// # use vqm::Matrix2x2f32;
 /// let m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -260,7 +260,7 @@ where
 
 // **** SubAssign ****
 
-/// Subtract one matrix from another
+/// Subtract one matrix from another.
 /// ```
 /// # use vqm::Matrix2x2f32;
 /// let mut m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -284,7 +284,7 @@ where
 
 // **** Pre-multiply ****
 
-/// Pre-multiply a matrix by a constant
+/// Pre-multiply a matrix by a constant.
 /// ```
 /// # use vqm::Matrix2x2f32;
 /// let m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -313,7 +313,7 @@ impl Mul<Matrix2x2<f64>> for f64 {
 
 // **** Mul ****
 
-/// Multiply a matrix by a constant
+/// Multiply a matrix by a constant.
 /// ```
 /// # use vqm::Matrix2x2f32;
 /// let m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -337,7 +337,7 @@ where
 
 // **** MulAssign ****
 
-/// In-place multiply a matrix by a constant
+/// In-place multiply a matrix by a constant.
 /// ```
 /// # use vqm::Matrix2x2f32;
 /// let mut m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -357,7 +357,7 @@ where
     }
 }
 
-/// Multiply a vector by a matrix
+/// Multiply a vector by a matrix.
 /// ```
 /// # use vqm::Matrix2x2f32;
 /// # use vqm::Vector2d;
@@ -380,7 +380,7 @@ where
     }
 }
 
-/// Pre-multiply a vector by a matrix
+/// Pre-multiply a vector by a matrix.
 /// ```
 /// # use vqm::Matrix2x2f32;
 /// # use vqm::Vector2df32;
@@ -403,7 +403,7 @@ where
     }
 }
 
-/// Multiply two matrices
+/// Multiply two matrices.
 /// ```
 /// # use vqm::Matrix2x2f32;
 /// let m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -436,7 +436,7 @@ where
     }
 }
 
-/// Multiply one matrix by another
+/// Multiply one matrix by another.
 /// ```
 /// # use vqm::Matrix2x2f32;
 ///
@@ -463,7 +463,7 @@ where
 }
 // **** Div ****
 
-/// Divide a matrix by a constant
+/// Divide a matrix by a constant.
 /// ```
 /// # use vqm::Matrix2x2f32;
 /// let m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -487,7 +487,7 @@ where
 
 // **** DivAssign ****
 
-/// In-place divide a matrix by a constant
+/// In-place divide a matrix by a constant.
 /// ```
 /// # use vqm::Matrix2x2f32;
 /// let mut m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -509,7 +509,7 @@ where
 
 // **** Index ****
 
-/// Access matrix element by index
+/// Access matrix element by index.
 /// ```
 /// # use vqm::Matrix2x2f32;
 ///
@@ -531,7 +531,7 @@ impl<T> Index<usize> for Matrix2x2<T> {
 
 // **** IndexMut ****
 
-/// Set matrix element by index
+/// Set matrix element by index.
 /// ```
 /// # use vqm::Matrix2x2f32;
 ///
@@ -553,7 +553,7 @@ impl<T> IndexMut<usize> for Matrix2x2<T> {
     }
 }
 
-/// Access matrix element by ordered pair (row, column)
+/// Access matrix element by ordered pair (row, column).
 /// ```
 /// # use vqm::Matrix2x2f32;
 ///
@@ -574,7 +574,7 @@ impl<T> Index<(usize, usize)> for Matrix2x2<T> {
     }
 }
 
-/// Set matrix element by ordered pair (row, column)
+/// Set matrix element by ordered pair (row, column).
 /// ```
 /// # use vqm::Matrix2x2f32;
 ///
@@ -610,7 +610,7 @@ where
         }
     }
 
-    /// Return matrix row as a vector
+    /// Return matrix row as a vector.
     /// ```
     /// # use vqm::{Matrix2x2f32,Vector2df32};
     ///
@@ -639,7 +639,7 @@ where
         }
     }
 
-    /// Return matrix column as a vector
+    /// Return matrix column as a vector.
     /// ```
     /// # use vqm::{Matrix2x2f32,Vector2df32};
     ///
@@ -658,7 +658,7 @@ where
         }
     }
 
-    /// Return matrix diagonal as a vector
+    /// Return matrix diagonal as a vector.
     /// ```
     /// # use vqm::{Matrix2x2f32,Vector2df32};
     ///
@@ -679,7 +679,7 @@ impl<T> Matrix2x2<T>
 where
     T: Copy + Matrix2x2Math,
 {
-    /// Return a copy of the matrix with all components set to their absolute values
+    /// Return a copy of the matrix with all components set to their absolute values.
     /// ```
     /// # use vqm::Matrix2x2f32;
     /// let m = Matrix2x2f32::from([ 2.0,  -3.0,
@@ -694,7 +694,7 @@ where
         T::m2x2_abs(self)
     }
 
-    /// Set all components of the matrix to their absolute values
+    /// Set all components of the matrix to their absolute values.
     /// ```
     /// # use vqm::Matrix2x2f32;
     /// let mut m = Matrix2x2f32::from([ 2.0,  -3.0,
@@ -717,7 +717,7 @@ impl<T> Matrix2x2<T>
 where
     T: Copy + FloatCore,
 {
-    /// Return a copy of the matrix with all components clamped to the specified range
+    /// Return a copy of the matrix with all components clamped to the specified range.
     /// ```
     /// # use vqm::Matrix2x2f32;
     /// let m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -736,7 +736,7 @@ where
         Self { a }
     }
 
-    /// Clamp all components of the matrix to the specified range
+    /// Clamp all components of the matrix to the specified range.
     /// ```
     /// # use vqm::Matrix2x2f32;
     /// let mut m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -772,7 +772,7 @@ where
         Self { a: [self.a[0], self.a[2], self.a[1], self.a[3]] }
     }
 
-    /// Transpose matrix, in-place
+    /// Transpose matrix, in-place.
     /// ```
     /// # use vqm::Matrix2x2f32;
     /// let mut m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -808,7 +808,7 @@ where
         T::m2x2_adjugate(self)
     }
 
-    /// Adjugate matrix, in-place
+    /// Adjugate matrix, in-place.
     /// ```
     /// # use vqm::Matrix2x2f32;
     /// let m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -853,7 +853,7 @@ where
         *self = adjugate / determinant;
         self
     }
-    /// Matrix determinant
+    /// Matrix determinant.
     /// ```
     /// # use vqm::Matrix2x2f32;
     /// let m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -927,7 +927,7 @@ where
         Some(adjugate / determinant)
     }
 
-    /// Return the sum of all components of the matrix
+    /// Return the sum of all components of the matrix.
     /// ```
     /// # use vqm::Matrix2x2f32;
     /// let m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -941,7 +941,7 @@ where
         T::m2x2_sum(self)
     }
 
-    /// Return the mean of all components of the matrix
+    /// Return the mean of all components of the matrix.
     /// ```
     /// # use vqm::Matrix2x2f32;
     /// let m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -955,7 +955,7 @@ where
         T::m2x2_mean(self)
     }
 
-    /// Return the product of all components of the matrix
+    /// Return the product of all components of the matrix.
     /// ```
     /// # use vqm::Matrix2x2f32;
     /// let m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -983,7 +983,7 @@ where
         T::m2x2_trace_sum_squares(self)
     }
 
-    /// Return true if matrix is near zero
+    /// Return true if matrix is near zero.
     /// ```
     /// # use vqm::Matrix2x2f32;
     /// # use num_traits::Zero;
@@ -999,7 +999,7 @@ where
         true
     }
 
-    /// Return true if matrix is near identity
+    /// Return true if matrix is near identity.
     /// ```
     /// # use vqm::Matrix2x2f32;
     /// # use num_traits::One;
@@ -1019,7 +1019,7 @@ where
 
 // **** From ****
 
-/// Matrix from 1D array
+/// Matrix from 1D array.
 /// ```
 /// # use vqm::{Matrix2x2f32};
 /// let m = Matrix2x2f32::from([ 2.0,  3.0,
@@ -1037,7 +1037,7 @@ where
     }
 }
 
-/// Matrix from 2D array
+/// Matrix from 2D array.
 /// ```
 /// # use vqm::{Matrix2x2f32};
 /// let m = Matrix2x2f32::from([ [2.0,  3.0],
@@ -1055,7 +1055,7 @@ where
     }
 }
 
-/// Matrix2x2 from array of 2 vectors
+/// Matrix2x2 from array of 2 vectors.
 /// ```
 /// # use vqm::{Matrix2x2f32,Vector2df32};
 /// let m = Matrix2x2f32::from([ Vector2df32::new(2.0,  3.0),
@@ -1073,7 +1073,7 @@ where
     }
 }
 
-/// Matrix2x2 from a tuple of 2 vectors
+/// Matrix2x2 from a tuple of 2 vectors.
 /// ```
 /// # use vqm::{Matrix2x2f32,Vector2df32};
 /// let m = Matrix2x2f32::from(( Vector2df32::new(2.0,  3.0),

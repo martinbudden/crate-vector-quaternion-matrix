@@ -32,7 +32,7 @@ impl<T> Vector2d<T>
 where
     T: Copy,
 {
-    /// Create a vector
+    /// Create a vector.
     #[inline(always)]
     pub const fn new(x: T, y: T) -> Self {
         Self { x, y }
@@ -41,7 +41,7 @@ where
 
 // **** Zero ****
 
-/// Zero vector
+/// Zero vector.
 /// ```
 /// # use vqm::Vector2df32;
 /// # use num_traits::{zero,Zero};
@@ -66,7 +66,7 @@ where
 
 // **** Neg ****
 
-/// Negate vector
+/// Negate vector.
 /// ```
 /// # use vqm::Vector2df32;
 /// let v = Vector2df32 { x: 2.0, y: 3.0 };
@@ -88,7 +88,7 @@ where
 
 // **** Add ****
 
-/// Add two vectors
+/// Add two vectors.
 /// ```
 /// # use vqm::Vector2df32;
 /// let u = Vector2df32::new(2.0, 3.0);
@@ -111,7 +111,7 @@ where
 
 // **** AddAssign ****
 
-/// Add one vector to another
+/// Add one vector to another.
 /// ```
 /// # use vqm::Vector2df32;
 /// let mut r = Vector2df32::new(2.0, 3.0);
@@ -137,7 +137,7 @@ where
 
 // **** MulAdd ****
 
-/// Multiply vector by constant and add another vector
+/// Multiply vector by constant and add another vector.
 /// ```
 /// # use vqm::Vector2df32;
 /// # use num_traits::MulAdd;
@@ -162,7 +162,7 @@ where
 
 // **** MulAddAssign ****
 
-/// Multiply vector by constant and add another vector in place
+/// Multiply vector by constant and add another vector in place.
 /// ```
 /// # use vqm::Vector2df32;
 /// # use num_traits::MulAddAssign;
@@ -185,7 +185,7 @@ where
 
 // **** Sub ****
 
-/// Subtract two vectors
+/// Subtract two vectors.
 /// ```
 /// # use vqm::Vector2df32;
 /// let u = Vector2df32::new(2.0, 3.0);
@@ -209,7 +209,7 @@ where
 
 // **** SubAssign ****
 
-/// Subtract one vector from another
+/// Subtract one vector from another.
 /// ```
 /// # use vqm::Vector2df32;
 /// let mut r = Vector2df32::new(2.0, 3.0);
@@ -230,7 +230,7 @@ where
 
 // **** Scalar Mul ****
 
-/// Pre-multiply vector by a constant
+/// Pre-multiply vector by a constant.
 /// ```
 /// # use vqm::Vector2df32;
 /// let v = Vector2df32::new(2.0, 3.0);
@@ -256,7 +256,7 @@ impl Mul<Vector2d<f64>> for f64 {
 
 // **** Mul Scalar ****
 
-/// Multiply vector by a constant
+/// Multiply vector by a constant.
 /// ```
 /// # use vqm::Vector2df32;
 /// let v = Vector2df32::new(2.0, 3.0);
@@ -278,7 +278,7 @@ where
 
 // **** MulAssign ****
 
-/// In-place multiply a vector by a constant
+/// In-place multiply a vector by a constant.
 /// ```
 /// # use vqm::Vector2df32;
 /// let mut v = Vector2df32::new(2.0, 3.0);
@@ -298,7 +298,7 @@ where
 
 // **** Div scalar ****
 
-/// Divide a vector by a constant
+/// Divide a vector by a constant.
 /// ```
 /// # use vqm::Vector2df32;
 /// let v = Vector2df32::new(2.0, 3.0);
@@ -318,7 +318,7 @@ where
     }
 }
 
-/// In-place divide a vector by a constant
+/// In-place divide a vector by a constant.
 /// ```
 /// # use vqm::Vector2df32;
 /// let mut v = Vector2df32::new(2.0, 3.0);
@@ -338,7 +338,7 @@ where
 
 // **** Index ****
 
-/// Access vector component by index
+/// Access vector component by index.
 /// ```
 /// # use vqm::Vector2df32;
 /// let v = Vector2df32::new(2.0, 3.0);
@@ -359,7 +359,7 @@ impl<T> Index<usize> for Vector2d<T> {
 
 // **** IndexMut ****
 
-// Set vector component by index
+// Set vector component by index.
 /// ```
 /// # use vqm::Vector2df32;
 /// let mut v = Vector2df32::new(2.0, 3.0);
@@ -384,7 +384,7 @@ impl<T> Vector2d<T>
 where
     T: Copy + Signed,
 {
-    /// Return a copy of the vector with all components set to their absolute values
+    /// Return a copy of the vector with all components set to their absolute values.
     /// ```
     /// # use vqm::Vector2df32;
     /// let v = Vector2df32::new(2.0, -3.0);
@@ -397,7 +397,7 @@ where
         Self { x: self.x.abs(), y: self.y.abs() }
     }
 
-    /// Set all components of the vector to their absolute values
+    /// Set all components of the vector to their absolute values.
     /// ```
     /// # use vqm::Vector2df32;
     /// let mut v = Vector2df32::new(2.0, -3.0);
@@ -418,7 +418,7 @@ impl<T> Vector2d<T>
 where
     T: Copy + FloatCore,
 {
-    /// Return a copy of the matrix with all components clamped to the specified range
+    /// Return a copy of the matrix with all components clamped to the specified range.
     /// ```
     /// # use vqm::Vector2df32;
     /// let v = Vector2df32::new(2.0, 3.0);
@@ -431,7 +431,7 @@ where
         Self { x: self.x.clamp(min, max), y: self.y.clamp(min, max) }
     }
 
-    /// Clamp all components of the vector to the specified range
+    /// Clamp all components of the vector to the specified range.
     /// ```
     /// # use vqm::Vector2df32;
     /// let mut v = Vector2df32::new(2.0, 3.0);
@@ -452,7 +452,7 @@ impl<T> Vector2d<T>
 where
     T: Copy + Vector2dMath,
 {
-    /// Vector dot product
+    /// Vector dot product.
     /// ```
     /// # use vqm::Vector2df32;
     /// let v = Vector2df32::new(2.0, 3.0);
@@ -474,7 +474,7 @@ impl<T> Vector2d<T>
 where
     T: Copy + Vector2dMath,
 {
-    /// Z component of vector cross product of self and other extended to 3D
+    /// Z component of vector cross product of self and other extended to 3D.
     /// ```
     /// # use vqm::Vector2df32;
     /// let v = Vector2df32::new(2.0, 3.0);
@@ -496,7 +496,7 @@ impl<T> Vector2d<T>
 where
     T: Copy + Vector2dMath,
 {
-    /// Return square of Euclidean norm
+    /// Return square of Euclidean norm.
     /// ```
     /// # use vqm::Vector2df32;
     /// let v = Vector2df32::new(2.0, 3.0);
@@ -507,7 +507,7 @@ where
         T::v2_norm_squared(self)
     }
 
-    /// Return distance between two points, squared
+    /// Return distance between two points, squared.
     /// ```
     /// # use vqm::Vector2df32;
     /// let v = Vector2df32::new(2.0, 3.0);
@@ -526,7 +526,7 @@ impl<T> Vector2d<T>
 where
     T: Copy + SqrtMethods + Vector2dMath,
 {
-    /// Return Euclidean norm
+    /// Return Euclidean norm.
     #[inline(always)]
     pub fn norm(self) -> T {
         Self::norm_squared(self).sqrt()
@@ -626,7 +626,7 @@ impl<T> Vector2d<T>
 where
     T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
 {
-    /// Return the sum of all components of the vector
+    /// Return the sum of all components of the vector.
     /// ```
     /// # use vqm::Vector2df32;
     /// let v = Vector2df32::new(2.0, 3.0);
@@ -637,7 +637,7 @@ where
         self.x + self.y
     }
 
-    /// Return the product of all components of the vector
+    /// Return the product of all components of the vector.
     /// ```
     /// # use vqm::Vector2df32;
     /// let v = Vector2df32::new(2.0, 3.0);
@@ -655,7 +655,7 @@ impl<T> Vector2d<T>
 where
     T: Copy + One + Add<Output = T> + Div<Output = T>,
 {
-    /// Return the mean of all components of the vector
+    /// Return the mean of all components of the vector.
     /// ```
     /// # use vqm::Vector2df32;
     /// let v = Vector2df32::new(2.0, 3.0);
@@ -673,7 +673,7 @@ impl<T> Vector2d<T>
 where
     T: Copy + Vector2dMath,
 {
-    /// Return the max element in the vector
+    /// Return the max element in the vector.
     /// ```
     /// # use vqm::Vector2df32;
     /// let v = Vector2df32::new(2.0, 3.0);
@@ -686,7 +686,7 @@ where
         T::v2_max(self)
     }
 
-    /// Return the min element in the vector
+    /// Return the min element in the vector.
     /// ```
     /// # use vqm::Vector2df32;
     /// let v = Vector2df32::new(2.0, 3.0);
@@ -704,7 +704,7 @@ where
 
 // **** From Tuple ****
 
-/// Vector from tuple
+/// Vector from tuple.
 /// ```
 /// # use vqm::Vector2df32;
 /// let v = Vector2df32::from((2.0, 3.0));
@@ -722,7 +722,7 @@ impl<T> From<(T, T)> for Vector2d<T> {
 
 // **** From Array ****
 
-/// Vector from array
+/// Vector from array.
 /// ```
 /// # use vqm::Vector2df32;
 /// let v = Vector2df32::from([2.0, 3.0]);
@@ -741,7 +741,7 @@ where
     }
 }
 
-/// Array from vector
+/// Array from vector.
 /// ```
 /// # use vqm::Vector2df32;
 /// let v = Vector2df32 { x: 2.0, y: 3.0 };

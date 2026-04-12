@@ -10,16 +10,16 @@ and uses no allocation. This means it is suitable for embedded system.
 
 Vectors have 2D, 3D, and 4D versions.
 
-Matrices have 2D and 3D versions,
+Matrices have 2x2 and 3x3 versions.
 
-Each type has versions for `f32` and `f64`: eg `Vector3df32` and `Vector3df64`. So we have:
+Each type has versions for `f32` and `f64`. So we have:
 
 1. 2D vectors: `Vector2df32`, `Vector2df64`
 2. 3D vectors: `Vector3df32`, `Vector3df64`
 3. 4D vectors: `Vector4df32`, `Vector4df64`
 4. [quaternions](https://en.wikipedia.org/wiki/Quaternion): `Quaternionf32`, `Quaternionf64`
-5. 2D matrices: `Matrix2x2f32`, `Matrix2x2f64`
-6. 3D matrices: `Matrix3x3f32`,`Matrix3x3f64`
+5. 2x2 matrices: `Matrix2x2f32`, `Matrix2x2f64`
+6. 3x3 matrices: `Matrix3x3f32`,`Matrix3x3f64`
 
 The 3D vector additionally has a `i16` version: `Vector3di16`.
 
@@ -58,7 +58,9 @@ rustup run nightly cargo build --features simd --target thumbv8m.main-none-eabi
 By default `Vector3df32` is aligned to a 16-byte boundary, and `Matrix3x3f32` is aligned to a 32-byte boundary.
 This can be turned off using the `no_align` feature flag:
 
-`cargo build -features no_align`
+```sh
+cargo build -features no_align
+```
 
 If `no_align` is used then SIMD support is not available.
 
@@ -93,12 +95,14 @@ Sometimes `invert` is used, sometimes `inverse`.
 | [cg-math](https://crates.io/crates/cg-math)         | `fn invert(&self) -> Option<>;`     | N/A                                      |
 | [nalgebra](https://crates.io/crates/nalgebra)       | `fn try_inverse(self) -> Option<>;` | `fn try_inverse_mut(&mut self) -> bool;` |
 
+Note that only `vqm` and `vek` pass parameters by value.
+
 When both return and in-place forms are supported, the choice is to use `inverted` and `invert` or `inversed` and `inverse`.
 I prefer `inverse` to `invert`, but I really don't like `inversed`. So VQM uses `inverted` and `invert`.
 
 ## Architecture
 
-See [ARCHITECTURE.md] for details on `vector-quaternion-matrix`'s internals.
+See [ARCHITECTURE.md] for details on `vqm`'s internals.
 
 [ARCHITECTURE.md]: ARCHITECTURE.md
 
