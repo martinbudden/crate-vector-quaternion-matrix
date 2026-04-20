@@ -950,7 +950,22 @@ impl From<Vector3d<f32>> for Vector3d<i16> {
     }
 }
 
-// **** Vector3di16 ****
+impl From<[i16; 3]> for Vector3d<f32> {
+    #[inline(always)]
+    fn from(v: [i16; 3]) -> Self {
+        Self { x: f32::from(v[0]), y: f32::from(v[1]), z: f32::from(v[2]) }
+    }
+}
+
+impl From<Vector3d<f32>> for [i16; 3] {
+    #[inline(always)]
+    fn from(v: Vector3d<f32>) -> Self {
+        #[allow(clippy::cast_possible_truncation)]
+        [v.x as i16, v.y as i16, v.z as i16]
+    }
+}
+
+// **** Vector3di32 ****
 
 /// 3-dimensional `{x, y, z}` vector of `i32` values<br><br>
 pub type Vector3di32 = Vector3d<i32>;
@@ -991,5 +1006,21 @@ impl From<Vector3d<f32>> for Vector3d<i32> {
     fn from(v: Vector3d<f32>) -> Self {
         #[allow(clippy::cast_possible_truncation)]
         Self { x: v.x as i32, y: v.y as i32, z: v.z as i32 }
+    }
+}
+
+impl From<[i32; 3]> for Vector3d<f32> {
+    #[inline(always)]
+    fn from(v: [i32; 3]) -> Self {
+        #[allow(clippy::cast_precision_loss)]
+        Self { x: v[0] as f32, y: v[1] as f32, z: v[2] as f32 }
+    }
+}
+
+impl From<Vector3d<f32>> for [i32; 3] {
+    #[inline(always)]
+    fn from(v: Vector3d<f32>) -> Self {
+        #[allow(clippy::cast_possible_truncation)]
+        [v.x as i32, v.y as i32, v.z as i32]
     }
 }

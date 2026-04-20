@@ -306,6 +306,16 @@ mod tests {
         assert_abs_diff_eq!(body_v.z, original_v.z, epsilon = 1e-5);
     }
     #[test]
+    fn vector3df32_array_i16() {
+        let v = Vector3df32::from([2.1, 3.8, 5.2]);
+
+        let a = <[i16; 3]>::from(v);
+        let b: [i16; 3] = v.into();
+
+        assert_eq!(a, [2, 3, 5]);
+        assert_eq!(b, [2, 3, 5]);
+    }
+    #[test]
     fn filter_vector3di16_i32() {
         use filters::{Pt1Filter, SignalFilter};
 
