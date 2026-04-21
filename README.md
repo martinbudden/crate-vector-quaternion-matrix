@@ -106,6 +106,16 @@ See [ARCHITECTURE.md] for details on `vqm`'s internals.
 
 [ARCHITECTURE.md]: ARCHITECTURE.md
 
+## Future directions
+
+Apart from implementing Matrix4x4, I have no planned major extensions to this crate.
+
+My main focus will be on fixing any bugs that come up in usage.
+
+I may at some point add the ability to calculate eigenvalues and eigenvectors.
+
+I may do some work on improving the performance of the SIMD implementations.
+
 ## Original implementation
 
 I originally implemented this crate as a C++ library:
