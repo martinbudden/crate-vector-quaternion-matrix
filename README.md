@@ -96,9 +96,6 @@ Sometimes `invert` is used, sometimes `inverse`.
 
 Note that only `vqm` and `vek` pass parameters by value.
 
-When both return and in-place forms are supported, the choice is to use `inverted` and `invert` or `inversed` and `inverse`.
-I prefer `inverse` to `invert`, but I really don't like `inversed`. So VQM uses `inverted` and `invert`.
-
 ## Architecture
 
 See [ARCHITECTURE.md] for details on `vqm`'s internals.
