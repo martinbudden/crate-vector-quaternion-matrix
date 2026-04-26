@@ -6,7 +6,7 @@ use crate::{MathConstants, Quaternion, QuaternionMath, SqrtMethods, Vector2d, Ve
 
 /// 3-dimensional `{x, y, z}` vector of `f32` values<br>
 pub type Vector3df32 = Vector3d<f32>;
-/// 3-dimensional `{x, y, z}` vector of `f64` values<br>
+/// 3-dimensional `{x, y, z}` vector of `f64` values<br><br>
 pub type Vector3df64 = Vector3d<f64>;
 
 // **** Define ****
@@ -16,7 +16,7 @@ if #[cfg(feature = "no_align")] {
 // Compact 12-byte version
 
 /// `Vector3d<T>`: 3D vector of type `T`.<br>
-/// Aliases `Vector3df32`, `Vector3df64`, and `Vector3di16` are provided.<br><br>
+/// Aliases `Vector3df32`, `Vector3df64`, `Vector3di16`, and `Vector3di32` are provided.<br><br>
 #[repr(C, align(4))]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Vector3d<T> {
@@ -28,7 +28,7 @@ pub struct Vector3d<T> {
 // High-performance 16-byte aligned version, enables use of SIMD
 
 /// `Vector3d<T>`: 3D vector of type `T`.<br>
-/// Aliases `Vector3df32`, `Vector3df64`, and `Vector3di16` are provided.<br><br>
+/// Aliases `Vector3df32`, `Vector3df64`, `Vector3di16`, and `Vector3di32`  are provided.<br><br>
 /// `Vector3df32` uses **SIMD** accelerations implemented in `Vector3dMath`.<br><br>
 #[repr(C, align(16))]
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -939,7 +939,7 @@ where
         Vector2d::<T> { x: v.x, y: v.y }
     }
 }
-/// 3-dimensional `{x, y, z}` vector of `i16` values<br><br>
+/// 3-dimensional `{x, y, z}` vector of `i16` values<br>
 pub type Vector3di16 = Vector3d<i16>;
 
 // **** Vector3di16 ****
