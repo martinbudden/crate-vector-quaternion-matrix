@@ -39,6 +39,7 @@ Once the API has stabilized this project will adopt semantic versioning, the fir
 
 ### Changed
 
+- Renamed crate from `vector-quaternion-matrix` to `vqm`.
 - Changed back to use verbal form for return functions and _in_place suffix for in place versions,
   ie `transpose` and `transpose_in_place` rather than `transpose` and `transposed`.
 - Updated README.md
