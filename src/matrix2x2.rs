@@ -892,13 +892,13 @@ where
     /// # use num_traits::Zero;
     /// let m = Matrix2x2f32::from([ 2.0,  3.0,
     ///                              7.0, 10.5]);
-    /// let n = m.invert_or_zero();
+    /// let n = m.inverse_or_zero();
     ///
     /// assert_eq!(0.0, m.determinant());
     /// assert_eq!(Matrix2x2f32::zero(), n);
     ///
     /// ```
-    pub fn invert_or_zero(self) -> Self {
+    pub fn inverse_or_zero(self) -> Self {
         let determinant = self.determinant();
         if determinant.abs() < T::EPSILON {
             return Self::zero();

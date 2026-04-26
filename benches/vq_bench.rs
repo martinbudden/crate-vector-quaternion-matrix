@@ -47,7 +47,7 @@ fn bench_vq(c: &mut Criterion) {
         );
     });
 
-    _ = group.bench_function("v3d_mu_add_*_+", |b| {
+    _ = group.bench_function("v3d_mul_add_*_+", |b| {
         b.iter_batched(
             || {
                 // Setup: Generate two random vectors
@@ -83,7 +83,7 @@ fn bench_vq(c: &mut Criterion) {
         );
     });
 
-    _ = group.bench_function("v3d normalized", |b| {
+    _ = group.bench_function("v3d normalize", |b| {
         b.iter_batched(
             || {
                 let a: [f32; 3] = rng().random();
@@ -94,7 +94,7 @@ fn bench_vq(c: &mut Criterion) {
         );
     });
 
-    _ = group.bench_function("v3d normalized_u", |b| {
+    _ = group.bench_function("v3d normalize_u", |b| {
         b.iter_batched(
             || {
                 loop {
@@ -111,7 +111,7 @@ fn bench_vq(c: &mut Criterion) {
         );
     });
 
-    _ = group.bench_function("q normalized", |b| {
+    _ = group.bench_function("q normalize", |b| {
         b.iter_batched(
             || {
                 let a: [f32; 4] = rng().random();
@@ -122,7 +122,7 @@ fn bench_vq(c: &mut Criterion) {
         );
     });
 
-    _ = group.bench_function("q normalize", |b| {
+    _ = group.bench_function("q normalize_ip", |b| {
         b.iter_batched(
             || {
                 let a: [f32; 4] = rng().random();
@@ -132,7 +132,7 @@ fn bench_vq(c: &mut Criterion) {
             BatchSize::SmallInput,
         );
     });
-    _ = group.bench_function("q normalized_u", |b| {
+    _ = group.bench_function("q normalize_ip_u", |b| {
         b.iter_batched(
             || {
                 loop {

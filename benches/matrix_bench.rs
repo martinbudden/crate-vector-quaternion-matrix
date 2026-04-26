@@ -49,7 +49,7 @@ fn bench_matrix(c: &mut Criterion) {
         );
     });
 
-    _ = group.bench_function("m3x3 inverted", |b| {
+    _ = group.bench_function("m3x3 inverse", |b| {
         b.iter_batched(
             || {
                 let mut my_rng = rand::rng();
