@@ -62,7 +62,7 @@ pub trait Matrix2x2Math: Sized {
 }
 
 impl Matrix2x2Math for f32 {
-    #[inline]
+    #[inline(always)]
     fn m2x2_neg(this: Matrix2x2<Self>) -> Matrix2x2<Self> {
         #[cfg(feature = "simd")]
         {

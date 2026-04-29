@@ -373,7 +373,6 @@ where
     T: Copy + Matrix2x2Math,
 {
     type Output = Vector2d<T>;
-
     #[inline]
     fn mul(self, other: Vector2d<T>) -> Vector2d<T> {
         T::m2x2_mul_vector(self, other)
