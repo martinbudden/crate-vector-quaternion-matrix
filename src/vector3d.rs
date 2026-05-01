@@ -161,12 +161,12 @@ where
 /// ```
 /// # use vqm::Vector3df32;
 /// # use num_traits::MulAdd;
-/// let mut v = Vector3df32::new(2.0, 3.0, 5.0);
-/// let w = Vector3df32::new(7.0, 11.0, 13.0);
-/// let k = 17.0;
+/// let mut v = Vector3df32::new(2.0, 5.0, 11.0);
+/// let w = Vector3df32::new(3.0, 7.0, 13.0);
+/// let k = 23.0;
 /// let r = v.mul_add(k, w);
 ///
-/// assert_eq!(r, Vector3df32 { x: 41.0, y: 62.0, z: 98.0 });
+/// assert_eq!(r, Vector3df32 { x: 49.0, y: 122.0, z: 266.0 });
 /// ```
 impl<T> MulAdd<T> for Vector3d<T>
 where
@@ -214,12 +214,12 @@ impl MulAdd<f32> for Vector3d<i16> {
 /// ```
 /// # use vqm::Vector3df32;
 /// # use num_traits::MulAddAssign;
-/// let mut v = Vector3df32::new(2.0, 3.0, 5.0);
-/// let w = Vector3df32::new(7.0, 11.0, 13.0);
-/// let k = 17.0;
+/// let mut v = Vector3df32::new(2.0, 5.0, 11.0);
+/// let w = Vector3df32::new(3.0, 7.0, 13.0);
+/// let k = 23.0;
 /// v.mul_add_assign(k, w);
 ///
-/// assert_eq!(v, Vector3df32 { x: 41.0, y: 62.0, z: 98.0 });
+/// assert_eq!(v, Vector3df32 { x: 49.0, y: 122.0, z: 266.0 });
 /// ```
 impl<T> MulAddAssign<T> for Vector3d<T>
 where
@@ -260,11 +260,11 @@ where
 /// Subtract one vector from another.
 /// ```
 /// # use vqm::Vector3df32;
-/// let mut r = Vector3df32::new(2.0, 3.0, 5.0);
-/// let v = Vector3df32::new(7.0, 11.0, 17.0);
+/// let mut r = Vector3df32::new(2.0, 5.0, 13.0);
+/// let     v = Vector3df32::new(3.0, 7.0, 11.0);
 /// r -= v;
 ///
-/// assert_eq!(r, Vector3df32 { x: -5.0, y: -8.0, z: -12.0 });
+/// assert_eq!(r, Vector3df32 { x: -1.0, y: -2.0, z: 2.0 });
 /// ```
 impl<T> SubAssign for Vector3d<T>
 where
@@ -487,12 +487,12 @@ impl<T> Index<usize> for Vector3d<T> {
 // Set vector component by index.
 /// ```
 /// # use vqm::Vector3df32;
-/// let mut v = Vector3df32::new(2.0, 3.0, 5.0);
-/// v[0] = 7.0;
-/// v[1] = 11.0;
+/// let mut v = Vector3df32::new(2.0, 5.0, 11.0);
+/// v[0] = 3.0;
+/// v[1] = 7.0;
 /// v[2] = 13.0;
 ///
-/// assert_eq!(v, Vector3df32 { x:7.0, y:11.0, z:13.0 });
+/// assert_eq!(v, Vector3df32 { x:3.0, y:7.0, z:13.0 });
 /// ```
 impl<T> IndexMut<usize> for Vector3d<T> {
     #[inline]
@@ -582,12 +582,12 @@ where
     /// Vector dot product.
     /// ```
     /// # use vqm::Vector3df32;
-    /// let v = Vector3df32::new(2.0, 3.0, 5.0);
-    /// let w = Vector3df32::new(7.0, 11.0, 13.0);
+    /// let v = Vector3df32::new(2.0, 5.0, 11.0);
+    /// let w = Vector3df32::new(3.0, 7.0, 13.0);
     ///
     /// let x = v.dot(w);
     ///
-    /// assert_eq!(x, 112.0);
+    /// assert_eq!(x, 184.0);
     /// ```
     #[inline]
     pub fn dot(self, other: Self) -> T {
@@ -604,12 +604,12 @@ where
     /// Vector cross product.
     /// ```
     /// # use vqm::Vector3df32;
-    /// let v = Vector3df32::new(2.0, 3.0, 5.0);
-    /// let w = Vector3df32::new(7.0, 11.0, 13.0);
+    /// let v = Vector3df32::new(2.0, 5.0, 11.0);
+    /// let w = Vector3df32::new(3.0, 7.0, 13.0);
     ///
     /// let x = v.cross(w);
     ///
-    /// assert_eq!(x, Vector3df32::new(-16.0, 9.0, 1.0));
+    /// assert_eq!(x, Vector3df32::new(-12.0, 7.0, -1.0));
     /// ```
     #[inline]
     pub fn cross(self, other: Self) -> Vector3d<T> {
@@ -637,9 +637,9 @@ where
     /// Return distance between two points, squared.
     /// ```
     /// # use vqm::Vector3df32;
-    /// let v = Vector3df32::new(2.0, 3.0, 5.0);
-    /// let w = Vector3df32::new(7.0, 11.0, 13.0);
-    /// assert_eq!(153.0, v.distance_squared(w));
+    /// let v = Vector3df32::new(2.0, 5.0, 11.0);
+    /// let w = Vector3df32::new(3.0, 7.0, 17.0);
+    /// assert_eq!(41.0, v.distance_squared(w));
     /// ```
     #[inline]
     pub fn distance_squared(self, other: Self) -> T {

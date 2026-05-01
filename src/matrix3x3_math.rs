@@ -77,16 +77,34 @@ impl Matrix3x3Math for f32 {
         Self::m3x3_add(Self::m3x3_mul_scalar(this, k), other)
     }
 
-    #[inline(always)]
+    /*#[inline]
     fn m3x3_mul_vector(this: Matrix3x3<Self>, other: Vector3d<Self>) -> Vector3d<Self> {
         Vector3d {
             x: this.a[0] * other.x + this.a[1] * other.y + this.a[2] * other.z,
             y: this.a[3] * other.x + this.a[4] * other.y + this.a[5] * other.z,
             z: this.a[6] * other.x + this.a[7] * other.y + this.a[8] * other.z,
         }
-    }
+    }*/
 
-    #[inline(always)]
+    #[inline]
+    fn m3x3_mul_vector(this: Matrix3x3<Self>, other: Vector3d<Self>) -> Vector3d<Self> {
+        // Column 0 * x
+        let mut rx = this.a[0] * other.x;
+        let mut ry = this.a[3] * other.x;
+        let mut rz = this.a[6] * other.x;
+
+        // Accumulate Column 1 * y
+        rx += this.a[1] * other.y;
+        ry += this.a[4] * other.y;
+        rz += this.a[7] * other.y;
+
+        // Accumulate Column 2 * z
+        rx += this.a[2] * other.z;
+        ry += this.a[5] * other.z;
+        rz += this.a[8] * other.z;
+
+        Vector3d { x: rx, y: ry, z: rz }
+    }
     fn m3x3_vector_mul(this: Vector3d<Self>, other: Matrix3x3<Self>) -> Vector3d<Self> {
         Vector3d {
             x: this.x * other.a[0] + this.y * other.a[3] + this.z * other.a[6],

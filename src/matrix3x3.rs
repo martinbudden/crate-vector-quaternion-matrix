@@ -918,6 +918,7 @@ where
     /// Equivalent to the inverse but without dividing by the determinant of the matrix.
     /// ```
     /// # use vqm::Matrix3x3f32;
+    /// # use num_traits::One;
     /// let m = Matrix3x3f32::from([  2.0, 17.0, 59.0,
     ///                               5.0, 11.0, 47.0,
     ///                              23.0, 31.0, 41.0]);
@@ -925,6 +926,7 @@ where
     ///
     /// assert_eq!(m.determinant(), d);
     /// assert!((n*m/m.determinant()).is_near_identity());
+    /// assert_eq!(Matrix3x3f32::one(), n*m/(m.determinant()));
     /// ```
     #[inline]
     pub fn adjugate(self) -> (Self, T) {

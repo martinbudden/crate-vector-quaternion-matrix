@@ -143,12 +143,12 @@ where
 /// ```
 /// # use vqm::Vector4df32;
 /// # use num_traits::MulAdd;
-/// let mut v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
-/// let w = Vector4df32::new(11.0, 13.0, 17.0, 19.0);
+/// let v = Vector4df32::new(2.0, 5.0, 11.0, 17.0);
+/// let w = Vector4df32::new(3.0, 7.0, 13.0, 19.0);
 /// let k = 23.0;
 /// let r = v.mul_add(k, w);
 ///
-/// assert_eq!(r, Vector4df32 { x: 57.0, y: 82.0, z: 132.0, t: 180.0 });
+/// assert_eq!(r, Vector4df32 { x: 49.0, y: 122.0, z: 266.0, t: 410.0 });
 /// ```
 impl<T> MulAdd<T> for Vector4d<T>
 where
@@ -168,12 +168,12 @@ where
 /// ```
 /// # use vqm::Vector4df32;
 /// # use num_traits::MulAddAssign;
-/// let mut v = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
-/// let w = Vector4df32::new(11.0, 13.0, 17.0, 19.0);
+/// let mut v = Vector4df32::new(2.0, 5.0, 11.0, 17.0);
+/// let w = Vector4df32::new(3.0, 7.0, 13.0, 19.0);
 /// let k = 23.0;
 /// v.mul_add_assign(k, w);
 ///
-/// assert_eq!(v, Vector4df32 { x: 57.0, y: 82.0, z: 132.0, t: 180.0 });
+/// assert_eq!(v, Vector4df32 { x: 49.0, y: 122.0, z: 266.0, t: 410.0 });
 /// ```
 impl<T> MulAddAssign<T> for Vector4d<T>
 where
@@ -190,9 +190,9 @@ where
 /// Subtract two vectors.
 /// ```
 /// # use vqm::Vector4df32;
-/// let u = Vector4df32::new(2.0, 5.0, 13.0, 17.0);
-/// let v = Vector4df32::new(3.0, 7.0, 11.0, 23.0);
-/// let r = u - v;
+/// let v = Vector4df32::new(2.0, 5.0, 13.0, 17.0);
+/// let w = Vector4df32::new(3.0, 7.0, 11.0, 23.0);
+/// let r = v - w;
 ///
 /// assert_eq!(r, Vector4df32 { x: -1.0, y: -2.0, z: 2.0, t: -6.0 });
 /// ```
@@ -214,11 +214,11 @@ where
 /// Subtract one vector from another.
 /// ```
 /// # use vqm::Vector4df32;
-/// let mut r = Vector4df32::new(2.0, 3.0, 5.0, 7.0);
-/// let     v = Vector4df32::new(11.0, 13.0, 17.0, 23.0);
+/// let mut r = Vector4df32::new(2.0, 5.0, 13.0, 17.0);
+/// let     v = Vector4df32::new(3.0, 7.0, 11.0, 23.0);
 /// r -= v;
 ///
-/// assert_eq!(r, Vector4df32 { x: -9.0, y: -10.0, z: -12.0, t: -16.0 });
+/// assert_eq!(r, Vector4df32 { x: -1.0, y: -2.0, z: 2.0, t: -6.0 });
 /// ```
 impl<T> SubAssign for Vector4d<T>
 where

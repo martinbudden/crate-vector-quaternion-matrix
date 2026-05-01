@@ -141,12 +141,12 @@ where
 /// ```
 /// # use vqm::Vector2df32;
 /// # use num_traits::MulAdd;
-/// let mut v = Vector2df32::new(2.0, 3.0);
-/// let w = Vector2df32::new(5.0, 7.0);
-/// let k = 11.0;
+/// let mut v = Vector2df32::new(2.0, 5.0);
+/// let w = Vector2df32::new(3.0, 7.0);
+/// let k = 23.0;
 /// let r = v.mul_add(k, w);
 ///
-/// assert_eq!(r, Vector2df32 { x: 27.0, y: 40.0 });
+/// assert_eq!(r, Vector2df32 { x: 49.0, y: 122.0 });
 /// ```
 impl<T> MulAdd<T> for Vector2d<T>
 where
@@ -166,12 +166,12 @@ where
 /// ```
 /// # use vqm::Vector2df32;
 /// # use num_traits::MulAddAssign;
-/// let mut v = Vector2df32::new(2.0, 3.0);
-/// let w = Vector2df32::new(5.0, 7.0);
-/// let k = 11.0;
+/// let mut v = Vector2df32::new(2.0, 5.0);
+/// let w = Vector2df32::new(3.0, 7.0);
+/// let k = 23.0;
 /// v.mul_add_assign(k, w);
 ///
-/// assert_eq!(v, Vector2df32 { x: 27.0, y: 40.0 });
+/// assert_eq!(v, Vector2df32 { x: 49.0, y: 122.0 });
 /// ```
 impl<T> MulAddAssign<T> for Vector2d<T>
 where
@@ -212,11 +212,11 @@ where
 /// Subtract one vector from another.
 /// ```
 /// # use vqm::Vector2df32;
-/// let mut r = Vector2df32::new(2.0, 3.0);
-/// let v = Vector2df32::new(7.0, 11.0);
+/// let mut r = Vector2df32::new(2.0, 5.0);
+/// let     v = Vector2df32::new(3.0, 7.0);
 /// r -= v;
 ///
-/// assert_eq!(r, Vector2df32 { x: -5.0, y: -8.0 });
+/// assert_eq!(r, Vector2df32 { x: -1.0, y: -2.0 });
 /// ```
 impl<T> SubAssign for Vector2d<T>
 where
@@ -523,12 +523,12 @@ where
     /// Z component of vector cross product of self and other extended to 3D.
     /// ```
     /// # use vqm::Vector2df32;
-    /// let v = Vector2df32::new(2.0, 3.0);
-    /// let w = Vector2df32::new(7.0, 11.0);
+    /// let v = Vector2df32::new(2.0, 5.0);
+    /// let w = Vector2df32::new(3.0, 7.0);
     ///
     /// let x = v.cross(w);
     ///
-    /// assert_eq!(x, 1.0);
+    /// assert_eq!(x, -1.0);
     /// ```
     #[inline]
     pub fn cross(self, other: Self) -> T {
