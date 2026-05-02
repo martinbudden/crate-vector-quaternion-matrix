@@ -15,15 +15,11 @@ categories = [
     "science::robotics",
 ]
 
-[features]
-default = ["libm"]
-#default = ["libm", "simd",]
-#default = ["libm", "no_align"]
-std = []
-libm = ["num-traits/libm"]
-no_align = []
-simd = []
+[package.metadata.docs.rs]
+rustdoc-args = ["--html-in-header", "katex-header.html"]
 
+[build-dependencies]
+rustc_version = "0.4.1"
 
 # Note the RP2350 uses thumbv8m and the RP2040 uses thumbv6m.
 # RP2350: thumbv8m.main-none-eabihf (Cortex-M33, ARMv8-M, Hard Float)
@@ -44,11 +40,15 @@ rustflags = [
     # "-C", "target-feature=+vfp4sp", # Enables single-precision FPU
 ]
 
-[package.metadata.docs.rs]
-rustdoc-args = ["--html-in-header", "katex-header.html"]
+[features]
+default = ["libm"]
+#default = ["libm", "simd",]
+#default = ["libm", "no_align"]
+std = []
+libm = ["num-traits/libm"]
+no_align = []
+simd = []
 
-[build-dependencies]
-rustc_version = "0.4.1"
 
 [dependencies]
 # libm is required for num_traits, sqrt, and trigonometric functions in no_std
