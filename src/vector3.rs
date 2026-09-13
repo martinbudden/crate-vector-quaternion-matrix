@@ -156,7 +156,7 @@ where
     /// ```
     #[inline]
     fn add(self, other: Self) -> Self {
-        Vector3 { x: self.x + other.x, y: self.y + other.y, z: self.z + other.z }
+        Self { x: self.x + other.x, y: self.y + other.y, z: self.z + other.z }
     }
 }
 
@@ -207,7 +207,7 @@ where
     /// ```
     #[inline]
     fn mul_add(self, k: T, other: Self) -> Self {
-        Vector3 { x: self.x * k + other.x, y: self.y * k + other.y, z: self.z * k + other.z }
+        Self { x: self.x * k + other.x, y: self.y * k + other.y, z: self.z * k + other.z }
     }
 }
 
@@ -348,7 +348,7 @@ where
     /// Multiply a vector by a scalar.
     #[inline]
     fn mul(self, rhs: Rhs) -> Self::Output {
-        Vector3 { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs }
+        Self { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs }
     }
 }
 
@@ -473,7 +473,7 @@ where
     /// ```
     #[inline]
     fn div(self, other: Self) -> Self {
-        Vector3 { x: self.x / other.x, y: self.y / other.y, z: self.z / other.z }
+        Self { x: self.x / other.x, y: self.y / other.y, z: self.z / other.z }
     }
 }
 
@@ -721,7 +721,7 @@ where
     #[inline]
     #[must_use]
     pub fn cross(self, other: Self) -> Vector3<T> {
-        Vector3 {
+        Self {
             x: self.y * other.z - self.z * other.y,
             y: self.z * other.x - self.x * other.z,
             z: self.x * other.y - self.y * other.x,
@@ -766,7 +766,7 @@ impl<T> Vector3<T> {
         Rhs: Copy,
         Out: Sub<Output = Out>,
     {
-        Vector3 {
+        Self {
             x: (self.y * rhs.z) - (self.z * rhs.y),
             y: (self.z * rhs.x) - (self.x * rhs.z),
             z: (self.x * rhs.y) - (self.y * rhs.x),
@@ -886,7 +886,7 @@ where
         let norm = (x * x + y * y + z * z).sqrt();
         let norm_reciprocal = V::one() / norm;
 
-        Vector3 {
+        Self {
             x: uom::si::Quantity { dimension: PhantomData, units: PhantomData, value: x * norm_reciprocal },
             y: uom::si::Quantity { dimension: PhantomData, units: PhantomData, value: y * norm_reciprocal },
             z: uom::si::Quantity { dimension: PhantomData, units: PhantomData, value: z * norm_reciprocal },

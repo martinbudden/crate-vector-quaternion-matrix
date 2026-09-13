@@ -18,7 +18,7 @@ pub type Vector4f64 = Vector4<f64>;
 
 // **** Define ****
 
-/// `Vector4<T>`: 3D vector of type `T`.<br>
+/// `Vector4<T>`: 4D vector of type `T`.<br>
 /// Aliases `Vector4f32` and `Vector4f64` are provided.<br><br>
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 #[cfg_attr(feature = "std", derive(derive_more::Display))]
@@ -154,7 +154,7 @@ where
     /// ```
     #[inline]
     fn add(self, other: Self) -> Self {
-        Vector4 { x: self.x + other.x, y: self.y + other.y, z: self.z + other.z, t: self.t + other.t }
+        Self { x: self.x + other.x, y: self.y + other.y, z: self.z + other.z, t: self.t + other.t }
     }
 }
 
@@ -205,7 +205,7 @@ where
     /// ```
     #[inline]
     fn mul_add(self, k: T, other: Self) -> Self {
-        Vector4 { x: self.x * k + other.x, y: self.y * k + other.y, z: self.z * k + other.z, t: self.t * k + other.t }
+        Self { x: self.x * k + other.x, y: self.y * k + other.y, z: self.z * k + other.z, t: self.t * k + other.t }
     }
 }
 
@@ -338,7 +338,7 @@ where
     /// Multiply a vector by a scalar.
     #[inline]
     fn mul(self, rhs: Rhs) -> Self::Output {
-        Vector4 { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs, t: self.t * rhs }
+        Self { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs, t: self.t * rhs }
     }
 }
 
@@ -463,7 +463,7 @@ where
     /// ```
     #[inline]
     fn div(self, other: Self) -> Self {
-        Vector4 { x: self.x / other.x, y: self.y / other.y, z: self.z / other.z, t: self.t / other.t }
+        Self { x: self.x / other.x, y: self.y / other.y, z: self.z / other.z, t: self.t / other.t }
     }
 }
 
@@ -749,7 +749,7 @@ where
         let norm = (x * x + y * y + z * z + t * t).sqrt();
         let norm_reciprocal = V::one() / norm;
 
-        Vector4 {
+        Self {
             x: uom::si::Quantity { dimension: PhantomData, units: PhantomData, value: x * norm_reciprocal },
             y: uom::si::Quantity { dimension: PhantomData, units: PhantomData, value: y * norm_reciprocal },
             z: uom::si::Quantity { dimension: PhantomData, units: PhantomData, value: z * norm_reciprocal },

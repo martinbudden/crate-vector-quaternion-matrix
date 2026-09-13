@@ -27,28 +27,23 @@ That is a significant amount of work to perform in 125 microseconds. So:
 
 My previous C++ library had shown this was possible (even without SIMD).
 
-### Align parameters and pass by value, not by reference
+### Pass parameters by value, not by reference
 
 This is more peformant.
 
 Most of the calculations are performed on `Vector3f32` and `Quaternionf32` types.
 
-If these are aligned they are 16-byte values and fit comfortably into the CPUs floating point registers.
+If these fit comfortably into the CPUs floating point registers.
 What's more, if calculations are chained, then the intermediate values can be retained in the CPU registers,
 rather than being copied on and off the stack (which might be the case if passed by reference).
 
 Passing by value is also preferable when SIMD is used.
 
-The largest item this library may contain is an `Matrix4x4f64` which is 128 bytes, which is well below the
-256-byte rust-recommended limit for passing by value.
-
 ### Use generics
 
 For the main processing loop `Vector3f32` and `Quaternionf32` was required.
 
-To support reading from an Inertial Measurement Unit (IMU), `Vector3i16` was required.
-
-Initially I started implementing `Vector3f32` and `Vector3i16` as separate types,
+Initially I started implementing `Vector3f32` and `Quaternionf32` etc as separate types,
 but during implementation and especially when I started adding SIMD support it became
 clear that using generics would make for a simpler implementation.
 
@@ -70,9 +65,6 @@ but this is manageable and not excessive.
 [API guidelines]: https://rust-lang.github.io/api-guidelines
 [rustdoc]: https://doc.rust-lang.org/rustdoc/index.html
 
-I have not yet started using newtypes to ensure type safety between different measurement units
-(eg degrees and radians).
-
 ## Naming convention for "return" and "in-place" versions of functions
 
 Several functions (eg `normalize`, `clamp`, `transpose`, `adjugate`, and `inverse`) have both "return" and "in-place" forms.
@@ -93,15 +85,15 @@ The convention used is that the `_in_place` suffix is used for the "in-place" fo
 As illustrated below, there is no universal convention for the name of the function used to invert a matrix.
 Sometimes `invert` is used, sometimes `inverse`.
 
-| Crate                                               | return                               | in-place                                           |
-| --------------------------------------------------- | ------------------------------------ | -------------------------------------------------- |
-| [vqm](https://crates.io/crates/vqm)                 | `fn inverse(self) -> Self;`          | `fn inverse_in_place(&mut self) -> &mut Self;`     |
-| [glam](https://crates.io/crates/glam)               | `fn inverse(&self) -> Self;`         | N/A                                                |
-| [static-math](https://crates.io/crates/static-math) | `fn inverse(&self) -> Option<>;`     | N/A                                                |
-| [nalgebra](https://crates.io/crates/nalgebra)       | `fn try_inverse(&self) -> Option<>;` | `fn try_inverse_mut(&mut self) -> bool;`           |
-| [cg-math](https://crates.io/crates/cg-math)         | `fn invert(&self) -> Option<>;`      | N/A                                                |
-| [vek](https://crates.io/crates/vek)                 | `fn inverted(self) -> Self;`         | `fn invert(&mut self);`                            |
-| [ultraviolet](https://crates.io/crates/ultraviolet) | `fn inversed(&self) -> Self;`        | `fn inverse(&mut self);`                           |
+| Crate                                               | return                                                     | in-place                                   |
+| --------------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------ |
+| [vqm](https://crates.io/crates/vqm)                 | `inverse(self) -> Self`<br>`try_inverse(self) -> Option<>` | `inverse_in_place(&mut self) -> &mut Self` |
+| [nalgebra](https://crates.io/crates/nalgebra)       | `try_inverse(&self) -> Option<>`                           | `try_inverse_mut(&mut self) -> bool`       |
+| [glam](https://crates.io/crates/glam)               | `inverse(&self) -> Self`                                   | N/A                                        |
+| [vek](https://crates.io/crates/vek)                 | `inverted(self) -> Self`                                   | `invert(&mut self)`                        |
+| [ultraviolet](https://crates.io/crates/ultraviolet) | `inversed(&self) -> Self`                                  | `inverse(&mut self)`                       |
+| [static-math](https://crates.io/crates/static-math) | `inverse(&self) -> Option<>`                               | N/A                                        |
+| [cg-math](https://crates.io/crates/cg-math)         | `invert(&self) -> Option<>`                                | N/A                                        |
 
 Note that only `vqm` and `vek` pass parameters by value.
 

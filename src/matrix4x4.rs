@@ -1815,28 +1815,13 @@ where
     /// ```
     pub fn row(self, row: usize) -> Vector4<T> {
         let r = row.min(3);
-        // Made safe because c is clamped to 0..=3, so c + 12 <= 15
-        unsafe {
-            Vector4 {
-                x: *self.a.get_unchecked(r),
-                y: *self.a.get_unchecked(r + 4),
-                z: *self.a.get_unchecked(r + 8),
-                t: *self.a.get_unchecked(r + 12),
-            }
-        }
+        Vector4 { x: self.a[r], y: self.a[r + 4], z: self.a[r + 8], t: self.a[r + 12] }
     }
+
     /// Return matrix row as a tuple.
     pub fn row_tuple(self, row: usize) -> (T, T, T, T) {
         let r = row.min(3);
-        // Made safe because c is clamped to 0..=3, so c + 12 <= 15
-        unsafe {
-            (
-                *self.a.get_unchecked(r),
-                *self.a.get_unchecked(r + 4),
-                *self.a.get_unchecked(r + 8),
-                *self.a.get_unchecked(r + 12),
-            )
-        }
+        ( self.a[r], self.a[r + 4], self.a[r + 8], self.a[r + 12] )
     }
 
     /// Set matrix column from a vector.

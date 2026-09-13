@@ -1397,16 +1397,14 @@ where
     /// ```
     pub fn row(self, row: usize) -> Vector2<T> {
         let r = row.min(1);
-        // Made safe because r is clamped to 0..=1, so r + 2 <= 3
-        unsafe { Vector2 { x: *self.a.get_unchecked(r), y: *self.a.get_unchecked(r + 2) } }
+        Vector2 { x: self.a[r], y: self.a[r + 2] }
     }
 
     /// Returns a row as tuple.
     #[inline]
     pub fn row_tuple(&self, row: usize) -> (T, T) {
         let r = row.min(1);
-        // Made safe because r is clamped to 0..=1, so r + 2 <= 3
-        unsafe { (*self.a.get_unchecked(r), *self.a.get_unchecked(r + 2)) }
+        (self.a[r], self.a[r + 2])
     }
 
     /// Set matrix column from a vector.

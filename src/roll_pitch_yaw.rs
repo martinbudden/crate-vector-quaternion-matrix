@@ -9,14 +9,14 @@ use {
 
 use crate::{MathConstants, MathMethods, Quaternion, Vector2, Vector3};
 
-/// `RollPitchYaw` `struct { roll: f32, pitch: f32, yaw: f32 }`<br>
+/// `RollPitchYaw` struct `{ roll: f32, pitch: f32, yaw: f32 }`<br>
 pub type RollPitchYawf32 = RollPitchYaw<f32>;
-/// `RollPitchYaw` `struct { roll: f64, pitch: f64, yaw: f64 }`<br>
+/// `RollPitchYaw` struct `{ roll: f64, pitch: f64, yaw: f64 }`<br>
 pub type RollPitchYawf64 = RollPitchYaw<f64>;
 
-/// `RollPitch` `struct { roll: f32, pitch: f32 }`<br>
+/// `RollPitch` struct `{ roll: f32, pitch: f32 }`<br>
 pub type RollPitchf32 = RollPitch<f32>;
-/// `RollPitch` `struct { roll: f64, pitch: f64 }`<br><br>
+/// `RollPitch` struct `{ roll: f64, pitch: f64 }`<br><br>
 pub type RollPitchf64 = RollPitch<f64>;
 
 /// Roll and Pitch bundled for convenience.

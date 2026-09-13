@@ -152,7 +152,7 @@ where
     /// ```
     #[inline]
     fn add(self, other: Self) -> Self {
-        Vector2 { x: self.x + other.x, y: self.y + other.y }
+        Self { x: self.x + other.x, y: self.y + other.y }
     }
 }
 
@@ -203,7 +203,7 @@ where
     /// ```
     #[inline]
     fn mul_add(self, k: T, other: Self) -> Self {
-        Vector2 { x: self.x * k + other.x, y: self.y * k + other.y }
+        Self { x: self.x * k + other.x, y: self.y * k + other.y }
     }
 }
 
@@ -337,7 +337,7 @@ where
     /// Multiply a vector by a scalar.
     #[inline]
     fn mul(self, rhs: Rhs) -> Self::Output {
-        Vector2 { x: self.x * rhs, y: self.y * rhs }
+        Self { x: self.x * rhs, y: self.y * rhs }
     }
 }
 
@@ -381,7 +381,7 @@ where
     /// ```
     #[inline]
     fn mul(self, other: Self) -> Self {
-        Vector2 { x: self.x * other.x, y: self.y * other.y }
+        Self { x: self.x * other.x, y: self.y * other.y }
     }
 }
 
@@ -462,7 +462,7 @@ where
     /// ```
     #[inline]
     fn div(self, other: Self) -> Self {
-        Vector2 { x: self.x / other.x, y: self.y / other.y }
+        Self { x: self.x / other.x, y: self.y / other.y }
     }
 }
 
@@ -828,7 +828,7 @@ where
         let norm = (x * x + y * y).sqrt();
         let norm_reciprocal = V::one() / norm;
 
-        Vector2 {
+        Self {
             x: uom::si::Quantity { dimension: PhantomData, units: PhantomData, value: x * norm_reciprocal },
             y: uom::si::Quantity { dimension: PhantomData, units: PhantomData, value: y * norm_reciprocal },
         }
