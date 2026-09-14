@@ -1,14 +1,31 @@
 # `vqm` Rust Crate<br>![license](https://img.shields.io/badge/license-MIT-green) [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![open source](https://badgen.net/badge/open/source/blue?icon=github)
 
-**vqm** is a lightweight, allocation-free Rust math library for **vectors**, **matrices**, and **quaternions**,
-designed specifically for `no_std` embedded robotics and real-time systems.
-(In particular stabilized vehicles including self-balancing robots and aircraft).
+**vqm** is a lightweight, allocation-free Rust math library for **vectors**, **quaternions**, and **matrices**,
+designed for embedded systems, robotics, and real-time applications.
 
-This crate is `no_std`, that it does not link to the standard library and so does not depend on an operating system
-and uses no allocation. This means it is suitable for embedded systems.
+This crate is `no_std`, ie it does not link to the standard library, does not depend on an operating system, and uses no allocation.
+This means it is suitable for embedded systems.
 
-MSRV: Rust 1.85
-The optional `storage` feature requires Rust 1.89 and `simd` requires nightly.
+MSRV: `Rust 1.85`.
+The optional `storage` feature requires `Rust 1.89` and `simd` requires nightly.
+
+## Why vqm?
+
+**vqm** is intended for applications where you need practical vector, quaternion, and matrix mathematics without bringing
+a large general-purpose framework into a small embedded application.
+
+It is particularly suited to:
+
+* Embedded control systems
+* Robotics
+* IMU and sensor processing
+* Attitude estimation and orientation tracking
+* Kalman filters
+* Self-balancing vehicles
+* Aircraft and other autonomous vehicles
+* Real-time applications
+
+The library uses fixed-size types and does not allocate memory.
 
 ## Overview
 
@@ -111,9 +128,44 @@ let orientation = Quaternionf32::from_roll_pitch_yaw_degrees(15.0, 60.0, 120.0);
 let pitch = orientation.calculate_pitch_degrees();
 ```
 
+## Comparison with other crates
+
+There are currently a number of Rust crates that support vector math, quaternions, and matrices. The most notable being
+[nalgebra](https://crates.io/crates/nalgebra), [glam](https://crates.io/crates/glam), [vek](https://crates.io/crates/vek),
+[ultraviolet](https://crates.io/crates/ultraviolet), and [micromath](https://crates.io/crates/micromath).
+
+Of these `glam`, `vek` and `ultraviolet` are focused primarily on graphics and gaming.
+
+Comparing `vqm` with the remaining two, `micromath` and `nalgebra`, we have:
+
+|                                 | **vqm**                              | **micromath**                        | **nalgebra**                               |
+|---------------------------------|--------------------------------------|--------------------------------------|--------------------------------------------|
+| Primary focus                   |Embedded<br>linear algebra<br>robotics|Small, fast<br>embedded<br>mathematics| General-purpose<br>linear algebra          |
+| `no_std`                        | Yes                                  | Yes                                  | Yes                                        |
+| Heap allocation<br>required     | No                                   | No                                   |No for static types<br>Yes for dynamic types|
+| Vectors                         | 2D, 3D, 4D                           | 2D, 3D                               | 1D-6D static<br>any size dynamic           |
+| Fixed-size matrices             | 2×2, 3×3, 4×4, 9×9                   | ——                                   | Extensive                                  |
+| Dynamic matrices                | ——                                   | ——                                   | Yes                                        |
+| Quaternions                     | Yes                                  | Yes                                  | Yes                                        |
+| `f32`                           | Yes                                  | Yes                                  | Yes                                        |
+| `f64`                           | Yes                                  | ——                                   | Yes                                        |
+| Approximate<br>math functions   | Yes                                  | Core focus                           | Via supported<br>scalar types/features     |
+| Robotics-oriented<br>operations | Yes                                  | Some                                 | Yes                                        |
+| Kalman-filter<br>oriented types | Yes                                  | ——                                   | ——                                         |
+| Units of measure                | Optional `uom`                       | ——                                   | ——                                         |
+| Serialization                   | Optional                             | ——                                   | Optional                                   |
+| SIMD                            | Experimental                         | ——                                   | Yes                                        |
+| General<br>linear algebra       | Focused                              | Limited                              | Extensive                                  |
+| MSRV                            | 2024 v1.85                           | 2018 v1.47                           | 2024 v1.89                                 |
+
 ## Units of Measurement (uom) support
 
-Units of measurement support can be enabled with the `uom` feature.
+The optional `uom` feature integrates `vqm` with the units-of-measurement crate, [uom](https://crates.io/crates/uom).
+
+This allows vectors and matrices to carry physical units and lets the type system catch incompatible operations.
+
+For example, vectors can contain lengths rather than bare floating-point values.
+
 By default the `autoconvert` feature is off, so `uom` will check that incorrect units are not inadvertently used,
 but it will not automatically convert between different units.
 
@@ -166,10 +218,11 @@ A specialization generally won't be considered for inclusion to support a single
 
 `vqm` has additional functionality specifically to support robotics applications. This includes:
 
-1. `Vector3f32` functions to load from a `[u8; 6]`.
+1. `Vector3f32` functions to load sensor data from a `[u8; 6]`.
 2. `RollPitch` and `RollPitchYaw` structs.
 3. `to_radians` and `to_degrees` convenience functions for vectors and `RollPitch` and `RollPitchYaw` structs.
 4. Quaternion utility functions such as `cos_tilt` and `gravity`.
+5. Matrices specifically to support Kalman filters.
 
 ### Kalman filters
 
@@ -182,28 +235,23 @@ A specialization generally won't be considered for inclusion to support a single
 
 ## SIMD support
 
-**SIMD** support can be enabled with the `simd` feature.
+Experimental **SIMD** support is available through the simd feature.
 
 Currently most microcontrollers (eg Arm Cortex M series) don't directly support **SIMD**, so it is of limited use for embedded applications.
 
 However, that may change: the implementation serves as proof of concept and future proofing: it ensures that future implementations are possible.
 
-For that reason many of the implementations are naive "placeholder" implementations.
-These placeholder implementations may be slower than the non-SIMD code, so if you used SIMD make sure you benchmark to show
-that you are indeed getting a performance improvement.
+For that reason many implementations are deliberately simple or serve as proof-of-concept, so benchmark before assuming SIMD is faster.
 
-This uses [portable simd](https://doc.rust-lang.org/core/simd/index.html), which requires the nightly compiler, since it is still
-unstable in rust.
+**SIMD** requires the `align` feature and is implemented using [portable simd](https://doc.rust-lang.org/core/simd/index.html), which requires the nightly compiler.
 
-**SIMD** does not work with Units of Measurement `uom`.
-
-**SIMD** requires using the `align` feature flag.
-
-This can be invoked using `rustup`, eg:
+It can be invoked using `rustup`, eg:
 
 ```sh
 rustup run nightly cargo build --features "simd align" --target thumbv8m.main-none-eabi
 ```
+
+**SIMD** is not currently compatible with the `uom` (Units of Measurement) feature.
 
 ## Usage by other crates
 
@@ -216,37 +264,6 @@ rustup run nightly cargo build --features "simd align" --target thumbv8m.main-no
    IMU data based on motor RPM.
 4. [imu-sensors](https://crates.io/crates/imu-sensors) - uses `Vector3f32` to return scaled gyro and acceleration readings from the IMU.
 5. [protoflight](https://crates.io/crates/protoflight) - extensive use of vectors and quaternions.
-
-## Why another vector/linear algebra/math related crate?
-
-There are currently a number of Rust crates that support vector math, quaternions, and matrices. The most notable being
-[nalgebra](https://crates.io/crates/nalgebra), [glam](https://crates.io/crates/glam), [vek](https://crates.io/crates/vek),
-and [ultraviolet](https://crates.io/crates/ultraviolet).
-
-`nalgebra` is a general purpose linear algebra crate. The others are more focused on graphics and game maths.
-
-In graphics and gaming the requirement is generally to be able to do a relatively small number of operations on a
-relatively large number of vectors in a given time slice. The graphics/game focused crates optimize for this
-(`ultraviolet` in particular uses  `SoA` (Structure of Arrays) rather than `AoS` (Array of Structs) layout to this end).
-
-In embedded applications the requirement is often to do a relatively large number of operations on a relatively small number
-of vectors. This means that `ultraviolet` is not really suited for embedded, and although `glam` or `vek` could be used
-they would not be playing to their strengths.
-
-This leaves `nalgebra`. It certainly could be used: even though it is a large library only the bits used would be included
-in an application, so it would not cause code bloat.
-
-However I did not really want my code to be dependent on such a large library, so I decided to port my existing C++ vector
-library to Rust. ("How hard could it be" - well harder than I thought, but ok).
-
-I decided to take a generic approach from the start (because I wanted to support both `f32` and `f62`) and that decision
-has paid unexpected dividends:
-
-1. During the development of version `0.1.13` I realized my generic approach would enable
-   Units of Measurement([uom](https://crates.io/crates/uom)) almost "for free" so I added support for it.
-1. During the development of version `0.1.15` I realized my generic approach would allow the straightforward
-   implementation of a 9x9 matrix as an array of nine 3x3 matrices. I knew this would greatly simplify the
-   position Kalman filter I was writing, so I added support for this a the `Matrix9` type.
 
 ## Architecture
 
