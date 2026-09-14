@@ -2,10 +2,11 @@ use core::convert::From;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{ConstOne, ConstZero};
 use num_traits::{MulAdd, MulAddAssign, One, Signed, Zero, float::FloatCore};
+#[cfg(feature = "storage")]
+use sequential_storage::map::PostcardValue;
 #[cfg(feature = "serde")]
 use {
     postcard::experimental::max_size::MaxSize,
-    sequential_storage::map::PostcardValue,
     serde::{Deserialize, Serialize},
 };
 
@@ -21,7 +22,7 @@ pub type Quaternionf64 = Quaternion<f64>;
 
 /// `Quaternion<T>`: quaternion type `T`.<br>
 /// Implementations use the Hamilton convention.
-/// Aliases `Quaternion32` and `Quaternionf64` are provided.<br><br>
+/// Aliases `Quaternionf32` and `Quaternionf64` are provided.<br><br>
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[cfg_attr(feature = "std", derive(derive_more::Display))]
 #[cfg_attr(feature = "std", display("Q{{w:{w}, x:{x}, y:{y}, z:{z}}}"))]
@@ -35,7 +36,7 @@ pub struct Quaternion<T> {
     pub z: T,
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "storage")]
 impl<T> PostcardValue<'_> for Quaternion<T> where T: Serialize + for<'de> Deserialize<'de> {}
 
 // **** Default ****
@@ -511,11 +512,11 @@ impl<T> Index<usize> for Quaternion<T> {
     /// ```
     #[inline]
     fn index(&self, index: usize) -> &T {
-        // make safe by using index = 0 if index out of range
-        let safe_index = if index < 4 { index } else { 0 };
-        unsafe {
-            let ptr = core::ptr::from_ref::<Self>(self).cast::<T>();
-            &*ptr.add(safe_index)
+        match index {
+            0 => &self.w,
+            1 => &self.x,
+            2 => &self.y,
+            _ => &self.z,
         }
     }
 }
@@ -535,11 +536,11 @@ impl<T> IndexMut<usize> for Quaternion<T> {
     /// ```
     #[inline]
     fn index_mut(&mut self, index: usize) -> &mut T {
-        // make safe by using index = 0 if index out of range
-        let safe_index = if index < 4 { index } else { 0 };
-        unsafe {
-            let ptr = core::ptr::from_mut::<Self>(self).cast::<T>();
-            &mut *ptr.add(safe_index)
+        match index {
+            0 => &mut self.w,
+            1 => &mut self.x,
+            2 => &mut self.y,
+            _ => &mut self.z,
         }
     }
 }

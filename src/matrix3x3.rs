@@ -4,10 +4,11 @@ use core::ops::{
 };
 use core::slice::{ChunksExact, ChunksExactMut, Iter, IterMut};
 use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Zero, float::FloatCore};
+#[cfg(feature = "storage")]
+use sequential_storage::map::PostcardValue;
 #[cfg(feature = "serde")]
 use {
     postcard::experimental::max_size::MaxSize,
-    sequential_storage::map::PostcardValue,
     serde::{Deserialize, Serialize},
 };
 
@@ -34,7 +35,7 @@ pub struct Matrix3x3<T> {
     pub(crate) a: [T; 9],
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "storage")]
 impl<T> PostcardValue<'_> for Matrix3x3<T> where T: Serialize + for<'de> Deserialize<'de> {}
 
 /// Constants to index matrix elements.
@@ -1620,7 +1621,7 @@ where
     #[inline]
     pub fn row_tuple(&self, row: usize) -> (T, T, T) {
         let r = row.min(2);
-        (self.a[r], self.a[r + 3],self.a[r + 6] )
+        (self.a[r], self.a[r + 3], self.a[r + 6])
     }
 
     /// Set matrix column from a vector.
@@ -2135,7 +2136,7 @@ where
 {
     /// Returns an iterator over the columns of the matrix as owned 3-element arrays.
     #[inline]
-    pub fn cols(&self) -> impl Iterator<Item = [T; 3]> {
+    pub fn cols(&self) -> impl Iterator<Item = [T; 3]> + '_ {
         // Create an iterator over the column indices (0, 1, 2)
         (0..3).map(|c| {
             // Collect the strided elements for the current column
@@ -2148,6 +2149,7 @@ impl<'a, T> IntoIterator for &'a Matrix3x3<T> {
     type Item = &'a [T];
     type IntoIter = ChunksExact<'a, T>;
 
+    #[allow(clippy::chunks_exact_to_as_chunks)]
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
         // Leverages the Deref trait automatically to get slice chunks
@@ -2159,6 +2161,7 @@ impl<'a, T> IntoIterator for &'a mut Matrix3x3<T> {
     type Item = &'a mut [T];
     type IntoIter = ChunksExactMut<'a, T>;
 
+    #[allow(clippy::chunks_exact_to_as_chunks)]
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
         // Leverages the DerefMut trait automatically
@@ -2184,34 +2187,30 @@ impl<T> IntoIterator for Matrix3x3<T> {
 impl<T> Matrix3x3<T> {
     /// Exposes the matrix as a read-only reference to 3 contiguous columns.
     /// Each sub-array `[T; 3]` represents one full column in memory.
-    #[inline]
     pub fn columns(&self) -> &[[T; 3]] {
-        // remainder is empty.
-        let (chunks, _remainder) = self.a.as_chunks::<3>();
-        chunks
+        // SAFETY:
+        // `self.a` contains 9 contiguous `T`s, so it can be viewed as 3 contiguous `[T; 3]` values.
+        //`[T; 3]` has the same alignment as `T`.
+        unsafe { core::slice::from_raw_parts(self.a.as_ptr().cast::<[T; 3]>(), 3) }
     }
 
     /// Exposes the matrix as a mutable reference to 3 contiguous columns.
     /// Each sub-array `[T; 3]` represents one full column in memory.
     #[inline]
     pub fn columns_mut(&mut self) -> &mut [[T; 3]] {
-        // remainder is empty.
-        let (chunks, _remainder) = self.a.as_chunks_mut::<3>();
-        chunks
+        // SAFETY: `self.a` contains 9 contiguous `T`s, which are 3 contiguous `[T; 3]` values.
+        // `[T; 3]` has the same alignment as `T`, and the returned reference is uniquely borrowed from `self.a`.
+        unsafe { core::slice::from_raw_parts_mut(self.a.as_mut_ptr().cast::<[T; 3]>(), 3) }
     }
 
     #[inline]
     pub fn iter_columns(&self) -> Matrix3x3Columns<'_, T> {
-        // remainder is empty.
-        let (chunks, _remainder) = self.a.as_chunks::<3>();
-        Matrix3x3Columns { inner: chunks.iter() }
+        Matrix3x3Columns { inner: self.columns().iter() }
     }
 
     #[inline]
     pub fn iter_columns_mut(&mut self) -> Matrix3x3ColumnsMut<'_, T> {
-        // remainder is empty.
-        let (chunks, _remainder) = self.a.as_chunks_mut::<3>();
-        Matrix3x3ColumnsMut { inner: chunks.iter_mut() }
+        Matrix3x3ColumnsMut { inner: self.columns_mut().iter_mut() }
     }
 }
 
@@ -2248,7 +2247,7 @@ impl<T> DoubleEndedIterator for Matrix3x3Columns<'_, T> {
 }
 
 /// A custom iterator over the mutable columns of the matrix.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Matrix3x3ColumnsMut<'a, T> {
     inner: IterMut<'a, [T; 3]>,
 }

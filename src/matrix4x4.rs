@@ -5,10 +5,11 @@ use core::ops::{
 };
 use core::slice::{ChunksExact, ChunksExactMut, Iter, IterMut};
 use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Zero, float::FloatCore};
+#[cfg(feature = "storage")]
+use sequential_storage::map::PostcardValue;
 #[cfg(feature = "serde")]
 use {
     postcard::experimental::max_size::MaxSize,
-    sequential_storage::map::PostcardValue,
     serde::{Deserialize, Serialize},
 };
 
@@ -34,7 +35,7 @@ pub struct Matrix4x4<T> {
     pub(crate) a: [T; 16],
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "storage")]
 impl<T> PostcardValue<'_> for Matrix4x4<T> where T: Serialize + for<'de> Deserialize<'de> {}
 
 impl<T> fmt::Debug for Matrix4x4<T>
@@ -1821,7 +1822,7 @@ where
     /// Return matrix row as a tuple.
     pub fn row_tuple(self, row: usize) -> (T, T, T, T) {
         let r = row.min(3);
-        ( self.a[r], self.a[r + 4], self.a[r + 8], self.a[r + 12] )
+        (self.a[r], self.a[r + 4], self.a[r + 8], self.a[r + 12])
     }
 
     /// Set matrix column from a vector.
@@ -2369,7 +2370,7 @@ where
 {
     /// Returns an iterator over the columns of the matrix as owned 4-element arrays.
     #[inline]
-    pub fn cols(&self) -> impl Iterator<Item = [T; 4]> {
+    pub fn cols(&self) -> impl Iterator<Item = [T; 4]> + '_ {
         // Create an iterator over the column indices (0, 1, 2, 3)
         (0..4).map(|c| {
             // Collect the strided elements for the current column
@@ -2382,6 +2383,7 @@ impl<'a, T> IntoIterator for &'a Matrix4x4<T> {
     type Item = &'a [T];
     type IntoIter = ChunksExact<'a, T>;
 
+    #[allow(clippy::chunks_exact_to_as_chunks)]
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
         // Leverages the Deref trait automatically to get 4-element rows
@@ -2393,6 +2395,7 @@ impl<'a, T> IntoIterator for &'a mut Matrix4x4<T> {
     type Item = &'a mut [T];
     type IntoIter = ChunksExactMut<'a, T>;
 
+    #[allow(clippy::chunks_exact_to_as_chunks)]
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
         // Leverages the DerefMut trait automatically.
@@ -2422,39 +2425,36 @@ impl<T> Matrix4x4<T> {
     /// Each sub-array `[T; 4]` represents one full column in memory.
     #[inline]
     pub fn columns(&self) -> &[[T; 4]] {
-        // remainder is empty.
-        let (chunks, _remainder) = self.a.as_chunks::<4>();
-        chunks
+        // SAFETY:
+        // `self.a` contains 16 contiguous `T`s, so it can be viewed as 4 contiguous `[T; 4]` values.
+        //`[T; 4]` has the same alignment as `T`.
+        unsafe { core::slice::from_raw_parts(self.a.as_ptr().cast::<[T; 4]>(), 4) }
     }
 
     /// Exposes the matrix as a mutable reference to 4 contiguous columns.
     /// Each sub-array `[T; 4]` represents one full column in memory.
     #[inline]
     pub fn columns_mut(&mut self) -> &mut [[T; 4]] {
-        // remainder is empty.
-        let (chunks, _remainder) = self.a.as_chunks_mut::<4>();
-        chunks
+        // SAFETY: `self.a` contains 16 contiguous `T`s, which are 4 contiguous `[T; 4]` values.
+        // `[T; 4]` has the same alignment as `T`, and the returned reference is uniquely borrowed from `self.a`.
+        unsafe { core::slice::from_raw_parts_mut(self.a.as_mut_ptr().cast::<[T; 4]>(), 4) }
     }
 
     #[inline]
     pub fn iter_columns(&self) -> Matrix4x4Columns<'_, T> {
-        let (chunks, _remainder) = self.a.as_chunks::<4>();
-        // remainder is empty.
-        Matrix4x4Columns { inner: chunks.iter() }
+        Matrix4x4Columns { inner: self.columns().iter() }
     }
 
     #[inline]
     pub fn iter_columns_mut(&mut self) -> Matrix4x4ColumnsMut<'_, T> {
-        // remainder is empty.
-        let (chunks, _remainder) = self.a.as_chunks_mut::<4>();
-        Matrix4x4ColumnsMut { inner: chunks.iter_mut() }
+        Matrix4x4ColumnsMut { inner: self.columns_mut().iter_mut() }
     }
 }
 
 // **** Iterator Pairs ****
 
 /// A custom iterator over the read-only columns of a 4x4 matrix.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Matrix4x4Columns<'a, T> {
     inner: Iter<'a, [T; 4]>,
 }

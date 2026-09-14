@@ -577,7 +577,8 @@ fn scale_binary_f32(x: f32, k: i32) -> f32 {
     }
 
     // Reconstruct the normal float
-    f32::from_bits(sign | (exp_bits.cast_unsigned() << 23) | mantissa)
+    #[allow(clippy::cast_sign_loss)]
+    f32::from_bits(sign | ((exp_bits as u32) << 23) | mantissa)
 }
 
 #[cfg(test)]

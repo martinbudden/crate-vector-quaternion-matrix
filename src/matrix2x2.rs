@@ -4,10 +4,11 @@ use core::ops::{
 };
 use core::slice::{ChunksExact, ChunksExactMut, Iter, IterMut};
 use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Zero, float::FloatCore};
+#[cfg(feature = "storage")]
+use sequential_storage::map::PostcardValue;
 #[cfg(feature = "serde")]
 use {
     postcard::experimental::max_size::MaxSize,
-    sequential_storage::map::PostcardValue,
     serde::{Deserialize, Serialize},
 };
 
@@ -33,7 +34,7 @@ pub struct Matrix2x2<T> {
     pub(crate) a: [T; 4],
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "storage")]
 impl<T> PostcardValue<'_> for Matrix2x2<T> where T: Serialize + for<'de> Deserialize<'de> {}
 
 /// Constants to index matrix elements.
@@ -1861,7 +1862,7 @@ where
 {
     /// Returns an iterator over the columns of the matrix as owned 2-element arrays.
     #[inline]
-    pub fn cols(&self) -> impl Iterator<Item = [T; 2]> {
+    pub fn cols(&self) -> impl Iterator<Item = [T; 2]> + '_ {
         // Create an iterator over the column indices (0, 1)
         (0..2).map(|c| {
             // Collect the strided elements for the current column
@@ -1874,6 +1875,7 @@ impl<'a, T> IntoIterator for &'a Matrix2x2<T> {
     type Item = &'a [T];
     type IntoIter = ChunksExact<'a, T>;
 
+    #[allow(clippy::chunks_exact_to_as_chunks)]
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
         // Leverages the Deref trait automatically to get slice chunks
@@ -1885,6 +1887,7 @@ impl<'a, T> IntoIterator for &'a mut Matrix2x2<T> {
     type Item = &'a mut [T];
     type IntoIter = ChunksExactMut<'a, T>;
 
+    #[allow(clippy::chunks_exact_to_as_chunks)]
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
         // Leverages the DerefMut trait automatically
@@ -1912,39 +1915,36 @@ impl<T> Matrix2x2<T> {
     /// Each sub-array `[T; 2]` represents one full column in memory.
     #[inline]
     pub fn columns(&self) -> &[[T; 2]] {
-        // remainder is empty.
-        let (chunks, _remainder) = self.a.as_chunks::<2>();
-        chunks
+        // SAFETY:
+        // `self.a` contains 4 contiguous `T`s, so it can be viewed as 2 contiguous `[T; 2]` values.
+        //`[T; 2]` has the same alignment as `T`.
+        unsafe { core::slice::from_raw_parts(self.a.as_ptr().cast::<[T; 2]>(), 2) }
     }
 
     /// Exposes the matrix as a mutable reference to 2 contiguous columns.
     /// Each sub-array `[T; 2]` represents one full column in memory.
     #[inline]
     pub fn columns_mut(&mut self) -> &mut [[T; 2]] {
-        // remainder is empty.
-        let (chunks, _remainder) = self.a.as_chunks_mut::<2>();
-        chunks
+        // SAFETY: `self.a` contains 4 contiguous `T`s, which are 2 contiguous `[T; 2]` values.
+        // `[T; 2]` has the same alignment as `T`, and the returned reference is uniquely borrowed from `self.a`.
+        unsafe { core::slice::from_raw_parts_mut(self.a.as_mut_ptr().cast::<[T; 2]>(), 2) }
     }
 
     #[inline]
     pub fn iter_columns(&self) -> Matrix2x2Columns<'_, T> {
-        // remainder is empty.
-        let (chunks, _remainder) = self.a.as_chunks::<2>();
-        Matrix2x2Columns { inner: chunks.iter() }
+        Matrix2x2Columns { inner: self.columns().iter() }
     }
 
     #[inline]
     pub fn iter_columns_mut(&mut self) -> Matrix2x2ColumnsMut<'_, T> {
-        // remainder is empty.
-        let (chunks, _remainder) = self.a.as_chunks_mut::<2>();
-        Matrix2x2ColumnsMut { inner: chunks.iter_mut() }
+        Matrix2x2ColumnsMut { inner: self.columns_mut().iter_mut() }
     }
 }
 
 // **** Iterator Pairs ****
 
 /// A custom iterator over the read-only columns of a 2x2 matrix.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Matrix2x2Columns<'a, T> {
     inner: Iter<'a, [T; 2]>,
 }

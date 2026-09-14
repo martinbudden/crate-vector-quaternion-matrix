@@ -1002,7 +1002,7 @@ where
     T: Copy,
 {
     #[inline]
-    pub fn cols(&self) -> impl Iterator<Item = [T; 9]> {
+    pub fn cols(&self) -> impl Iterator<Item = [T; 9]> + '_ {
         (0..9).map(|col| self.column(col))
     }
 

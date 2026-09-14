@@ -1282,7 +1282,7 @@ where
 {
     /// Returns an iterator over the columns of the matrix as owned 9-element arrays.
     #[inline]
-    pub fn cols(&self) -> impl Iterator<Item = [T; 9]> {
+    pub fn cols(&self) -> impl Iterator<Item = [T; 9]> + '_ {
         // Create an iterator over the column indices (0, 1, 2, ..)
         (0..9).map(|c| {
             // Collect the strided elements for the current column
@@ -1345,32 +1345,29 @@ impl<T> Matrix9x9<T> {
     /// Each sub-array `[T; 9]` represents one full column in memory.
     #[inline]
     pub fn columns(&self) -> &[[T; 9]] {
-        // remainder is empty.
-        let (chunks, _remainder) = self.a.as_chunks::<9>();
-        chunks
+        // SAFETY:
+        // `self.a` contains 81 contiguous `T`s, so it can be viewed as 9 contiguous `[T; 9]` values.
+        //`[T; 9]` has the same alignment as `T`.
+        unsafe { core::slice::from_raw_parts(self.a.as_ptr().cast::<[T; 9]>(), 9) }
     }
 
     /// Exposes the matrix as a mutable reference to 9 contiguous columns.
     /// Each sub-array `[T; 9]` represents one full column in memory.
     #[inline]
     pub fn columns_mut(&mut self) -> &mut [[T; 9]] {
-        // remainder is empty.
-        let (chunks, _remainder) = self.a.as_chunks_mut::<9>();
-        chunks
+        // SAFETY: `self.a` contains 81 contiguous `T`s, which are 9 contiguous `[T; 9]` values.
+        // `[T; 9]` has the same alignment as `T`, and the returned reference is uniquely borrowed from `self.a`.
+        unsafe { core::slice::from_raw_parts_mut(self.a.as_mut_ptr().cast::<[T; 9]>(), 9) }
     }
 
     #[inline]
     pub fn iter_columns(&self) -> Matrix9x9Columns<'_, T> {
-        // remainder is empty.
-        let (chunks, _remainder) = self.a.as_chunks::<9>();
-        Matrix9x9Columns { inner: chunks.iter() }
+        Matrix9x9Columns { inner: self.columns().iter() }
     }
 
     #[inline]
     pub fn iter_columns_mut(&mut self) -> Matrix9x9ColumnsMut<'_, T> {
-        // remainder is empty.
-        let (chunks, _remainder) = self.a.as_chunks_mut::<9>();
-        Matrix9x9ColumnsMut { inner: chunks.iter_mut() }
+        Matrix9x9ColumnsMut { inner: self.columns_mut().iter_mut() }
     }
 }
 
@@ -1407,7 +1404,7 @@ impl<T> DoubleEndedIterator for Matrix9x9Columns<'_, T> {
 }
 
 /// A custom iterator over the mutable columns of a 9x9 matrix.
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Matrix9x9ColumnsMut<'a, T> {
     inner: IterMut<'a, [T; 9]>,
 }

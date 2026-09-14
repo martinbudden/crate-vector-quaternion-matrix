@@ -2,6 +2,8 @@
 name = "vqm"
 version = "0.1.16"
 edition = "2024"
+rust-version = "1.85"
+resolver = "3"
 authors = ["Martin Budden"]
 license = "MIT OR Apache-2.0"
 readme = "README.md"
@@ -19,16 +21,11 @@ categories = [
 rustc_version = "0.4.1"
 
 [features]
-#default = []
 default = ["libm"]
-#default = ["std"]
-#default = ["libm", "std"]
-#default = ["libm", "simd", "align"]
-#default = ["libm", "serde", "uom"]
-#default = ["std", "serde"]
 std = ["num-traits/std", "derive_more/std"]
 libm = ["dep:libm", "num-traits/libm"]
-serde = ["dep:serde", "postcard", "sequential-storage"]
+serde = ["dep:serde", "postcard"]
+storage = ["dep:sequential-storage", "serde"]
 uom = ["dep:uom"]
 align = []
 simd = []
@@ -55,6 +52,7 @@ approx = { version = "0.5.1", default-features = false }
 [profile.dev]
 opt-level = 0
 debug = "line-tables-only"
+#debug = true
 # split-debuginfo = '...'  # Platform-specific.
 strip = "none"
 debug-assertions = true

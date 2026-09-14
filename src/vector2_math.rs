@@ -1,6 +1,6 @@
 #![allow(clippy::inline_always)]
 use cfg_if::cfg_if;
-
+use core::mem::{align_of, size_of};
 cfg_if! {
     if #[cfg(feature = "simd")] {
         use core::mem::transmute;

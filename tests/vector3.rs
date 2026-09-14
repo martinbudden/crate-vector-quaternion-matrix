@@ -307,7 +307,6 @@ mod tests {
         // Backward to Body Frame
         let body_v = world_v.rotate_back_by(q);
 
-        // Should match the original exactly (within f32 epsilon)
         assert_abs_diff_eq!(body_v.x, original_v.x, epsilon = 1e-5);
         assert_abs_diff_eq!(body_v.y, original_v.y, epsilon = 1e-5);
         assert_abs_diff_eq!(body_v.z, original_v.z, epsilon = 1e-5);

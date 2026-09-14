@@ -2,10 +2,11 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{ConstZero, MulAdd, MulAddAssign, One, Signed, Zero, float::FloatCore};
+#[cfg(feature = "storage")]
+use sequential_storage::map::PostcardValue;
 #[cfg(feature = "serde")]
 use {
     postcard::experimental::max_size::MaxSize,
-    sequential_storage::map::PostcardValue,
     serde::{Deserialize, Serialize},
 };
 
@@ -33,7 +34,7 @@ pub struct Vector4<T> {
     pub t: T,
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "storage")]
 impl<T> PostcardValue<'_> for Vector4<T> where T: Serialize + for<'de> Deserialize<'de> {}
 
 // **** New ****
@@ -338,7 +339,7 @@ where
     /// Multiply a vector by a scalar.
     #[inline]
     fn mul(self, rhs: Rhs) -> Self::Output {
-        Self { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs, t: self.t * rhs }
+        Vector4 { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs, t: self.t * rhs }
     }
 }
 
@@ -484,11 +485,11 @@ impl<T> Index<usize> for Vector4<T> {
     /// ```
     #[inline]
     fn index(&self, index: usize) -> &T {
-        // make safe by using index = 0 if index out of range
-        let safe_index = if index < 4 { index } else { 0 };
-        unsafe {
-            let ptr = core::ptr::from_ref::<Self>(self).cast::<T>();
-            &*ptr.add(safe_index)
+        match index {
+            0 => &self.x,
+            1 => &self.y,
+            2 => &self.z,
+            _ => &self.t,
         }
     }
 }
@@ -509,11 +510,11 @@ impl<T> IndexMut<usize> for Vector4<T> {
     /// ```
     #[inline]
     fn index_mut(&mut self, index: usize) -> &mut T {
-        // make safe by using index = 0 if index out of range
-        let safe_index = if index < 4 { index } else { 0 };
-        unsafe {
-            let ptr = core::ptr::from_mut::<Self>(self).cast::<T>();
-            &mut *ptr.add(safe_index)
+        match index {
+            0 => &mut self.x,
+            1 => &mut self.y,
+            2 => &mut self.z,
+            _ => &mut self.t,
         }
     }
 }
@@ -749,7 +750,7 @@ where
         let norm = (x * x + y * y + z * z + t * t).sqrt();
         let norm_reciprocal = V::one() / norm;
 
-        Self {
+        Vector4 {
             x: uom::si::Quantity { dimension: PhantomData, units: PhantomData, value: x * norm_reciprocal },
             y: uom::si::Quantity { dimension: PhantomData, units: PhantomData, value: y * norm_reciprocal },
             z: uom::si::Quantity { dimension: PhantomData, units: PhantomData, value: z * norm_reciprocal },

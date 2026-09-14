@@ -1,9 +1,10 @@
 use core::ops::{Mul, Neg};
 use num_traits::float::FloatCore;
+#[cfg(feature = "storage")]
+use sequential_storage::map::PostcardValue;
 #[cfg(feature = "serde")]
 use {
     postcard::experimental::max_size::MaxSize,
-    sequential_storage::map::PostcardValue,
     serde::{Deserialize, Serialize},
 };
 
@@ -30,7 +31,7 @@ pub struct RollPitch<T> {
     pub pitch: T,
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "storage")]
 impl<T> PostcardValue<'_> for RollPitch<T> where T: Serialize + for<'de> Deserialize<'de> {}
 
 impl<T> RollPitch<T>
@@ -104,7 +105,7 @@ pub struct RollPitchYaw<T> {
     pub yaw: T,
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "storage")]
 impl<T> PostcardValue<'_> for RollPitchYaw<T> where T: Serialize + for<'de> Deserialize<'de> {}
 
 impl<T> RollPitchYaw<T>

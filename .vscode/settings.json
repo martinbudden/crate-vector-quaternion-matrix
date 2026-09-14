@@ -64,6 +64,7 @@
         "microcontroller",
         "microcontrollers",
         "micromath",
+        "MSRV",
         "msvc",
         "nalgebra",
         "newtypes",

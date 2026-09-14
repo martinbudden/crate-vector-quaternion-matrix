@@ -2,10 +2,11 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{ConstZero, MulAdd, MulAddAssign, One, Signed, Zero, float::FloatCore};
+#[cfg(feature = "storage")]
+use sequential_storage::map::PostcardValue;
 #[cfg(feature = "serde")]
 use {
     postcard::experimental::max_size::MaxSize,
-    sequential_storage::map::PostcardValue,
     serde::{Deserialize, Serialize},
 };
 
@@ -31,7 +32,7 @@ pub struct Vector2<T> {
     pub y: T,
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "storage")]
 impl<T> PostcardValue<'_> for Vector2<T> where T: Serialize + for<'de> Deserialize<'de> {}
 
 // **** New ****
@@ -337,7 +338,7 @@ where
     /// Multiply a vector by a scalar.
     #[inline]
     fn mul(self, rhs: Rhs) -> Self::Output {
-        Self { x: self.x * rhs, y: self.y * rhs }
+        Vector2 { x: self.x * rhs, y: self.y * rhs }
     }
 }
 
@@ -481,11 +482,9 @@ impl<T> Index<usize> for Vector2<T> {
     /// ```
     #[inline]
     fn index(&self, index: usize) -> &T {
-        // make safe by using index = 0 if index out of range
-        let safe_index = if index < 2 { index } else { 0 };
-        unsafe {
-            let ptr = core::ptr::from_ref::<Self>(self).cast::<T>();
-            &*ptr.add(safe_index)
+        match index {
+            0 => &self.x,
+            _ => &self.y,
         }
     }
 }
@@ -504,11 +503,9 @@ impl<T> IndexMut<usize> for Vector2<T> {
     /// ```
     #[inline]
     fn index_mut(&mut self, index: usize) -> &mut T {
-        // make safe by using index = 0 if index out of range
-        let safe_index = if index < 2 { index } else { 0 };
-        unsafe {
-            let ptr = core::ptr::from_mut::<Self>(self).cast::<T>();
-            &mut *ptr.add(safe_index)
+        match index {
+            0 => &mut self.x,
+            _ => &mut self.y,
         }
     }
 }
@@ -828,7 +825,7 @@ where
         let norm = (x * x + y * y).sqrt();
         let norm_reciprocal = V::one() / norm;
 
-        Self {
+        Vector2 {
             x: uom::si::Quantity { dimension: PhantomData, units: PhantomData, value: x * norm_reciprocal },
             y: uom::si::Quantity { dimension: PhantomData, units: PhantomData, value: y * norm_reciprocal },
         }

@@ -2,10 +2,11 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{ConstZero, MulAdd, MulAddAssign, One, Signed, Zero, float::FloatCore};
+#[cfg(feature = "storage")]
+use sequential_storage::map::PostcardValue;
 #[cfg(feature = "serde")]
 use {
     postcard::experimental::max_size::MaxSize,
-    sequential_storage::map::PostcardValue,
     serde::{Deserialize, Serialize},
 };
 
@@ -35,7 +36,7 @@ pub struct Vector3<T> {
     pub z: T,
 }
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "storage")]
 impl<T> PostcardValue<'_> for Vector3<T> where T: Serialize + for<'de> Deserialize<'de> {}
 
 // **** New ****
@@ -348,7 +349,7 @@ where
     /// Multiply a vector by a scalar.
     #[inline]
     fn mul(self, rhs: Rhs) -> Self::Output {
-        Self { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs }
+        Vector3 { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs }
     }
 }
 
@@ -493,11 +494,10 @@ impl<T> Index<usize> for Vector3<T> {
     /// ```
     #[inline]
     fn index(&self, index: usize) -> &T {
-        // make safe by using index = 0 if index out of range
-        let safe_index = if index < 3 { index } else { 0 };
-        unsafe {
-            let ptr = core::ptr::from_ref::<Self>(self).cast::<T>();
-            &*ptr.add(safe_index)
+        match index {
+            0 => &self.x,
+            1 => &self.y,
+            _ => &self.z,
         }
     }
 }
@@ -517,11 +517,10 @@ impl<T> IndexMut<usize> for Vector3<T> {
     /// ```
     #[inline]
     fn index_mut(&mut self, index: usize) -> &mut T {
-        // make safe by using index = 0 if index out of range
-        let safe_index = if index < 3 { index } else { 0 };
-        unsafe {
-            let ptr = core::ptr::from_mut::<Self>(self).cast::<T>();
-            &mut *ptr.add(safe_index)
+        match index {
+            0 => &mut self.x,
+            1 => &mut self.y,
+            _ => &mut self.z,
         }
     }
 }
@@ -766,7 +765,7 @@ impl<T> Vector3<T> {
         Rhs: Copy,
         Out: Sub<Output = Out>,
     {
-        Self {
+        Vector3 {
             x: (self.y * rhs.z) - (self.z * rhs.y),
             y: (self.z * rhs.x) - (self.x * rhs.z),
             z: (self.x * rhs.y) - (self.y * rhs.x),
@@ -886,7 +885,7 @@ where
         let norm = (x * x + y * y + z * z).sqrt();
         let norm_reciprocal = V::one() / norm;
 
-        Self {
+        Vector3 {
             x: uom::si::Quantity { dimension: PhantomData, units: PhantomData, value: x * norm_reciprocal },
             y: uom::si::Quantity { dimension: PhantomData, units: PhantomData, value: y * norm_reciprocal },
             z: uom::si::Quantity { dimension: PhantomData, units: PhantomData, value: z * norm_reciprocal },

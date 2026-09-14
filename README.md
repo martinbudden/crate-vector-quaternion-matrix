@@ -1,10 +1,14 @@
 # `vqm` Rust Crate<br>![license](https://img.shields.io/badge/license-MIT-green) [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![open source](https://badgen.net/badge/open/source/blue?icon=github)
 
-A **vector**, **quaternion**, and **matrix** (**VQM**) library targeted at embedded systems and robotics.
+**vqm** is a lightweight, allocation-free Rust math library for **vectors**, **matrices**, and **quaternions**,
+designed specifically for `no_std` embedded robotics and real-time systems.
 (In particular stabilized vehicles including self-balancing robots and aircraft).
 
 This crate is `no_std`, that it does not link to the standard library and so does not depend on an operating system
 and uses no allocation. This means it is suitable for embedded systems.
+
+MSRV: Rust 1.85
+The optional `storage` feature requires Rust 1.89 and `simd` requires nightly.
 
 ## Overview
 
