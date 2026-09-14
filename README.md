@@ -15,7 +15,9 @@ The optional `storage` feature requires Rust 1.89 and `simd` requires nightly.
 Vectors have 2D, 3D, and 4D versions.
 
 Matrices have 2x2, 3x3, 4x4, and 9x9 versions.
-The 9x9 matrix is a partial implementation which has been added to support Kalman filters.
+
+Additionally there are 3x3xM2x2 (effectively 6x6) and 3x3xM3x3 (effectively 9x9) matrices which have been added to support Kalman filters.
+They are used by the [sensor-fusion](https://crates.io/crates/sensor-fusion) crate to implement Kalman filters.
 
 Each type has versions for `f32` and `f64`. So we have:
 
@@ -136,6 +138,18 @@ let e = a / t;
 assert_eq!(e, Vector3 { x: Velocity::new::<meter_per_second>(0.5), y: Velocity::new::<meter_per_second>(1.25), z: Velocity::new::<meter_per_second>(2.75)})
 ```
 
+## Features
+
+All features except `libm` are off by default. The full set, including those described above, is:
+
+* `libm` - enabled by default, uses `libm` math functions. When disabled `vqm` math function approximations are used.
+* `serde` -  implementations of `Serialize` and `Deserialize` for all `vqm` types.
+* `storage` - adds [sequential-storage](https://crates.io/crates/sequential-storage) support for storing data in flash with minimal erase cycles.
+* `uom` - Units Of Measurement support.
+* `simd` - enables **SIMD** support via the [portable simd](https://doc.rust-lang.org/core/simd/index.html) module. This requires the nightly Rust toolchain.
+* `align` - aligns larger `struct`s to 16-byte boundaries. Required by `simd`.
+* `std` - uses `std` math functions.
+
 ## Specializations
 
 `vqm` includes a number of specializations that you might not find in your typical linear algebra/graphics/math library.
@@ -146,7 +160,7 @@ A specialization generally won't be considered for inclusion to support a single
 
 ### Bare metal (that is `no_std` and no `libm`)
 
-`vqm` includes implementations for square root and trigonometric functions that allow it to run without `std` and `libm`.
+`vqm` includes implementations for math functions, including square root and trigonometric functions, that allow it to run without `std` and `libm`.
 
 ### Robotics support
 
@@ -163,7 +177,7 @@ A specialization generally won't be considered for inclusion to support a single
 
 1. `Matrix3x3xM2x2` - a 3x3 matrix matrix of `Matrix2x2`s (so effectively a 6x6 matrix).
 2. `Matrix3x3xM3x3` - a 3x3 matrix matrix of `Matrix3x3`s (so effectively a 9x9 matrix).
-3. `Matrix3x3::mul_diagonal_vector` - multiplies vector which is treated as a diagonal matrix by a matrix.
+3. `Matrix3x3::mul_diagonal_vector` - multiplies a vector which is treated as a diagonal matrix by a matrix.
 4. `Matrix3x3::add_diagonal_vector` - adds a vector which is treated as a diagonal matrix to a matrix.
 
 ## SIMD support
