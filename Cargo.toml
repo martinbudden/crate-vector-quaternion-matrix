@@ -87,6 +87,12 @@ rpath = false
 inherits = "release"
 lto = true
 
+[workspace]
+members = [
+    ".",
+    "xtask",
+]
+
 [[bench]]
 name = "matrix_bench"
 harness = false
