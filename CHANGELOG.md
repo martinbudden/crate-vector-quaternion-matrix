@@ -21,6 +21,12 @@ Once the API has stabilized this project will adopt semantic versioning, the fir
 
 At some point [0.1.0] to [0.1.14] will be [YANKED]
 
+## [0.1.17] - 2026-09-xx
+
+### Changed
+
+- split `serde` feature into `serde` and `storage`.
+
 ## [0.1.16] - 2026-09-05
 
 ### Added

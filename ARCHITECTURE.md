@@ -2,6 +2,37 @@
 
 This document describes the overall design goals of `vqm` (`vector-quaternion-matrix`).
 
+## Why another vector/linear algebra/math related crate?
+
+There are currently a number of Rust crates that support vector math, quaternions, and matrices. The most notable being
+[nalgebra](https://crates.io/crates/nalgebra), [glam](https://crates.io/crates/glam), [vek](https://crates.io/crates/vek),
+and [ultraviolet](https://crates.io/crates/ultraviolet).
+
+`nalgebra` is a general purpose linear algebra crate. The others are more focused on graphics and game maths.
+
+In graphics and gaming the requirement is generally to be able to do a relatively small number of operations on a
+relatively large number of vectors in a given time slice. The graphics/game focused crates optimize for this
+(`ultraviolet` in particular uses  `SoA` (Structure of Arrays) rather than `AoS` (Array of Structs) layout to this end).
+
+In embedded applications the requirement is often to do a relatively large number of operations on a relatively small number
+of vectors. This means that `ultraviolet` is not really suited for embedded, and although `glam` or `vek` could be used
+they would not be playing to their strengths.
+
+This leaves `nalgebra`. It certainly could be used: even though it is a large library only the bits used would be included
+in an application, so it would not cause code bloat.
+
+However I did not really want my code to be dependent on such a large library, so I decided to port my existing C++ vector
+library to Rust. ("How hard could it be" - well harder than I thought, but ok).
+
+I decided to take a generic approach from the start (because I wanted to support both `f32` and `f62`) and that decision
+has paid unexpected dividends:
+
+1. During the development of version `0.1.13` I realized my generic approach would enable
+   Units of Measurement([uom](https://crates.io/crates/uom)) almost "for free" so I added support for it.
+1. During the development of version `0.1.15` I realized my generic approach would allow the straightforward
+   implementation of a 9x9 matrix as an array of nine 3x3 matrices. I knew this would greatly simplify the
+   position Kalman filter I was writing, so I added support for this a the `Matrix9` type.
+
 ## Design goals
 
 `vqm` was primarily designed to support the implementation a self-balancing robot and a flight controller.
