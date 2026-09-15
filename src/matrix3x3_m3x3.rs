@@ -41,7 +41,7 @@ impl<T: fmt::Debug> fmt::Debug for Matrix3x3xM3x3<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(f, "Matrix9x9 [")?; // Start the struct block wrapper
         // Loop over rows using Deref slice chunking behavior.
-        for row in self.chunks_exact(9) {
+        for row in self.rows() {
             write!(f, "    ")?; // Print 4 spaces of indentation for clean alignment
             fmt::Debug::fmt(row, f)?; // Format the row elements neatly as a standard array slice
             writeln!(f, ",")?;
@@ -997,6 +997,24 @@ where
 }
 
 // **** Iterators ****
+
+impl<T> Matrix3x3xM3x3<T> {
+    /// Returns an iterator over the rows of the matrix as slices of 3 elements.
+    #[inline]
+    pub fn rows(&self) -> &[[Matrix3x3<T>; 3]] {
+        let (chunks, _remainder) = self.as_chunks::<3>();
+        chunks
+    }
+}
+
+impl<T> Matrix3x3xM3x3<T> {
+    /// Returns an iterator over the rows of the matrix as mutable slices of 3 elements.
+    #[inline]
+    pub fn rows_mut(&mut self) -> &mut [[Matrix3x3<T>; 3]] {
+        let (chunks, _remainder) = self.as_chunks_mut::<3>();
+        chunks
+    }
+}
 
 impl<T> Matrix3x3xM3x3<T>
 where

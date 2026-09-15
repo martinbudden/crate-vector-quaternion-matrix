@@ -81,10 +81,8 @@ pub fn sqrt_reciprocal_f64(x: f64) -> f64 {
 #[allow(unused)]
 #[inline(always)]
 pub fn sqrt_reciprocal_approx_f32(x: f32) -> f32 {
-    #[allow(clippy::cast_possible_wrap)]
-    let i = 0x_5F1F_1412 - ((x.to_bits() as i32) >> 1); // Initial estimate for Newton's method.
-    #[allow(clippy::cast_sign_loss)]
-    let y = f32::from_bits(i as u32);
+    let i = 0x_5F1F_1412 - (x.to_bits().cast_signed() >> 1); // Initial estimate for Newton's method.
+    let y = f32::from_bits(i.cast_unsigned());
     y * (1.690_002_31 - 0.714_158_168 * x * y * y) // First iteration of Newton's method.
 }
 
@@ -100,10 +98,8 @@ pub fn sqrt_reciprocal_approx_f64(x: f64) -> f64 {
 #[allow(unused)]
 #[inline(always)]
 fn quake_sqrt_reciprocal_approx_f32(x: f32) -> f32 {
-    #[allow(clippy::cast_possible_wrap)]
-    let i = 0x_5F37_5A86 - ((x.to_bits() as i32) >> 1); // Initial estimate for Newton's method.
-    #[allow(clippy::cast_sign_loss)]
-    let y = f32::from_bits(i as u32);
+    let i = 0x_5F37_5A86 - (x.to_bits().cast_signed() >> 1); // Initial estimate for Newton's method.
+    let y = f32::from_bits(i.cast_unsigned());
     y * (1.5 - 0.5 * x * y * y) // First iteration of Newton's method.
 }
 

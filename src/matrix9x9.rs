@@ -47,7 +47,7 @@ where
         writeln!(f, "Matrix9x9 [")?;
 
         // Loop over rows using the Deref slice chunking behavior we added earlier
-        for row in self.chunks_exact(9) {
+        for row in self.rows() {
             // Print 4 spaces of indentation for clean alignment
             write!(f, "    ")?;
 
@@ -1251,16 +1251,18 @@ where
 impl<T> Matrix9x9<T> {
     /// Returns an iterator over the rows of the matrix as slices of 9 elements.
     #[inline]
-    pub fn rows(&self) -> ChunksExact<'_, T> {
-        self.chunks_exact(9)
+    pub fn rows(&self) -> &[[T; 9]] {
+        let (chunks, _remainder) = self.as_chunks::<9>();
+        chunks
     }
 }
 
 impl<T> Matrix9x9<T> {
     /// Returns an iterator over the rows of the matrix as mutable slices of 9 elements.
     #[inline]
-    pub fn rows_mut(&mut self) -> ChunksExactMut<'_, T> {
-        self.chunks_exact_mut(9)
+    pub fn rows_mut(&mut self) -> &mut [[T; 9]] {
+        let (chunks, _remainder) = self.as_chunks_mut::<9>();
+        chunks
     }
 }
 
@@ -1305,6 +1307,7 @@ impl<'a, T> IntoIterator for &'a Matrix9x9<T> {
     type Item = &'a [T];
     type IntoIter = ChunksExact<'a, T>;
 
+    #[allow(clippy::chunks_exact_to_as_chunks)]
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
         // Leverages the Deref trait automatically to get 9-element rows
@@ -1316,6 +1319,7 @@ impl<'a, T> IntoIterator for &'a mut Matrix9x9<T> {
     type Item = &'a mut [T];
     type IntoIter = ChunksExactMut<'a, T>;
 
+    #[allow(clippy::chunks_exact_to_as_chunks)]
     #[inline]
     fn into_iter(self) -> Self::IntoIter {
         // Leverages the DerefMut trait automatically.

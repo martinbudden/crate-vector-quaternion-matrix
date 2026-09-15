@@ -30,6 +30,7 @@ At some point [0.1.0] to [0.1.14] will be [YANKED]
 ### Changed
 
 - split `serde` feature into `serde` and `storage`.
+- updated to Rust version 1.89.
 
 ## [0.1.16] - 2026-09-05
 

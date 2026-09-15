@@ -63,6 +63,7 @@ impl Matrix9x9Math for f32 {
         // Loop through the output matrix column by column (9 elements at a time).
         // In column-major layout, chunks_exact_mut(9) cleanly yields full columns,
         // which eliminates internal array bounds checks.
+        #[allow(clippy::chunks_exact_to_as_chunks)]
         for (col_idx, out_column) in ret.chunks_exact_mut(9).enumerate() {
             // Cache the current column of the OTHER matrix in local memory/registers.
             let other_col_offset = col_idx * 9;
@@ -170,6 +171,7 @@ impl Matrix9x9Math for f64 {
         // Loop through the output matrix column by column (9 elements at a time).
         // In column-major layout, chunks_exact_mut(9) cleanly yields full columns,
         // which eliminates internal array bounds checks.
+        #[allow(clippy::chunks_exact_to_as_chunks)]
         for (col_idx, out_column) in ret.chunks_exact_mut(9).enumerate() {
             // Cache the current column of the OTHER matrix in local memory/registers.
             let other_col_offset = col_idx * 9;

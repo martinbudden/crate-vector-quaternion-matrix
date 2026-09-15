@@ -156,7 +156,7 @@ Comparing `vqm` with the remaining two, `micromath` and `nalgebra`, we have:
 | Serialization                   | Optional                             | ——                                   | Optional                                   |
 | SIMD                            | Experimental                         | ——                                   | Yes                                        |
 | General<br>linear algebra       | Focused                              | Limited                              | Extensive                                  |
-| MSRV                            | 2024 v1.85                           | 2018 v1.47                           | 2024 v1.89                                 |
+| MSRV                            | 2024 v1.89                           | 2018 v1.47                           | 2024 v1.89                                 |
 
 ## Units of Measurement (uom) support
 

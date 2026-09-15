@@ -2107,16 +2107,18 @@ where
 impl<T> Matrix3x3<T> {
     /// Returns an iterator over the rows of the matrix as slices of 3 elements.
     #[inline]
-    pub fn rows(&self) -> ChunksExact<'_, T> {
-        self.chunks_exact(3)
+    pub fn rows(&self) -> &[[T; 3]] {
+        let (chunks, _remainder) = self.as_chunks::<3>();
+        chunks
     }
 }
 
 impl<T> Matrix3x3<T> {
     /// Returns an iterator over the rows of the matrix as mutable slices of 3 elements.
     #[inline]
-    pub fn rows_mut(&mut self) -> ChunksExactMut<'_, T> {
-        self.chunks_exact_mut(3)
+    pub fn rows_mut(&mut self) -> &mut [[T; 3]] {
+        let (chunks, _remainder) = self.as_chunks_mut::<3>();
+        chunks
     }
 }
 

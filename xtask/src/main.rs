@@ -35,13 +35,13 @@ fn run_ci_pipeline() {
 }
 
 fn run_msrv_check() {
-    println!("🚀 Running: cargo +1.85.0 check --lib --features serde");
+    println!("🚀 Running: cargo +1.89.0 check --lib --features serde");
 
     // We invoke cargo, passing the toolchain string as the very first argument
-    let status = Command::new("cargo").arg("+1.85.0").arg("check").arg("--lib").arg("--features").arg("serde").status();
+    let status = Command::new("cargo").arg("+1.89.0").arg("check").arg("--lib").arg("--features").arg("serde").status();
 
     check_status(status, "check-msrv");
-    println!("✅ MSRV 1.85 check passed!");
+    println!("✅ MSRV 1.89 check passed!");
 }
 
 fn check_status(status: Result<ExitStatus, std::io::Error>, name: &str) {

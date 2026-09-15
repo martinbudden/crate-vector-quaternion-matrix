@@ -1833,16 +1833,18 @@ where
 impl<T> Matrix2x2<T> {
     /// Returns an iterator over the rows of the matrix as slices of 2 elements.
     #[inline]
-    pub fn rows(&self) -> ChunksExact<'_, T> {
-        self.chunks_exact(2)
+    pub fn rows(&self) -> &[[T; 2]] {
+        let (chunks, _remainder) = self.as_chunks::<2>();
+        chunks
     }
 }
 
 impl<T> Matrix2x2<T> {
     /// Returns an iterator over the rows of the matrix as mutable slices of 2 elements.
     #[inline]
-    pub fn rows_mut(&mut self) -> ChunksExactMut<'_, T> {
-        self.chunks_exact_mut(2)
+    pub fn rows_mut(&mut self) -> &mut [[T; 2]] {
+        let (chunks, _remainder) = self.as_chunks_mut::<2>();
+        chunks
     }
 }
 
