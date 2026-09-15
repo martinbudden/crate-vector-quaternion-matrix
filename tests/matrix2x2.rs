@@ -12,22 +12,27 @@ const _: () = assert!(align_of::<Matrix2x2<f64>>() == 16);
 #[cfg(test)]
 mod test_traits {
     use super::*;
+    #[cfg(feature = "storage")]
+    use sequential_storage::map::PostcardValue;
     #[cfg(feature = "serde")]
     use {
         postcard::experimental::max_size::MaxSize,
-        sequential_storage::map::PostcardValue,
         serde::{Deserialize, Serialize},
     };
 
     fn is_full<T: Sized + Send + Sync + Unpin + Copy + Clone + Default + PartialEq>() {}
     #[cfg(feature = "serde")]
-    fn is_config<T: Serialize + MaxSize + for<'a> Deserialize<'a> + for<'a> PostcardValue<'a>>() {}
+    fn is_serde<T: Serialize + MaxSize + for<'a> Deserialize<'a>>() {}
+    #[cfg(feature = "storage")]
+    fn is_storage<T: for<'a> PostcardValue<'a>>() {}
 
     #[test]
     fn normal_types() {
         is_full::<Matrix2x2<f32>>();
         #[cfg(feature = "serde")]
-        is_config::<Matrix2x2<f32>>();
+        is_serde::<Matrix2x2<f32>>();
+        #[cfg(feature = "storage")]
+        is_storage::<Matrix2x2<f32>>();
     }
 }
 

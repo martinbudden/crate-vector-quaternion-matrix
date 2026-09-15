@@ -830,6 +830,7 @@ dependencies = [
  "sequential-storage",
  "serde",
  "uom",
+ "vqm",
 ]
 
 [[package]]
