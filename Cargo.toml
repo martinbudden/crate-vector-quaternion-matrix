@@ -33,7 +33,7 @@ simd = []
 [dependencies]
 # Mandatory dependencies
 num-traits = { version = "0.2.19", default-features = false }
-cfg-if = "1.0.4"
+cfg-if = "1.0.5"
 
 # Optional dependencies: they aren't compiled unless requested
 libm = { version = "0.2.16", optional = true }
