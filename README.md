@@ -31,7 +31,7 @@ The library uses fixed-size types and does not allocate memory.
 
 Vectors have 2D, 3D, and 4D versions.
 
-Matrices have 2x2, 3x3, 4x4, and 9x9 versions.
+Matrices have 2x2, 3x3, and 4x4 versions.
 
 Additionally there are 3x3xM2x2 (effectively 6x6) and 3x3xM3x3 (effectively 9x9) matrices which have been added to support Kalman filters.
 They are used by the [sensor-fusion](https://crates.io/crates/sensor-fusion) crate to implement Kalman filters.
@@ -45,14 +45,13 @@ Each type has versions for `f32` and `f64`. So we have:
 5. 2x2 matrices: `Matrix2x2f32`, `Matrix2x2f64`
 6. 3x3 matrices: `Matrix3x3f32`, `Matrix3x3f64`
 7. 4x4 matrices: `Matrix4x4f32`, `Matrix4x4f64`
-8. 9x9 matrices: `Matrix9x9f32`, `Matrix9x9f64`
-9. 3x3xM2x2 matrices: `Matrix3x3xM2x2f32`, `Matrix3x3xM2x2f64`
-10. 3x3xM3x3 matrices: `Matrix3x3xM3x3f32`, `Matrix3x3xM3x3f64`
+8. 3x3xM2x2 matrices: `Matrix3x3xM2x2f32`, `Matrix3x3xM2x2f64`
+9. 3x3xM3x3 matrices: `Matrix3x3xM3x3f32`, `Matrix3x3xM3x3f64`
 
 Quaternions are implemented using the Hamilton convention.
 
-Matrix elements are stored in a one-dimensional array, stored in column-major order.
-`Matrix9x9`, `Matrix3x3xM2x2`, and `Matrix3x3xM3x3` are partial implementations to support Kalman filters.
+Matrix elements are stored in a one-dimensional array in column-major order.
+`Matrix3x3xM2x2`, and `Matrix3x3xM3x3` are partial implementations to support Kalman filters.
 
 (Under the hood, types are implemented using generics, so `Vector3f32` is actually `Vector3<f32>`,
 but that is transparent to the user.)

@@ -101,7 +101,7 @@ where
                 Matrix2x2::new([a[24], a[25], a[30], a[31]]),
                 Matrix2x2::new([a[26], a[27], a[32], a[33]]),
                 Matrix2x2::new([a[28], a[29], a[34], a[35]]),
-            ]
+            ],
         }
     }
 }
@@ -1160,8 +1160,8 @@ impl<T: Copy> From<Matrix3x3xM2x2<T>> for Matrix4x4<T> {
     }
 }
 
-impl<T: Copy> From<[T;36]> for Matrix3x3xM2x2<T> {
-    fn from(src: [T;36]) -> Self {
+impl<T: Copy> From<[T; 36]> for Matrix3x3xM2x2<T> {
+    fn from(src: [T; 36]) -> Self {
         Self {
             a: core::array::from_fn(|block| {
                 let block_row = block % 3;

@@ -46,9 +46,6 @@ mod matrix3x3_m3x3;
 mod matrix4x4;
 mod matrix4x4_math;
 
-mod matrix9x9;
-mod matrix9x9_math;
-
 mod quaternion;
 mod quaternion_math;
 mod roll_pitch_yaw;
@@ -82,6 +79,3 @@ pub use matrix3x3_m3x3::{Matrix3x3xM3x3, Matrix3x3xM3x3f32, Matrix3x3xM3x3f64};
 
 pub use matrix4x4::{Matrix4x4, Matrix4x4f32, Matrix4x4f64};
 pub use matrix4x4_math::Matrix4x4Math;
-
-pub use matrix9x9::{Matrix9x9, Matrix9x9f32, Matrix9x9f64};
-pub use matrix9x9_math::Matrix9x9Math;
