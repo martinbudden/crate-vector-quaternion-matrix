@@ -39,6 +39,8 @@ check-none = [ "check", "--no-default-features"]
 check-libm = [ "check", "--no-default-features", "--features", "libm"]
 check-std = [ "check", "--no-default-features", "--features", "std"]
 check-std-libm = [ "check", "--no-default-features", "--features", "std, libm"]
+check-serde = [ "check", "--no-default-features", "--features", "serde"]
+check-storage = [ "check", "--no-default-features", "--features", "storage"]
 
 # Continuous Integration
 ci = "run --package xtask --bin xtask"
