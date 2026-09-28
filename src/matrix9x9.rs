@@ -6,7 +6,7 @@ use core::ops::{
 use core::slice::{ChunksExact, ChunksExactMut, Iter, IterMut};
 use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Zero, float::FloatCore};
 
-use crate::{MathConstants, Matrix2x2, Matrix3x3, Matrix4x4, Matrix9x9Math, Vector3};
+use crate::{MathConstants, Matrix2x2, Matrix3x3, Matrix3x3xM2x2, Matrix3x3xM3x3, Matrix4x4, Matrix9x9Math, Vector3};
 
 /// 9x9 matrix of `f32` values<br>
 pub type Matrix9x9f32 = Matrix9x9<f32>;
@@ -1485,5 +1485,83 @@ impl<T: Copy> From<Matrix9x9<T>> for Matrix4x4<T> {
             m.a[18], m.a[19], m.a[20], m.a[21],
             m.a[27], m.a[28], m.a[29], m.a[30],
         ] }
+    }
+}
+
+impl<T: Copy> From<Matrix9x9<T>> for Matrix3x3xM2x2<T> {
+    fn from(src: Matrix9x9<T>) -> Self {
+        Self {
+            a: core::array::from_fn(|block| {
+                let block_row = block % 3;
+                let block_col = block / 3;
+                Matrix2x2 {
+                    a: core::array::from_fn(|i| {
+                        let local_row = i % 3;
+                        let local_col = i / 3;
+                        let row = block_row * 3 + local_row;
+                        let col = block_col * 3 + local_col;
+                        src[col * 9 + row]
+                    }),
+                }
+            }),
+        }
+    }
+}
+
+impl<T: Copy + Zero> From<Matrix3x3xM2x2<T>> for Matrix9x9<T> {
+    fn from(src: Matrix3x3xM2x2<T>) -> Self {
+        let mut ret = Self::default();
+        for block_col in 0..3 {
+            for block_row in 0..3 {
+                let block = src[block_col * 3 + block_row];
+                for local_col in 0..3 {
+                    for local_row in 0..3 {
+                        let row = block_row * 3 + local_row;
+                        let col = block_col * 3 + local_col;
+                        ret[col * 9 + row] = block[local_col * 3 + local_row];
+                    }
+                }
+            }
+        }
+        ret
+    }
+}
+
+impl<T: Copy> From<Matrix9x9<T>> for Matrix3x3xM3x3<T> {
+    fn from(src: Matrix9x9<T>) -> Self {
+        Self {
+            a: core::array::from_fn(|block| {
+                let block_row = block % 3;
+                let block_col = block / 3;
+                Matrix3x3 {
+                    a: core::array::from_fn(|i| {
+                        let local_row = i % 3;
+                        let local_col = i / 3;
+                        let row = block_row * 3 + local_row;
+                        let col = block_col * 3 + local_col;
+                        src[col * 9 + row]
+                    }),
+                }
+            }),
+        }
+    }
+}
+
+impl<T: Copy + Zero> From<Matrix3x3xM3x3<T>> for Matrix9x9<T> {
+    fn from(src: Matrix3x3xM3x3<T>) -> Self {
+        let mut ret = Self::default();
+        for block_col in 0..3 {
+            for block_row in 0..3 {
+                let block = src[block_col * 3 + block_row];
+                for local_col in 0..3 {
+                    for local_row in 0..3 {
+                        let row = block_row * 3 + local_row;
+                        let col = block_col * 3 + local_col;
+                        ret[col * 9 + row] = block[local_col * 3 + local_row];
+                    }
+                }
+            }
+        }
+        ret
     }
 }

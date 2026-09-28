@@ -181,7 +181,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Copy + Zero + One,
+    T: Zero + One,
 {
     /// Unit quaternion.
     /// Alias for `one()` that does not require `num_traits::One`.
@@ -201,7 +201,7 @@ where
 
 impl<T> Neg for Quaternion<T>
 where
-    T: Copy + QuaternionMath,
+    T: QuaternionMath,
 {
     type Output = Self;
 
@@ -223,7 +223,7 @@ where
 
 impl<T> Add for Quaternion<T>
 where
-    T: Copy + QuaternionMath,
+    T: QuaternionMath,
 {
     type Output = Self;
 
@@ -317,7 +317,7 @@ where
 
 impl<T> Sub for Quaternion<T>
 where
-    T: Copy + QuaternionMath,
+    T: QuaternionMath,
 {
     type Output = Self;
 
@@ -389,7 +389,7 @@ impl Mul<Quaternion<f64>> for f64 {
 
 impl<T> Mul<T> for Quaternion<T>
 where
-    T: Copy + QuaternionMath,
+    T: QuaternionMath,
 {
     type Output = Self;
 
@@ -431,7 +431,7 @@ where
 
 impl<T> Div<T> for Quaternion<T>
 where
-    T: Copy + QuaternionMath,
+    T: QuaternionMath,
 {
     type Output = Self;
 
@@ -471,7 +471,7 @@ where
 
 impl<T> Mul<Quaternion<T>> for Quaternion<T>
 where
-    T: Copy + QuaternionMath,
+    T: QuaternionMath,
 {
     type Output = Self;
 
@@ -627,7 +627,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Copy + FloatCore,
+    T: FloatCore,
 {
     /// Return a copy of the quaternion with all components clamped to the specified range.
     /// ```
@@ -667,7 +667,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Copy + QuaternionMath,
+    T: QuaternionMath,
 {
     /// Quaternion dot product.
     /// ```
@@ -873,7 +873,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Copy + Add<Output = T> + Mul<Output = T>,
+    T: Add<Output = T> + Mul<Output = T>,
 {
     /// Return the sum of all components of the quaternion.
     /// ```
@@ -902,7 +902,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Copy + One + Add<Output = T> + Div<Output = T>,
+    T: One + Add<Output = T> + Div<Output = T>,
 {
     /// Return the mean of all components of the quaternion.
     #[inline]
@@ -916,7 +916,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Copy + FloatCore + MathMethods,
+    T: FloatCore + MathMethods,
 {
     pub fn rotate(self, v: &Vector3<T>) -> Vector3<T> {
         let two: T = T::one() + T::one();
@@ -1001,7 +1001,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Copy + FloatCore + MathMethods,
+    T: FloatCore + MathMethods,
 {
     /// clip `sin(roll_angle)` to +/-1.0 when roll angle outside range [-90 degrees, 90 degrees].
     pub fn sin_roll_clipped(self) -> T {
@@ -1036,7 +1036,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Copy + FloatCore + MathMethods,
+    T: FloatCore + MathMethods,
 {
     /// Rotate about the x-axis,
     /// equivalent to *= Quaternion(cos(theta/2), sin(theta/2), 0, 0).
@@ -1200,10 +1200,7 @@ where
     }
 }
 
-impl<T> Quaternion<T>
-where
-    T: Copy + One + Neg<Output = T> + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Div<Output = T>,
-{
+impl<T> Quaternion<T> {
     /// Return the scalar part of the quaternion.
     #[inline]
     pub fn scalar(self) -> T {
@@ -1215,7 +1212,12 @@ where
     pub fn imaginary(self) -> Vector3<T> {
         Vector3::<T> { x: self.x, y: self.y, z: self.z }
     }
+}
 
+impl<T> Quaternion<T>
+where
+    T: Copy + One + Neg<Output = T> + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Div<Output = T>,
+{
     /// Return the last column of the equivalent rotation matrix, but calculated more efficiently than a full conversion.
     #[inline]
     pub fn direction_cosine_matrix_z(self) -> Vector3<T> {
@@ -1299,10 +1301,7 @@ where
 
 // **** From Tuple ****
 
-impl<T> From<(T, T, T, T)> for Quaternion<T>
-where
-    T: Copy,
-{
+impl<T> From<(T, T, T, T)> for Quaternion<T> {
     /// Quaternion from tuple.
     /// ```
     /// # use vqm::Quaternionf32;

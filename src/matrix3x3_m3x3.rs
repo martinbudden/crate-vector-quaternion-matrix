@@ -5,7 +5,7 @@ use core::ops::{
 };
 use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Zero, float::FloatCore};
 
-use crate::{MathConstants, Matrix2x2, Matrix3x3, Matrix3x3Math, Matrix4x4, Matrix9x9, Matrix9x9Math};
+use crate::{MathConstants, Matrix2x2, Matrix3x3, Matrix3x3Math, Matrix4x4};
 
 /// 3x3 matrix of `Matrix3x3f32` values<br>
 pub type Matrix3x3xM3x3f32 = Matrix3x3xM3x3<f32>;
@@ -76,11 +76,38 @@ impl<T> Matrix3x3xM3x3<T>
 where
     T: Copy,
 {
-    /// Constructor.
+    /// Create a matrix.
+    /// ```
+    /// # use vqm::Matrix3x3xM3x3f32;
+    /// let m = Matrix3x3xM3x3f32::new([
+    ///    1.0,  2.0,  3.0,  4.0,  5.0,  6.0,  7.0,  8.0,  9.0,
+    ///   10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0,
+    ///   19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0,
+    ///   28.0, 29.0, 30.0, 31.0, 32.0, 33.0, 34.0, 35.0, 36.0,
+    ///   37.0, 38.0, 39.0, 40.0, 41.0, 42.0, 43.0, 44.0, 45.0,
+    ///   46.0, 47.0, 48.0, 49.0, 50.0, 51.0, 52.0, 53.0, 54.0,
+    ///   55.0, 56.0, 57.0, 58.0, 59.0, 60.0, 61.0, 62.0, 63.0,
+    ///   64.0, 65.0, 66.0, 67.0, 68.0, 69.0, 70.0, 71.0, 72.0,
+    ///   73.0, 74.0, 75.0, 76.0, 77.0, 78.0, 79.0, 80.0, 81.0,
+    /// ]);
+    /// ```
     #[inline]
-    pub fn new(a: [T; 81]) -> Self {
-        let m9x9 = Matrix9x9::new(a);
-        Matrix3x3xM3x3::from(m9x9)
+    pub fn new(src: [T; 81]) -> Self {
+        Self {
+            a: core::array::from_fn(|block| {
+                let block_row = block / 3;
+                let block_col = block % 3;
+                Matrix3x3 {
+                    a: core::array::from_fn(|i| {
+                        let local_row = i % 3;
+                        let local_col = i / 3;
+                        let row = block_row * 3 + local_row;
+                        let col = block_col * 3 + local_col;
+                        src[col + row * 9]
+                    }),
+                }
+            }),
+        }
     }
 }
 
@@ -154,7 +181,7 @@ where
 
 impl<T> Zero for Matrix3x3xM3x3<T>
 where
-    T: Copy + Zero + PartialEq + Matrix9x9Math,
+    T: Copy + Zero + PartialEq,
     Matrix3x3<T>: Zero,
 {
     /// Zero matrix.
@@ -177,7 +204,7 @@ where
 
 impl<T> ConstZero for Matrix3x3xM3x3<T>
 where
-    T: Copy + ConstZero + PartialEq + Matrix9x9Math,
+    T: Copy + ConstZero + PartialEq,
     Matrix3x3<T>: Zero + ConstZero,
 {
     /// Const zero matrix.
@@ -215,7 +242,7 @@ where
 
 impl<T> One for Matrix3x3xM3x3<T>
 where
-    T: Copy + ConstZero + ConstOne + PartialEq + Matrix9x9Math,
+    T: Copy + ConstZero + ConstOne + PartialEq,
     Matrix3x3<T>: ConstOne + ConstZero,
 {
     /// Identity matrix.
@@ -239,7 +266,7 @@ where
 
 impl<T> ConstOne for Matrix3x3xM3x3<T>
 where
-    T: Copy + ConstZero + ConstOne + PartialEq + Matrix9x9Math,
+    T: Copy + ConstZero + ConstOne + PartialEq,
     Matrix3x3<T>: ConstOne + ConstZero,
 {
     /// Const identity matrix.
@@ -365,7 +392,7 @@ where
 
 impl<T> AddAssign for Matrix3x3xM3x3<T>
 where
-    T: Copy + Matrix9x9Math,
+    T: Copy,
     Matrix3x3<T>: Add<Output = Matrix3x3<T>> + Copy,
 {
     /// Add one matrix to another.
@@ -419,7 +446,7 @@ where
 
 impl<T> MulAddAssign<T> for Matrix3x3xM3x3<T>
 where
-    T: Copy + Matrix9x9Math,
+    T: Copy,
     Matrix3x3<T>: Mul<T, Output = Matrix3x3<T>> + Add<Matrix3x3<T>, Output = Matrix3x3<T>>,
 {
     /// Multiply matrix by constant and add another matrix in place.
@@ -536,7 +563,7 @@ impl Mul<Matrix3x3xM3x3<f64>> for f64 {
 
 impl<T> Mul<T> for Matrix3x3xM3x3<T>
 where
-    T: Copy + Matrix9x9Math,
+    T: Copy,
     Matrix3x3<T>: Mul<T, Output = Matrix3x3<T>>,
 {
     type Output = Self;
@@ -563,7 +590,7 @@ where
 
 impl<T> MulAssign<T> for Matrix3x3xM3x3<T>
 where
-    T: Copy + Matrix9x9Math,
+    T: Copy,
     Matrix3x3<T>: Mul<T, Output = Matrix3x3<T>>,
 {
     /// In-place multiply a matrix by a scalar.
@@ -584,7 +611,7 @@ where
 
 impl<T> Mul<Matrix3x3xM3x3<T>> for Matrix3x3xM3x3<T>
 where
-    T: Copy + Matrix9x9Math,
+    T: Copy,
     Matrix3x3<T>: Add<Output = Matrix3x3<T>> + Mul<Output = Matrix3x3<T>>,
     Matrix3x3xM3x3<T>: Zero,
 {
@@ -611,7 +638,7 @@ where
 
 impl<T> Div<T> for Matrix3x3xM3x3<T>
 where
-    T: Copy + One + Div<Output = T>,
+    T: One + Div<Output = T>,
     Matrix3x3xM3x3<T>: Mul<T, Output = Matrix3x3xM3x3<T>>,
 {
     type Output = Self;
@@ -817,7 +844,7 @@ where
 
 impl<T> Matrix3x3xM3x3<T>
 where
-    T: Copy + Matrix3x3Math,
+    T: Matrix3x3Math,
     Matrix3x3<T>: Copy + Neg,
     Matrix3x3xM3x3<T>: Copy + Neg,
 {
@@ -858,7 +885,7 @@ where
 
 impl<T> Matrix3x3xM3x3<T>
 where
-    T: Copy + FloatCore,
+    T: FloatCore,
 {
     /// Return a copy of the matrix with all elements clamped to the specified range.
     /// ```
@@ -940,7 +967,7 @@ where
 
 impl<T> Matrix3x3xM3x3<T>
 where
-    T: Copy + Zero + One + Matrix3x3Math + MathConstants + PartialOrd + FloatCore,
+    T: Matrix3x3Math + MathConstants + PartialOrd + FloatCore,
 {
     /// Return the sum of all elements of the matrix.
     #[inline]
@@ -1152,27 +1179,8 @@ impl<T: Copy> From<Matrix3x3xM3x3<T>> for Matrix4x4<T> {
     }
 }
 
-impl<T: Copy + Zero> From<Matrix3x3xM3x3<T>> for Matrix9x9<T> {
-    fn from(src: Matrix3x3xM3x3<T>) -> Self {
-        let mut ret = Self::default();
-        for block_col in 0..3 {
-            for block_row in 0..3 {
-                let block = src[block_col * 3 + block_row];
-                for local_col in 0..3 {
-                    for local_row in 0..3 {
-                        let row = block_row * 3 + local_row;
-                        let col = block_col * 3 + local_col;
-                        ret[col * 9 + row] = block[local_col * 3 + local_row];
-                    }
-                }
-            }
-        }
-        ret
-    }
-}
-
-impl<T: Copy> From<Matrix9x9<T>> for Matrix3x3xM3x3<T> {
-    fn from(src: Matrix9x9<T>) -> Self {
+impl<T: Copy> From<[T; 81]> for Matrix3x3xM3x3<T> {
+    fn from(src: [T; 81]) -> Self {
         Self {
             a: core::array::from_fn(|block| {
                 let block_row = block % 3;

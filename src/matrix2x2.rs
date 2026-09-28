@@ -515,7 +515,7 @@ where
 
 impl<T> Matrix2x2<T>
 where
-    T: Copy + One + FloatCore + AddAssign,
+    T: FloatCore + AddAssign,
 {
     /// Add a diagonal matrix.
     /// ```
@@ -715,7 +715,7 @@ where
 
 impl<T> MulAdd<T> for Matrix2x2<T>
 where
-    T: Copy + Matrix2x2Math,
+    T: Matrix2x2Math,
 {
     type Output = Self;
 
@@ -849,7 +849,7 @@ impl Mul<Matrix2x2<f64>> for f64 {
 
 impl<T> Mul<T> for Matrix2x2<T>
 where
-    T: Copy + Matrix2x2Math,
+    T: Matrix2x2Math,
 {
     type Output = Self;
 
@@ -893,7 +893,7 @@ where
 
 impl<T> Mul<Vector2<T>> for Matrix2x2<T>
 where
-    T: Copy + Matrix2x2Math,
+    T: Matrix2x2Math,
 {
     type Output = Vector2<T>;
 
@@ -917,7 +917,7 @@ where
 #[cfg(not(feature = "uom"))]
 impl<T> Mul<Matrix2x2<T>> for Vector2<T>
 where
-    T: Copy + Matrix2x2Math,
+    T: Matrix2x2Math,
 {
     type Output = Self;
 
@@ -942,7 +942,7 @@ where
 
 impl<T> Mul<Matrix2x2<T>> for Matrix2x2<T>
 where
-    T: Copy + Matrix2x2Math,
+    T: Matrix2x2Math,
 {
     type Output = Self;
 
@@ -975,7 +975,7 @@ where
 
 impl<T> Matrix2x2<T>
 where
-    T: Copy + One + FloatCore,
+    T: FloatCore,
 {
     /// Multiply by a diagonal matrix.
     /// ```
@@ -1089,7 +1089,7 @@ where
 
 impl<T> Matrix2x2<T>
 where
-    T: Copy + Matrix2x2Math,
+    T: Matrix2x2Math,
 {
     /// Calculates the outer product of a column vector and a row vector to give a matrix.
     /// ```
@@ -1109,7 +1109,7 @@ where
 
 impl<T> Vector2<T>
 where
-    T: Copy + Matrix2x2Math,
+    T: Matrix2x2Math,
 {
     /// Calculates the outer product with another vector to give a matrix.
     /// ```
@@ -1131,7 +1131,7 @@ where
 
 impl<T> Div<T> for Matrix2x2<T>
 where
-    T: Copy + Matrix2x2Math,
+    T: Matrix2x2Math,
 {
     type Output = Self;
 
@@ -1486,7 +1486,7 @@ where
 
 impl<T> Matrix2x2<T>
 where
-    T: Copy + Matrix2x2Math,
+    T: Matrix2x2Math,
 {
     /// Return a copy of the matrix with all elements set to their absolute values.
     /// ```
@@ -1503,7 +1503,12 @@ where
     pub fn abs(self) -> Self {
         T::m2x2_abs(self)
     }
+}
 
+impl<T> Matrix2x2<T>
+where
+    T: Copy + Matrix2x2Math,
+{
     /// Set all elements of the matrix to their absolute values.
     /// ```
     /// # use vqm::Matrix2x2f32;
@@ -1525,7 +1530,7 @@ where
 
 impl<T> Matrix2x2<T>
 where
-    T: Copy + FloatCore,
+    T: FloatCore,
 {
     /// Return a copy of the matrix with all elements clamped to the specified range.
     /// ```
@@ -1671,7 +1676,7 @@ where
 
 impl<T> Matrix2x2<T>
 where
-    T: Copy + Matrix2x2Math + FloatCore + MathConstants,
+    T: Matrix2x2Math + FloatCore + MathConstants,
 {
     /// Return the inverse of this matrix. Returns self if the determinant is zero.
     /// ```
@@ -1711,7 +1716,7 @@ where
 
 impl<T> Matrix2x2<T>
 where
-    T: Copy + Zero + One + Matrix2x2Math + MathConstants + PartialOrd + FloatCore,
+    T: Matrix2x2Math + MathConstants + PartialOrd + FloatCore,
 {
     /// Return inverse of matrix or `T::zero()` if not invertible.
     /// ```

@@ -5,7 +5,7 @@ use core::ops::{
 };
 use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Zero, float::FloatCore};
 
-use crate::{MathConstants, Matrix2x2, Matrix2x2Math, Matrix4x4, Matrix9x9, Matrix9x9Math};
+use crate::{MathConstants, Matrix2x2, Matrix2x2Math, Matrix4x4};
 
 /// 3x3 matrix of `Matrix2x2f32` values<br>
 pub type Matrix3x3xM2x2f32 = Matrix3x3xM2x2<f32>;
@@ -14,7 +14,7 @@ pub type Matrix3x3xM2x2f64 = Matrix3x3xM2x2<f64>;
 
 // **** Define ****
 
-/// `Matrix9<T>`: 3x3 Matrix of type `Matrix2x2<T>`.<br>
+/// `Matrix3x3xM2x2<T>`: 3x3 Matrix of type `Matrix2x2<T>`.<br>
 /// Provided to support Kalman filter matrix math and so not all functions are provided.<br>
 /// In particular matrix by matrix multiply, determinant, adjugate, and inverse are not provided.<br>
 /// Functions to extract and utilize 2x2 sub-matrices are provided.<br>
@@ -76,11 +76,33 @@ impl<T> Matrix3x3xM2x2<T>
 where
     T: Copy,
 {
-    /// Constructor.
+    /// Create a matrix.
+    /// ```
+    /// # use vqm::Matrix3x3xM2x2f32;
+    /// let m = Matrix3x3xM2x2f32::new([
+    ///    1.0,  2.0,  3.0,  4.0,  5.0,  6.0,
+    ///    7.0,  8.0,  9.0, 10.0, 11.0, 12.0,
+    ///   13.0, 14.0, 15.0, 16.0, 17.0, 18.0,
+    ///   19.0, 20.0, 21.0, 22.0, 23.0, 24.0,
+    ///   25.0, 26.0, 27.0, 28.0, 29.0, 30.0,
+    ///   31.0, 32.0, 33.0, 34.0, 35.0, 36.0,
+    /// ]);
+    /// ```
     #[inline]
-    pub fn new(a: [T; 81]) -> Self {
-        let m9x9 = Matrix9x9::new(a);
-        Matrix3x3xM2x2::from(m9x9)
+    pub fn new(a: [T; 36]) -> Self {
+        Self {
+            a: [
+                Matrix2x2::new([a[0], a[1], a[6], a[7]]),
+                Matrix2x2::new([a[2], a[3], a[8], a[9]]),
+                Matrix2x2::new([a[4], a[5], a[10], a[11]]),
+                Matrix2x2::new([a[12], a[13], a[18], a[19]]),
+                Matrix2x2::new([a[14], a[15], a[20], a[21]]),
+                Matrix2x2::new([a[16], a[17], a[22], a[23]]),
+                Matrix2x2::new([a[24], a[25], a[30], a[31]]),
+                Matrix2x2::new([a[26], a[27], a[32], a[33]]),
+                Matrix2x2::new([a[28], a[29], a[34], a[35]]),
+            ]
+        }
     }
 }
 
@@ -153,7 +175,7 @@ where
 
 impl<T> Zero for Matrix3x3xM2x2<T>
 where
-    T: Copy + Zero + PartialEq + Matrix9x9Math,
+    T: Copy + Zero + PartialEq,
     Matrix2x2<T>: Zero,
 {
     /// Zero matrix.
@@ -176,7 +198,7 @@ where
 
 impl<T> ConstZero for Matrix3x3xM2x2<T>
 where
-    T: Copy + ConstZero + PartialEq + Matrix9x9Math,
+    T: Copy + ConstZero + PartialEq,
     Matrix2x2<T>: Zero + ConstZero,
 {
     /// Const zero matrix.
@@ -214,7 +236,7 @@ where
 
 impl<T> One for Matrix3x3xM2x2<T>
 where
-    T: Copy + ConstZero + ConstOne + PartialEq + Matrix9x9Math,
+    T: Copy + ConstZero + ConstOne + PartialEq,
     Matrix2x2<T>: ConstOne + ConstZero,
 {
     /// Identity matrix.
@@ -238,7 +260,7 @@ where
 
 impl<T> ConstOne for Matrix3x3xM2x2<T>
 where
-    T: Copy + ConstZero + ConstOne + PartialEq + Matrix9x9Math,
+    T: Copy + ConstZero + ConstOne + PartialEq,
     Matrix2x2<T>: ConstOne + ConstZero,
 {
     /// Const identity matrix.
@@ -364,7 +386,7 @@ where
 
 impl<T> AddAssign for Matrix3x3xM2x2<T>
 where
-    T: Copy + Matrix9x9Math,
+    T: Copy,
     Matrix2x2<T>: Add<Output = Matrix2x2<T>> + Copy,
 {
     /// Add one matrix to another.
@@ -418,7 +440,7 @@ where
 
 impl<T> MulAddAssign<T> for Matrix3x3xM2x2<T>
 where
-    T: Copy + Matrix9x9Math,
+    T: Copy,
     Matrix2x2<T>: Mul<T, Output = Matrix2x2<T>> + Add<Matrix2x2<T>, Output = Matrix2x2<T>>,
 {
     /// Multiply matrix by constant and add another matrix in place.
@@ -535,7 +557,7 @@ impl Mul<Matrix3x3xM2x2<f64>> for f64 {
 
 impl<T> Mul<T> for Matrix3x3xM2x2<T>
 where
-    T: Copy + Matrix9x9Math,
+    T: Copy,
     Matrix2x2<T>: Mul<T, Output = Matrix2x2<T>>,
 {
     type Output = Self;
@@ -562,7 +584,7 @@ where
 
 impl<T> MulAssign<T> for Matrix3x3xM2x2<T>
 where
-    T: Copy + Matrix9x9Math,
+    T: Copy,
     Matrix2x2<T>: Mul<T, Output = Matrix2x2<T>>,
 {
     /// In-place multiply a matrix by a scalar.
@@ -583,7 +605,7 @@ where
 
 impl<T> Mul<Matrix3x3xM2x2<T>> for Matrix3x3xM2x2<T>
 where
-    T: Copy + Matrix9x9Math,
+    T: Copy,
     Matrix2x2<T>: Add<Output = Matrix2x2<T>> + Mul<Output = Matrix2x2<T>>,
     Matrix3x3xM2x2<T>: Zero,
 {
@@ -610,7 +632,7 @@ where
 
 impl<T> Div<T> for Matrix3x3xM2x2<T>
 where
-    T: Copy + One + Div<Output = T>,
+    T: One + Div<Output = T>,
     Matrix3x3xM2x2<T>: Mul<T, Output = Matrix3x3xM2x2<T>>,
 {
     type Output = Self;
@@ -816,7 +838,7 @@ where
 
 impl<T> Matrix3x3xM2x2<T>
 where
-    T: Copy + Matrix2x2Math,
+    T: Matrix2x2Math,
     Matrix2x2<T>: Copy + Neg,
     Matrix3x3xM2x2<T>: Copy + Neg,
 {
@@ -857,7 +879,7 @@ where
 
 impl<T> Matrix3x3xM2x2<T>
 where
-    T: Copy + FloatCore,
+    T: FloatCore,
 {
     /// Return a copy of the matrix with all elements clamped to the specified range.
     /// ```
@@ -939,7 +961,7 @@ where
 
 impl<T> Matrix3x3xM2x2<T>
 where
-    T: Copy + Zero + One + Matrix2x2Math + MathConstants + PartialOrd + FloatCore,
+    T: Matrix2x2Math + MathConstants + PartialOrd + FloatCore,
 {
     /// Return the sum of all elements of the matrix.
     #[inline]
@@ -1138,38 +1160,19 @@ impl<T: Copy> From<Matrix3x3xM2x2<T>> for Matrix4x4<T> {
     }
 }
 
-impl<T: Copy + Zero> From<Matrix3x3xM2x2<T>> for Matrix9x9<T> {
-    fn from(src: Matrix3x3xM2x2<T>) -> Self {
-        let mut ret = Self::default();
-        for block_col in 0..3 {
-            for block_row in 0..3 {
-                let block = src[block_col * 3 + block_row];
-                for local_col in 0..3 {
-                    for local_row in 0..3 {
-                        let row = block_row * 3 + local_row;
-                        let col = block_col * 3 + local_col;
-                        ret[col * 9 + row] = block[local_col * 3 + local_row];
-                    }
-                }
-            }
-        }
-        ret
-    }
-}
-
-impl<T: Copy> From<Matrix9x9<T>> for Matrix3x3xM2x2<T> {
-    fn from(src: Matrix9x9<T>) -> Self {
+impl<T: Copy> From<[T;36]> for Matrix3x3xM2x2<T> {
+    fn from(src: [T;36]) -> Self {
         Self {
             a: core::array::from_fn(|block| {
                 let block_row = block % 3;
                 let block_col = block / 3;
                 Matrix2x2 {
                     a: core::array::from_fn(|i| {
-                        let local_row = i % 3;
-                        let local_col = i / 3;
-                        let row = block_row * 3 + local_row;
-                        let col = block_col * 3 + local_col;
-                        src[col * 9 + row]
+                        let local_row = i % 2;
+                        let local_col = i / 2;
+                        let row = block_row * 2 + local_row;
+                        let col = block_col * 2 + local_col;
+                        src[col * 4 + row]
                     }),
                 }
             }),

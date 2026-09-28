@@ -645,7 +645,7 @@ where
 
 impl<T> Matrix4x4<T>
 where
-    T: Copy + One + FloatCore + AddAssign,
+    T: FloatCore + AddAssign,
 {
     /// Add a diagonal matrix.
     /// ```
@@ -916,7 +916,7 @@ where
 
 impl<T> MulAdd<T> for Matrix4x4<T>
 where
-    T: Copy + Matrix4x4Math,
+    T: Matrix4x4Math,
 {
     type Output = Self;
 
@@ -1074,7 +1074,7 @@ impl Mul<Matrix4x4<f64>> for f64 {
 
 impl<T> Mul<T> for Matrix4x4<T>
 where
-    T: Copy + Matrix4x4Math,
+    T: Matrix4x4Math,
 {
     type Output = Self;
 
@@ -1118,7 +1118,7 @@ where
 
 impl<T> Mul<Vector4<T>> for Matrix4x4<T>
 where
-    T: Copy + Matrix4x4Math,
+    T: Matrix4x4Math,
 {
     type Output = Vector4<T>;
 
@@ -1143,7 +1143,7 @@ where
 #[cfg(not(feature = "uom"))]
 impl<T> Mul<Matrix4x4<T>> for Vector4<T>
 where
-    T: Copy + Matrix4x4Math,
+    T: Matrix4x4Math,
 {
     type Output = Self;
 
@@ -1172,7 +1172,7 @@ where
 
 impl<T> Mul<Matrix4x4<T>> for Matrix4x4<T>
 where
-    T: Copy + Matrix4x4Math,
+    T: Matrix4x4Math,
 {
     type Output = Self;
 
@@ -1227,7 +1227,7 @@ where
 
 impl<T> Matrix4x4<T>
 where
-    T: Copy + One + FloatCore,
+    T: FloatCore,
 {
     /// Multiply by a diagonal matrix.
     /// ```
@@ -1403,7 +1403,7 @@ where
 
 impl<T> Matrix4x4<T>
 where
-    T: Copy + Matrix4x4Math,
+    T: Matrix4x4Math,
 {
     /// Calculates the outer product of a column vector and a row vector to give a matrix.
     /// ```
@@ -1425,7 +1425,7 @@ where
 
 impl<T> Vector4<T>
 where
-    T: Copy + Matrix4x4Math,
+    T: Matrix4x4Math,
 {
     /// Calculates the outer product with another vector to give a matrix.
     /// ```
@@ -1447,7 +1447,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Copy + Matrix4x4Math,
+    T: Matrix4x4Math,
 {
     /// Quaternion outer product `q * q^T` resulting in a symmetric 4x4 matrix.
     /// ```
@@ -1471,7 +1471,7 @@ where
 
 impl<T> Div<T> for Matrix4x4<T>
 where
-    T: Copy + Matrix4x4Math,
+    T: Matrix4x4Math,
 {
     type Output = Self;
 
@@ -1915,7 +1915,7 @@ where
 
 impl<T> Matrix4x4<T>
 where
-    T: Copy + Matrix4x4Math,
+    T: Matrix4x4Math,
 {
     /// Return a copy of the matrix with all elements set to their absolute values.
     /// ```
@@ -1936,7 +1936,12 @@ where
     pub fn abs(self) -> Self {
         T::m4x4_abs(self)
     }
+}
 
+impl<T> Matrix4x4<T>
+where
+    T: Copy + Matrix4x4Math,
+{
     /// Set all elements of the matrix to their absolute values.
     /// ```
     /// # use vqm::Matrix4x4f32;
@@ -1962,7 +1967,7 @@ where
 
 impl<T> Matrix4x4<T>
 where
-    T: Copy + FloatCore,
+    T: FloatCore,
 {
     /// Return a copy of the matrix with all elements clamped to the specified range.
     /// ```
@@ -2149,7 +2154,7 @@ where
 
 impl<T> Matrix4x4<T>
 where
-    T: Copy + Matrix4x4Math + FloatCore + MathConstants,
+    T: Matrix4x4Math + FloatCore + MathConstants,
 {
     /// Return the inverse of this matrix. Returns self if the determinant is zero.
     /// ```
@@ -2193,7 +2198,7 @@ where
 
 impl<T> Matrix4x4<T>
 where
-    T: Copy + Zero + One + Matrix4x4Math + MathConstants + PartialOrd + FloatCore,
+    T: Matrix4x4Math + MathConstants + PartialOrd + FloatCore,
 {
     /// Return inverse of matrix or `T::zero()` if not invertible.
     /// ```
@@ -2485,7 +2490,7 @@ impl<T> DoubleEndedIterator for Matrix4x4Columns<'_, T> {
     }
 }
 
-/// A custom iterator over the mutable columns of a 4x4 matrix.
+/// A custom iterator over the mutable columns of the matrix.
 #[derive(Debug, Default)]
 pub struct Matrix4x4ColumnsMut<'a, T> {
     inner: IterMut<'a, [T; 4]>,

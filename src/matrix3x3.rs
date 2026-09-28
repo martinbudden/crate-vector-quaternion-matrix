@@ -551,7 +551,7 @@ where
 
 impl<T> Neg for Matrix3x3<T>
 where
-    T: Copy + Matrix3x3Math,
+    T: Matrix3x3Math,
 {
     type Output = Self;
 
@@ -577,7 +577,7 @@ where
 
 impl<T> Add for Matrix3x3<T>
 where
-    T: Copy + Matrix3x3Math,
+    T: Matrix3x3Math,
 {
     type Output = Self;
 
@@ -611,7 +611,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: Copy + One + FloatCore + AddAssign,
+    T: FloatCore + AddAssign,
 {
     /// Add a diagonal matrix.
     /// ```
@@ -847,7 +847,7 @@ where
 
 impl<T> MulAdd<T> for Matrix3x3<T>
 where
-    T: Copy + Matrix3x3Math,
+    T: Matrix3x3Math,
 {
     type Output = Self;
 
@@ -907,7 +907,7 @@ where
 
 impl<T> Sub for Matrix3x3<T>
 where
-    T: Copy + Matrix3x3Math,
+    T: Matrix3x3Math,
 {
     type Output = Self;
 
@@ -996,7 +996,7 @@ impl Mul<Matrix3x3<f64>> for f64 {
 
 impl<T> Mul<T> for Matrix3x3<T>
 where
-    T: Copy + Matrix3x3Math,
+    T: Matrix3x3Math,
 {
     type Output = Self;
 
@@ -1044,7 +1044,7 @@ where
 
 impl<T> Mul<Vector3<T>> for Matrix3x3<T>
 where
-    T: Copy + Matrix3x3Math,
+    T: Matrix3x3Math,
 {
     type Output = Vector3<T>;
 
@@ -1069,7 +1069,7 @@ where
 #[cfg(not(feature = "uom"))]
 impl<T> Mul<Matrix3x3<T>> for Vector3<T>
 where
-    T: Copy + Matrix3x3Math,
+    T: Matrix3x3Math,
 {
     type Output = Self;
 
@@ -1094,7 +1094,7 @@ where
 
 impl<T> Mul<Matrix3x3<T>> for Matrix3x3<T>
 where
-    T: Copy + Matrix3x3Math,
+    T: Matrix3x3Math,
 {
     type Output = Self;
 
@@ -1130,7 +1130,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: Copy + One + FloatCore,
+    T: FloatCore,
 {
     /// Multiply by a diagonal matrix.
     /// ```
@@ -1269,7 +1269,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: Copy + Matrix3x3Math,
+    T: Matrix3x3Math,
 {
     /// Calculates the outer product of a column vector and a row vector to give a matrix.
     /// ```
@@ -1290,7 +1290,7 @@ where
 
 impl<T> Vector3<T>
 where
-    T: Copy + Matrix3x3Math,
+    T: Matrix3x3Math,
 {
     /// Calculates the outer product with another vector to give a matrix.
     /// ```
@@ -1313,7 +1313,7 @@ where
 
 impl<T> Div<T> for Matrix3x3<T>
 where
-    T: Copy + Matrix3x3Math,
+    T: Matrix3x3Math,
 {
     type Output = Self;
 
@@ -1707,7 +1707,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: Copy + Matrix3x3Math,
+    T: Matrix3x3Math,
 {
     /// Return a copy of the matrix with all elements set to their absolute values.
     /// ```
@@ -1726,7 +1726,12 @@ where
     pub fn abs(self) -> Self {
         T::m3x3_abs(self)
     }
+}
 
+impl<T> Matrix3x3<T>
+where
+    T: Copy + Matrix3x3Math,
+{
     /// Set all elements of the matrix to their absolute values.
     /// ```
     /// # use vqm::Matrix3x3f32;
@@ -1750,7 +1755,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: Copy + FloatCore,
+    T: FloatCore,
 {
     /// Return a copy of the matrix with all elements clamped to the specified range.
     /// ```
@@ -1931,7 +1936,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: Copy + Matrix3x3Math + FloatCore + MathConstants,
+    T: Matrix3x3Math + FloatCore + MathConstants,
 {
     /// Return the inverse of this matrix. Returns self if the determinant is zero.
     /// ```
@@ -1973,7 +1978,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: Copy + Zero + One + Matrix3x3Math + MathConstants + PartialOrd + FloatCore,
+    T: Matrix3x3Math + MathConstants + PartialOrd + FloatCore,
 {
     /// Return inverse of matrix or `T::zero()` if not invertible.
     /// ```
@@ -2189,6 +2194,7 @@ impl<T> IntoIterator for Matrix3x3<T> {
 impl<T> Matrix3x3<T> {
     /// Exposes the matrix as a read-only reference to 3 contiguous columns.
     /// Each sub-array `[T; 3]` represents one full column in memory.
+    #[inline]
     pub fn columns(&self) -> &[[T; 3]] {
         // SAFETY:
         // `self.a` contains 9 contiguous `T`s, so it can be viewed as 3 contiguous `[T; 3]` values.
