@@ -1,13 +1,15 @@
 # `vqm` Rust Crate<br>![License: MIT](https://img.shields.io/badge/license-MIT-green) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![open source](https://badgen.net/badge/open/source/blue?icon=github)
 
-**vqm** is a lightweight, allocation-free Rust math library for **vectors**, **quaternions**, and **matrices**,
+**vqm** is a lightweight, allocation-free, Rust math library for **vectors**, **quaternions**, and **matrices**,
 designed for embedded systems, robotics, and real-time applications.
 
 This crate is `no_std`, ie it does not link to the standard library, does not depend on an operating system, and uses no allocation.
 This means it is suitable for embedded systems.
 
+It also contains floating point approximations for common mathematical and trigonometry functions, enabling it to be used without `libm`.
+By default the `libm` functions are used.
+
 Minimum Supported Rust Version (MSRV): `Rust 1.89`.
-The optional `simd` feature requires nightly.
 
 ## Why vqm?
 
@@ -143,12 +145,12 @@ Comparing `vqm` with the remaining two, `micromath` and `nalgebra`, we have:
 | `no_std`                        | Yes                                  | Yes                                  | Yes                                        |
 | Heap allocation<br>required     | No                                   | No                                   |No for static types<br>Yes for dynamic types|
 | Vectors                         | 2D, 3D, 4D                           | 2D, 3D                               | 1D-6D static<br>any size dynamic           |
-| Fixed-size matrices             | 2×2, 3×3, 4×4, 9×9                   | ——                                   | Extensive                                  |
+| Fixed-size matrices             | 2×2, 3×3, 4×4                        | ——                                   | Extensive                                  |
 | Dynamic matrices                | ——                                   | ——                                   | Yes                                        |
 | Quaternions                     | Yes                                  | Yes                                  | Yes                                        |
 | `f32`                           | Yes                                  | Yes                                  | Yes                                        |
 | `f64`                           | Yes                                  | ——                                   | Yes                                        |
-| Approximate<br>math functions   | Yes                                  | Core focus                           | Via supported<br>scalar types/features     |
+| Approximate<br>math functions   | Yes<br>Fast<br>Accuracy: 4+ sf       | Core focus<br>Faster<br>Less accurate| Via supported<br>scalar types/features     |
 | Robotics-oriented<br>operations | Yes                                  | Some                                 | Yes                                        |
 | Kalman-filter<br>oriented types | Yes                                  | ——                                   | ——                                         |
 | Units of measure                | Optional `uom`                       | ——                                   | ——                                         |
@@ -156,6 +158,14 @@ Comparing `vqm` with the remaining two, `micromath` and `nalgebra`, we have:
 | SIMD                            | Experimental                         | ——                                   | Yes                                        |
 | General<br>linear algebra       | Focused                              | Limited                              | Extensive                                  |
 | MSRV                            | 2024 v1.89                           | 2018 v1.47                           | 2024 v1.89                                 |
+
+`vqm` aims to use the same function names as `nalgebra` (eg `try_inverse` rather than `invert` or `inverted`).
+This reduces the cognitive load if:
+
+1. You are using `vqm` for the first time and you are familiar with `nalgebra`.
+2. Your project outgrows `vqm` and you want to switch to `nalgebra`.
+3. You have a hybrid project, using `vqm` for real-time low level operations (eg reading an IMU and sensor fusion)
+   and using `nalgebra` for higher level functions (eg navigation).
 
 ## Units of Measurement (uom) support
 
@@ -196,8 +206,9 @@ All features except `libm` are off by default. The full set, including those des
 * `libm` - enabled by default, uses `libm` math functions. When disabled `vqm` math function approximations are used.
 * `serde` -  implementations of `Serialize` and `Deserialize` for all `vqm` types.
 * `storage` - adds [sequential-storage](https://crates.io/crates/sequential-storage) support for storing data in flash with minimal erase cycles.
-* `uom` - Units Of Measurement support.
-* `simd` - enables **SIMD** support via the [portable simd](https://doc.rust-lang.org/core/simd/index.html) module. This requires the nightly Rust toolchain.
+* `uom` - [Units Of Measurement](https://crates.io/crates/uom) support.
+* `simd` - (experimental) enables **SIMD** support via the [portable simd](https://doc.rust-lang.org/core/simd/index.html) module.
+         This requires the nightly Rust toolchain.
 * `align` - aligns larger `struct`s to 16-byte boundaries. Required by `simd`.
 * `std` - uses `std` math functions.
 
