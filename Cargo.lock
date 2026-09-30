@@ -816,7 +816,7 @@ dependencies = [
 
 [[package]]
 name = "vqm"
-version = "0.1.16"
+version = "0.1.17"
 dependencies = [
  "approx",
  "criterion",
