@@ -33,6 +33,8 @@ At some point [0.1.0] to [0.1.14] will be [YANKED]
 - updated to Rust version 1.89.
 - updated tests.
 - increased order of `atan` and `exp` approximations.
+- fixed SIMD version of `m3x3_vector_outer_product`.
+- fixed `m4x4_mul_vector`.
 
 ### Removed
 

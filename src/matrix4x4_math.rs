@@ -1,6 +1,6 @@
 #![allow(clippy::inline_always)]
 
-use crate::{Matrix3x3, Matrix3x3Math, Matrix4x4, Quaternion, Vector4};
+use crate::{Matrix4x4, Quaternion, Vector4};
 
 // Column 1
 const M11: usize = 0;
@@ -86,14 +86,15 @@ impl Matrix4x4Math for f32 {
     #[inline(always)]
     fn m4x4_mul_vector(this: Matrix4x4<Self>, other: Vector4<Self>) -> Vector4<Self> {
         Vector4 {
-            x: this.a[M11] * other.x + this.a[M21] * other.y + this.a[M31] * other.z + this.a[M41] * other.t,
-            y: this.a[M12] * other.x + this.a[M22] * other.y + this.a[M32] * other.z + this.a[M42] * other.t,
-            z: this.a[M13] * other.x + this.a[M23] * other.y + this.a[M33] * other.z + this.a[M43] * other.t,
-            t: this.a[M14] * other.x + this.a[M24] * other.y + this.a[M34] * other.z + this.a[M44] * other.t,
+            x: this.a[M11] * other.x + this.a[M12] * other.y + this.a[M13] * other.z + this.a[M14] * other.t,
+            y: this.a[M21] * other.x + this.a[M22] * other.y + this.a[M23] * other.z + this.a[M24] * other.t,
+            z: this.a[M31] * other.x + this.a[M32] * other.y + this.a[M33] * other.z + this.a[M34] * other.t,
+            t: this.a[M41] * other.x + this.a[M42] * other.y + this.a[M43] * other.z + this.a[M44] * other.t,
         }
     }
+
     #[rustfmt::skip]
-    #[inline]
+    #[inline(always)]
     fn m4x4_vector_mul(this: Vector4<Self>, other: Matrix4x4<Self>) -> Vector4<Self> {
         Vector4 {
             x: this.x * other.a[M11] + this.y * other.a[M21] + this.z * other.a[M31] + this.t * other.a[M41],
@@ -374,16 +375,6 @@ impl Matrix4x4Math for f64 {
     }
 
     #[inline(always)]
-    fn m4x4_vector_mul(this: Vector4<Self>, other: Matrix4x4<Self>) -> Vector4<Self> {
-        Vector4 {
-            x: this.x * other.a[M11] + this.y * other.a[M21] + this.z * other.a[M31] + this.t * other.a[M41],
-            y: this.x * other.a[M12] + this.y * other.a[M22] + this.z * other.a[M32] + this.t * other.a[M42],
-            z: this.x * other.a[M13] + this.y * other.a[M23] + this.z * other.a[M33] + this.t * other.a[M43],
-            t: this.x * other.a[M14] + this.y * other.a[M24] + this.z * other.a[M34] + this.t * other.a[M44],
-        }
-    }
-
-    #[inline(always)]
     fn m4x4_mul_vector(this: Matrix4x4<Self>, other: Vector4<Self>) -> Vector4<Self> {
         Vector4 {
             x: this.a[M11] * other.x + this.a[M12] * other.y + this.a[M13] * other.z + this.a[M14] * other.t,
@@ -394,28 +385,38 @@ impl Matrix4x4Math for f64 {
     }
 
     #[inline(always)]
+    fn m4x4_vector_mul(this: Vector4<Self>, other: Matrix4x4<Self>) -> Vector4<Self> {
+        Vector4 {
+            x: this.x * other.a[M11] + this.y * other.a[M21] + this.z * other.a[M31] + this.t * other.a[M41],
+            y: this.x * other.a[M12] + this.y * other.a[M22] + this.z * other.a[M32] + this.t * other.a[M42],
+            z: this.x * other.a[M13] + this.y * other.a[M23] + this.z * other.a[M33] + this.t * other.a[M43],
+            t: this.x * other.a[M14] + this.y * other.a[M24] + this.z * other.a[M34] + this.t * other.a[M44],
+        }
+    }
+
+    #[inline(always)]
     fn m4x4_vector_outer_product(col: Vector4<Self>, row: Vector4<Self>) -> Matrix4x4<Self> {
         // Structure data into local fixed-size arrays of 4 elements.
         // Since row is align(16), we manually map the implicit 4th buffer element.
         let r = [row.x, row.y, row.z, row.t];
 
-        let mut m0 = [0.0; 4];
-        let mut m1 = [0.0; 4];
-        let mut m2 = [0.0; 4];
-        let mut m3 = [0.0; 4];
 
         // Write uniform loops spanning exactly 4 elements.
         // LLVM's auto-vectorizer recognizes 4-wide float operations
         // and combines these into parallel execution blocks, if the processor supports it.
+        let mut m0 = [0.0; 4];
         for ii in 0..4 {
             m0[ii] = col.x * r[ii];
         }
+        let mut m1 = [0.0; 4];
         for ii in 0..4 {
             m1[ii] = col.y * r[ii];
         }
+        let mut m2 = [0.0; 4];
         for ii in 0..4 {
             m2[ii] = col.z * r[ii];
         }
+        let mut m3 = [0.0; 4];
         for ii in 0..4 {
             m3[ii] = col.t * r[ii];
         }
@@ -436,23 +437,23 @@ impl Matrix4x4Math for f64 {
         // Since row is align(16), we manually map the implicit 4th buffer element.
         let r = [this.w, this.x, this.y, this.z];
 
-        let mut m0 = [0.0; 4];
-        let mut m1 = [0.0; 4];
-        let mut m2 = [0.0; 4];
-        let mut m3 = [0.0; 4];
 
         // Write uniform loops spanning exactly 4 elements.
         // LLVM's auto-vectorizer recognizes 4-wide float operations
         // and combines these into parallel execution blocks, if the processor supports it.
+        let mut m0 = [0.0; 4];
         for ii in 0..4 {
             m0[ii] = this.w * r[ii];
         }
+        let mut m1 = [0.0; 4];
         for ii in 0..4 {
             m1[ii] = this.x * r[ii];
         }
+        let mut m2 = [0.0; 4];
         for ii in 0..4 {
             m2[ii] = this.y * r[ii];
         }
+        let mut m3 = [0.0; 4];
         for ii in 0..4 {
             m3[ii] = this.z * r[ii];
         }
@@ -518,11 +519,29 @@ impl Matrix4x4Math for f64 {
 
     #[rustfmt::skip]
     #[inline(always)]
-    fn m4x4_determinant(this: Matrix4x4<Self>) -> Self {
-         this.a[M11] * Self::m3x3_determinant(Matrix3x3 { a: [this.a[M22], this.a[M23], this.a[M24], this.a[M32], this.a[M33], this.a[M34], this.a[M42], this.a[M43], this.a[M44]]})
+    fn m4x4_determinant(s: Matrix4x4<Self>) -> Self {
+         /*this.a[M11] * Self::m3x3_determinant(Matrix3x3 { a: [this.a[M22], this.a[M23], this.a[M24], this.a[M32], this.a[M33], this.a[M34], this.a[M42], this.a[M43], this.a[M44]]})
         -this.a[M12] * Self::m3x3_determinant(Matrix3x3 { a: [this.a[M21], this.a[M23], this.a[M24], this.a[M31], this.a[M33], this.a[M34], this.a[M41], this.a[M43], this.a[M44]]})
         +this.a[M13] * Self::m3x3_determinant(Matrix3x3 { a: [this.a[M21], this.a[M22], this.a[M24], this.a[M31], this.a[M32], this.a[M34], this.a[M41], this.a[M42], this.a[M44]]})
-        -this.a[M14] * Self::m3x3_determinant(Matrix3x3 { a: [this.a[M21], this.a[M22], this.a[M23], this.a[M31], this.a[M32], this.a[M33], this.a[M41], this.a[M42], this.a[M43]]})
+        -this.a[M14] * Self::m3x3_determinant(Matrix3x3 { a: [this.a[M21], this.a[M22], this.a[M23], this.a[M31], this.a[M32], this.a[M33], this.a[M41], this.a[M42], this.a[M43]]})*/
+        let s0  = s.a[M11]; let s1  = s.a[M12]; let s2  = s.a[M13]; let s3  = s.a[M14];
+        let s4  = s.a[M21]; let s5  = s.a[M22]; let s6  = s.a[M23]; let s7  = s.a[M24];
+        let s8  = s.a[M31]; let s9  = s.a[M32]; let s10 = s.a[M33]; let s11 = s.a[M34];
+        let s12 = s.a[M41]; let s13 = s.a[M42]; let s14 = s.a[M43]; let s15 = s.a[M44];
+
+        let b0 = s8 * s13 - s9 * s12;
+        let b1 = s8 * s14 - s10 * s12;
+        let b2 = s8 * s15 - s11 * s12;
+        let b3 = s9 * s14 - s10 * s13;
+        let b4 = s9 * s15 - s11 * s13;
+        let b5 = s10 * s15 - s11 * s14;
+
+        let c00 =  s5 * b5 - s6 * b4 + s7 * b3;
+        let c10 = -s4 * b5 + s6 * b2 - s7 * b1;
+        let c20 =  s4 * b4 - s5 * b2 + s7 * b0;
+        let c30 = -s4 * b3 + s5 * b1 - s6 * b0;
+
+        s0 * c00 + s1 * c10 + s2 * c20 + s3 * c30
     }
 
     #[rustfmt::skip]

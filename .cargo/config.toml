@@ -25,15 +25,9 @@ rustflags = [
 [alias]
 # Run using: 'cargo test-libm'
 test-libm = "test --features libm"
-
 test-none = [ "test", "--no-default-features"]
-
-test-serde = "test --features serde"
-
+test-serde = [ "test --features serde" ]
 test-uom = [ "test", "--no-default-features", "--features", "serde, uom, libm"]
-
-# Run using: 'rustup run nightly cargo check-simd'
-check-simd = "check --features simd,align"
 
 check-none = [ "check", "--no-default-features"]
 check-libm = [ "check", "--no-default-features", "--features", "libm"]
@@ -41,6 +35,13 @@ check-std = [ "check", "--no-default-features", "--features", "std"]
 check-std-libm = [ "check", "--no-default-features", "--features", "std, libm"]
 check-serde = [ "check", "--no-default-features", "--features", "serde"]
 check-storage = [ "check", "--no-default-features", "--features", "storage"]
+
+# Run using: 'CARGO_BUILD_WARNINGS=allow rustup run nightly cargo check-simd'
+check-simd = "check --features simd,align"
+# Run using: 'CARGO_BUILD_WARNINGS=allow rustup run nightly cargo test-simd'
+# Waw: Run using: 'rustup run nightly cargo test-simd'
+
+test-simd = "test --features simd,align"
 
 # Continuous Integration
 ci = "run --package xtask --bin xtask"

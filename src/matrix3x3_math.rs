@@ -100,37 +100,6 @@ impl Matrix3x3Math for f32 {
         }
     }
 
-    /*#[inline(always)]
-    fn m3x3_mul_vector(this: Matrix3x3<Self>, other: Vector3<Self>) -> Vector3<Self> {
-        // Map the 16-byte aligned vector into a uniform 4-element array.
-        // The 4th element is zeroed out so it contributes nothing to the dot products.
-        let v = [other.x, other.y, other.z, 0.0];
-
-        // Unpack the flat matrix into 4-element padded rows.
-        let r1 = [this.a[M11], this.a[M12], this.a[M13], 0.0];
-        let r2 = [this.a[M21], this.a[M22], this.a[M23], 0.0];
-        let r3 = [this.a[M31], this.a[M32], this.a[M33], 0.0];
-
-        // Calculates row dot products using unrolled, 4-wide loops.
-        // LLVM easily vectorizes a simple element-wise multiply-and-accumulate loop
-        // spanning exactly 4 items, mapping it directly to hardware registers.
-        let mut x = 0.0;
-        let mut y = 0.0;
-        let mut z = 0.0;
-
-        for ii in 0..4 {
-            x += r1[ii] * v[ii];
-        }
-        for ii in 0..4 {
-            y += r2[ii] * v[ii];
-        }
-        for ii in 0..4 {
-            z += r3[ii] * v[ii];
-        }
-
-        Vector3 { x, y, z }
-    }*/
-
     #[rustfmt::skip]
     #[inline(always)]
     fn m3x3_vector_mul(this: Vector3<Self>, other: Matrix3x3<Self>) -> Vector3<Self> {
@@ -159,7 +128,7 @@ impl Matrix3x3Math for f32 {
             let c2 = row_y * col_simd;
             let c3 = row_z * col_simd;
 
-            Matrix3x3::from_padded_2d_row_array([c1.to_array(), c2.to_array(), c3.to_array()])
+            Matrix3x3::from_padded_2d_column_array([c1.to_array(), c2.to_array(), c3.to_array()])
         }
         #[cfg(not(feature = "simd"))]
         {
@@ -177,25 +146,31 @@ impl Matrix3x3Math for f32 {
     fn m3x3_mul(this: Matrix3x3<Self>, other: Matrix3x3<Self>) -> Matrix3x3<Self> {
         #[cfg(feature = "simd")]
         {
-            let a0_simd = f32x4::from_array([this.a[M11], this.a[M12], this.a[M13], 0.0]);
-            let a3_simd = f32x4::from_array([this.a[M21], this.a[M22], this.a[M23], 0.0]);
-            let a6_simd = f32x4::from_array([this.a[M31], this.a[M32], this.a[M33], 0.0]);
-            let b0_simd = f32x4::from_array([other.a[M11], other.a[M21], other.a[M31], 0.0]);
-            let b1_simd = f32x4::from_array([other.a[M12], other.a[M22], other.a[M32], 0.0]);
-            let b2_simd = f32x4::from_array([other.a[M13], other.a[M23], other.a[M33], 0.0]);
-            let a = [
-                (a0_simd * b0_simd).reduce_sum(),
-                (a0_simd * b1_simd).reduce_sum(),
-                (a0_simd * b2_simd).reduce_sum(),
-                (a3_simd * b0_simd).reduce_sum(),
-                (a3_simd * b1_simd).reduce_sum(),
-                (a3_simd * b2_simd).reduce_sum(),
-                (a6_simd * b0_simd).reduce_sum(),
-                (a6_simd * b1_simd).reduce_sum(),
-                (a6_simd * b2_simd).reduce_sum(),
-            ];
-            Matrix3x3 { a }
+            // Load the three rows of the other matrix into SIMD registers
+            let b_row0 = f32x4::from_array([other.a[M11], other.a[M12], other.a[M13], 0.0]);
+            let b_row1 = f32x4::from_array([other.a[M21], other.a[M22], other.a[M23], 0.0]);
+            let b_row2 = f32x4::from_array([other.a[M31], other.a[M32], other.a[M33], 0.0]);
+
+            let r0 = f32x4::splat(this.a[M11]) * b_row0
+                + f32x4::splat(this.a[M12]) * b_row1
+                + f32x4::splat(this.a[M13]) * b_row2;
+
+            let r1 = f32x4::splat(this.a[M21]) * b_row0
+                + f32x4::splat(this.a[M22]) * b_row1
+                + f32x4::splat(this.a[M23]) * b_row2;
+
+            let r2 = f32x4::splat(this.a[M31]) * b_row0
+                + f32x4::splat(this.a[M32]) * b_row1
+                + f32x4::splat(this.a[M33]) * b_row2;
+
+            // Extract arrays (ignoring the 4th lane)
+            let r0 = r0.to_array();
+            let r1 = r1.to_array();
+            let r2 = r2.to_array();
+
+            Matrix3x3 { a: [r0[0], r1[0], r2[0], r0[1], r1[1], r2[1], r0[2], r1[2], r2[2]] }
         }
+
         #[cfg(not(feature = "simd"))]
         {
             let a = [
@@ -404,9 +379,9 @@ impl Matrix3x3Math for f64 {
     #[inline(always)]
     fn m3x3_mul_vector(this: Matrix3x3<Self>, other: Vector3<Self>) -> Vector3<Self> {
         Vector3 {
-            x: this.a[M11] * other.x + this.a[M21] * other.y + this.a[M31] * other.z,
-            y: this.a[M12] * other.x + this.a[M22] * other.y + this.a[M32] * other.z,
-            z: this.a[M13] * other.x + this.a[M23] * other.y + this.a[M33] * other.z,
+            x: this.a[M11] * other.x + this.a[M12] * other.y + this.a[M13] * other.z,
+            y: this.a[M21] * other.x + this.a[M22] * other.y + this.a[M23] * other.z,
+            z: this.a[M31] * other.x + this.a[M32] * other.y + this.a[M33] * other.z,
         }
     }
 

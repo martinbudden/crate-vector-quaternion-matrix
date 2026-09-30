@@ -59,10 +59,10 @@ where
     /// Create a matrix.
     /// ```
     /// # use vqm::Matrix2x2f32;
-    /// let m = Matrix2x2f32::new([  2.0,  17.0,
-    ///                              5.0,  11.0]);
-    /// assert_eq!(m, Matrix2x2f32::new([  2.0,  17.0,
-    ///                                    5.0,  11.0]));
+    /// let m = Matrix2x2f32::new([  2.0, 17.0,
+    ///                              5.0, 11.0]);
+    /// assert_eq!(m, Matrix2x2f32::new([  2.0, 17.0,
+    ///                                    5.0, 11.0]));
     /// ```
     #[inline]
     pub const fn new(a: [T; 4]) -> Self {
@@ -91,10 +91,10 @@ where
     /// Matrix from array of row vectors.
     /// ```
     /// # use vqm::{Matrix2x2f32,Vector2f32};
-    /// let m = Matrix2x2f32::from_rows([ Vector2f32::new(2.0, 17.0),
-    ///                                   Vector2f32::new(5.0, 11.0) ]);
+    /// let m = Matrix2x2f32::from_rows([ Vector2f32::new( 2.0, 17.0),
+    ///                                   Vector2f32::new( 5.0, 11.0) ]);
     /// assert_eq!(m, Matrix2x2f32::new([  2.0, 17.0,
-    ///                                    5.0, 11.0 ]));
+    ///                                    5.0, 11.0]));
     /// ```
     #[inline]
     pub const fn from_rows(v: [Vector2<T>; 2]) -> Self {
@@ -109,10 +109,10 @@ where
     /// Matrix from array of column vectors.
     /// ```
     /// # use vqm::{Matrix2x2f32,Vector2f32};
-    /// let m = Matrix2x2f32::from_columns([ Vector2f32::new(2.0, 17.0),
-    ///                                      Vector2f32::new(5.0, 11.0) ]);
+    /// let m = Matrix2x2f32::from_columns([ Vector2f32::new( 2.0, 17.0),
+    ///                                      Vector2f32::new( 5.0, 11.0) ]);
     /// assert_eq!(m, Matrix2x2f32::new([  2.0,   5.0,
-    ///                                   17.0,  11.0 ]));
+    ///                                   17.0,  11.0]));
     /// ```
     #[inline]
     pub const fn from_columns(v: [Vector2<T>; 2]) -> Self {
@@ -130,7 +130,7 @@ where
     /// let m = Matrix2x2f32::from_row_array([  2.0, 17.0,
     ///                                         5.0, 11.0]);
     /// assert_eq!(m, Matrix2x2f32::new([  2.0, 17.0,
-    ///                                    5.0, 11.0 ]));
+    ///                                    5.0, 11.0]));
     /// ```
     #[inline]
     pub const fn from_row_array(a: [T; 4]) -> Self {
@@ -148,7 +148,7 @@ where
     /// let m = Matrix2x2f32::from_column_array([  2.0, 17.0,
     ///                                            5.0, 11.0]);
     /// assert_eq!(m, Matrix2x2f32::new([  2.0,   5.0,
-    ///                                   17.0,  11.0 ]));
+    ///                                   17.0,  11.0]));
     /// ```
     #[inline]
     pub const fn from_column_array(a: [T; 4]) -> Self {
@@ -161,7 +161,7 @@ where
     /// let m = Matrix2x2f32::from_2d_row_array([[  2.0, 17.0],
     ///                                          [  5.0, 11.0]]);
     /// assert_eq!(m, Matrix2x2f32::new([  2.0, 17.0,
-    ///                                    5.0, 11.0 ]));
+    ///                                    5.0, 11.0]));
     /// ```
     #[inline]
     pub const fn from_2d_row_array(a: [[T; 2]; 2]) -> Self {
@@ -179,7 +179,7 @@ where
     /// let m = Matrix2x2f32::from_2d_column_array([[  2.0, 17.0],
     ///                                             [  5.0, 11.0]]);
     /// assert_eq!(m, Matrix2x2f32::new([  2.0,   5.0,
-    ///                                   17.0,  11.0 ]));
+    ///                                   17.0,  11.0]));
     /// ```
     #[inline]
     pub const fn from_2d_column_array(a: [[T; 2]; 2]) -> Self {
@@ -649,7 +649,7 @@ where
     /// # use vqm::Matrix2x2f32;
     /// let m = Matrix2x2f32::new([  2.0, 17.0,
     ///                              5.0, 11.0]);
-    /// let a = [3.0, 13.0 ];
+    /// let a = [3.0, 13.0];
     /// let n = Matrix2x2f32::new([  a[0], 0.0,
     ///                              0.0,  a[1]]);
     /// let p = m + n;
@@ -671,7 +671,7 @@ where
     /// # use vqm::Matrix2x2f32;
     /// let mut m = Matrix2x2f32::new([  2.0, 17.0,
     ///                                  5.0, 11.0]);
-    /// let a = [3.0, 13.0 ];
+    /// let a = [3.0, 13.0];
     /// let n = Matrix2x2f32::new([  a[0], 0.0,
     ///                              0.0,  a[1]]);
     /// let p = m + n;
@@ -1036,7 +1036,7 @@ where
     /// # use vqm::Matrix2x2f32;
     /// let m = Matrix2x2f32::new([  2.0, 17.0,
     ///                              5.0, 11.0]);
-    /// let a = [ 3.0, 13.0 ];
+    /// let a = [ 3.0, 13.0];
     /// let n = Matrix2x2f32::new([  a[0], 0.0,
     ///                              0.0, a[1]]);
     /// let r = m.mul_diagonal_array(a);
@@ -1462,7 +1462,7 @@ where
     ///                              5.0, 11.0]);
     /// let a = m.diagonal_as_array();
     ///
-    /// assert_eq!(a, [ 2.0, 11.0 ]);
+    /// assert_eq!(a, [ 2.0, 11.0]);
     /// ```
     pub fn diagonal_as_array(self) -> [T; 2] {
         [self.a[Self::M11], self.a[Self::M22]]
