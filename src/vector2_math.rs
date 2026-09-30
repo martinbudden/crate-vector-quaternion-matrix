@@ -1,12 +1,12 @@
 #![allow(clippy::inline_always)]
-use cfg_if::cfg_if;
+
 use core::mem::{align_of, size_of};
-cfg_if! {
-    if #[cfg(feature = "simd")] {
-        use core::mem::transmute;
-        use core::simd::{f32x2,num::SimdFloat};
-    }
-}
+
+#[cfg(feature = "simd")]
+use core::{
+    mem::transmute,
+    simd::{f32x2, num::SimdFloat},
+};
 
 const _: () = assert!(size_of::<Vector2<f32>>() == 8);
 const _: () = assert!(align_of::<Vector2<f32>>() == 8);

@@ -41,6 +41,7 @@ At some point [0.1.0] to [0.1.14] will be [YANKED]
 
 - `Matrix9x9`, it is superseded by `Matrix3x3xM3x3`.
 - removed unnecessary `Copy` trait constraints.
+- removed dependency on `cfg-if`.
 
 ## [0.1.16] - 2026-09-05
 

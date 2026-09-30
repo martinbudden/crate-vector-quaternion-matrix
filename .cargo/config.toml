@@ -27,8 +27,8 @@ rustflags = [
 test-libm = "test --features libm"
 test-std = "test --features std"
 test-none = [ "test", "--no-default-features"]
-test-serde = [ "test --features serde" ]
-test-uom = [ "test", "--no-default-features", "--features", "serde, uom, libm"]
+test-serde = [ "test", "--features", "serde" ]
+test-uom = [ "test", "--no-default-features", "--features", "serde, storage, uom, libm"]
 
 check-none = [ "check", "--no-default-features"]
 check-libm = [ "check", "--no-default-features", "--features", "libm"]

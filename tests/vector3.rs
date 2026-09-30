@@ -1,20 +1,22 @@
-use cfg_if::cfg_if;
 use vqm::{Vector3, Vector3f32, Vector3f64};
 
 // **** Align ****
-cfg_if! {
-    if #[cfg(feature = "align")] {
-        const _: () = assert!(size_of::<Vector3f32>() == 16);
-        const _: () = assert!(align_of::<Vector3f32>() == 16);
-        const _: () = assert!(size_of::<Vector3f64>() == 32);
-        const _: () = assert!(align_of::<Vector3f64>() == 16);
-    } else {
-        const _: () = assert!(size_of::<Vector3f32>() == 12);
-        const _: () = assert!(align_of::<Vector3f32>() == 4);
-        const _: () = assert!(size_of::<Vector3f64>() == 24);
-        const _: () = assert!(align_of::<Vector3f64>() == 8);
-    }
-}
+
+#[cfg(feature = "align")]
+const _: () = assert!(
+    size_of::<Vector3f32>() == 16
+        && align_of::<Vector3f32>() == 16
+        && size_of::<Vector3f64>() == 32
+        && align_of::<Vector3f64>() == 16
+);
+
+#[cfg(not(feature = "align"))]
+const _: () = assert!(
+    size_of::<Vector3f32>() == 12
+        && align_of::<Vector3f32>() == 4
+        && size_of::<Vector3f64>() == 24
+        && align_of::<Vector3f64>() == 8
+);
 
 #[cfg(test)]
 mod test_traits {

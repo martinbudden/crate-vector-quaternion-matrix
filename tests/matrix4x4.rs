@@ -1,22 +1,13 @@
-use cfg_if::cfg_if;
 use num_traits::identities::{One, Zero};
 use vqm::{Matrix4x4, Matrix4x4f32};
 
 // **** Align
 
-cfg_if! {
-    if #[cfg(feature = "simd")] {
-        // must be aligned if using SIMD
-        const _: () = assert!(size_of::<Matrix4x4<f32>>() == 64);
-        const _: () = assert!(align_of::<Matrix4x4<f32>>() == 64);
-    } else if #[cfg(feature = "align")] {
-        const _: () = assert!(size_of::<Matrix4x4<f32>>() == 64);
-        const _: () = assert!(align_of::<Matrix4x4<f32>>() == 16);
-    } else {
-        const _: () = assert!(size_of::<Matrix4x4<f32>>() == 64);
-        const _: () = assert!(align_of::<Matrix4x4<f32>>() == 16);
-    }
-}
+#[cfg(any(feature = "align", feature = "simd"))]
+const _: () = assert!(size_of::<Matrix4x4<f32>>() == 64 && align_of::<Matrix4x4<f32>>() == 64);
+
+#[cfg(not(any(feature = "align", feature = "simd")))]
+const _: () = assert!(size_of::<Matrix4x4<f32>>() == 64 && align_of::<Matrix4x4<f32>>() == 16);
 
 #[cfg(test)]
 mod test_traits {

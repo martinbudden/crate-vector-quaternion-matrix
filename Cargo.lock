@@ -819,7 +819,6 @@ name = "vqm"
 version = "0.1.16"
 dependencies = [
  "approx",
- "cfg-if",
  "criterion",
  "derive_more",
  "libm",

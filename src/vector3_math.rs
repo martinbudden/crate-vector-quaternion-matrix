@@ -1,22 +1,18 @@
 #![allow(clippy::inline_always)]
-use cfg_if::cfg_if;
+
 use core::mem::{align_of, size_of};
 
-cfg_if! {
-    if #[cfg(feature = "simd")] {
-        use core::mem::transmute;
-        use core::simd::{f32x4,num::SimdFloat,simd_swizzle};
-        // must be aligned if using SIMD
-        const _: () = assert!(size_of::<Vector3<f32>>() == 16);
-        const _: () = assert!(align_of::<Vector3<f32>>() == 16);
-    } else if #[cfg(feature = "align")] {
-        const _: () = assert!(size_of::<Vector3<f32>>() == 16);
-        const _: () = assert!(align_of::<Vector3<f32>>() == 16);
-    } else {
-        const _: () = assert!(size_of::<Vector3<f32>>() == 12);
-        const _: () = assert!(align_of::<Vector3<f32>>() == 4);
-    }
-}
+#[cfg(feature = "simd")]
+use core::{
+    mem::transmute,
+    simd::{f32x4, num::SimdFloat, simd_swizzle},
+};
+
+#[cfg(any(feature = "align", feature = "simd"))]
+const _: () = assert!(size_of::<Vector3<f32>>() == 16 && align_of::<Vector3<f32>>() == 16);
+
+#[cfg(not(any(feature = "align", feature = "simd")))]
+const _: () = assert!(size_of::<Vector3<f32>>() == 12 && align_of::<Vector3<f32>>() == 4);
 
 use crate::Vector3;
 
