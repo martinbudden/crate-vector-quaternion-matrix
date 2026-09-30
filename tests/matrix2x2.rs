@@ -45,14 +45,12 @@ mod tests {
         let a: Matrix2x2<f32> = Matrix2x2f32::default();
         assert_eq!(a, Matrix2x2f32::new([0.0, 0.0, 0.0, 0.0]));
         let z = Matrix2x2f32::zero();
-        //let z: Matrix2x2 = zero();
         assert_eq!(a, z);
         assert!(z.is_zero());
         assert!(!z.is_one());
         assert!(z.is_near_zero(1e-5));
 
         let i = Matrix2x2f32::one();
-        //let i: Matrix2x2 = one();
         assert!(i.is_one());
         assert!(!i.is_zero());
         assert!(i.is_near_identity(1e-5));

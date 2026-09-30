@@ -29,7 +29,8 @@ pub type Matrix4x4f64 = Matrix4x4<f64>;
 #[derive(Clone, Copy, Default, PartialEq)]
 #[cfg_attr(feature = "serde", allow(clippy::unsafe_derive_deserialize))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
-#[repr(C, align(64))]
+#[cfg_attr(feature = "align", repr(C, align(64)))]
+#[cfg_attr(not(feature = "align"), repr(C, align(16)))]
 pub struct Matrix4x4<T> {
     // Flattened 4x4 matrix: 16 elements in column-major order
     pub(crate) a: [T; 16],

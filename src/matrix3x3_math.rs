@@ -1,23 +1,9 @@
 #![allow(clippy::inline_always)]
-use cfg_if::cfg_if;
-use core::mem::{align_of, size_of};
-
-cfg_if! {
-    if #[cfg(feature = "simd")] {
-        use core::simd::{f32x4,num::SimdFloat};
-        // must be aligned if using SIMD
-        const _: () = assert!(size_of::<Matrix3x3<f32>>() == 64);
-        const _: () = assert!(align_of::<Matrix3x3<f32>>() == 64);
-    } else if #[cfg(feature = "align")] {
-        const _: () = assert!(size_of::<Matrix3x3<f32>>() == 64);
-        const _: () = assert!(align_of::<Matrix3x3<f32>>() == 64);
-    } else {
-        const _: () = assert!(size_of::<Matrix3x3<f32>>() == 36);
-        const _: () = assert!(align_of::<Matrix3x3<f32>>() == 4);
-    }
-}
 
 use crate::{Matrix3x3, Vector3};
+
+#[cfg(feature = "simd")]
+use core::simd::{f32x4, num::SimdFloat};
 
 // Column 1
 const M11: usize = 0;
@@ -142,6 +128,8 @@ impl Matrix3x3Math for f32 {
         }
     }
 
+    // **** Mul ****
+
     #[inline(always)]
     fn m3x3_mul(this: Matrix3x3<Self>, other: Matrix3x3<Self>) -> Matrix3x3<Self> {
         #[cfg(feature = "simd")]
@@ -170,7 +158,6 @@ impl Matrix3x3Math for f32 {
 
             Matrix3x3 { a: [r0[0], r1[0], r2[0], r0[1], r1[1], r2[1], r0[2], r1[2], r2[2]] }
         }
-
         #[cfg(not(feature = "simd"))]
         {
             let a = [
@@ -394,6 +381,8 @@ impl Matrix3x3Math for f64 {
         }
     }
 
+    // **** Outer product ****
+
     #[rustfmt::skip]
     #[inline(always)]
     fn m3x3_vector_outer_product(col: Vector3<Self>, row: Vector3<Self>) -> Matrix3x3<Self> {
@@ -406,15 +395,19 @@ impl Matrix3x3Math for f64 {
         }
     }
 
+    // **** Mul ****
+
     #[inline(always)]
     fn m3x3_mul(this: Matrix3x3<Self>, other: Matrix3x3<Self>) -> Matrix3x3<Self> {
         let a = [
             this.a[M11] * other.a[M11] + this.a[M12] * other.a[M21] + this.a[M13] * other.a[M31],
             this.a[M11] * other.a[M12] + this.a[M12] * other.a[M22] + this.a[M13] * other.a[M32],
             this.a[M11] * other.a[M13] + this.a[M12] * other.a[M23] + this.a[M13] * other.a[M33],
+
             this.a[M21] * other.a[M11] + this.a[M22] * other.a[M21] + this.a[M23] * other.a[M31],
             this.a[M21] * other.a[M12] + this.a[M22] * other.a[M22] + this.a[M23] * other.a[M32],
             this.a[M21] * other.a[M13] + this.a[M22] * other.a[M23] + this.a[M23] * other.a[M33],
+
             this.a[M31] * other.a[M11] + this.a[M32] * other.a[M21] + this.a[M33] * other.a[M31],
             this.a[M31] * other.a[M12] + this.a[M32] * other.a[M22] + this.a[M33] * other.a[M32],
             this.a[M31] * other.a[M13] + this.a[M32] * other.a[M23] + this.a[M33] * other.a[M33],
@@ -450,9 +443,9 @@ impl Matrix3x3Math for f64 {
     #[rustfmt::skip]
     #[inline(always)]
     fn m3x3_determinant(this: Matrix3x3<Self>) -> Self {
-         this.a[M11] * (this.a[M22] * this.a[M33] - this.a[M23] * this.a[M32])
-        -this.a[M12] * (this.a[M21] * this.a[M33] - this.a[M23] * this.a[M31])
-        +this.a[M13] * (this.a[M21] * this.a[M32] - this.a[M22] * this.a[M31])
+          this.a[M11] * (this.a[M22] * this.a[M33] - this.a[M23] * this.a[M32])
+        - this.a[M12] * (this.a[M21] * this.a[M33] - this.a[M23] * this.a[M31])
+        + this.a[M13] * (this.a[M21] * this.a[M32] - this.a[M22] * this.a[M31])
     }
 
     /// Returns the adjugate and determinant of a matrix.

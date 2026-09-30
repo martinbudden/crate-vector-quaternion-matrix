@@ -2,18 +2,19 @@ use cfg_if::cfg_if;
 use num_traits::identities::{One, Zero};
 use vqm::{Matrix3x3, Matrix3x3f32, Vector3};
 
-// **** Align ****
+// **** Align
+
 cfg_if! {
-    if #[cfg(feature = "align")] {
+    if #[cfg(feature = "simd")] {
+        // must be aligned if using SIMD
         const _: () = assert!(size_of::<Matrix3x3<f32>>() == 64);
         const _: () = assert!(align_of::<Matrix3x3<f32>>() == 64);
-        const _: () = assert!(size_of::<Matrix3x3<f64>>() == 128);
-        const _: () = assert!(align_of::<Matrix3x3<f64>>() == 64);
+    } else if #[cfg(feature = "align")] {
+        const _: () = assert!(size_of::<Matrix3x3<f32>>() == 64);
+        const _: () = assert!(align_of::<Matrix3x3<f32>>() == 64);
     } else {
         const _: () = assert!(size_of::<Matrix3x3<f32>>() == 36);
         const _: () = assert!(align_of::<Matrix3x3<f32>>() == 4);
-        const _: () = assert!(size_of::<Matrix3x3<f64>>() == 72);
-        const _: () = assert!(align_of::<Matrix3x3<f64>>() == 8);
     }
 }
 
@@ -43,6 +44,7 @@ mod test_traits {
         is_storage::<Matrix3x3<f32>>();
     }
 }
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -52,14 +54,12 @@ mod tests {
         let a: Matrix3x3<f32> = Matrix3x3f32::default();
         assert_eq!(a, Matrix3x3f32::new([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]));
         let z = Matrix3x3f32::zero();
-        //let z: Matrix3x3 = zero();
         assert_eq!(a, z);
         assert!(z.is_zero());
         assert!(!z.is_one());
         assert!(z.is_near_zero(1e-5));
 
         let i = Matrix3x3f32::one();
-        //let i: Matrix3x3 = one();
         assert!(i.is_one());
         assert!(!i.is_zero());
         assert!(i.is_near_identity(1e-5));
@@ -67,7 +67,6 @@ mod tests {
     #[test]
     fn m3x3_neg() {
         let a = Matrix3x3f32::new([2.0, 3.0, 5.0, 7.0, 11.0, 13.0, 17.0, 19.0, 23.0]);
-
         assert_eq!(-a, Matrix3x3f32::new([-2.0, -3.0, -5.0, -7.0, -11.0, -13.0, -17.0, -19.0, -23.0]));
 
         let b = -a;

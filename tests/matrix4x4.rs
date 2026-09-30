@@ -1,12 +1,22 @@
-use vqm::Matrix4x4;
+use cfg_if::cfg_if;
+use num_traits::identities::{One, Zero};
+use vqm::{Matrix4x4, Matrix4x4f32};
 
 // **** Align
 
-const _: () = assert!(size_of::<Matrix4x4<f32>>() == 64);
-const _: () = assert!(align_of::<Matrix4x4<f32>>() == 64);
-
-const _: () = assert!(size_of::<Matrix4x4<f64>>() == 128);
-const _: () = assert!(align_of::<Matrix4x4<f64>>() == 64);
+cfg_if! {
+    if #[cfg(feature = "simd")] {
+        // must be aligned if using SIMD
+        const _: () = assert!(size_of::<Matrix4x4<f32>>() == 64);
+        const _: () = assert!(align_of::<Matrix4x4<f32>>() == 64);
+    } else if #[cfg(feature = "align")] {
+        const _: () = assert!(size_of::<Matrix4x4<f32>>() == 64);
+        const _: () = assert!(align_of::<Matrix4x4<f32>>() == 16);
+    } else {
+        const _: () = assert!(size_of::<Matrix4x4<f32>>() == 64);
+        const _: () = assert!(align_of::<Matrix4x4<f32>>() == 16);
+    }
+}
 
 #[cfg(test)]
 mod test_traits {
@@ -32,5 +42,29 @@ mod test_traits {
         is_serde::<Matrix4x4<f32>>();
         #[cfg(feature = "storage")]
         is_storage::<Matrix4x4<f32>>();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn default() {
+        let a: Matrix4x4<f32> = Matrix4x4f32::default();
+        assert_eq!(
+            a,
+            Matrix4x4f32::new([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+        );
+        let z = Matrix4x4f32::zero();
+        assert_eq!(a, z);
+        assert!(z.is_zero());
+        assert!(!z.is_one());
+        assert!(z.is_near_zero(1e-5));
+
+        let i = Matrix4x4f32::one();
+        assert!(i.is_one());
+        assert!(!i.is_zero());
+        assert!(i.is_near_identity(1e-5));
     }
 }

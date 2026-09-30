@@ -219,7 +219,7 @@ assert_eq!(e, Vector3 { x: Velocity::new::<meter_per_second>(0.5), y: Velocity::
 All features except `libm` are off by default. The full set, including those described above, is:
 
 * `libm` - enabled by default, uses `libm` math functions. When disabled `vqm` math function approximations are used.
-* `serde` - implementations of `Serialize` and `Deserialize` for all `vqm` types.
+* `serde` - implementations of `Serialize` and `Deserialize` `MaxSize` for all `vqm` types.
 * `storage` - adds [sequential-storage](https://crates.io/crates/sequential-storage) support for storing data in flash with minimal erase cycles.
 * `uom` - [Units Of Measurement](https://crates.io/crates/uom) support.
 * `align` - aligns larger `struct`s to 16-byte boundaries.

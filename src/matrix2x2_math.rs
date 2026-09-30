@@ -1,18 +1,12 @@
 #![allow(clippy::inline_always)]
-use cfg_if::cfg_if;
-use core::mem::{align_of, size_of};
-
-cfg_if! {
-    if #[cfg(feature = "simd")] {
-        use core::mem::transmute;
-        use core::simd::{f32x2,f32x4,num::SimdFloat};
-    }
-}
-
-const _: () = assert!(size_of::<Matrix2x2<f32>>() == 16);
-const _: () = assert!(align_of::<Matrix2x2<f32>>() == 16);
 
 use crate::{Matrix2x2, Vector2};
+
+#[cfg(feature = "simd")]
+use core::{
+    mem::transmute,
+    simd::{f32x2, f32x4, num::SimdFloat},
+};
 
 // Column 1
 const M11: usize = 0;
@@ -142,9 +136,13 @@ impl Matrix2x2Math for f32 {
         Self::m2x2_add(Self::m2x2_mul_scalar(this, k), other)
     }
 
+    #[rustfmt::skip]
     #[inline(always)]
     fn m2x2_mul_vector(this: Matrix2x2<Self>, other: Vector2<Self>) -> Vector2<Self> {
-        Vector2 { x: this.a[M11] * other.x + this.a[M12] * other.y, y: this.a[M21] * other.x + this.a[M22] * other.y }
+        Vector2 {
+            x: this.a[M11] * other.x + this.a[M12] * other.y,
+            y: this.a[M21] * other.x + this.a[M22] * other.y
+        }
     }
 
     #[rustfmt::skip]
@@ -166,6 +164,8 @@ impl Matrix2x2Math for f32 {
             ],
         }
     }
+
+    // **** Mul ****
 
     #[inline(always)]
     fn m2x2_mul(this: Matrix2x2<Self>, other: Matrix2x2<Self>) -> Matrix2x2<Self> {
@@ -220,17 +220,24 @@ impl Matrix2x2Math for f32 {
         this.a.iter().product()
     }
 
+    #[rustfmt::skip]
     #[inline(always)]
     fn m2x2_determinant(this: Matrix2x2<Self>) -> Self {
-        this.a[M11] * this.a[M22] - this.a[M12] * this.a[M21]
+          this.a[M11] * this.a[M22]
+        - this.a[M12] * this.a[M21]
     }
 
+    /// Returns the adjugate and determinant of a matrix.
+    #[rustfmt::skip]
+    #[rustfmt::skip]
     #[inline(always)]
     fn m2x2_adjugate(this: Matrix2x2<Self>) -> (Matrix2x2<Self>, Self) {
-        (
-            Matrix2x2 { a: [this.a[M22], -this.a[M21], -this.a[M12], this.a[M11]] },
-            this.a[M11] * this.a[M22] - this.a[M12] * this.a[M21],
-        )
+        let determinant = this.a[M11] * this.a[M22] - this.a[M12] * this.a[M21];
+        let a = [
+            this.a[M22], -this.a[M21],
+            -this.a[M12], this.a[M11]
+        ];
+        (Matrix2x2 { a }, determinant)
     }
 }
 
@@ -288,7 +295,7 @@ impl Matrix2x2Math for f64 {
     fn m2x2_mul_vector(this: Matrix2x2<Self>, other: Vector2<Self>) -> Vector2<Self> {
         Vector2 {
             x: this.a[M11] * other.x + this.a[M21] * other.y,
-            y: this.a[M12] * other.x + this.a[M22] * other.y
+            y: this.a[M12] * other.x + this.a[M22] * other.y,
         }
     }
 
@@ -297,9 +304,11 @@ impl Matrix2x2Math for f64 {
     fn m2x2_vector_mul(this: Vector2<Self>, other: Matrix2x2<Self>) -> Vector2<Self> {
         Vector2 {
             x: this.x * other.a[M11] + this.y * other.a[M21],
-            y: this.x * other.a[M12] + this.y * other.a[M22]
+            y: this.x * other.a[M12] + this.y * other.a[M22],
         }
     }
+
+    // **** Outer product ****
 
     #[rustfmt::skip]
     #[inline(always)]
@@ -312,11 +321,14 @@ impl Matrix2x2Math for f64 {
         }
     }
 
+    // **** Mul ****
+
     #[inline(always)]
     fn m2x2_mul(this: Matrix2x2<Self>, other: Matrix2x2<Self>) -> Matrix2x2<Self> {
         let a = [
             this.a[M11] * other.a[M11] + this.a[M12] * other.a[M21],
             this.a[M11] * other.a[M12] + this.a[M12] * other.a[M22],
+
             this.a[M21] * other.a[M11] + this.a[M22] * other.a[M21],
             this.a[M21] * other.a[M12] + this.a[M22] * other.a[M22],
         ];
@@ -348,16 +360,23 @@ impl Matrix2x2Math for f64 {
         this.a.iter().product()
     }
 
+    #[rustfmt::skip]
     #[inline(always)]
     fn m2x2_determinant(this: Matrix2x2<Self>) -> Self {
-        this.a[M11] * this.a[M22] - this.a[M12] * this.a[M21]
+          this.a[M11] * this.a[M22]
+        - this.a[M12] * this.a[M21]
     }
 
+    /// Returns the adjugate and determinant of a matrix.
+    #[rustfmt::skip]
     #[inline(always)]
     fn m2x2_adjugate(this: Matrix2x2<Self>) -> (Matrix2x2<Self>, Self) {
-        (
-            Matrix2x2 { a: [this.a[M22], -this.a[M21], -this.a[M12], this.a[M11]] },
-            this.a[M11] * this.a[M22] - this.a[M12] * this.a[M21],
-        )
+        let determinant = this.a[M11] * this.a[M22] - this.a[M12] * this.a[M21];
+        let a = [
+            this.a[M22], -this.a[M21],
+            -this.a[M12], this.a[M11]
+        ];
+
+        (Matrix2x2 { a }, determinant)
     }
 }

@@ -198,6 +198,8 @@ impl Matrix4x4Math for f32 {
         Matrix4x4 { a: ret }
     }*/
 
+    // **** Mul ****
+
     #[inline(always)]
     fn m4x4_mul(this: Matrix4x4<Self>, other: Matrix4x4<Self>) -> Matrix4x4<Self> {
         let mut ret = [0.0; 16];
@@ -276,6 +278,7 @@ impl Matrix4x4Math for f32 {
         s0 * c00 + s1 * c01 + s2 * c02 + s3 * c03
     }
 
+    /// Returns the adjugate and determinant of a matrix.
     #[rustfmt::skip]
     #[inline(always)]
     fn m4x4_adjugate(s: Matrix4x4<Self>) -> (Matrix4x4<Self>, Self) {
@@ -328,12 +331,14 @@ impl Matrix4x4Math for f32 {
 
         let determinant = s0 * c00 + s1 * c10 + s2 * c20 + s3 * c30;
 
-        (Matrix4x4 { a: [
+        let a = [
             c00, c10, c20, c30,
             c01, c11, c21, c31,
             c02, c12, c22, c32,
-            c03, c13, c23, c33
-        ]}, determinant)
+            c03, c13, c23, c33,
+        ];
+
+        (Matrix4x4 { a }, determinant)
     }
 }
 
@@ -394,12 +399,13 @@ impl Matrix4x4Math for f64 {
         }
     }
 
+    // **** Outer product ****
+
     #[inline(always)]
     fn m4x4_vector_outer_product(col: Vector4<Self>, row: Vector4<Self>) -> Matrix4x4<Self> {
         // Structure data into local fixed-size arrays of 4 elements.
         // Since row is align(16), we manually map the implicit 4th buffer element.
         let r = [row.x, row.y, row.z, row.t];
-
 
         // Write uniform loops spanning exactly 4 elements.
         // LLVM's auto-vectorizer recognizes 4-wide float operations
@@ -437,7 +443,6 @@ impl Matrix4x4Math for f64 {
         // Since row is align(16), we manually map the implicit 4th buffer element.
         let r = [this.w, this.x, this.y, this.z];
 
-
         // Write uniform loops spanning exactly 4 elements.
         // LLVM's auto-vectorizer recognizes 4-wide float operations
         // and combines these into parallel execution blocks, if the processor supports it.
@@ -467,6 +472,8 @@ impl Matrix4x4Math for f64 {
             ],
         }
     }
+
+    // **** Mul ****
 
     #[inline(always)]
     fn m4x4_mul(this: Matrix4x4<Self>, other: Matrix4x4<Self>) -> Matrix4x4<Self> {
@@ -544,6 +551,7 @@ impl Matrix4x4Math for f64 {
         s0 * c00 + s1 * c10 + s2 * c20 + s3 * c30
     }
 
+    /// Returns the adjugate and determinant of a matrix.
     #[rustfmt::skip]
     #[inline(always)]
     fn m4x4_adjugate(s: Matrix4x4<Self>) -> (Matrix4x4<Self>, Self) {
@@ -591,11 +599,13 @@ impl Matrix4x4Math for f64 {
 
         let determinant = s0 * c00 + s1 * c10 + s2 * c20 + s3 * c30;
 
-        (Matrix4x4 { a: [
+        let a = [
             c00, c01, c02, c03,
             c10, c11, c12, c13,
             c20, c21, c22, c23,
-            c30, c31, c32, c33
-        ]}, determinant)
+            c30, c31, c32, c33,
+        ];
+
+        (Matrix4x4 { a }, determinant)
     }
 }
