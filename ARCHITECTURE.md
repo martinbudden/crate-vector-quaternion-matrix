@@ -128,6 +128,26 @@ Sometimes `invert` is used, sometimes `inverse`.
 
 Note that only `vqm` and `vek` pass parameters by value.
 
+## SIMD support
+
+Experimental **SIMD** support is available through the simd feature.
+
+Currently most microcontrollers (eg Arm Cortex M series) don't directly support **SIMD**, so it is of limited use for embedded applications.
+
+However, that may change: the implementation serves as proof of concept and future proofing: it ensures that future implementations are possible.
+
+For that reason many implementations are deliberately simple or serve as proof-of-concept, so benchmark before assuming SIMD is faster.
+
+**SIMD** requires the `align` feature and is implemented using [portable simd](https://doc.rust-lang.org/core/simd/index.html), which requires the nightly compiler.
+
+It can be invoked using `rustup`, eg:
+
+```sh
+rustup run nightly cargo build --features "simd align" --target thumbv8m.main-none-eabi
+```
+
+**SIMD** is not currently compatible with the `uom` (Units of Measurement) feature.
+
 ## Future directions
 
 I have no planned major extensions to this crate.

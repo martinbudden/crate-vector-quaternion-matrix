@@ -6,7 +6,9 @@ use core::ops::Neg;
 use num_traits::{Num, float::FloatCore};
 // see [Optimized Trigonometric Functions on TI Arm Cores](https://www.ti.com/lit/an/sprad27a/sprad27a.pdf)
 // for explanation of range mapping and coefficients
-// r (remainder) is in range [-0.5, 0.5] and pre-scaled by 2/PI
+
+// For sin and cos functions r (remainder) is in range [-0.5, 0.5] and pre-scaled by 2/PI.
+
 trait Sin5Coefficients {
     const SIN_C1: Self;
     const SIN_C3: Self;
@@ -27,7 +29,24 @@ trait ATan7Coefficients {
     const ATAN_C7: Self;
 }
 
-trait ExpCoefficients {
+trait ATan9Coefficients {
+    const ATAN_C1: Self;
+    const ATAN_C3: Self;
+    const ATAN_C5: Self;
+    const ATAN_C7: Self;
+    const ATAN_C9: Self;
+}
+
+trait ATan11Coefficients {
+    const ATAN_C1: Self;
+    const ATAN_C3: Self;
+    const ATAN_C5: Self;
+    const ATAN_C7: Self;
+    const ATAN_C9: Self;
+    const ATAN_C11: Self;
+}
+
+trait Exp6Coefficients {
     const EXP_C0: Self;
     const EXP_C1: Self;
     const EXP_C2: Self;
@@ -37,7 +56,18 @@ trait ExpCoefficients {
     const EXP_C6: Self;
 }
 
-trait LnCoefficients {
+trait Exp7Coefficients {
+    const EXP_C0: Self;
+    const EXP_C1: Self;
+    const EXP_C2: Self;
+    const EXP_C3: Self;
+    const EXP_C4: Self;
+    const EXP_C5: Self;
+    const EXP_C6: Self;
+    const EXP_C7: Self;
+}
+
+trait Ln7Coefficients {
     const LN_C1: Self;
     const LN_C3: Self;
     const LN_C5: Self;
@@ -91,34 +121,90 @@ impl ATan7Coefficients for f64 {
     const ATAN_C7: Self = -3.898_674_249_649_047_851_562_5e-2;
 }
 
-impl ExpCoefficients for f32 {
-    const EXP_C0: Self = 1.0;
-    const EXP_C1: Self = 1.0;
-    const EXP_C2: Self = 0.5;
-    const EXP_C3: Self = 0.166_666_666_66; // 1/6
-    const EXP_C4: Self = 0.041_666_666_66; // 1/24
-    const EXP_C5: Self = 0.008_333_333_33; // 1/120
-    const EXP_C6: Self = 0.001_388_888_88; // 1/720
+impl ATan9Coefficients for f32 {
+    const ATAN_C1: Self = 0.999_970_018_863_677_978_515_625;
+    const ATAN_C3: Self = -0.331_700_652_837_753_295_898_437_5;
+    const ATAN_C5: Self = 0.185_215_026_140_213_012_695_312_5;
+    const ATAN_C7: Self = -9.192_573_279_142_379_760_742_187_5e-2;
+    const ATAN_C9: Self = 2.386_303_804_814_815_521_240_234_375e-2;
 }
 
-impl ExpCoefficients for f64 {
-    const EXP_C0: Self = 1.0;
-    const EXP_C1: Self = 1.0;
-    const EXP_C2: Self = 0.5;
-    const EXP_C3: Self = 0.166_666_666_66; // 1/6
-    const EXP_C4: Self = 0.041_666_666_66; // 1/24
-    const EXP_C5: Self = 0.008_333_333_33; // 1/120
-    const EXP_C6: Self = 0.001_388_888_88; // 1/720
+impl ATan9Coefficients for f64 {
+    const ATAN_C1: Self = 0.999_970_018_863_677_978_515_625;
+    const ATAN_C3: Self = -0.331_700_652_837_753_295_898_437_5;
+    const ATAN_C5: Self = 0.185_215_026_140_213_012_695_312_5;
+    const ATAN_C7: Self = -9.192_573_279_142_379_760_742_187_5e-2;
+    const ATAN_C9: Self = 2.386_303_804_814_815_521_240_234_375e-2;
 }
 
-impl LnCoefficients for f32 {
+impl ATan11Coefficients for f32 {
+    const ATAN_C1: Self = 0.999_995_648_860_931_396_484_375;
+    const ATAN_C3: Self = -0.332_994_967_699_050_903_320_312_5;
+    const ATAN_C5: Self = 0.195_637_956_261_634_826_660_156_25;
+    const ATAN_C7: Self = -0.121_243_648_231_029_510_498_046_875;
+    const ATAN_C9: Self = 5.748_184_770_345_687_866_210_937_5e-2;
+    const ATAN_C11: Self = -1.348_210_778_087_377_548_217_773_437_5e-2;
+}
+
+impl ATan11Coefficients for f64 {
+    const ATAN_C1: Self = 0.999_995_648_860_931_396_484_375;
+    const ATAN_C3: Self = -0.332_994_967_699_050_903_320_312_5;
+    const ATAN_C5: Self = 0.195_637_956_261_634_826_660_156_25;
+    const ATAN_C7: Self = -0.121_243_648_231_029_510_498_046_875;
+    const ATAN_C9: Self = 5.748_184_770_345_687_866_210_937_5e-2;
+    const ATAN_C11: Self = -1.348_210_778_087_377_548_217_773_437_5e-2;
+}
+
+impl Exp6Coefficients for f32 {
+    const EXP_C0: Self = 1.0;
+    const EXP_C1: Self = 1.0;
+    const EXP_C2: Self = 0.5; // 1/2
+    const EXP_C3: Self = 0.166_666_666_666_666_667; // 1/6
+    const EXP_C4: Self = 4.166_666_666_666_666_667e-2; // 1/24
+    const EXP_C5: Self = 8.333_333_333_333_333_333e-3; // 1/120
+    const EXP_C6: Self = 1.388_888_888_888_888_889e-3; // 1/720
+}
+
+impl Exp6Coefficients for f64 {
+    const EXP_C0: Self = 1.0;
+    const EXP_C1: Self = 1.0;
+    const EXP_C2: Self = 0.5; // 1/2
+    const EXP_C3: Self = 0.166_666_666_666_666_667; // 1/6
+    const EXP_C4: Self = 4.166_666_666_666_666_667e-2; // 1/24
+    const EXP_C5: Self = 8.333_333_333_333_333_333e-3; // 1/120
+    const EXP_C6: Self = 1.388_888_888_888_888_889e-3; // 1/720
+}
+
+impl Exp7Coefficients for f32 {
+    const EXP_C0: Self = 1.0;
+    const EXP_C1: Self = 1.0;
+    const EXP_C2: Self = 0.5; // 1/2
+    const EXP_C3: Self = 0.166_666_666_666_666_667; // 1/6
+    const EXP_C4: Self = 4.166_666_666_666_666_667e-2; // 1/24
+    const EXP_C5: Self = 8.333_333_333_333_333_333e-3; // 1/120
+    const EXP_C6: Self = 1.388_888_888_888_888_889e-3; // 1/720
+    const EXP_C7: Self = 1.984_126_984_126_984_127e-4; // 1/5040
+}
+
+impl Exp7Coefficients for f64 {
+    const EXP_C0: Self = 1.0;
+    const EXP_C1: Self = 1.0;
+    const EXP_C2: Self = 0.5; // 1/2
+    const EXP_C3: Self = 0.166_666_666_666_666_667; // 1/6
+    const EXP_C4: Self = 4.166_666_666_666_666_667e-2; // 1/24
+    const EXP_C5: Self = 8.333_333_333_333_333_333e-3; // 1/120
+    const EXP_C6: Self = 1.388_888_888_888_888_889e-3; // 1/720
+    const EXP_C7: Self = 1.984_126_984_126_984_127e-4; // 1/5040
+}
+
+impl Ln7Coefficients for f32 {
     const LN_C1: Self = 2.0;
     const LN_C3: Self = 2.0 / 3.0;
     const LN_C5: Self = 2.0 / 5.0;
     const LN_C7: Self = 2.0 / 7.0;
 }
 
-impl LnCoefficients for f64 {
+impl Ln7Coefficients for f64 {
     const LN_C1: Self = 2.0;
     const LN_C3: Self = 2.0 / 3.0;
     const LN_C5: Self = 2.0 / 5.0;
@@ -143,7 +229,6 @@ where
     T::COS_C0 + r2 * (T::COS_C2 + r2 * (T::COS_C4 + r2 * T::COS_C6))
 }
 
-#[allow(unused)]
 #[inline(always)]
 fn atan_poly7<T>(r: T) -> T
 where
@@ -154,18 +239,47 @@ where
 }
 
 #[inline(always)]
-fn exp_poly7<T>(r: T) -> T
+fn atan_poly9<T>(r: T) -> T
 where
-    T: Copy + Num + ExpCoefficients,
+    T: Copy + Num + ATan9Coefficients,
+{
+    let r2 = r * r;
+    r * (T::ATAN_C1 + r2 * (T::ATAN_C3 + r2 * (T::ATAN_C5 + r2 * (T::ATAN_C7 + r2 * T::ATAN_C9))))
+}
+
+#[inline(always)]
+fn atan_poly11<T>(r: T) -> T
+where
+    T: Copy + Num + ATan11Coefficients,
+{
+    let r2 = r * r;
+    r * (T::ATAN_C1 + r2 * (T::ATAN_C3 + r2 * (T::ATAN_C5 + r2 * (T::ATAN_C7 + r2 * (T::ATAN_C9 + r2 * T::ATAN_C11)))))
+}
+
+#[inline(always)]
+fn exp_poly6<T>(r: T) -> T
+where
+    T: Copy + Num + Exp6Coefficients,
 {
     // e^r = 1 + r + r^2/2! + r^3/3! + r^4/4! + r^5/5! + r^6/6!
     T::EXP_C0 + r * (T::EXP_C1 + r * (T::EXP_C2 + r * (T::EXP_C3 + r * (T::EXP_C4 + r * (T::EXP_C5 + r * T::EXP_C6)))))
 }
 
 #[inline(always)]
+fn exp_poly7<T>(r: T) -> T
+where
+    T: Copy + Num + Exp7Coefficients,
+{
+    // e^r = 1 + r + r^2/2! + r^3/3! + r^4/4! + r^5/5! + r^6/6! + r^7/7!
+    T::EXP_C0
+        + r * (T::EXP_C1
+            + r * (T::EXP_C2 + r * (T::EXP_C3 + r * (T::EXP_C4 + r * (T::EXP_C5 + r * (T::EXP_C6 + r * T::EXP_C7))))))
+}
+
+#[inline(always)]
 fn ln_poly5<T>(r: T) -> T
 where
-    T: Copy + Num + LnCoefficients,
+    T: Copy + Num + Ln7Coefficients,
 {
     let r2 = r * r;
     r * (T::LN_C1 + r2 * (T::LN_C3 + r2 * T::LN_C5))
@@ -174,7 +288,7 @@ where
 #[inline(always)]
 fn ln_poly7<T>(r: T) -> T
 where
-    T: Copy + Num + LnCoefficients,
+    T: Copy + Num + Ln7Coefficients,
 {
     let r2 = r * r;
     r * (T::LN_C1 + r2 * (T::LN_C3 + r2 * (T::LN_C5 + r2 * T::LN_C7)))
@@ -321,7 +435,7 @@ pub fn atan2_approx_f32(y: f32, x: f32) -> f32 {
     };
 
     // Calculate core first-quadrant angle cleanly
-    let mut angle = offset + (sign * atan_poly7(ratio));
+    let mut angle = offset + (sign * atan_poly9(ratio));
 
     // Map back to the correct quadrant based on original signs
     if x < 0.0 {
@@ -378,7 +492,7 @@ pub fn exp_approx_f32(x: f32) -> f32 {
     if x > 88.722_839 {
         return f32::INFINITY;
     }
-    if x < -103.27893 {
+    if x < -103.278_93 {
         return 0.0;
     }
 
@@ -515,8 +629,22 @@ pub fn powf_approx_f32(base: f32, exponent: f32) -> f32 {
 #[inline(always)]
 #[must_use]
 pub fn powf_approx_f64(base: f64, exponent: f64) -> f64 {
-    #[allow(clippy::cast_possible_truncation)]
-    f64::from(powf_approx_f32(base as f32, exponent as f32))
+    if exponent == 0.0 {
+        return 1.0;
+    }
+    if base == 0.0 {
+        return 0.0;
+    }
+    if base < 0.0 {
+        // If exponent is an integer, the math is valid
+        #[allow(clippy::float_cmp)]
+        if exponent == exponent.trunc() {
+            let result = exp_approx_f64(exponent * ln_approx_f64(base.abs()));
+            return if exponent % 2.0 == 0.0 { result } else { -result };
+        }
+        return f64::NAN;
+    }
+    exp_approx_f64(exponent * ln_approx_f64(base))
 }
 
 /// Takes x and returns (mantissa, exponent) with mantissa in the range [0.5, 1.0) or [-1.0, -0.5) for negative numbers.
@@ -679,11 +807,11 @@ mod test_exp {
         // Test standard values against hardware implementation
         assert!(approx_equal(1.0, exp_approx_f32(0.0), 1e-8));
         #[cfg(feature = "libm")]
-        assert!(approx_equal(libm::expf(-1.0), exp_approx_f32(-1.0), 1e-10));
+        assert!(approx_equal(libm::expf(-1.0), exp_approx_f32(-1.0), 1e-12));
 
         // Test slightly larger inputs where scaling matters
         #[cfg(feature = "libm")]
-        assert!(approx_equal(libm::expf(4.5), exp_approx_f32(4.5), 5e-5));
+        assert!(approx_equal(libm::expf(4.5), exp_approx_f32(4.5), 8e-6));
 
         // Test extreme limits
         assert_eq!(exp_approx_f32(90.0), f32::INFINITY);
@@ -707,15 +835,15 @@ mod test_exp {
     #[test]
     fn test_powf_approx_f32() {
         // Test basic integer powers using your full pipeline
-        assert!(approx_equal(powf_approx_f32(2.0, 3.0), 8.0, 0.005)); // 2^3
-        assert!(approx_equal(powf_approx_f32(5.0, -1.0), 0.2, 0.005)); // 5^-1
+        assert!(approx_equal(powf_approx_f32(2.0, 3.0), 8.0, 1e-20)); // 2^3
+        assert!(approx_equal(powf_approx_f32(5.0, -1.0), 0.2, 2e-8)); // 5^-1
 
         // Test fractional powers (square roots)
-        assert!(approx_equal(powf_approx_f32(9.0, 0.5), 3.0, 0.005)); // √9
+        assert!(approx_equal(powf_approx_f32(9.0, 0.5), 3.0, 1e-10)); // √9
 
         // Test negative bases with integer exponents
-        assert!(approx_equal(powf_approx_f32(-2.0, 3.0), -8.0, 0.005)); // (-2)^3
-        assert!(approx_equal(powf_approx_f32(-2.0, 4.0), 16.0, 0.01)); // (-2)^4
+        assert!(approx_equal(powf_approx_f32(-2.0, 3.0), -8.0, 1e-20)); // (-2)^3
+        assert!(approx_equal(powf_approx_f32(-2.0, 4.0), 16.0, 1e-20)); // (-2)^4
         //assert_eq!(custom_no_std_powf_f32(-2.0, 4.0), 16.0);    // (-2)^4
 
         // Test negative base with fractional exponent (should yield NaN)
@@ -872,58 +1000,58 @@ mod tests {
     #[cfg(feature = "libm")]
     #[test]
     fn atan2_approx() {
-        assert_abs_diff_eq!(atan2_approx_f32(0.0, 0.0), libm::atan2f(0.0, 0.0), epsilon = 7.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(0.0, 0.0), libm::atan2f(0.0, 0.0), epsilon = 1.0e-20);
 
-        assert_abs_diff_eq!(atan2_approx_f32(0.0, 1.0), libm::atan2f(0.0, 1.0), epsilon = 7.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(0.1, 1.0), libm::atan2f(0.1, 1.0), epsilon = 7.0e-5); // 0.09966865
-        assert_abs_diff_eq!(atan2_approx_f32(0.5, 1.0), libm::atan2f(0.5, 1.0), epsilon = 8.0e-5); // 0.4636476
-        assert_abs_diff_eq!(atan2_approx_f32(1.0, 1.0), libm::atan2f(1.0, 1.0), epsilon = 8.2e-5); // 0.7853982, PI/4
-        assert_abs_diff_eq!(atan2_approx_f32(2.0, 1.0), libm::atan2f(2.0, 1.0), epsilon = 8.0e-5); // 1.1071488
-        assert_abs_diff_eq!(atan2_approx_f32(8.0, 1.0), libm::atan2f(8.0, 1.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(100.0, 1.0), libm::atan2f(100.00, 1.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(1000.0, 1.0), libm::atan2f(1000.0, 1.0), epsilon = 8.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(0.0, 1.0), libm::atan2f(0.0, 1.0), epsilon = 1.0e-20);
+        assert_abs_diff_eq!(atan2_approx_f32(0.1, 1.0), libm::atan2f(0.1, 1.0), epsilon = 1.6e-6); // 0.09966865
+        assert_abs_diff_eq!(atan2_approx_f32(0.5, 1.0), libm::atan2f(0.5, 1.0), epsilon = 9.0e-6); // 0.4636476
+        assert_abs_diff_eq!(atan2_approx_f32(1.0, 1.0), libm::atan2f(1.0, 1.0), epsilon = 3.0e-5); // 0.7853982, PI/4
+        assert_abs_diff_eq!(atan2_approx_f32(2.0, 1.0), libm::atan2f(2.0, 1.0), epsilon = 9.0e-6); // 1.1071488
+        assert_abs_diff_eq!(atan2_approx_f32(8.0, 1.0), libm::atan2f(8.0, 1.0), epsilon = 9.0e-6);
+        assert_abs_diff_eq!(atan2_approx_f32(100.0, 1.0), libm::atan2f(100.00, 1.0), epsilon = 4.0e-7);
+        assert_abs_diff_eq!(atan2_approx_f32(1000.0, 1.0), libm::atan2f(1000.0, 1.0), epsilon = 2.0e-7);
 
-        assert_abs_diff_eq!(atan2_approx_f32(-0.1, 1.0), libm::atan2f(-0.1, 1.0), epsilon = 7.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-0.5, 1.0), libm::atan2f(-0.5, 1.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-1.0, 1.0), libm::atan2f(-1.0, 1.0), epsilon = 8.2e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-2.0, 1.0), libm::atan2f(-2.0, 1.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-8.0, 1.0), libm::atan2f(-8.0, 1.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-100.0, 1.0), libm::atan2f(-100.00, 1.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-1000.0, 1.0), libm::atan2f(-1000.0, 1.0), epsilon = 8.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-0.1, 1.0), libm::atan2f(-0.1, 1.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-0.5, 1.0), libm::atan2f(-0.5, 1.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-1.0, 1.0), libm::atan2f(-1.0, 1.0), epsilon = 3.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-2.0, 1.0), libm::atan2f(-2.0, 1.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-8.0, 1.0), libm::atan2f(-8.0, 1.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-100.0, 1.0), libm::atan2f(-100.00, 1.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-1000.0, 1.0), libm::atan2f(-1000.0, 1.0), epsilon = 1.0e-5);
 
-        assert_abs_diff_eq!(atan2_approx_f32(0.0, -1.0), libm::atan2f(0.0, -1.0), epsilon = 7.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(0.1, -1.0), libm::atan2f(0.1, -1.0), epsilon = 7.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(0.5, -1.0), libm::atan2f(0.5, -1.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(1.0, -1.0), libm::atan2f(1.0, -1.0), epsilon = 8.2e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(2.0, -1.0), libm::atan2f(2.0, -1.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(8.0, -1.0), libm::atan2f(8.0, -1.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(100.0, -1.0), libm::atan2f(100.00, -1.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(1000.0, -1.0), libm::atan2f(1000.0, -1.0), epsilon = 8.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(0.0, -1.0), libm::atan2f(0.0, -1.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(0.1, -1.0), libm::atan2f(0.1, -1.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(0.5, -1.0), libm::atan2f(0.5, -1.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(1.0, -1.0), libm::atan2f(1.0, -1.0), epsilon = 3.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(2.0, -1.0), libm::atan2f(2.0, -1.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(8.0, -1.0), libm::atan2f(8.0, -1.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(100.0, -1.0), libm::atan2f(100.00, -1.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(1000.0, -1.0), libm::atan2f(1000.0, -1.0), epsilon = 1.0e-5);
 
-        assert_abs_diff_eq!(atan2_approx_f32(-0.1, -1.0), libm::atan2f(-0.1, -1.0), epsilon = 7.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-0.5, -1.0), libm::atan2f(-0.5, -1.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-1.0, -1.0), libm::atan2f(-1.0, -1.0), epsilon = 8.2e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-2.0, -1.0), libm::atan2f(-2.0, -1.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-8.0, -1.0), libm::atan2f(-8.0, -1.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-100.0, -1.0), libm::atan2f(-100.00, -1.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-1000.0, -1.0), libm::atan2f(-1000.0, -1.0), epsilon = 8.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-0.1, -1.0), libm::atan2f(-0.1, -1.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-0.5, -1.0), libm::atan2f(-0.5, -1.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-1.0, -1.0), libm::atan2f(-1.0, -1.0), epsilon = 3.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-2.0, -1.0), libm::atan2f(-2.0, -1.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-8.0, -1.0), libm::atan2f(-8.0, -1.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-100.0, -1.0), libm::atan2f(-100.00, -1.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-1000.0, -1.0), libm::atan2f(-1000.0, -1.0), epsilon = 1.0e-5);
 
-        assert_abs_diff_eq!(atan2_approx_f32(0.1, 0.0), libm::atan2f(0.1, 0.0), epsilon = 7.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(0.1, 0.0), libm::atan2f(0.1, 0.0), epsilon = 7.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(0.5, 0.0), libm::atan2f(0.5, 0.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(1.0, 0.0), libm::atan2f(1.0, 0.0), epsilon = 8.2e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(2.0, 0.0), libm::atan2f(2.0, 0.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(8.0, 0.0), libm::atan2f(8.0, 0.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(100.0, 0.0), libm::atan2f(100.00, 0.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(1000.0, 0.0), libm::atan2f(1000.0, 0.0), epsilon = 8.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(0.1, 0.0), libm::atan2f(0.1, 0.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(0.1, 0.0), libm::atan2f(0.1, 0.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(0.5, 0.0), libm::atan2f(0.5, 0.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(1.0, 0.0), libm::atan2f(1.0, 0.0), epsilon = 3.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(2.0, 0.0), libm::atan2f(2.0, 0.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(8.0, 0.0), libm::atan2f(8.0, 0.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(100.0, 0.0), libm::atan2f(100.00, 0.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(1000.0, 0.0), libm::atan2f(1000.0, 0.0), epsilon = 1.0e-5);
 
-        assert_abs_diff_eq!(atan2_approx_f32(-0.1, 0.0), libm::atan2f(-0.1, 0.0), epsilon = 7.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-0.1, 0.0), libm::atan2f(-0.1, 0.0), epsilon = 7.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-0.5, 0.0), libm::atan2f(-0.5, 0.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-1.0, 0.0), libm::atan2f(-1.0, 0.0), epsilon = 8.2e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-2.0, 0.0), libm::atan2f(-2.0, 0.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-8.0, 0.0), libm::atan2f(-8.0, 0.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-100.0, 0.0), libm::atan2f(-100.00, 0.0), epsilon = 8.0e-5);
-        assert_abs_diff_eq!(atan2_approx_f32(-1000.0, 0.0), libm::atan2f(-1000.0, 0.0), epsilon = 8.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-0.1, 0.0), libm::atan2f(-0.1, 0.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-0.1, 0.0), libm::atan2f(-0.1, 0.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-0.5, 0.0), libm::atan2f(-0.5, 0.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-1.0, 0.0), libm::atan2f(-1.0, 0.0), epsilon = 3.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-2.0, 0.0), libm::atan2f(-2.0, 0.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-8.0, 0.0), libm::atan2f(-8.0, 0.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-100.0, 0.0), libm::atan2f(-100.00, 0.0), epsilon = 1.0e-5);
+        assert_abs_diff_eq!(atan2_approx_f32(-1000.0, 0.0), libm::atan2f(-1000.0, 0.0), epsilon = 1.0e-5);
     }
 }

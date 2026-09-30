@@ -50,6 +50,7 @@
         "indexmap",
         "inversed",
         "invertable",
+        "invsqrt",
         "itertools",
         "itoa",
         "Kalman",

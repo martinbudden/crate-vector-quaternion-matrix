@@ -32,6 +32,7 @@ At some point [0.1.0] to [0.1.14] will be [YANKED]
 - split `serde` feature into `serde` and `storage`.
 - updated to Rust version 1.89.
 - updated tests.
+- increased order of `atan` and `exp` approximations.
 
 ### Removed
 
