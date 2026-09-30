@@ -26,6 +26,7 @@ At some point [0.1.0] to [0.1.14] will be [YANKED]
 ### Added
 
 - support for Continuous Integration.
+- `is_near_one` function for `Quaternion`.
 
 ### Changed
 
