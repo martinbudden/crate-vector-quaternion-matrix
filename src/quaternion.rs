@@ -120,7 +120,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Copy + FloatCore,
+    T: FloatCore,
 {
     /// Return true if vector is near zero.
     /// ```
@@ -128,9 +128,12 @@ where
     /// # use num_traits::Zero;
     /// let z = Quaternionf32::zero();
     /// assert!(z.is_near_zero(1e-5));
+    /// let q = Quaternionf32 { w: 0.0001187, x: 0.0, y: 0.0, z: 0.0 };
+    /// assert!(q.is_near_zero(1e-3));
+    /// assert!(!q.is_near_zero(1e-4));
     /// ```
     pub fn is_near_zero(self, epsilon: T) -> bool {
-        if self.w.abs() > epsilon && self.x.abs() > epsilon && self.y.abs() > epsilon && self.z.abs() > epsilon {
+        if self.w.abs() > epsilon || self.x.abs() > epsilon || self.y.abs() > epsilon || self.z.abs() > epsilon {
             return false;
         }
         true
@@ -197,6 +200,31 @@ where
         Self { w: T::one(), x: T::zero(), y: T::zero(), z: T::zero() }
     }
 }
+
+impl<T> Quaternion<T>
+where
+    T: One + FloatCore,
+{
+    /// Return true if vector is near zero.
+    /// ```
+    /// # use vqm::Quaternionf32;
+    /// # use num_traits::One;
+    /// let q = Quaternionf32 { w: 1.0001187, x: 0.0, y: 0.0, z: 0.0 };
+    /// assert!(q.is_near_one(1e-3));
+    /// assert!(!q.is_near_one(1e-4));
+    /// ```
+    pub fn is_near_one(self, epsilon: T) -> bool {
+        if (self.w - T::one()).abs() > epsilon
+            || self.x.abs() > epsilon
+            || self.y.abs() > epsilon
+            || self.z.abs() > epsilon
+        {
+            return false;
+        }
+        true
+    }
+}
+
 // **** Neg ****
 
 impl<T> Neg for Quaternion<T>

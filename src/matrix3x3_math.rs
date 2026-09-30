@@ -403,11 +403,9 @@ impl Matrix3x3Math for f64 {
             this.a[M11] * other.a[M11] + this.a[M12] * other.a[M21] + this.a[M13] * other.a[M31],
             this.a[M11] * other.a[M12] + this.a[M12] * other.a[M22] + this.a[M13] * other.a[M32],
             this.a[M11] * other.a[M13] + this.a[M12] * other.a[M23] + this.a[M13] * other.a[M33],
-
             this.a[M21] * other.a[M11] + this.a[M22] * other.a[M21] + this.a[M23] * other.a[M31],
             this.a[M21] * other.a[M12] + this.a[M22] * other.a[M22] + this.a[M23] * other.a[M32],
             this.a[M21] * other.a[M13] + this.a[M22] * other.a[M23] + this.a[M23] * other.a[M33],
-
             this.a[M31] * other.a[M11] + this.a[M32] * other.a[M21] + this.a[M33] * other.a[M31],
             this.a[M31] * other.a[M12] + this.a[M32] * other.a[M22] + this.a[M33] * other.a[M32],
             this.a[M31] * other.a[M13] + this.a[M32] * other.a[M23] + this.a[M33] * other.a[M33],

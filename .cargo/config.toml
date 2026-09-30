@@ -25,6 +25,7 @@ rustflags = [
 [alias]
 # Run using: 'cargo test-libm'
 test-libm = "test --features libm"
+test-std = "test --features std"
 test-none = [ "test", "--no-default-features"]
 test-serde = [ "test --features serde" ]
 test-uom = [ "test", "--no-default-features", "--features", "serde, uom, libm"]

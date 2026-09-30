@@ -418,7 +418,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: Copy + FloatCore,
+    T: FloatCore,
 {
     /// Return true if matrix is near zero.
     /// ```
@@ -426,6 +426,11 @@ where
     /// # use num_traits::Zero;
     /// let z = Matrix3x3f32::zero();
     /// assert!(z.is_near_zero(1e-5));
+    /// let m = Matrix3x3f32::new([ 0.001, 0.0, 0.0,
+    ///                             0.0,   0.0, 0.0,
+    ///                             0.0,   0.0, 0.0]);
+    /// assert!(m.is_near_zero(1.01e-3));
+    /// assert!(!m.is_near_zero(1e-4));
     /// ```
     pub fn is_near_zero(self, epsilon: T) -> bool {
         for a in &self.a {
@@ -518,7 +523,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: Copy + One + FloatCore,
+    T: One + FloatCore,
 {
     /// Return true if matrix is near identity.
     /// ```
@@ -526,6 +531,11 @@ where
     /// # use num_traits::One;
     /// let i = Matrix3x3f32::one();
     /// assert!(i.is_near_identity(1e-5));
+    /// let m = Matrix3x3f32::new([ 1.001, 0.0, 0.0,
+    ///                             0.0,   1.0, 0.0,
+    ///                             0.0,   0.0, 1.0]);
+    /// assert!(m.is_near_identity(1.01e-3));
+    /// assert!(!m.is_near_identity(1.01e-4));
     /// ```
     pub fn is_near_identity(self, epsilon: T) -> bool {
         if self.a[Self::M21].abs() > epsilon

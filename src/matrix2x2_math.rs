@@ -328,7 +328,6 @@ impl Matrix2x2Math for f64 {
         let a = [
             this.a[M11] * other.a[M11] + this.a[M12] * other.a[M21],
             this.a[M11] * other.a[M12] + this.a[M12] * other.a[M22],
-
             this.a[M21] * other.a[M11] + this.a[M22] * other.a[M21],
             this.a[M21] * other.a[M12] + this.a[M22] * other.a[M22],
         ];
