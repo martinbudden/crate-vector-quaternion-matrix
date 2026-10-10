@@ -40,8 +40,6 @@ impl Vector3f32 {
     /// let v = Vector3f32::from_le_slice_6(&bytes);
     /// assert_eq!(Vector3f32 { x: 1.0, y: 256.0, z: 42.0 }, v);
     /// ```
-    /// # Panics
-    /// Panics if `slice.len() < 6`.
     #[inline]
     #[must_use]
     pub fn from_le_slice_6(slice: &[u8]) -> Self {
@@ -57,7 +55,7 @@ impl Vector3f32 {
     /// # use vqm::Vector3f32;
     /// let bytes = [0x01, 0x00, 0x00, 0x01, 0x2A, 0x00, 0x23, 0x45, 0x56, 0x78, 0x9a, 0xbc];
     /// let v = Vector3f32::try_from_le_slice_6(&bytes);
-    /// assert_eq!(Vector3f32 { x: 1.0, y: 256.0, z: 42.0 }, v.expect("REASON"));
+    /// assert_eq!(Ok(Vector3f32 { x: 1.0, y: 256.0, z: 42.0 }), v);
     /// ```
     /// # Errors
     /// Returns an [`SliceTooShortError`] if the provided `slice` contains fewer than 6 bytes.
@@ -95,8 +93,6 @@ impl Vector3f32 {
     /// let v = Vector3f32::from_be_slice_6(&bytes);
     /// assert_eq!(Vector3f32 { x: 1.0, y: 256.0, z: 42.0 }, v);
     /// ```
-    /// # Panics
-    /// Panics if `slice.len() < 6`.
     #[inline]
     #[must_use]
     pub fn from_be_slice_6(slice: &[u8]) -> Self {
@@ -112,7 +108,7 @@ impl Vector3f32 {
     /// # use vqm::Vector3f32;
     /// let bytes = [0x00, 0x01, 0x01, 0x00, 0x00, 0x2A];
     /// let v = Vector3f32::try_from_be_slice_6(&bytes);
-    /// assert_eq!(Vector3f32 { x: 1.0, y: 256.0, z: 42.0 }, v.expect("REASON"));
+    /// assert_eq!(Ok(Vector3f32 { x: 1.0, y: 256.0, z: 42.0 }), v);
     /// ```
     /// # Errors
     /// Returns an [`SliceTooShortError`] if the provided `slice` contains fewer than 6 bytes.

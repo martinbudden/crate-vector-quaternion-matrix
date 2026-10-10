@@ -278,15 +278,16 @@ where
     /// Try to create a matrix from a row slice.
     /// ```
     /// # use vqm::Matrix4x4f32;
-    /// let valid_data = [2.0; 16];
+    /// let valid_data = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0];
+    /// let option = Matrix4x4f32::try_from_row_slice(&valid_data);
+    /// assert_eq!(option, Some(Matrix4x4f32::new([  1.0,  2.0,  3.0,  4.0,
+    ///                                              5.0,  6.0,  7.0,  8.0,
+    ///                                              9.0, 10.0, 11.0, 12.0,
+    ///                                             13.0, 14.0, 15.0, 16.0])));
+    ///
     /// let invalid_data = [2.0; 3];
-    /// let Some(m) = Matrix4x4f32::try_from_row_slice(&valid_data) else {
-    ///     panic!("Expected Some(Matrix3x3), but got None");
-    /// };
-    /// assert_eq!(2.0, m[0]);
-    /// let None = Matrix4x4f32::try_from_row_slice(&invalid_data) else {
-    ///     panic!("Expected None for invalid data, but got Some");
-    /// };
+    /// let option = Matrix4x4f32::try_from_row_slice(&invalid_data);
+    /// assert!(option.is_none());
     /// ```
     #[rustfmt::skip]
     #[inline]
@@ -305,15 +306,16 @@ where
     /// Try to create a matrix from a column slice.
     /// ```
     /// # use vqm::Matrix4x4f32;
-    /// let valid_data = [2.0; 16];
+    /// let valid_data = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0];
+    /// let option = Matrix4x4f32::try_from_column_slice(&valid_data);
+    /// assert_eq!(option, Some(Matrix4x4f32::new([  1.0,  5.0,  9.0, 13.0,
+    ///                                              2.0,  6.0, 10.0, 14.0,
+    ///                                              3.0,  7.0, 11.0, 15.0,
+    ///                                              4.0,  8.0, 12.0, 16.0])));
+    ///
     /// let invalid_data = [2.0; 3];
-    /// let Some(m) = Matrix4x4f32::try_from_column_slice(&valid_data) else {
-    ///     panic!("Expected Some(Matrix4x4), but got None");
-    /// };
-    /// assert_eq!(2.0, m[0]);
-    /// let None = Matrix4x4f32::try_from_column_slice(&invalid_data) else {
-    ///     panic!("Expected None for invalid data, but got Some");
-    /// };
+    /// let option = Matrix4x4f32::try_from_column_slice(&invalid_data);
+    /// assert!(option.is_none());
     /// ```
     #[rustfmt::skip]
     #[inline]

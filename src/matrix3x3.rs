@@ -263,15 +263,16 @@ where
     /// Try to create a matrix from a row slice.
     /// ```
     /// # use vqm::Matrix3x3f32;
-    /// let valid_data = [2.0; 9];
+    /// let valid_data = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
+    /// let option = Matrix3x3f32::try_from_row_slice(&valid_data);
+    /// assert!(option.is_some());
+    /// assert_eq!(option, Some(Matrix3x3f32::new([  1.0,  2.0,  3.0,
+    ///                                              4.0,  5.0,  6.0,
+    ///                                              7.0,  8.0,  9.0])));
+    ///
     /// let invalid_data = [2.0; 3];
-    /// let Some(m) = Matrix3x3f32::try_from_row_slice(&valid_data) else {
-    ///     panic!("Expected Some(Matrix3x3), but got None");
-    /// };
-    /// assert_eq!(2.0, m[0]);
-    /// let None = Matrix3x3f32::try_from_row_slice(&invalid_data) else {
-    ///     panic!("Expected None for invalid data, but got Some");
-    /// };
+    /// let option = Matrix3x3f32::try_from_row_slice(&invalid_data);
+    /// assert!(option.is_none());
     /// ```
     #[rustfmt::skip]
     #[inline]
@@ -290,15 +291,16 @@ where
     /// Try to create a matrix from a column slice.
     /// ```
     /// # use vqm::Matrix3x3f32;
-    /// let valid_data = [2.0; 9];
+    /// let valid_data = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
+    /// let option = Matrix3x3f32::try_from_column_slice(&valid_data);
+    /// assert!(option.is_some());
+    /// assert_eq!(option, Some(Matrix3x3f32::new([  1.0,  4.0,  7.0,
+    ///                                              2.0,  5.0,  8.0,
+    ///                                              3.0,  6.0,  9.0])));
+    ///
     /// let invalid_data = [2.0; 3];
-    /// let Some(m) = Matrix3x3f32::try_from_column_slice(&valid_data) else {
-    ///     panic!("Expected Some(Matrix3x3), but got None");
-    /// };
-    /// assert_eq!(2.0, m[0]);
-    /// let None = Matrix3x3f32::try_from_column_slice(&invalid_data) else {
-    ///     panic!("Expected None for invalid data, but got Some");
-    /// };
+    /// let option = Matrix3x3f32::try_from_column_slice(&invalid_data);
+    /// assert!(option.is_none());
     /// ```
     #[inline]
     pub fn try_from_column_slice(slice: &[T]) -> Option<Self> {

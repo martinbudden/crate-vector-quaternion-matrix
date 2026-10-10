@@ -1141,10 +1141,10 @@ where
         // Extract the vector part of the quaternion (x, y, z)
         let q_xyz = Vector3 { x: q.x, y: q.y, z: q.z };
 
-        // 1. uv = 2 * (q_xyz cross v)
+        // uv = 2 * (q_xyz cross v)
         let uv = q_xyz.cross(self) * (T::one() + T::one());
 
-        // 2. res = v + w * uv + (q_xyz cross t)
+        // ret = v + w * uv + (q_xyz cross t)
         // This is the optimized Rodrigues form
         self + (uv * q.w) + q_xyz.cross(uv)
     }

@@ -194,15 +194,15 @@ where
     /// Try to create a matrix from a row slice.
     /// ```
     /// # use vqm::Matrix2x2f32;
-    /// let valid_data = [1.0; 4];
+    /// let valid_data = [1.0, 2.0, 3.0, 4.0];
+    /// let option = Matrix2x2f32::try_from_row_slice(&valid_data);
+    /// assert!(option.is_some());
+    /// assert_eq!(option, Some(Matrix2x2f32::new([ 1.0, 2.0,
+    ///                                             3.0, 4.0])));
+    ///
     /// let invalid_data = [1.0; 3];
-    /// let Some(m) = Matrix2x2f32::try_from_row_slice(&valid_data) else {
-    ///     panic!("Expected Some(Matrix2x2), but got None");
-    /// };
-    /// assert_eq!(1.0, m[0]);
-    /// let None = Matrix2x2f32::try_from_row_slice(&invalid_data) else {
-    ///     panic!("Expected None for invalid data, but got Some");
-    /// };
+    /// let option = Matrix2x2f32::try_from_row_slice(&invalid_data);
+    /// assert!(option.is_none());
     /// ```
     #[rustfmt::skip]
     #[inline]
@@ -220,15 +220,15 @@ where
     /// Try to create a matrix from a column slice.
     /// ```
     /// # use vqm::Matrix2x2f32;
-    /// let valid_data = [2.0; 4];
+    /// let valid_data = [1.0, 2.0, 3.0, 4.0];
+    /// let option = Matrix2x2f32::try_from_column_slice(&valid_data);
+    /// assert!(option.is_some());
+    /// assert_eq!(option, Some(Matrix2x2f32::new([ 1.0, 3.0,
+    ///                                             2.0, 4.0])));
+    ///
     /// let invalid_data = [2.0; 3];
-    /// let Some(m) = Matrix2x2f32::try_from_column_slice(&valid_data) else {
-    ///     panic!("Expected Some(Matrix2x2), but got None");
-    /// };
-    /// assert_eq!(2.0, m[0]);
-    /// let None = Matrix2x2f32::try_from_column_slice(&invalid_data) else {
-    ///     panic!("Expected None for invalid data, but got Some");
-    /// };
+    /// let option = Matrix2x2f32::try_from_column_slice(&invalid_data);
+    /// assert!(option.is_none());
     /// ```
     #[inline]
     pub fn try_from_column_slice(slice: &[T]) -> Option<Self> {
