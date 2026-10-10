@@ -1,4 +1,4 @@
-# `vqm` Rust Crate<br>![License: MIT](https://img.shields.io/badge/license-MIT-green) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) ![open source](https://badgen.net/badge/open/source/blue?icon=github)
+# `vqm` Rust Crate<br>[![Crates.io](https://img.shields.io/crates/v/vqm.svg)](https://crates.io/crates/vqm) [![Documentation](https://docs.rs/vqm/badge.svg)](https://docs.rs/vqm) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0) [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) ![open source](https://badgen.net/badge/open/source/blue?icon=github)
 
 **vqm** is a lightweight, allocation-free, Rust math library for **vectors**, **quaternions**, and **matrices**.
 It is designed for embedded systems, robotics, and real-time applications.
