@@ -1,5 +1,5 @@
 use num_traits::identities::{One, Zero};
-use vqm::{Matrix3x3, Matrix3x3f32, Vector3};
+use vqm::{Matrix3x3, Matrix3x3f32, Vector3, Vector3f32};
 
 // **** Align
 
@@ -170,5 +170,80 @@ mod tests {
         assert!(c[7].abs() < f32::EPSILON);
 
         assert!(((c - Matrix3x3::one()) / 5.0).is_near_zero(1e-5));
+    }
+
+    #[test]
+    fn cholesky_solve_vector_diagonal() {
+        // L = diag(2, 3, 4), so A = L * L^T = diag(4, 9, 16).
+        let l: Matrix3x3<f32> = Matrix3x3::new([2.0, 0.0, 0.0, 0.0, 3.0, 0.0, 0.0, 0.0, 4.0]);
+
+        let expected = Vector3f32 { x: 1.0, y: 2.0, z: 3.0 };
+
+        // b = A * expected = (4, 18, 48).
+        let b = Vector3f32 { x: 4.0, y: 18.0, z: 48.0 };
+
+        let actual = l.solve_cholesky_vector(b);
+
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn cholesky_solve_vector_off_diagonal() {
+        // L = [2 0 0; 1 2 0; 1 1 2], stored column-major.
+        let l: Matrix3x3<f32> = Matrix3x3::new([2.0, 0.0, 0.0, 1.0, 2.0, 0.0, 1.0, 1.0, 2.0]);
+
+        let expected = Vector3f32 { x: 1.0, y: 2.0, z: 3.0 };
+
+        // A = L * L^T = [4 2 2; 2 5 3; 2 3 6].
+        // b = A * expected = (14, 21, 26).
+        let b = Vector3f32 { x: 14.0, y: 21.0, z: 26.0 };
+
+        let actual = l.solve_cholesky_vector(b);
+
+        assert_eq!(actual, expected);
+    }
+    #[test]
+    fn cholesky_solve_vector_distinct_elements() {
+        let l: Matrix3x3<f32> = Matrix3x3::new([
+            2.0, 0.0, 0.0, //
+            3.0, 5.0, 0.0, //
+            7.0, 11.0, 13.0, //
+        ]);
+
+        let x = Vector3f32 { x: 17.0, y: 19.0, z: 23.0 };
+        let lt = l.transpose();
+        let a = lt * x;
+        assert_eq!(a, Vector3f32 { x: 252.0, y: 348.0, z: 299.0 });
+        let b = l * a;
+        assert_eq!(b, Vector3f32 { x: 504.0, y: 2496.0, z: 9479.0 });
+
+        let actual = l.solve_cholesky_vector(b);
+
+        assert_eq!(actual, x);
+    }
+    #[test]
+    fn solve_cholesky_matrix_distinct_entries() {
+        let l = Matrix3x3f32::new([
+            2.0, 0.0, 0.0, //
+            3.0, 5.0, 0.0, //
+            7.0, 11.0, 13.0, //
+        ]);
+
+        // Expected solution B.
+        let b = Matrix3x3f32::new([
+            1.0, 4.0, 3.0, //
+            2.0, 5.0, 6.0, //
+            3.0, 8.0, 9.0, //
+        ]);
+
+        let ltb = l.transpose() * b;
+        let c = l * ltb;
+
+        let actual = l.solve_cholesky_matrix(c);
+        assert_eq!(actual, b);
+
+        for ii in 0..Matrix3x3::<f32>::SIZE {
+            assert!((actual[ii] - b[ii]).abs() < 1e-4, "index {ii}: expected {}, got {}", b[ii], actual[ii],);
+        }
     }
 }

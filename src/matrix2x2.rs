@@ -12,7 +12,7 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use crate::{MathConstants, Matrix2x2Math, Vector2};
+use crate::{MathConstants, MathMethods, Matrix2x2Math, Vector2};
 
 /// 2x2 matrix of `f32` values<br>
 pub type Matrix2x2f32 = Matrix2x2<f32>;
@@ -458,6 +458,26 @@ where
             return false;
         }
         if (self.a[Self::M11] - T::one()).abs() > epsilon || (self.a[Self::M22] - T::one()).abs() > epsilon {
+            return false;
+        }
+        true
+    }
+}
+
+impl<T> Matrix2x2<T>
+where
+    T: FloatCore,
+{
+    /// Return true if matrix is symmetric.
+    /// ```
+    /// # use vqm::Matrix2x2f32;
+    /// let m = Matrix2x2f32::new([  2.0,  5.001,
+    ///                              5.0, 11.0]);
+    /// assert!(m.is_symmetric(1.01e-3));
+    /// assert!(!m.is_symmetric(1.01e-4));
+    /// ```
+    pub fn is_symmetric(self, epsilon: T) -> bool {
+        if (self.a[Self::M12] - self.a[Self::M21]).abs() > epsilon {
             return false;
         }
         true
@@ -1765,7 +1785,191 @@ where
         }
         Some(adjugate / determinant)
     }
+}
 
+impl<T> Matrix2x2<T>
+where
+    T: Copy + FloatCore + MathMethods,
+{
+    /// Return the Cholesky of a matrix or None if the matrix is not positive definite.
+    /// ```
+    /// # use vqm::Matrix2x2f32;
+    /// let m = Matrix2x2f32::new([  4.0,  2.0,
+    ///                              2.0,  3.0]);
+    /// let c = m.cholesky();
+    ///
+    /// assert!(c.is_some());
+    /// assert_eq!(c, Some(Matrix2x2f32::new([ 2.0, 0.0,
+    ///                                        1.0, 1.4142135])));
+    /// ```
+    #[must_use]
+    pub fn cholesky(self) -> Option<Self> {
+        let mut ret = [T::zero(); 4];
+        let a2 = self.a[Self::M11];
+        if a2 < T::zero() {
+            return None;
+        }
+        let a = a2.sqrt();
+        ret[Self::M11] = a;
+
+        let b = self.a[Self::M21] / a;
+        ret[Self::M21] = b;
+
+        let c2 = self.a[Self::M22] - b * b;
+        if c2 < T::zero() {
+            return None;
+        }
+        let c = c2.sqrt();
+        ret[Self::M22] = c;
+
+        Some(Self::from_column_array(ret))
+    }
+
+    #[must_use]
+    pub fn cholesky_reciprocal_diagonal(self) -> Option<Self> {
+        let mut ret = [T::zero(); 4];
+        let a2 = self.a[Self::M11];
+        if a2 < T::zero() {
+            return None;
+        }
+        let a_reciprocal = a2.sqrt_reciprocal();
+        ret[Self::M11] = a_reciprocal;
+
+        let b = self.a[Self::M21] * a_reciprocal;
+        ret[Self::M21] = b;
+
+        let c2 = self.a[Self::M22] - b * b;
+        if c2 < T::zero() {
+            return None;
+        }
+        let c_reciprocal = c2.sqrt_reciprocal();
+        ret[Self::M22] = c_reciprocal;
+
+        Some(Self::from_column_array(ret))
+    }
+
+    #[must_use]
+    #[inline]
+    pub fn solve_cholesky_array(self, a: [T; 2]) -> [T; 2] {
+        // Forward substitution: L * y = a.
+        let y0 = a[0] / self.a[Self::M11];
+        let y1 = (a[1] - self.a[Self::M21] * y0) / self.a[Self::M22];
+
+        // Back substitution: L^T * x = y.
+        let x1 = y1 / self.a[Self::M22];
+        let x0 = (y0 - self.a[Self::M21] * x1) / self.a[Self::M11];
+
+        [x0, x1]
+    }
+
+    #[must_use]
+    #[inline]
+    pub fn solve_cholesky_array_reciprocal_diagonal(self, a: [T; 2]) -> [T; 2] {
+        // Forward substitution: L * y = a.
+        let y0 = a[0] * self.a[Self::M11];
+        let y1 = (a[1] - self.a[Self::M21] * y0) * self.a[Self::M22];
+
+        // Back substitution: L^T * x = y.
+        let x1 = y1 * self.a[Self::M22];
+        let x0 = (y0 - self.a[Self::M21] * x1) * self.a[Self::M11];
+
+        [x0, x1]
+    }
+
+    /// Solves (L * L^T) * x = a, where `self` is the lower-triangular Cholesky factor L.
+    /// Assumes the diagonal entries are nonzero.
+    #[must_use]
+    pub fn solve_cholesky_vector(self, v: Vector2<T>) -> Vector2<T> {
+        let a = self.solve_cholesky_array([v.x, v.y]);
+        Vector2 { x: a[0], y: a[1] }
+    }
+
+    #[must_use]
+    pub fn solve_cholesky_vector_reciprocal_diagonal(self, v: Vector2<T>) -> Vector2<T> {
+        let a = self.solve_cholesky_array_reciprocal_diagonal([v.x, v.y]);
+        Vector2 { x: a[0], y: a[1] }
+    }
+
+    /// Solves (L * L^T) * X = C, where `self` is the lower-triangular Cholesky factor L.
+    #[must_use]
+    pub fn solve_cholesky_matrix(self, other: Self) -> Matrix2x2<T> {
+        let mut a = [T::zero(); 4];
+
+        for offset in (0..4).step_by(2) {
+            let rhs = [other[offset], other[offset + 1]];
+
+            let solution = self.solve_cholesky_array(rhs);
+
+            a[offset] = solution[0];
+            a[offset + 1] = solution[1];
+        }
+        Self { a }
+    }
+
+    #[must_use]
+    pub fn solve_cholesky_matrix_reciprocal_diagonal(self, other: Self) -> Matrix2x2<T> {
+        let mut a = [T::zero(); 4];
+
+        for offset in (0..4).step_by(2) {
+            let rhs = [other[offset], other[offset + 1]];
+
+            let solution = self.solve_cholesky_array_reciprocal_diagonal(rhs);
+
+            a[offset] = solution[0];
+            a[offset + 1] = solution[1];
+        }
+        Self { a }
+    }
+
+    #[must_use]
+    pub fn solve_cholesky_matrix_transposed(self, other: Self) -> Matrix2x2<T> {
+        let mut a = [T::zero(); 4];
+
+        // Solve A * B = C, where B = L * L^T.
+        // Each row of A satisfies B * a_row^T = c_row^T.
+
+        for row in 0..2 {
+            // Extract a row of C.
+            let rhs = [other.a[row], other.a[row + 2]];
+
+            // Solve B * a_row^T = c_row^T.
+            let solution = self.solve_cholesky_array(rhs);
+
+            // Store the solution as a row of X.
+            a[row] = solution[0];
+            a[row + 2] = solution[1];
+        }
+
+        Matrix2x2 { a }
+    }
+
+    #[must_use]
+    pub fn solve_cholesky_matrix_transposed_reciprocal_diagonal(self, other: Self) -> Matrix2x2<T> {
+        let mut a = [T::zero(); 4];
+
+        // Solve A * B = C, where B = L * L^T.
+        // Each row of A satisfies B * a_row^T = c_row^T.
+
+        for row in 0..2 {
+            // Extract a row of C.
+            let rhs = [other.a[row], other.a[row + 2]];
+
+            // Solve B * a_row^T = c_row^T.
+            let solution = self.solve_cholesky_array_reciprocal_diagonal(rhs);
+
+            // Store the solution as a row of X.
+            a[row] = solution[0];
+            a[row + 2] = solution[1];
+        }
+
+        Matrix2x2 { a }
+    }
+}
+
+impl<T> Matrix2x2<T>
+where
+    T: Matrix2x2Math,
+{
     /// Return the sum of all elements of the matrix.
     /// ```
     /// # use vqm::Matrix2x2f32;

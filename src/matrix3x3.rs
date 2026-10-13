@@ -559,6 +559,30 @@ where
     }
 }
 
+impl<T> Matrix3x3<T>
+where
+    T: FloatCore,
+{
+    /// Return true if matrix is symmetric.
+    /// ```
+    /// # use vqm::Matrix3x3f32;
+    /// let m = Matrix3x3f32::new([  2.0,  5.0, 23.0,
+    ///                              5.0, 11.0, 31.001,
+    ///                             23.0, 31.0, 41.0]);
+    /// assert!(m.is_symmetric(1.01e-3));
+    /// assert!(!m.is_symmetric(1.01e-4));
+    /// ```
+    pub fn is_symmetric(self, epsilon: T) -> bool {
+        if (self.a[Self::M12] - self.a[Self::M21]).abs() > epsilon
+            || (self.a[Self::M13] - self.a[Self::M31]).abs() > epsilon
+            || (self.a[Self::M23] - self.a[Self::M32]).abs() > epsilon
+        {
+            return false;
+        }
+        true
+    }
+}
+
 // **** Neg ****
 
 impl<T> Neg for Matrix3x3<T>
@@ -2033,7 +2057,299 @@ where
         }
         Some(adjugate / determinant)
     }
+}
 
+impl<T> Matrix3x3<T>
+where
+    T: Copy + FloatCore + MathMethods,
+{
+    /// Return the Cholesky of a matrix or None if the matrix is not positive definite.
+    /// ```
+    /// # use vqm::Matrix3x3f32;
+    /// let m = Matrix3x3f32::new([  4.0,  2.0, 2.0,
+    ///                              2.0,  5.0, 3.0,
+    ///                              2.0,  3.0, 6.0]);
+    /// let c = m.cholesky();
+    ///
+    /// assert!(c.is_some());
+    /// assert_eq!(c, Some(Matrix3x3f32::new([ 2.0, 0.0, 0.0,
+    ///                                        1.0, 2.0, 0.0,
+    ///                                        1.0, 1.0, 2.0])));
+    /// ```
+    #[allow(clippy::many_single_char_names)]
+    #[must_use]
+    pub fn cholesky(self) -> Option<Self> {
+        let mut ret = [T::zero(); 9];
+        let a2 = self.a[Self::M11];
+        if a2 < T::zero() {
+            return None;
+        }
+        let a = a2.sqrt();
+        ret[Self::M11] = a;
+        let a_reciprocal = T::one() / a;
+
+        let b = self.a[Self::M21] * a_reciprocal;
+        ret[Self::M21] = b;
+
+        let c2 = self.a[Self::M22] - b * b;
+        if c2 < T::zero() {
+            return None;
+        }
+        let c = c2.sqrt();
+        ret[Self::M22] = c;
+        let c_reciprocal = T::one() / c;
+
+        let d = self.a[Self::M31] * a_reciprocal;
+        ret[Self::M31] = d;
+
+        let e = (self.a[Self::M32] - b * d) * c_reciprocal;
+        ret[Self::M32] = e;
+
+        let f2 = self.a[Self::M33] - d * d - e * e;
+        if f2 < T::zero() {
+            return None;
+        }
+        let f = f2.sqrt();
+        ret[Self::M33] = f;
+
+        Some(Self::from_column_array(ret))
+    }
+
+    #[must_use]
+    pub fn cholesky_reciprocal_diagonal(self) -> Option<Self> {
+        let mut ret = [T::zero(); 9];
+        let a2 = self.a[Self::M11];
+        if a2 < T::zero() {
+            return None;
+        }
+        let a_reciprocal = a2.sqrt_reciprocal();
+        ret[Self::M11] = a_reciprocal;
+
+        let b = self.a[Self::M21] * a_reciprocal;
+        ret[Self::M21] = b;
+
+        let c2 = self.a[Self::M22] - b * b;
+        if c2 < T::zero() {
+            return None;
+        }
+        let c_reciprocal = c2.sqrt_reciprocal();
+        ret[Self::M22] = c_reciprocal;
+
+        let d = self.a[Self::M31] * a_reciprocal;
+        ret[Self::M31] = d;
+
+        let e = (self.a[Self::M32] - b * d) * c_reciprocal;
+        ret[Self::M32] = e;
+
+        let f2 = self.a[Self::M33] - d * d - e * e;
+        if f2 < T::zero() {
+            return None;
+        }
+        ret[Self::M33] = f2.sqrt_reciprocal();
+
+        Some(Self::from_column_array(ret))
+    }
+
+    #[must_use]
+    #[inline]
+    pub fn solve_cholesky_array(self, a: [T; 3]) -> [T; 3] {
+        // Forward substitution: L * y = a.
+        let y0 = a[0] / self.a[Self::M11];
+        let y1 = (a[1] - self.a[Self::M21] * y0) / self.a[Self::M22];
+        let y2 = (a[2] - self.a[Self::M31] * y0 - self.a[Self::M32] * y1) / self.a[Self::M33];
+
+        // Back substitution: L^T * x = y.
+        let x2 = y2 / self.a[Self::M33];
+        let x1 = (y1 - self.a[Self::M32] * x2) / self.a[Self::M22];
+        let x0 = (y0 - self.a[Self::M21] * x1 - self.a[Self::M31] * x2) / self.a[Self::M11];
+
+        [x0, x1, x2]
+    }
+
+    #[must_use]
+    #[inline]
+    pub fn solve_cholesky_array_reciprocal_diagonal(self, a: [T; 3]) -> [T; 3] {
+        // Forward substitution: L * y = a.
+        let y0 = a[0] * self.a[Self::M11];
+        let y1 = (a[1] - self.a[Self::M21] * y0) * self.a[Self::M22];
+        let y2 = (a[2] - self.a[Self::M31] * y0 - self.a[Self::M32] * y1) * self.a[Self::M33];
+
+        // Back substitution: L^T * x = y.
+        let x2 = y2 * self.a[Self::M33];
+        let x1 = (y1 - self.a[Self::M32] * x2) * self.a[Self::M22];
+        let x0 = (y0 - self.a[Self::M21] * x1 - self.a[Self::M31] * x2) * self.a[Self::M11];
+
+        [x0, x1, x2]
+    }
+
+    /// Solves (L * L^T) * x = a, where `self` is the lower-triangular Cholesky factor L.
+    /// Assumes the diagonal entries are nonzero.
+    /// ```
+    /// # use vqm::{Matrix3x3f32, Vector3f32};
+    /// let m = Matrix3x3f32::new([  4.0,  2.0, 2.0,
+    ///                              2.0,  5.0, 3.0,
+    ///                              2.0,  3.0, 6.0]);
+    /// let a = Vector3f32::new(14.0, 21.0, 26.0);
+    ///
+    /// let c = m.cholesky();
+    /// assert!(c.is_some());
+    /// if let Some(c) = c {
+    ///     assert_eq!(c, Matrix3x3f32::new([ 2.0, 0.0, 0.0,
+    ///                                       1.0, 2.0, 0.0,
+    ///                                       1.0, 1.0, 2.0]));
+    ///     let x = c.solve_cholesky_vector(a);
+    ///     assert_eq!(x, Vector3f32 { x: 1.0, y: 2.0, z: 3.0 });
+    /// }
+    /// ```
+    #[must_use]
+    pub fn solve_cholesky_vector(self, v: Vector3<T>) -> Vector3<T> {
+        let a = self.solve_cholesky_array([v.x, v.y, v.z]);
+        Vector3 { x: a[0], y: a[1], z: a[2] }
+    }
+
+    /// Solves (L * L^T) * x = a, where `self` is the lower-triangular Cholesky factor L.
+    /// Assumes the diagonal entries are nonzero.
+    /// ```
+    /// # use vqm::{Matrix3x3f32, Vector3f32};
+    /// let m = Matrix3x3f32::new([  4.0,  2.0, 2.0,
+    ///                              2.0,  5.0, 3.0,
+    ///                              2.0,  3.0, 6.0]);
+    /// let a = Vector3f32::new(14.0, 21.0, 26.0);
+    ///
+    /// let c = m.cholesky_reciprocal_diagonal();
+    /// assert!(c.is_some());
+    /// if let Some(c) = c {
+    ///     assert_eq!(c, Matrix3x3f32::new([ 0.5, 0.0, 0.0,
+    ///                                       1.0, 0.5, 0.0,
+    ///                                       1.0, 1.0, 0.5]));
+    ///     let x = c.solve_cholesky_vector_reciprocal_diagonal(a);
+    ///     assert_eq!(x, Vector3f32 { x: 1.0, y: 2.0, z: 3.0 });
+    /// }
+    /// ```
+    #[must_use]
+    pub fn solve_cholesky_vector_reciprocal_diagonal(self, v: Vector3<T>) -> Vector3<T> {
+        let a = self.solve_cholesky_array_reciprocal_diagonal([v.x, v.y, v.z]);
+        Vector3 { x: a[0], y: a[1], z: a[2] }
+    }
+
+    /// Solves (L * L^T) * A = B, for A, where `self` is the lower-triangular Cholesky factor L.
+    /// ```
+    /// # use vqm::Matrix3x3f32;
+    /// let m = Matrix3x3f32::new([  4.0,  2.0, 2.0,
+    ///                              2.0,  5.0, 3.0,
+    ///                              2.0,  3.0, 6.0]);
+    /// let c = m.cholesky();
+    /// assert!(c.is_some());
+    /// if let Some(c) = c {
+    ///     assert_eq!(c, Matrix3x3f32::new([ 2.0, 0.0, 0.0,
+    ///                                       1.0, 2.0, 0.0,
+    ///                                       1.0, 1.0, 2.0]));
+    ///     let a = c.solve_cholesky_matrix(m);
+    ///     assert_eq!(a, Matrix3x3f32::new([ 1.0, 0.0, 0.0,
+    ///                                       0.0, 1.0, 0.0,
+    ///                                       0.0, 0.0, 1.0]));
+    /// }
+    /// ```
+    #[must_use]
+    pub fn solve_cholesky_matrix(self, other: Self) -> Matrix3x3<T> {
+        let mut a = [T::zero(); 9];
+
+        for offset in (0..9).step_by(3) {
+            let rhs = [other[offset], other[offset + 1], other[offset + 2]];
+
+            let solution = self.solve_cholesky_array(rhs);
+
+            a[offset] = solution[0];
+            a[offset + 1] = solution[1];
+            a[offset + 2] = solution[2];
+        }
+        Self { a }
+    }
+
+    /// ```
+    /// # use vqm::Matrix3x3f32;
+    /// let m = Matrix3x3f32::new([  4.0,  2.0, 2.0,
+    ///                              2.0,  5.0, 3.0,
+    ///                              2.0,  3.0, 6.0]);
+    /// let c = m.cholesky_reciprocal_diagonal();
+    /// assert!(c.is_some());
+    /// if let Some(c) = c {
+    ///     assert_eq!(c, Matrix3x3f32::new([ 0.5, 0.0, 0.0,
+    ///                                       1.0, 0.5, 0.0,
+    ///                                       1.0, 1.0, 0.5]));
+    ///     let a = c.solve_cholesky_matrix_reciprocal_diagonal(m);
+    ///     assert_eq!(a, Matrix3x3f32::new([ 1.0, 0.0, 0.0,
+    ///                                       0.0, 1.0, 0.0,
+    ///                                       0.0, 0.0, 1.0]));
+    /// }
+    /// ```
+    #[must_use]
+    pub fn solve_cholesky_matrix_reciprocal_diagonal(self, other: Self) -> Matrix3x3<T> {
+        let mut a = [T::zero(); 9];
+
+        for offset in (0..9).step_by(3) {
+            let rhs = [other[offset], other[offset + 1], other[offset + 2]];
+
+            let solution = self.solve_cholesky_array_reciprocal_diagonal(rhs);
+
+            a[offset] = solution[0];
+            a[offset + 1] = solution[1];
+            a[offset + 2] = solution[2];
+        }
+        Self { a }
+    }
+
+    #[must_use]
+    pub fn solve_cholesky_matrix_transposed(self, other: Self) -> Matrix3x3<T> {
+        let mut a = [T::zero(); 9];
+
+        // Solve A * B = C, where B = L * L^T.
+        // Each row of A satisfies B * a_row^T = c_row^T.
+
+        for row in 0..3 {
+            // Extract a row of C.
+            let rhs = [other.a[row], other.a[row + 3], other.a[row + 6]];
+
+            // Solve B * a_row^T = c_row^T.
+            let solution = self.solve_cholesky_array(rhs);
+
+            // Store the solution as a row of X.
+            a[row] = solution[0];
+            a[row + 3] = solution[1];
+            a[row + 6] = solution[2];
+        }
+
+        Matrix3x3 { a }
+    }
+
+    #[must_use]
+    pub fn solve_cholesky_matrix_transposed_reciprocal_diagonal(self, other: Self) -> Matrix3x3<T> {
+        let mut a = [T::zero(); 9];
+
+        // Solve A * B = C, where B = L * L^T.
+        // Each row of A satisfies B * a_row^T = c_row^T.
+
+        for row in 0..3 {
+            // Extract a row of C.
+            let rhs = [other.a[row], other.a[row + 3], other.a[row + 6]];
+
+            // Solve B * a_row^T = c_row^T.
+            let solution = self.solve_cholesky_array_reciprocal_diagonal(rhs);
+
+            // Store the solution as a row of X.
+            a[row] = solution[0];
+            a[row + 3] = solution[1];
+            a[row + 6] = solution[2];
+        }
+
+        Matrix3x3 { a }
+    }
+}
+
+impl<T> Matrix3x3<T>
+where
+    T: Matrix3x3Math,
+{
     /// Return the sum of all elements of the matrix.
     /// ```
     /// # use vqm::Matrix3x3f32;
