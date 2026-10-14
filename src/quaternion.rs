@@ -122,7 +122,7 @@ impl<T> Quaternion<T>
 where
     T: FloatCore,
 {
-    /// Return true if vector is near zero.
+    /// Return true if quaternion is near zero.
     /// ```
     /// # use vqm::Quaternionf32;
     /// # use num_traits::Zero;
@@ -137,6 +137,23 @@ where
             return false;
         }
         true
+    }
+}
+
+impl<T> Quaternion<T>
+where
+    T: FloatCore + QuaternionMath,
+{
+    /// Return true if quaternion is near other.
+    /// ```
+    /// # use vqm::Quaternionf32;
+    /// let q = Quaternionf32::new(2.0,  3.0, 7.0, 11.0);
+    /// let r = Quaternionf32::new(2.0,  3.0, 7.0, 11.001);
+    /// assert!(q.is_near(r, 1.01e-3));
+    /// assert!(!q.is_near(r, 1e-4));
+    /// ```
+    pub fn is_near(self, other: Quaternion<T>, epsilon: T) -> bool {
+        (self - other).is_near_zero(epsilon)
     }
 }
 
@@ -205,7 +222,7 @@ impl<T> Quaternion<T>
 where
     T: One + FloatCore,
 {
-    /// Return true if vector is near zero.
+    /// Return true if quaternion is near the unit quaternion.
     /// ```
     /// # use vqm::Quaternionf32;
     /// # use num_traits::One;

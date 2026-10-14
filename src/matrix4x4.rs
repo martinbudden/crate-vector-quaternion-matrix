@@ -13,7 +13,7 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use crate::{MathConstants, MathMethods, Matrix2x2, Matrix3x3, Matrix4x4Math, Quaternion, Vector4};
+use crate::{MathConstants, Matrix2x2, Matrix3x3, Matrix4x4Math, Quaternion, Vector4};
 
 /// 4x4 matrix of `f32` values<br>
 pub type Matrix4x4f32 = Matrix4x4<f32>;
@@ -464,6 +464,29 @@ where
             }
         }
         true
+    }
+}
+
+impl<T> Matrix4x4<T>
+where
+    T: FloatCore + Matrix4x4Math,
+{
+    /// Return true if matrix is near other.
+    /// ```
+    /// # use vqm::Matrix4x4f32;
+    /// let m = Matrix4x4f32::new([  2.0, 17.0, 59.0, 127.0,
+    ///                              5.0, 11.0, 47.0, 109.0,
+    ///                             23.0, 31.0, 41.0, 103.0,
+    ///                             67.0, 73.0, 83.0,  97.0]);
+    /// let n = Matrix4x4f32::new([  2.0, 17.0, 59.0, 127.0,
+    ///                              5.0, 11.0, 47.0, 109.0,
+    ///                             23.0, 31.0, 41.0, 103.0,
+    ///                             67.0, 73.0, 83.0,  97.001]);
+    /// assert!(m.is_near(n, 1.01e-3));
+    /// assert!(!m.is_near(n,1e-4));
+    /// ```
+    pub fn is_near(self, other: Matrix4x4<T>, epsilon: T) -> bool {
+        (self - other).is_near_zero(epsilon)
     }
 }
 
@@ -2285,224 +2308,6 @@ where
             return None;
         }
         Some(adjugate / determinant)
-    }
-}
-
-impl<T> Matrix4x4<T>
-where
-    T: Copy + FloatCore + MathMethods,
-{
-    /// Return the Cholesky of a matrix or None if the matrix is not positive definite.
-    /// ```
-    /// # use vqm::Matrix4x4f32;
-    /// let m = Matrix4x4f32::new([  2.0,  5.0, 23.0,  67.0,
-    ///                              5.0, 11.0, 31.0,  73.0,
-    ///                             23.0, 31.0, 41.0,  83.0,
-    ///                             67.0, 73.0, 83.0,  97.0]);
-    /// let c = m.cholesky();
-    /// assert!(c.is_none());
-    /// ```
-    #[allow(clippy::many_single_char_names)]
-    #[must_use]
-    pub fn cholesky(self) -> Option<Self> {
-        let mut ret = [T::zero(); 16];
-        let a2 = self.a[Self::M11];
-        if a2 < T::zero() {
-            return None;
-        }
-        let a = a2.sqrt();
-        ret[Self::M11] = a;
-
-        let b = self.a[Self::M21] / a;
-        ret[Self::M21] = b;
-
-        let c2 = self.a[Self::M22] - b * b;
-        if c2 < T::zero() {
-            return None;
-        }
-        let c = c2.sqrt();
-        ret[Self::M22] = c;
-
-        let d = self.a[Self::M31] / a;
-        ret[Self::M31] = d;
-
-        let e = (self.a[Self::M32] - b * d) / c;
-        ret[Self::M32] = e;
-
-        let f2 = self.a[Self::M33] - d * d - e * e;
-        if f2 < T::zero() {
-            return None;
-        }
-        let f = f2.sqrt();
-        ret[Self::M33] = f;
-
-        Some(Self::from_column_array(ret))
-    }
-
-    #[must_use]
-    pub fn cholesky_reciprocal_diagonal(self) -> Option<Self> {
-        let mut ret = [T::zero(); 16];
-        let a2 = self.a[Self::M11];
-        if a2 < T::zero() {
-            return None;
-        }
-        let a_reciprocal = a2.sqrt_reciprocal();
-        ret[Self::M11] = a_reciprocal;
-
-        let b = self.a[Self::M21] * a_reciprocal;
-        ret[Self::M21] = b;
-
-        let c2 = self.a[Self::M22] - b * b;
-        if c2 < T::zero() {
-            return None;
-        }
-        let c_reciprocal = c2.sqrt_reciprocal();
-        ret[Self::M22] = c_reciprocal;
-
-        let d = self.a[Self::M31] * a_reciprocal;
-        ret[Self::M31] = d;
-
-        let e = (self.a[Self::M32] - b * d) * c_reciprocal;
-        ret[Self::M32] = e;
-
-        let f2 = self.a[Self::M33] - d * d - e * e;
-        if f2 < T::zero() {
-            return None;
-        }
-        let f_reciprocal = f2.sqrt_reciprocal();
-        ret[Self::M33] = f_reciprocal;
-
-        Some(Self::from_column_array(ret))
-    }
-
-    #[must_use]
-    #[inline]
-    pub fn solve_cholesky_array(self, a: [T; 4]) -> [T; 4] {
-        // Solve L * y = b (forward substitution).
-        let y0 = a[0] / self.a[Self::M11];
-        let y1 = (a[1] - self.a[Self::M21] * y0) / self.a[Self::M22];
-        let y2 = (a[2] - self.a[Self::M31] * y0 - self.a[Self::M32] * y1) / self.a[Self::M33];
-        let y3 = (a[3] - self.a[Self::M41] * y0 - self.a[Self::M42] * y1 - self.a[Self::M43] * y2) / self.a[Self::M44];
-
-        // Solve L^T * x = y (back substitution).
-        let x3 = y3 / self.a[Self::M44];
-        let x2 = (y2 - self.a[Self::M34] * x3) / self.a[Self::M33];
-        let x1 = (y1 - self.a[Self::M23] * x2 - self.a[Self::M24] * x3) / self.a[Self::M22];
-        let x0 = (y0 - self.a[Self::M12] * x1 - self.a[Self::M13] * x2 - self.a[Self::M14] * x3) / self.a[Self::M11];
-
-        [x0, x1, x2, x3]
-    }
-
-    #[must_use]
-    #[inline]
-    pub fn solve_cholesky_array_reciprocal_diagonal(self, a: [T; 4]) -> [T; 4] {
-        // Solve L * y = b (forward substitution).
-        let y0 = a[0] * self.a[Self::M11];
-        let y1 = (a[1] - self.a[Self::M21] * y0) * self.a[Self::M22];
-        let y2 = (a[2] - self.a[Self::M31] * y0 - self.a[Self::M32] * y1) * self.a[Self::M33];
-        let y3 = (a[3] - self.a[Self::M41] * y0 - self.a[Self::M42] * y1 - self.a[Self::M43] * y2) * self.a[Self::M44];
-
-        // Solve L^T * x = y (back substitution).
-        let x3 = y3 * self.a[Self::M44];
-        let x2 = (y2 - self.a[Self::M34] * x3) * self.a[Self::M33];
-        let x1 = (y1 - self.a[Self::M23] * x2 - self.a[Self::M24] * x3) * self.a[Self::M22];
-        let x0 = (y0 - self.a[Self::M12] * x1 - self.a[Self::M13] * x2 - self.a[Self::M14] * x3) * self.a[Self::M11];
-
-        [x0, x1, x2, x3]
-    }
-
-    #[must_use]
-    pub fn solve_cholesky_vector(self, v: Vector4<T>) -> Vector4<T> {
-        let a = self.solve_cholesky_array([v.x, v.y, v.z, v.t]);
-        Vector4 { x: a[0], y: a[1], z: a[2], t: a[3] }
-    }
-
-    #[must_use]
-    pub fn solve_cholesky_vector_reciprocal_diagonal(self, v: Vector4<T>) -> Vector4<T> {
-        let a = self.solve_cholesky_array_reciprocal_diagonal([v.x, v.y, v.z, v.t]);
-        Vector4 { x: a[0], y: a[1], z: a[2], t: a[3] }
-    }
-
-    #[must_use]
-    pub fn solve_cholesky_matrix(self, other: Self) -> Matrix4x4<T> {
-        let mut a = [T::zero(); 16];
-
-        for offset in (0..16).step_by(4) {
-            let rhs = [other[offset], other[offset + 1], other[offset + 2], other[offset + 3]];
-
-            let solution = self.solve_cholesky_array(rhs);
-
-            a[offset] = solution[0];
-            a[offset + 1] = solution[1];
-            a[offset + 2] = solution[2];
-            a[offset + 3] = solution[3];
-        }
-        Self { a }
-    }
-
-    #[must_use]
-    pub fn solve_cholesky_matrix_reciprocal_diagonal(self, other: Self) -> Matrix4x4<T> {
-        let mut a = [T::zero(); 16];
-
-        for offset in (0..16).step_by(4) {
-            let rhs = [other[offset], other[offset + 1], other[offset + 2], other[offset + 3]];
-
-            let solution = self.solve_cholesky_array_reciprocal_diagonal(rhs);
-
-            a[offset] = solution[0];
-            a[offset + 1] = solution[1];
-            a[offset + 2] = solution[2];
-            a[offset + 3] = solution[3];
-        }
-        Self { a }
-    }
-
-    #[must_use]
-    pub fn solve_cholesky_matrix_transposed(self, other: Self) -> Matrix4x4<T> {
-        let mut a = [T::zero(); 16];
-
-        // Solve A * B = C, where B = L * L^T.
-        // Each row of A satisfies B * a_row^T = c_row^T.
-
-        for row in 0..3 {
-            // Extract a row of C.
-            let rhs = [other.a[row], other.a[row + 4], other.a[row + 8], other.a[row + 12]];
-
-            // Solve B * a_row^T = c_row^T.
-            let solution = self.solve_cholesky_array(rhs);
-
-            // Store the solution as a row of X.
-            a[row] = solution[0];
-            a[row + 4] = solution[1];
-            a[row + 8] = solution[2];
-            a[row + 12] = solution[3];
-        }
-
-        Matrix4x4 { a }
-    }
-
-    #[must_use]
-    pub fn solve_cholesky_matrix_transposed_reciprocal_diagonal(self, other: Self) -> Matrix4x4<T> {
-        let mut a = [T::zero(); 16];
-
-        // Solve A * B = C, where B = L * L^T.
-        // Each row of A satisfies B * a_row^T = c_row^T.
-
-        for row in 0..3 {
-            // Extract a row of C.
-            let rhs = [other.a[row], other.a[row + 4], other.a[row + 8], other.a[row + 12]];
-
-            // Solve B * a_row^T = c_row^T.
-            let solution = self.solve_cholesky_array_reciprocal_diagonal(rhs);
-
-            // Store the solution as a row of X.
-            a[row] = solution[0];
-            a[row + 4] = solution[1];
-            a[row + 8] = solution[2];
-            a[row + 12] = solution[3];
-        }
-
-        Matrix4x4 { a }
     }
 }
 

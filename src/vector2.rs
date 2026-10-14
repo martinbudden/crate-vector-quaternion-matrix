@@ -103,12 +103,33 @@ where
     /// # use num_traits::Zero;
     /// let z = Vector2f32::zero();
     /// assert!(z.is_near_zero(1e-5));
+    /// assert!(Vector2f32::new(1e-3, 0.0).is_near_zero(1e-2));
+    /// assert!(Vector2f32::new(0.0, 1e-3).is_near_zero(1e-2));
+    /// assert!(!Vector2f32::new(1e-1, 0.0).is_near_zero(1e-2));
+    /// assert!(!Vector2f32::new(0.0, 1e-1).is_near_zero(1e-2));
     /// ```
     pub fn is_near_zero(self, epsilon: T) -> bool {
-        if self.x.abs() > epsilon && self.y.abs() > epsilon {
+        if self.x.abs() > epsilon || self.y.abs() > epsilon {
             return false;
         }
         true
+    }
+}
+
+impl<T> Vector2<T>
+where
+    T: FloatCore + Vector2Math,
+{
+    /// Return true if vector is near other.
+    /// ```
+    /// # use vqm::Vector2f32;
+    /// let u = Vector2f32::new(2.0,  3.0);
+    /// let v = Vector2f32::new(2.0,  3.001);
+    /// assert!(u.is_near(v, 1.01e-3));
+    /// assert!(!u.is_near(v, 1e-4));
+    /// ```
+    pub fn is_near(self, other: Vector2<T>, epsilon: T) -> bool {
+        (self - other).is_near_zero(epsilon)
     }
 }
 

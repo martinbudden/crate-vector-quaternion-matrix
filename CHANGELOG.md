@@ -19,16 +19,19 @@ Once the API has stabilized this project will adopt semantic versioning, the fir
 
 ### Deprecated
 
-At some point [0.1.0] to [0.1.14] will be [YANKED]
+At some point [0.1.0] to [0.1.13] will be [YANKED]
 
 ## [0.1.18] - 2026-10-xx
 
 ### Added
 
 - `is_symmetric` functions for matrices.
-- `cholesky`, `solve_cholesky_array`, `solve_cholesky_vector`, and `solve_cholesky_matrix` functions for matrices
-- `solve_cholesky_matrix_transposed`.
-- reciprocal forms of Cholesky functions to avoid divisions in Cholesky functions.
+- `is_near` functions for vectors, quaternions, and matrices.
+- `Cholesky2x2`, `Cholesky2x2`, `Cholesky2x2` for solving positive deterministic matrices.
+
+### Changed
+
+- fixed `is_near_zero` for vectors.
 
 ## [0.1.17] - 2026-09-30
 
