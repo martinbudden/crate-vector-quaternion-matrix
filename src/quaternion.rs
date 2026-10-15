@@ -963,6 +963,13 @@ impl<T> Quaternion<T>
 where
     T: FloatCore + MathMethods,
 {
+    /// Rotates a 3D vector by this quaternion.
+    /// Uses an active rotation in a right-handed coordinate system.
+    ///
+    /// # Preconditions
+    ///
+    /// The quaternion must be normalized (have unit magnitude).
+    ///
     pub fn rotate(self, v: Vector3<T>) -> Vector3<T> {
         let two: T = T::one() + T::one();
         let half = T::one() / two;
@@ -980,12 +987,69 @@ where
                 + v.y * (half - x2 - z2)
                 + v.z * (self.y * self.z - self.w * self.x))
                 * two,
-            z: (v.x * (self.w * self.y + self.x * self.z)
+            z: (v.x * (self.x * self.z - self.w * self.y)
                 + v.y * (self.w * self.x + self.y * self.z)
                 + v.z * (half - x2 - y2))
                 * two,
         }
     }
+
+    /// Rotate about the x-axis,
+    /// equivalent to *= Quaternion(cos(theta/2), sin(theta/2), 0, 0).
+    pub fn rotate_x(&mut self, theta: T) -> &mut Self {
+        let two = T::one() + T::one();
+        let (sin, cos) = (theta / two).sin_cos();
+
+        let wt: T = self.w * cos - self.x * sin;
+        let yt: T = self.y * cos + self.z * sin;
+
+        self.x = self.w * sin + self.x * cos;
+        self.z = self.z * cos - self.y * sin;
+        self.w = wt;
+        self.y = yt;
+
+        self
+    }
+
+    /// Rotate about the y-axis,
+    /// equivalent to *= Quaternion(cos(theta/2), 0, sin(theta/2), 0).
+    pub fn rotate_y(&mut self, theta: T) -> &mut Self {
+        let two = T::one() + T::one();
+        let (sin, cos) = (theta / two).sin_cos();
+
+        let wt = self.w * cos - self.y * sin;
+        let xt = self.x * cos - self.z * sin;
+
+        self.y = self.w * sin + self.y * cos;
+        self.z = self.x * sin + self.z * cos;
+        self.w = wt;
+        self.x = xt;
+
+        self
+    }
+
+    /// Rotate about the z-axis,
+    /// equivalent to *= Quaternion(cos(theta/2), 0, 0, sin(theta/2)).
+    pub fn rotate_z(&mut self, theta: T) -> &mut Self {
+        let two = T::one() + T::one();
+        let (sin, cos) = (theta / two).sin_cos();
+
+        let wt = self.w * cos - self.z * sin;
+        let xt = self.x * cos + self.y * sin;
+
+        self.y = self.y * cos - self.x * sin;
+        self.z = self.w * sin + self.z * cos;
+        self.w = wt;
+        self.x = xt;
+
+        self
+    }
+}
+
+impl<T> Quaternion<T>
+where
+    T: FloatCore + MathMethods,
+{
     pub fn cos_roll(self) -> T {
         let half = T::one() / (T::one() + T::one());
         let a: T = self.w * self.x + self.y * self.z;
@@ -1083,48 +1147,6 @@ impl<T> Quaternion<T>
 where
     T: FloatCore + MathMethods,
 {
-    /// Rotate about the x-axis,
-    /// equivalent to *= Quaternion(cos(theta/2), sin(theta/2), 0, 0).
-    pub fn rotate_x(&mut self, theta: T) -> &mut Self {
-        let two = T::one() + T::one();
-        let (sin, cos) = (theta / two).sin_cos();
-        let wt: T = self.w * cos - self.x * sin;
-        self.x = self.w * sin + self.x * cos;
-        let yt: T = self.y * cos + self.z * sin;
-        self.z = self.z * cos - self.y * sin;
-        self.w = wt;
-        self.y = yt;
-        self
-    }
-
-    /// Rotate about the y-axis,
-    /// equivalent to *= Quaternion(cos(theta/2), 0, sin(theta/2), 0).
-    pub fn rotate_y(&mut self, theta: T) -> &mut Self {
-        let two = T::one() + T::one();
-        let (sin, cos) = (theta / two).sin_cos();
-        let wt: T = self.w * cos - self.y * sin;
-        let xt: T = self.x * cos - self.z * sin;
-        self.y = self.w * sin + self.y * cos;
-        self.z = self.x * sin - self.z * cos;
-        self.w = wt;
-        self.x = xt;
-        self
-    }
-
-    /// Rotate about the z-axis,
-    /// equivalent to *= Quaternion(cos(theta/2), 0, 0, sin(theta/2)).
-    pub fn rotate_z(&mut self, theta: T) -> &mut Self {
-        let two = T::one() + T::one();
-        let (sin, cos) = (theta / two).sin_cos();
-        let wt: T = self.w * cos - self.z * sin;
-        let xt: T = self.x * cos - self.y * sin;
-        self.y = self.x * sin + self.y * cos;
-        self.z = self.z * cos - self.w * sin;
-        self.w = wt;
-        self.x = xt;
-        self
-    }
-
     #[inline]
     pub fn calculate_roll_radians(self) -> T {
         let half = T::one() / (T::one() + T::one());

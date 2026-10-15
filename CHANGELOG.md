@@ -28,10 +28,12 @@ At some point [0.1.0] to [0.1.13] will be [YANKED]
 - `is_symmetric` functions for matrices.
 - `is_near` functions for vectors, quaternions, and matrices.
 - `Cholesky2x2`, `Cholesky2x2`, `Cholesky2x2` for solving positive deterministic matrices.
+- `Quaternion` tests.
 
 ### Changed
 
 - fixed `is_near_zero` for vectors.
+- fixed `Quaternion` `rotate`, `rotate_y`, and `rotate_z` functions.
 
 ## [0.1.17] - 2026-09-30
 
