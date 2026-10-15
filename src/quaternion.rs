@@ -1050,61 +1050,97 @@ impl<T> Quaternion<T>
 where
     T: FloatCore + MathMethods,
 {
+    /// Returns the cosine of the Euler roll angle.
+    ///
+    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
     pub fn cos_roll(self) -> T {
         let half = T::one() / (T::one() + T::one());
         let a: T = self.w * self.x + self.y * self.z;
         let b: T = half - self.x * self.x - self.y * self.y;
-        b * (a * a + b * b).sqrt_reciprocal()
+
+        let sq = a * a + b * b;
+        if sq == T::zero() { T::zero() } else { b * sq.sqrt_reciprocal() }
     }
 
+    /// Returns the sine of the Euler pitch angle.
+    ///
+    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
     pub fn sin_pitch(self) -> T {
         let two: T = T::one() + T::one();
         (self.w * self.y - self.x * self.z) * two
     }
 
+    /// Returns the non-negative cosine of the Euler pitch angle.
+    ///
+    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
     pub fn cos_pitch(self) -> T {
         let s: T = self.sin_pitch();
         let sq = T::one() - s * s;
-        if sq < T::zero() { T::zero() } else { sq.sqrt() }
+
+        if sq <= T::zero() { T::zero() } else { sq.sqrt() }
     }
 
+    /// Returns the tan of the Euler pitch angle.
+    ///
+    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
+    /// `tan_pitch` is undefined at ±90° pitch.
     pub fn tan_pitch(self) -> T {
         let s: T = self.sin_pitch();
         let sq = T::one() - s * s;
-        if sq < T::zero() { T::zero() } else { s * sq.sqrt_reciprocal() }
+
+        if sq <= T::zero() { T::zero() } else { s * sq.sqrt_reciprocal() }
     }
 
+    /// Returns the cosine of the Euler pitch angle.
+    ///
+    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
     pub fn cos_yaw(self) -> T {
         let half = T::one() / (T::one() + T::one());
         let a: T = self.w * self.z + self.x * self.y;
         let b: T = half - self.y * self.y - self.z * self.z;
-        b * (a * a + b * b).sqrt_reciprocal()
+
+        let sq = a * a + b * b;
+        if sq == T::zero() { T::zero() } else { b * sq.sqrt_reciprocal() }
     }
 
+    /// Returns the sin of the Euler yaw angle.
+    ///
+    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
     pub fn sin_yaw(self) -> T {
         let half = T::one() / (T::one() + T::one());
         let a: T = self.w * self.z + self.x * self.y;
         let b: T = half - self.y * self.y - self.z * self.z;
-        a * (a * a + b * b).sqrt_reciprocal()
+
+        let sq = a * a + b * b;
+        if sq == T::zero() { T::zero() } else { a * sq.sqrt_reciprocal() }
     }
 
+    /// Returns the sin of the Euler roll angle.
+    ///
+    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
     pub fn sin_roll(self) -> T {
         let half = T::one() / (T::one() + T::one());
         let a: T = self.w * self.x + self.y * self.z;
         let b: T = half - self.x * self.x - self.y * self.y;
-        a * (a * a + b * b).sqrt_reciprocal()
+
+        let sq = a * a + b * b;
+        if sq == T::zero() { T::zero() } else { a * sq.sqrt_reciprocal() }
     }
 
     /// cos of the total tilt angle (direct Z-axis projection from the rotation matrix).
+    ///
+    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
     pub fn cos_tilt(self) -> T {
         T::one() - (T::one() + T::one()) * (self.x * self.x + self.y * self.y)
     }
 
     /// sin of the total tilt angle (direct Z-axis projection from the rotation matrix).
+    ///
+    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
     pub fn sin_tilt(self) -> T {
         let c: T = self.cos_tilt();
         let sq = T::one() - c * c;
-        if sq < T::zero() { T::zero() } else { sq.sqrt() }
+        if sq <= T::zero() { T::zero() } else { sq.sqrt() }
     }
 }
 
@@ -1113,6 +1149,8 @@ where
     T: FloatCore + MathMethods,
 {
     /// clip `sin(roll_angle)` to +/-1.0 when roll angle outside range [-90 degrees, 90 degrees].
+    ///
+    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
     pub fn sin_roll_clipped(self) -> T {
         let half = T::one() / (T::one() + T::one());
         let a: T = self.w * self.x + self.y * self.z;
@@ -1123,23 +1161,27 @@ where
             }
             return T::one();
         }
-        a * (a * a + b * b).sqrt_reciprocal()
+        let sq = a * a + b * b;
+        if sq == T::zero() { T::zero() } else { a * sq.sqrt_reciprocal() }
     }
 
+    /// clip `sin(pitch_angle)` to +/-1.0 when roll angle outside range [-90 degrees, 90 degrees].
+    ///
+    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
     pub fn sin_pitch_clipped(self) -> T {
+        let two: T = T::one() + T::one();
+        let sin_pitch = two * (self.w * self.y - self.x * self.z);
         let d = self.w * self.w - self.y * self.y;
-        let half_sin_pitch = self.w * self.y - self.x * self.z;
 
         // if d < 0.0, then self is outside the range [-90, 90] degrees, so we return 1.0 or 1.0 according to the sign of sin_pitch
         if d < T::zero() {
-            if half_sin_pitch < T::zero() {
+            if sin_pitch < T::zero() {
                 return -T::one();
             }
             return T::one();
         }
         // self is in the range [-90, 90] degrees, so we can just return sin(self)
-        let two: T = T::one() + T::one();
-        two * half_sin_pitch
+        sin_pitch
     }
 }
 
