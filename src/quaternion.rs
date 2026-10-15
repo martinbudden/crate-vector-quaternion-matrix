@@ -963,7 +963,7 @@ impl<T> Quaternion<T>
 where
     T: FloatCore + MathMethods,
 {
-    pub fn rotate(self, v: &Vector3<T>) -> Vector3<T> {
+    pub fn rotate(self, v: Vector3<T>) -> Vector3<T> {
         let two: T = T::one() + T::one();
         let half = T::one() / two;
 
