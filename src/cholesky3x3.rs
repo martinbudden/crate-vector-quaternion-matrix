@@ -74,7 +74,7 @@ where
         let mut ret = [T::ZERO; CHOLESKY_3X3_SIZE];
 
         let a2 = m[Matrix3x3::<T>::M11];
-        if a2 < T::ZERO {
+        if a2 <= T::ZERO {
             return None;
         }
         let a_reciprocal = a2.sqrt_reciprocal();
@@ -84,7 +84,7 @@ where
         ret[Self::M21] = b;
 
         let c2 = m[Matrix3x3::<T>::M22] - b * b;
-        if c2 < T::ZERO {
+        if c2 <= T::ZERO {
             return None;
         }
         let c_reciprocal = c2.sqrt_reciprocal();
@@ -97,7 +97,46 @@ where
         ret[Self::M32] = e;
 
         let f2 = m[Matrix3x3::<T>::M33] - d * d - e * e;
-        if f2 < T::ZERO {
+        if f2 <= T::ZERO {
+            return None;
+        }
+        let f_reciprocal = f2.sqrt_reciprocal();
+        ret[Self::M33] = f_reciprocal;
+
+        Some(Self { a: ret })
+    }
+
+    #[allow(clippy::many_single_char_names)]
+    #[must_use]
+    pub fn from_lower_triangle_array(a: [T; 6]) -> Option<Self> {
+        // 14 arithmetic operations: 3 sqrt_reciprocal, 7 multiplications, 4 subtractions
+        let mut ret = [T::ZERO; CHOLESKY_3X3_SIZE];
+
+        let a2 = a[Self::M11];
+        if a2 <= T::ZERO {
+            return None;
+        }
+        let a_reciprocal = a2.sqrt_reciprocal();
+        ret[Self::M11] = a_reciprocal;
+
+        let b = a[Self::M21] * a_reciprocal;
+        ret[Self::M21] = b;
+
+        let c2 = a[Self::M22] - b * b;
+        if c2 <= T::ZERO {
+            return None;
+        }
+        let c_reciprocal = c2.sqrt_reciprocal();
+        ret[Self::M22] = c_reciprocal;
+
+        let d = a[Self::M31] * a_reciprocal;
+        ret[Self::M31] = d;
+
+        let e = (a[Self::M32] - b * d) * c_reciprocal;
+        ret[Self::M32] = e;
+
+        let f2 = a[Self::M33] - d * d - e * e;
+        if f2 <= T::ZERO {
             return None;
         }
         let f_reciprocal = f2.sqrt_reciprocal();
@@ -306,8 +345,10 @@ mod tests {
             17.0, 31.0, 47.0, //
             19.0, 37.0, 59.0, //
         ]);
+
         let option = Cholesky3x3f32::new(A);
         assert!(option.is_some());
+
         if let Some(cholesky) = option {
             const R: f32 = core::f32::consts::FRAC_1_SQRT_2;
             let L = cholesky.l();
@@ -346,5 +387,29 @@ mod tests {
             assert!(Z.is_near(Y, 1e-7));
             //assert!((A * X.transpose()).is_near(B.transpose(), 1e-2));
         }
+    }
+
+    #[rustfmt::skip]
+    #[test]
+    fn cholesky_from_lta() {
+        let m = Matrix3x3f32::new([
+            2.0,  3.0,  7.0,
+            3.0,  5.0, 11.0,
+            7.0, 11.0, 29.0,
+        ]);
+        let a :[f32;Cholesky3x3f32::SIZE] =[
+            2.0, 3.0,  7.0,
+                 5.0, 11.0,
+                      29.0,
+        ];
+        let option_m = Cholesky3x3f32::new(m);
+        assert!(option_m.is_some());
+        let option_a = Cholesky3x3f32::from_lower_triangle_array(a);
+        assert!(option_a.is_some());
+
+        if let Some(cholesky_a) = option_a
+            && let Some(cholesky_m) = option_m {
+                assert_eq!(cholesky_a, cholesky_m);
+            }
     }
 }

@@ -398,6 +398,35 @@ where
     }
 }
 
+impl<T> Matrix4x4<T>
+where
+    T: Copy,
+{
+    /// Create a matrix with the diagonal set to an array.
+    /// ```
+    /// # use vqm::Matrix4x4f32;
+    /// let m = Matrix4x4f32::from_lower_triangular_array([
+    ///     1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0
+    /// ]);
+    /// assert_eq!(m, Matrix4x4f32::new([ 1.0, 2.0, 4.0,  7.0,
+    ///                                   2.0, 3.0, 5.0,  8.0,
+    ///                                   4.0, 5.0, 6.0,  9.0,
+    ///                                   7.0, 8.0, 9.0, 10.0]));
+    /// ```
+    #[rustfmt::skip]
+    #[inline]
+    pub const fn from_lower_triangular_array(a: [T;10]) -> Self {
+        Self {
+            a: [
+                a[0], a[1], a[3],a[6],
+                a[1], a[2], a[4],a[7],
+                a[3], a[4], a[5],a[8],
+                a[6], a[7], a[8],a[9],
+            ]
+        }
+    }
+}
+
 // **** Zero ****
 
 impl<T> Zero for Matrix4x4<T>
