@@ -75,7 +75,7 @@ where
         let mut ret = [T::ZERO; CHOLESKY_4X4_SIZE];
 
         let a2 = m[Matrix4x4::<T>::M11];
-        if a2 < T::ZERO {
+        if a2 <= T::ZERO {
             return None;
         }
         let a_reciprocal = a2.sqrt_reciprocal();
@@ -85,7 +85,7 @@ where
         ret[Self::M21] = b;
 
         let c2 = m[Matrix4x4::<T>::M22] - b * b;
-        if c2 < T::ZERO {
+        if c2 <= T::ZERO {
             return None;
         }
         let c_reciprocal = c2.sqrt_reciprocal();
@@ -98,7 +98,7 @@ where
         ret[Self::M32] = e;
 
         let f2 = m[Matrix4x4::<T>::M33] - d * d - e * e;
-        if f2 < T::ZERO {
+        if f2 <= T::ZERO {
             return None;
         }
         let f_reciprocal = f2.sqrt_reciprocal();
@@ -114,7 +114,62 @@ where
         ret[Self::M43] = i;
 
         let j2 = m[Matrix4x4::<T>::M44] - g * g - h * h - i * i;
-        if j2 < T::ZERO {
+        if j2 <= T::ZERO {
+            return None;
+        }
+        let j_reciprocal = j2.sqrt_reciprocal();
+        ret[Self::M44] = j_reciprocal;
+
+        Some(Self { a: ret })
+    }
+
+    #[allow(clippy::many_single_char_names)]
+    #[must_use]
+    pub fn from_lower_triangle_array(a: [T; 10]) -> Option<Self> {
+        // 26 arithmetic operations: 4 sqrt_reciprocal, 12 multiplications, 10 subtractions
+        let mut ret = [T::ZERO; CHOLESKY_4X4_SIZE];
+
+        let a2 = a[Self::M11];
+        if a2 <= T::ZERO {
+            return None;
+        }
+        let a_reciprocal = a2.sqrt_reciprocal();
+        ret[Self::M11] = a_reciprocal;
+
+        let b = a[Self::M21] * a_reciprocal;
+        ret[Self::M21] = b;
+
+        let c2 = a[Self::M22] - b * b;
+        if c2 <= T::ZERO {
+            return None;
+        }
+        let c_reciprocal = c2.sqrt_reciprocal();
+        ret[Self::M22] = c_reciprocal;
+
+        let d = a[Self::M31] * a_reciprocal;
+        ret[Self::M31] = d;
+
+        let e = (a[Self::M32] - b * d) * c_reciprocal;
+        ret[Self::M32] = e;
+
+        let f2 = a[Self::M33] - d * d - e * e;
+        if f2 <= T::ZERO {
+            return None;
+        }
+        let f_reciprocal = f2.sqrt_reciprocal();
+        ret[Self::M33] = f_reciprocal;
+
+        let g = a[Self::M41] * a_reciprocal;
+        ret[Self::M41] = g;
+
+        let h = (a[Self::M42] - b * g) * c_reciprocal;
+        ret[Self::M42] = h;
+
+        let i = (a[Self::M43] - d * g - e * h) * f_reciprocal;
+        ret[Self::M43] = i;
+
+        let j2 = a[Self::M44] - g * g - h * h - i * i;
+        if j2 <= T::ZERO {
             return None;
         }
         let j_reciprocal = j2.sqrt_reciprocal();
@@ -338,5 +393,31 @@ mod tests {
                            -1.25,  0.0,   0.125, 0.125 ]), 5e-5));
             assert!((A * X).is_near_identity(1e-5));
         }
+    }
+
+    #[rustfmt::skip]
+    #[test]
+    fn cholesky_from_lta() {
+        let m = Matrix4x4f32::new([
+             2.0,  3.0,  7.0, 13.0,
+             3.0,  5.0, 11.0, 19.0, 
+             7.0, 11.0, 29.0, 41.0,
+            13.0, 19.0, 41.0, 97.0,
+        ]);
+        let a :[f32;Cholesky4x4f32::SIZE] =[
+            2.0, 3.0,  7.0, 13.0, 
+                 5.0, 11.0, 19.0, 
+                      29.0, 41.0,
+                            97.0,
+        ];
+        let option_m = Cholesky4x4f32::new(m);
+        assert!(option_m.is_some());
+        let option_a = Cholesky4x4f32::from_lower_triangle_array(a);
+        assert!(option_a.is_some());
+
+        if let Some(cholesky_a) = option_a
+            && let Some(cholesky_m) = option_m {
+                assert_eq!(cholesky_a, cholesky_m);
+            }
     }
 }

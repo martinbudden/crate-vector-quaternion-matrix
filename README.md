@@ -257,7 +257,7 @@ A specialization generally won't be considered for inclusion to support a single
 2. `Matrix3x3xM3x3` - a 3x3 matrix matrix of `Matrix3x3`s (so effectively a 9x9 matrix).
 3. `Matrix3x3::mul_diagonal_vector` - multiplies a vector which is treated as a diagonal matrix by a matrix.
 4. `Matrix3x3::add_diagonal_vector` - adds a vector which is treated as a diagonal matrix to a matrix.
-5. `Matrix3x3::cholesky` and related functions so Cholesky solvers can be used.
+5. Cholesky decomposition of matrices, so Cholesky solvers can be used instead of matrix inversion.
 
 ## Usage by other crates
 

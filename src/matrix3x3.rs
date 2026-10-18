@@ -376,6 +376,31 @@ where
     }
 }
 
+impl<T> Matrix3x3<T>
+where
+    T: Copy,
+{
+    /// Create a matrix with the diagonal set to an array.
+    /// ```
+    /// # use vqm::Matrix3x3f32;
+    /// let m = Matrix3x3f32::from_lower_triangular_array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0]);
+    /// assert_eq!(m, Matrix3x3f32::new([ 1.0, 2.0, 4.0,
+    ///                                   2.0, 3.0, 5.0,
+    ///                                   4.0, 5.0, 6.0]));
+    /// ```
+    #[rustfmt::skip]
+    #[inline]
+    pub const fn from_lower_triangular_array(a: [T;6]) -> Self {
+        Self {
+            a: [
+                a[0], a[1], a[3],
+                a[1], a[2], a[4],
+                a[3], a[4], a[5],
+            ]
+        }
+    }
+}
+
 // **** Zero ****
 
 impl<T> Zero for Matrix3x3<T>

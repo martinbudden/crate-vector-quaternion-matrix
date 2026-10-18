@@ -27,8 +27,9 @@ At some point [0.1.0] to [0.1.13] will be [YANKED]
 
 - `is_symmetric` functions for matrices.
 - `is_near` functions for vectors, quaternions, and matrices.
-- `Cholesky2x2`, `Cholesky2x2`, `Cholesky2x2` for solving positive deterministic matrices.
+- `Cholesky2x2`, `Cholesky3x3`, `Cholesky4x4` for solving positive deterministic matrices.
 - `Quaternion` tests.
+- functions to create matrices and Cholesky solvers from lower triangular arrays.
 
 ### Changed
 

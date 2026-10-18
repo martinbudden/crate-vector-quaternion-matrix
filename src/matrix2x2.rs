@@ -298,6 +298,29 @@ where
     }
 }
 
+impl<T> Matrix2x2<T>
+where
+    T: Copy,
+{
+    /// Create a symmetric matrix from the lower triangular array.
+    /// ```
+    /// # use vqm::Matrix2x2f32;
+    /// let m = Matrix2x2f32::from_lower_triangular_array([1.0, 2.0, 3.0]);
+    /// assert_eq!(m, Matrix2x2f32::new([ 1.0, 2.0,
+    ///                                   2.0, 3.0]));
+    /// ```
+    #[rustfmt::skip]
+    #[inline]
+    pub const fn from_lower_triangular_array(a: [T;3]) -> Self {
+        Self {
+            a: [
+                a[0], a[1],
+                a[1], a[2],
+            ]
+        }
+    }
+}
+
 // **** Zero ****
 
 impl<T> Zero for Matrix2x2<T>

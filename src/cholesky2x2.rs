@@ -67,7 +67,7 @@ where
         let mut ret = [T::ZERO; CHOLESKY_2X2_SIZE];
 
         let a2 = m[Matrix2x2::<T>::M11];
-        if a2 < T::ZERO {
+        if a2 <= T::ZERO {
             return None;
         }
         let a_reciprocal = a2.sqrt_reciprocal();
@@ -77,7 +77,33 @@ where
         ret[Self::M21] = b;
 
         let c2 = m[Matrix2x2::<T>::M22] - b * b;
-        if c2 < T::ZERO {
+        if c2 <= T::ZERO {
+            return None;
+        }
+        let c_reciprocal = c2.sqrt_reciprocal();
+        ret[Self::M22] = c_reciprocal;
+
+        Some(Self { a: ret })
+    }
+
+    #[allow(clippy::many_single_char_names)]
+    #[must_use]
+    pub fn from_lower_triangle_array(a: [T; 3]) -> Option<Self> {
+        // 5 arithmetic operations: 2 sqrt_reciprocal, 2 multiplications, 1 subtractions
+        let mut ret = [T::ZERO; CHOLESKY_2X2_SIZE];
+
+        let a2 = a[Self::M11];
+        if a2 <= T::ZERO {
+            return None;
+        }
+        let a_reciprocal = a2.sqrt_reciprocal();
+        ret[Self::M11] = a_reciprocal;
+
+        let b = a[Self::M21] * a_reciprocal;
+        ret[Self::M21] = b;
+
+        let c2 = a[Self::M22] - b * b;
+        if c2 <= T::ZERO {
             return None;
         }
         let c_reciprocal = c2.sqrt_reciprocal();
@@ -310,5 +336,27 @@ mod tests {
             assert!(Z.is_near(Y, 1e-7));
             //assert!((A * X.transpose()).is_near(B.transpose(), 1e-2));
         }
+    }
+
+    #[rustfmt::skip]
+    #[test]
+    fn cholesky_from_lta() {
+        let m = Matrix2x2f32::new([
+            2.0,  3.0,
+            3.0,  5.0,
+        ]);
+        let a :[f32;Cholesky2x2f32::SIZE] =[
+            2.0, 3.0,
+                 5.0,
+        ];
+        let option_m = Cholesky2x2f32::new(m);
+        assert!(option_m.is_some());
+        let option_a = Cholesky2x2f32::from_lower_triangle_array(a);
+        assert!(option_a.is_some());
+
+        if let Some(cholesky_a) = option_a
+            && let Some(cholesky_m) = option_m {
+                assert_eq!(cholesky_a, cholesky_m);
+            }
     }
 }
