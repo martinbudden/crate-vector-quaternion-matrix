@@ -24,21 +24,24 @@ in an application, so it would not cause code bloat.
 However I did not really want my code to be dependent on such a large library, so I decided to port my existing C++ vector
 library to Rust. ("How hard could it be" - well harder than I thought, but ok).
 
-I decided to take a generic approach from the start (because I wanted to support both `f32` and `f62`) and that decision
+I decided to take a generic approach from the start (because I wanted to support both `f32` and `f64`) and that decision
 has paid unexpected dividends:
 
 1. During the development of version `0.1.13` I realized my generic approach would enable
    Units of Measurement([uom](https://crates.io/crates/uom)) almost "for free" so I added support for it.
-1. During the development of version `0.1.15` I realized my generic approach would allow the straightforward
+2. During the development of version `0.1.15` I realized my generic approach would allow the straightforward
    implementation of a 9x9 matrix as an array of nine 3x3 matrices. I knew this would greatly simplify the
-   position Kalman filter I was writing, so I added support for this a the `Matrix9` type.
+   position Kalman filter I was writing, so I added support for this as the `Matrix9` type. Further
+   development of the Kalman filter showed that a 3x3 matrix of 3x3 would be more useful than an 9x9
+   matrix, so the `Matrix3x3xM3x3` replaced the `Matrix9`. A `Matrix3x3xM2x2` matrix followed for
+   a 2D Kalman filter.
 
 ## Design goals
 
 `vqm` was primarily designed to support the implementation a self-balancing robot and a flight controller.
 
 This means being fast enough to run a 8kHz "gyro-PID" loop on a single core microcontroller with enough spare
-bandwidth to do other tasks (such as receive commands from a radio, update and OSD, blackbox recording, etc).
+bandwidth to do other tasks (such as receive commands from a radio, drive the motors, blackbox recording, etc).
 
 Although the design choices were driven by this specific need, the results are generally applicable.
 
@@ -56,7 +59,7 @@ That is a significant amount of work to perform in 125 microseconds. So:
 1. Performance is key.
 2. Support for other libraries (including the filter library and the sensor fusion library) is key.
 
-My previous C++ library had shown this was possible (even without SIMD).
+My previous C++ library had shown this was possible.
 
 ### Pass parameters by value, not by reference
 

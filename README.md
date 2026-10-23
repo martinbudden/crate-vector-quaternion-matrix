@@ -3,13 +3,10 @@
 **vqm** is a lightweight, allocation-free, Rust math library for **vectors**, **quaternions**, and **matrices**.
 It is designed for embedded systems, robotics, and real-time applications.
 
-This crate is `no_std`, ie it does not link to the standard library, does not depend on an operating system, and uses no allocation.
-This means it is suitable for embedded systems.
+This crate is `no_std`, `no alloc`, `no panic`, `no unwrap`, `no expect`, and the Minimum Supported Rust Version (MSRV) is `Rust 1.89`.
 
 It also contains floating point approximations for common mathematical and trigonometry functions, enabling it to be used without `libm`.
 By default the `libm` functions are used.
-
-Minimum Supported Rust Version (MSRV): `Rust 1.89`.
 
 ## Why vqm?
 
@@ -141,32 +138,30 @@ Of these `glam`, `vek` and `ultraviolet` are focused primarily on graphics and g
 
 Comparing `vqm` with the remaining two, `micromath` and `nalgebra`, we have:
 
-|                                 | **vqm**                               | **micromath**                         | **nalgebra**                               |
-|---------------------------------|---------------------------------------|---------------------------------------|--------------------------------------------|
-| Primary focus                   |Embedded<br>linear algebra,<br>robotics|Small, fast<br>embedded<br>mathematics | General-purpose<br>linear algebra          |
-| `no_std`                        | Yes                                   | Yes                                   | Yes                                        |
-| Heap allocation<br>required     | No                                    | No                                    |No for static types<br>Yes for dynamic types|
-| Vectors                         | 2D, 3D, 4D                            | 2D, 3D                                | 1D-6D static<br>any size dynamic           |
-| Fixed-size matrices             | 2×2, 3×3, 4×4                         | ——                                    | Extensive                                  |
-| Dynamic matrices                | ——                                    | ——                                    | Yes                                        |
-| Quaternions                     | Yes                                   | Yes                                   | Yes                                        |
-| `f32`                           | Yes                                   | Yes                                   | Yes                                        |
-| `f64`                           | Yes                                   | ——                                    | Yes                                        |
-| Approximate<br>math functions   | Yes<br>Fast<br>Accuracy: 4+ SF¹       | Core focus<br>Faster<br>Less accurate²| ——                                         |
-| Robotics-oriented<br>operations | Yes                                   | Some                                  | Yes                                        |
-| Kalman-filter<br>oriented types | Yes                                   | ——                                    | ——                                         |
-| Units of measure                | Optional `uom`                        | ——                                    | ——                                         |
-| Serialization                   | Optional                              | ——                                    | Optional                                   |
-| General<br>linear algebra       | Focused                               | Limited                               | Extensive                                  |
-| MSRV                            | 2024 v1.89                            | 2018 v1.47                            | 2024 v1.89                                 |
+|                                  | **vqm**                               | **micromath**                             | **nalgebra**                               |
+|----------------------------------|---------------------------------------|-------------------------------------------|--------------------------------------------|
+| Primary focus                    |Embedded<br>linear algebra,<br>robotics| Small, fast<br>embedded<br>mathematics    | General-purpose<br>linear algebra          |
+| `no_std`                         | Yes                                   | Yes                                       | Yes                                        |
+| Heap<br>allocation<br>required   | No                                    | No                                        |No for static types<br>Yes for dynamic types|
+| Vectors                          | 2D, 3D, 4D                            | 2D, 3D                                    | 1D-6D static<br>any size dynamic           |
+| Fixed-size matrices              | 2×2, 3×3, 4×4                         | ——                                        | Extensive                                  |
+| Dynamic matrices                 | ——                                    | ——                                        | Yes                                        |
+| Quaternions                      | Yes                                   | Yes                                       | Yes                                        |
+| `f32`                            | Yes                                   | Yes                                       | Yes                                        |
+| `f64`                            | Yes                                   | ——                                        | Yes                                        |
+| Approximate<br>math<br>functions | Yes<br>Fast<br>Accuracy:<br>4+ SF¹    |Core focus<br>Faster<br>Accuracy:<br>2+ SF²| ——                                         |
+| Robotics-oriented<br>operations  | Yes                                   | Some                                      | Yes                                        |
+| Kalman-filter<br>oriented types  | Yes                                   | ——                                        | ——                                         |
+| Units of measure                 | Optional `uom`                        | ——                                        | ——                                         |
+| Serialization                    | Optional                              | ——                                        | Optional                                   |
+| General<br>linear algebra        | Focused                               | Limited                                   | Extensive                                  |
+| MSRV                             | 2024 v1.89                            | 2018 v1.47                                | 2024 v1.89                                 |
 
 (¹) - preliminary testing indicates that:
 
 1. `sqrt`, `sqrt_reciprocal`, `asin`, `acos` - accurate to 4 SF.
 2. `atan`, `atan2` - accurate to 5 SF.
 3. other functions are accurate to 6+ SF.
-
-Although this has not been formally verified.
 
 (²) - `micromath` documentation states:
 
@@ -218,10 +213,10 @@ assert_eq!(e, Vector3 { x: Velocity::new::<meter_per_second>(0.5), y: Velocity::
 
 All features except `libm` are off by default. The full set, including those described above, is:
 
-* `libm` - enabled by default, uses `libm` math functions. When disabled `vqm` math function approximations are used.
-* `serde` - implementations of `Serialize` and `Deserialize` `MaxSize` for all `vqm` types.
+* `libm` - enabled by default, uses `libm` math functions. When disabled, `vqm` math function approximations are used.
+* `serde` - implementations of `Serialize`, `Deserialize`, and `MaxSize` for all `vqm` types.
 * `storage` - adds [sequential-storage](https://crates.io/crates/sequential-storage) support for storing data in flash with minimal erase cycles.
-* `uom` - [Units Of Measurement](https://crates.io/crates/uom) support.
+* `uom` - [units of measurement](https://crates.io/crates/uom) support.
 * `align` - aligns larger `struct`s to 16-byte boundaries.
 * `std` - uses `std` math functions.
 * `simd` - (experimental) enables SIMD support via the [portable simd](https://doc.rust-lang.org/core/simd/index.html) module.
@@ -232,7 +227,6 @@ All features except `libm` are off by default. The full set, including those des
 `vqm` includes a number of specializations that you might not find in your typical linear algebra/graphics/math library.
 
 A specialization may be considered for inclusion in `vqm` if it provides useful functionality to a library that uses `vqm`.
-
 A specialization generally won't be considered for inclusion to support a single application.
 
 ### Bare metal (that is `no_std` and no `libm`)
