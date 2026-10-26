@@ -1,7 +1,7 @@
 #[cfg(feature = "uom")]
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
-use num_traits::{ConstZero, MulAdd, MulAddAssign, One, Signed, Zero, float::FloatCore};
+use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Signed, Zero, float::FloatCore};
 #[cfg(feature = "storage")]
 use sequential_storage::map::PostcardValue;
 #[cfg(feature = "serde")]
@@ -137,6 +137,48 @@ where
     pub fn is_near(self, other: Vector4<T>, epsilon: T) -> bool {
         (self - other).is_near_zero(epsilon)
     }
+}
+
+// **** One ****
+
+impl<T> One for Vector4<T>
+where
+    T: Copy + ConstZero + ConstOne + PartialEq + Sub<Output = T>,
+{
+    /// Unit vector.
+    /// ```
+    /// # use vqm::Vector4f32;
+    /// # use num_traits::One;
+    ///
+    /// let i = Vector4f32::one();
+    ///
+    /// assert_eq!(i, Vector4f32 { x: 1.0, y: 1.0, z: 1.0, t: 1.0 });
+    /// ```
+    #[inline]
+    fn one() -> Self {
+        Self::ONE
+    }
+
+    #[inline]
+    fn is_one(&self) -> bool {
+        *self == Self::one()
+    }
+}
+
+/// Const unit vector.
+/// ```
+/// # use vqm::Vector4f32;
+/// # use num_traits::ConstOne;
+///
+/// let i = Vector4f32::ONE;
+///
+/// assert_eq!(i, Vector4f32 { x: 1.0, y: 1.0, z: 1.0, t: 1.0 });
+/// ```
+impl<T> ConstOne for Vector4<T>
+where
+    T: Copy + ConstZero + ConstOne + PartialEq + Sub<Output = T>,
+{
+    const ONE: Self = Self { x: T::ONE, y: T::ONE, z: T::ONE, t: T::ONE };
 }
 
 // **** Neg ****
