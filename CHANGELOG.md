@@ -26,6 +26,14 @@ At some point [0.1.0] to [0.1.11] will be [YANKED]
 ### Added
 
 - implemented `One` and `ConstOne` traits for vectors.
+- implemented vector elementwise `min`, `max` and `clamp` functions.
+
+### Changed
+
+- renamed vector `clamp` to `clamp_elements`.
+- renamed vector `clamp_in_place` to `clamp_elements_in_place`.
+- renamed vector `min` to `min_element`.
+- renamed vector `max` to `max_element`.
 
 ## [0.1.18] - 2026-10-23
 

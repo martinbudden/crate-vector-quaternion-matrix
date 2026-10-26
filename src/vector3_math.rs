@@ -54,8 +54,8 @@ pub trait Vector3Math: Sized {
     fn v3_mul_add(this: Vector3<Self>, k: Self, other: Vector3<Self>) -> Vector3<Self>;
     fn v3_norm_squared(this: Vector3<Self>) -> Self;
     fn v3_is_normalized(this: Vector3<Self>) -> bool;
-    fn v3_max(this: Vector3<Self>) -> Self;
-    fn v3_min(this: Vector3<Self>) -> Self;
+    fn v3_max_element(this: Vector3<Self>) -> Self;
+    fn v3_min_element(this: Vector3<Self>) -> Self;
     fn v3_dot(this: Vector3<Self>, other: Vector3<Self>) -> Self;
     fn v3_cross(this: Vector3<Self>, other: Vector3<Self>) -> Vector3<Self>;
 }
@@ -175,7 +175,7 @@ impl Vector3Math for f32 {
     }
 
     #[inline(always)]
-    fn v3_max(this: Vector3<Self>) -> Self {
+    fn v3_max_element(this: Vector3<Self>) -> Self {
         #[cfg(feature = "simd")]
         {
             // repeat this.z in final lane to allow reduce_max to work correctly
@@ -193,7 +193,7 @@ impl Vector3Math for f32 {
     }
 
     #[inline(always)]
-    fn v3_min(this: Vector3<Self>) -> Self {
+    fn v3_min_element(this: Vector3<Self>) -> Self {
         #[cfg(feature = "simd")]
         {
             // repeat this.z in final lane to allow reduce_min to work correctly
@@ -314,7 +314,7 @@ impl Vector3Math for f64 {
     }
 
     #[inline(always)]
-    fn v3_max(this: Vector3<Self>) -> Self {
+    fn v3_max_element(this: Vector3<Self>) -> Self {
         if this.x > this.y {
             if this.x > this.z { this.x } else { this.z }
         } else {
@@ -323,7 +323,7 @@ impl Vector3Math for f64 {
     }
 
     #[inline(always)]
-    fn v3_min(this: Vector3<Self>) -> Self {
+    fn v3_min_element(this: Vector3<Self>) -> Self {
         if this.x < this.y {
             if this.x < this.z { this.x } else { this.z }
         } else {
@@ -397,7 +397,7 @@ impl Vector3Math for i16 {
     }
 
     #[inline(always)]
-    fn v3_max(this: Vector3<Self>) -> Self {
+    fn v3_max_element(this: Vector3<Self>) -> Self {
         if this.x > this.y {
             if this.x > this.z { this.x } else { this.z }
         } else {
@@ -406,7 +406,7 @@ impl Vector3Math for i16 {
     }
 
     #[inline(always)]
-    fn v3_min(this: Vector3<Self>) -> Self {
+    fn v3_min_element(this: Vector3<Self>) -> Self {
         if this.x < this.y {
             if this.x < this.z { this.x } else { this.z }
         } else {
@@ -479,7 +479,7 @@ impl Vector3Math for i32 {
     }
 
     #[inline(always)]
-    fn v3_max(this: Vector3<Self>) -> Self {
+    fn v3_max_element(this: Vector3<Self>) -> Self {
         if this.x > this.y {
             if this.x > this.z { this.x } else { this.z }
         } else {
@@ -488,7 +488,7 @@ impl Vector3Math for i32 {
     }
 
     #[inline(always)]
-    fn v3_min(this: Vector3<Self>) -> Self {
+    fn v3_min_element(this: Vector3<Self>) -> Self {
         if this.x < this.y {
             if this.x < this.z { this.x } else { this.z }
         } else {

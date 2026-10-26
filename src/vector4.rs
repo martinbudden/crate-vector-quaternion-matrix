@@ -143,7 +143,7 @@ where
 
 impl<T> One for Vector4<T>
 where
-    T: Copy + ConstZero + ConstOne + PartialEq + Sub<Output = T>,
+    T: Copy + ConstZero + ConstOne + PartialEq + Sub<Output = T> + Vector4Math,
 {
     /// Unit vector.
     /// ```
@@ -176,7 +176,7 @@ where
 /// ```
 impl<T> ConstOne for Vector4<T>
 where
-    T: Copy + ConstZero + ConstOne + PartialEq + Sub<Output = T>,
+    T: Copy + ConstZero + ConstOne + PartialEq + Sub<Output = T> + Vector4Math,
 {
     const ONE: Self = Self { x: T::ONE, y: T::ONE, z: T::ONE, t: T::ONE };
 }
@@ -674,13 +674,13 @@ where
     /// ```
     /// # use vqm::Vector4f32;
     /// let v = Vector4f32::new(2.0, 3.0, 7.0, 11.0);
-    /// let u = v.clamp(2.5, 7.5);
+    /// let u = v.clamp_elements(2.5, 7.5);
     ///
     /// assert_eq!(u, Vector4f32::new(2.5, 3.0, 7.0, 7.5));
     /// ```
     #[inline]
     #[must_use]
-    pub fn clamp(self, min: T, max: T) -> Self {
+    pub fn clamp_elements(self, min: T, max: T) -> Self {
         Self {
             x: self.x.clamp(min, max),
             y: self.y.clamp(min, max),
@@ -693,14 +693,65 @@ where
     /// ```
     /// # use vqm::Vector4f32;
     /// let mut v = Vector4f32::new(2.0, 3.0, 7.0, 11.0);
-    /// v.clamp_in_place(2.5, 7.5);
+    /// v.clamp_elements_in_place(2.5, 7.5);
     ///
     /// assert_eq!(v, Vector4f32::new(2.5, 3.0, 7.0, 7.5));
     /// ```
     #[inline]
-    pub fn clamp_in_place(&mut self, min: T, max: T) -> &mut Self {
-        *self = self.clamp(min, max);
+    pub fn clamp_elements_in_place(&mut self, min: T, max: T) -> &mut Self {
+        *self = self.clamp_elements(min, max);
         self
+    }
+
+    /// Returns the elementwise `min` of the two vectors.
+    /// ```
+    /// # use vqm::Vector4f32;
+    /// let v = Vector4f32::new(2.0, 5.0, 7.0, -11.0);
+    /// let u = Vector4f32::new(1.0, 6.0, -2.0, -13.0);
+    /// let r = v.min(u);
+    ///
+    /// assert_eq!(r, Vector4f32::new(1.0, 5.0, -2.0, -13.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn min(self, other: Vector4<T>) -> Self {
+        Self { x: self.x.min(other.x), y: self.y.min(other.y), z: self.z.min(other.z), t: self.t.min(other.t) }
+    }
+
+    /// Returns the elementwise `min` of the two vectors.
+    /// ```
+    /// # use vqm::Vector4f32;
+    /// let v = Vector4f32::new(2.0, 5.0, 7.0, -11.0);
+    /// let u = Vector4f32::new(1.0, 6.0, 11.0, -13.0);
+    /// let r = v.max(u);
+    ///
+    /// assert_eq!(r, Vector4f32::new(2.0, 6.0, 11.0, -11.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn max(self, other: Vector4<T>) -> Self {
+        Self { x: self.x.max(other.x), y: self.y.max(other.y), z: self.z.max(other.z), t: self.t.max(other.t) }
+    }
+
+    /// Returns vector clamped elementwise to min and max.
+    /// ```
+    /// # use vqm::Vector4f32;
+    /// let v = Vector4f32::new(2.0, 5.0, 11.0, 0.0);
+    /// let min = Vector4f32::new(1.0, 6.0, -2.0, -13.0);
+    /// let max = Vector4f32::new(1.5, 7.0, -1.0, -11.0);
+    /// let r = v.clamp(min, max);
+    ///
+    /// assert_eq!(r, Vector4f32::new(1.5, 6.0, -1.0, -11.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn clamp(self, min: Vector4<T>, max: Vector4<T>) -> Self {
+        Self {
+            x: self.x.clamp(min.x, max.x),
+            y: self.y.clamp(min.y, max.y),
+            z: self.z.clamp(min.z, max.z),
+            t: self.t.clamp(min.t, max.t),
+        }
     }
 }
 
@@ -1044,13 +1095,13 @@ where
     /// let v = Vector4f32::new(2.0, 3.0, 5.0, 7.0);
     /// let w = Vector4f32::new(3.0, 5.0, 7.0, 2.0);
     /// let x = Vector4f32::new(5.0, 7.0, 3.0, 2.0);
-    /// assert_eq!(7.0, v.max());
-    /// assert_eq!(7.0, w.max());
-    /// assert_eq!(7.0, x.max());
+    /// assert_eq!(7.0, v.max_element());
+    /// assert_eq!(7.0, w.max_element());
+    /// assert_eq!(7.0, x.max_element());
     /// ```
     #[inline]
-    pub fn max(self) -> T {
-        T::v4_max(self)
+    pub fn max_element(self) -> T {
+        T::v4_max_element(self)
     }
 
     /// Return the max element in the vector.
@@ -1059,13 +1110,13 @@ where
     /// let v = Vector4f32::new(2.0, 3.0, 5.0, 7.0);
     /// let w = Vector4f32::new(3.0, 5.0, 7.0, 2.0);
     /// let x = Vector4f32::new(5.0, 7.0, 3.0, 2.0);
-    /// assert_eq!(2.0, v.min());
-    /// assert_eq!(2.0, w.min());
-    /// assert_eq!(2.0, x.min());
+    /// assert_eq!(2.0, v.min_element());
+    /// assert_eq!(2.0, w.min_element());
+    /// assert_eq!(2.0, x.min_element());
     /// ```
     #[inline]
-    pub fn min(self) -> T {
-        T::v4_min(self)
+    pub fn min_element(self) -> T {
+        T::v4_min_element(self)
     }
 }
 

@@ -137,7 +137,7 @@ where
 
 impl<T> One for Vector2<T>
 where
-    T: Copy + ConstZero + ConstOne + PartialEq + Sub<Output = T>,
+    T: Copy + ConstZero + ConstOne + PartialEq + Sub<Output = T> + Mul<Output = T> + Vector2Math,
 {
     /// Unit vector.
     /// ```
@@ -170,7 +170,7 @@ where
 /// ```
 impl<T> ConstOne for Vector2<T>
 where
-    T: Copy + ConstZero + ConstOne + PartialEq + Sub<Output = T>,
+    T: Copy + ConstZero + ConstOne + PartialEq + Sub<Output = T> + Vector2Math,
 {
     const ONE: Self = Self { x: T::ONE, y: T::ONE };
 }
@@ -658,13 +658,13 @@ where
     /// ```
     /// # use vqm::Vector2f32;
     /// let v = Vector2f32::new(2.0, 5.0);
-    /// let u = v.clamp(2.5, 7.5);
+    /// let u = v.clamp_elements(2.5, 7.5);
     ///
     /// assert_eq!(u, Vector2f32::new(2.5, 5.0));
     /// ```
     #[inline]
     #[must_use]
-    pub fn clamp(self, min: T, max: T) -> Self {
+    pub fn clamp_elements(self, min: T, max: T) -> Self {
         Self { x: self.x.clamp(min, max), y: self.y.clamp(min, max) }
     }
 
@@ -672,14 +672,60 @@ where
     /// ```
     /// # use vqm::Vector2f32;
     /// let mut v = Vector2f32::new(2.0, 5.0);
-    /// v.clamp_in_place(2.5, 7.5);
+    /// v.clamp_elements_in_place(2.5, 7.5);
     ///
     /// assert_eq!(v, Vector2f32::new(2.5, 5.0));
     /// ```
     #[inline]
-    pub fn clamp_in_place(&mut self, min: T, max: T) -> &mut Self {
-        *self = self.clamp(min, max);
+    pub fn clamp_elements_in_place(&mut self, min: T, max: T) -> &mut Self {
+        *self = self.clamp_elements(min, max);
         self
+    }
+
+    /// Returns the elementwise `min` of the two vectors.
+    /// ```
+    /// # use vqm::Vector2f32;
+    /// let v = Vector2f32::new(2.0, 5.0);
+    /// let u = Vector2f32::new(1.0, 6.0);
+    /// let r = v.min(u);
+    ///
+    /// assert_eq!(r, Vector2f32::new(1.0, 5.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn min(self, other: Vector2<T>) -> Self {
+        Self { x: self.x.min(other.x), y: self.y.min(other.y) }
+    }
+
+    /// Returns the elementwise `min` of the two vectors.
+    /// ```
+    /// # use vqm::Vector2f32;
+    /// let v = Vector2f32::new(2.0, 5.0);
+    /// let u = Vector2f32::new(1.0, 6.0);
+    /// let r = v.max(u);
+    ///
+    /// assert_eq!(r, Vector2f32::new(2.0, 6.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn max(self, other: Vector2<T>) -> Self {
+        Self { x: self.x.max(other.x), y: self.y.max(other.y) }
+    }
+
+    /// Returns vector clamped elementwise to min and max.
+    /// ```
+    /// # use vqm::Vector2f32;
+    /// let v = Vector2f32::new(2.0, 5.0);
+    /// let min = Vector2f32::new(1.0, 6.0);
+    /// let max = Vector2f32::new(1.5, 7.0);
+    /// let r = v.clamp(min, max);
+    ///
+    /// assert_eq!(r, Vector2f32::new(1.5, 6.0));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn clamp(self, min: Vector2<T>, max: Vector2<T>) -> Self {
+        Self { x: self.x.clamp(min.x, max.x), y: self.y.clamp(min.y, max.y) }
     }
 }
 
@@ -1102,12 +1148,12 @@ where
     /// # use vqm::Vector2f32;
     /// let v = Vector2f32::new(2.0, 3.0);
     /// let w = Vector2f32::new(3.0, 2.0);
-    /// assert_eq!(3.0, v.max());
-    /// assert_eq!(3.0, w.max());
+    /// assert_eq!(3.0, v.max_element());
+    /// assert_eq!(3.0, w.max_element());
     /// ```
     #[inline]
-    pub fn max(self) -> T {
-        T::v2_max(self)
+    pub fn max_element(self) -> T {
+        T::v2_max_element(self)
     }
 
     /// Return the min element in the vector.
@@ -1115,12 +1161,12 @@ where
     /// # use vqm::Vector2f32;
     /// let v = Vector2f32::new(2.0, 3.0);
     /// let w = Vector2f32::new(3.0, 2.0);
-    /// assert_eq!(2.0, v.min());
-    /// assert_eq!(2.0, w.min());
+    /// assert_eq!(2.0, v.min_element());
+    /// assert_eq!(2.0, w.min_element());
     /// ```
     #[inline]
-    pub fn min(self) -> T {
-        T::v2_min(self)
+    pub fn min_element(self) -> T {
+        T::v2_min_element(self)
     }
 }
 

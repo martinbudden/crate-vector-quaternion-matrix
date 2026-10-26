@@ -200,14 +200,14 @@ mod tests {
     #[test]
     fn clamped() {
         let a = Vector2 { x: -2.0, y: 3.0 };
-        assert_eq!(a.clamp(-1.0, 4.0), Vector2 { x: -1.0, y: 3.0 });
+        assert_eq!(a.clamp_elements(-1.0, 4.0), Vector2 { x: -1.0, y: 3.0 });
     }
     #[test]
     fn clamp() {
         let a = Vector2 { x: 2.0, y: 3.0 };
         let mut b = a;
-        b.clamp_in_place(-1.0, 4.0);
-        assert_eq!(b, a.clamp(-1.0, 4.0));
+        b.clamp_elements_in_place(-1.0, 4.0);
+        assert_eq!(b, a.clamp_elements(-1.0, 4.0));
     }
     #[test]
     fn sum() {

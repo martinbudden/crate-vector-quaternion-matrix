@@ -50,8 +50,8 @@ pub trait Vector2Math: Sized {
     fn v2_mul_add(this: Vector2<Self>, k: Self, other: Vector2<Self>) -> Vector2<Self>;
     fn v2_norm_squared(this: Vector2<Self>) -> Self;
     fn v2_is_normalized(this: Vector2<Self>) -> bool;
-    fn v2_max(this: Vector2<Self>) -> Self;
-    fn v2_min(this: Vector2<Self>) -> Self;
+    fn v2_max_element(this: Vector2<Self>) -> Self;
+    fn v2_min_element(this: Vector2<Self>) -> Self;
     fn v2_dot(this: Vector2<Self>, other: Vector2<Self>) -> Self;
     fn v2_cross(this: Vector2<Self>, other: Vector2<Self>) -> Self;
 }
@@ -174,7 +174,7 @@ impl Vector2Math for f32 {
     }
 
     #[inline(always)]
-    fn v2_max(this: Vector2<Self>) -> Self {
+    fn v2_max_element(this: Vector2<Self>) -> Self {
         #[cfg(feature = "simd")]
         {
             let this_simd = f32x2::from(this);
@@ -187,7 +187,7 @@ impl Vector2Math for f32 {
     }
 
     #[inline(always)]
-    fn v2_min(this: Vector2<Self>) -> Self {
+    fn v2_min_element(this: Vector2<Self>) -> Self {
         #[cfg(feature = "simd")]
         {
             let this_simd = f32x2::from(this);
@@ -271,12 +271,12 @@ impl Vector2Math for f64 {
     }
 
     #[inline(always)]
-    fn v2_max(this: Vector2<Self>) -> Self {
+    fn v2_max_element(this: Vector2<Self>) -> Self {
         if this.x > this.y { this.x } else { this.y }
     }
 
     #[inline(always)]
-    fn v2_min(this: Vector2<Self>) -> Self {
+    fn v2_min_element(this: Vector2<Self>) -> Self {
         if this.x < this.y { this.x } else { this.y }
     }
 

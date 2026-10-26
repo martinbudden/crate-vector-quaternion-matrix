@@ -51,8 +51,8 @@ pub trait Vector4Math: Sized {
     fn v4_mul_add(this: Vector4<Self>, k: Self, other: Vector4<Self>) -> Vector4<Self>;
     fn v4_norm_squared(this: Vector4<Self>) -> Self;
     fn v4_is_normalized(this: Vector4<Self>) -> bool;
-    fn v4_max(this: Vector4<Self>) -> Self;
-    fn v4_min(this: Vector4<Self>) -> Self;
+    fn v4_max_element(this: Vector4<Self>) -> Self;
+    fn v4_min_element(this: Vector4<Self>) -> Self;
     fn v4_dot(this: Vector4<Self>, other: Vector4<Self>) -> Self;
 }
 
@@ -176,7 +176,7 @@ impl Vector4Math for f32 {
     }
 
     #[inline(always)]
-    fn v4_max(this: Vector4<Self>) -> Self {
+    fn v4_max_element(this: Vector4<Self>) -> Self {
         #[cfg(feature = "simd")]
         {
             let this_simd = f32x4::from(this);
@@ -201,7 +201,7 @@ impl Vector4Math for f32 {
     }
 
     #[inline(always)]
-    fn v4_min(this: Vector4<Self>) -> Self {
+    fn v4_min_element(this: Vector4<Self>) -> Self {
         #[cfg(feature = "simd")]
         {
             let this_simd = f32x4::from(this);
@@ -292,7 +292,7 @@ impl Vector4Math for f64 {
     }
 
     #[inline(always)]
-    fn v4_max(this: Vector4<Self>) -> Self {
+    fn v4_max_element(this: Vector4<Self>) -> Self {
         if this.x > this.y {
             if this.x > this.z {
                 if this.x > this.t { this.x } else { this.t }
@@ -309,7 +309,7 @@ impl Vector4Math for f64 {
     }
 
     #[inline(always)]
-    fn v4_min(this: Vector4<Self>) -> Self {
+    fn v4_min_element(this: Vector4<Self>) -> Self {
         if this.x < this.y {
             if this.x < this.z {
                 if this.x < this.t { this.x } else { this.t }
