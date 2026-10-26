@@ -220,7 +220,7 @@ All features except `libm` are off by default. The full set, including those des
 * `align` - aligns larger `struct`s to 16-byte boundaries.
 * `std` - uses `std` math functions.
 * `simd` - (experimental) enables SIMD support via the [portable simd](https://doc.rust-lang.org/core/simd/index.html) module.
-         This requires the `align` feature and the nightly Rust toolchain.
+  This requires the `align` feature and the nightly Rust toolchain.
 
 ## Specializations
 

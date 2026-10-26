@@ -1482,3 +1482,24 @@ where
         Quaternion::from_roll_pitch_yaw_radians(roll_radians, pitch_radians, yaw_radians)
     }
 }
+
+impl<T> From<Vector3<T>> for Quaternion<T>
+where
+    T: Copy + Zero + One + PartialEq + MathMethods + QuaternionMath,
+{
+    /// Quaternion from Vector3.
+    /// The vector forms the imaginary part of the quaternion, which is then normalized.
+    /// ```
+    /// # use vqm::{Quaternionf32, Vector3f32};
+    /// let v = Vector3f32 { x: 2.0, y: 3.0, z: 6.0 };
+    /// let q = Quaternionf32::from(v);
+    ///
+    /// assert_eq!(q, Quaternionf32 { w: 0.14142136, x: 0.28284273, y: 0.42426407, z: 0.84852815 });
+    /// assert!(q.is_near(Quaternionf32 { w: 0.14142136, x: 0.28284273, y: 0.42426407, z: 0.84852815 }, 1e-3));
+    /// ```
+    #[inline]
+    fn from(v: Vector3<T>) -> Self {
+        let q = Quaternion { w: T::one(), x: v.x, y: v.y, z: v.z };
+        q.normalize()
+    }
+}

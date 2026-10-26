@@ -24,6 +24,8 @@ mod math_constants;
 mod math_methods;
 mod sqrt_approximations;
 
+mod is_scalar;
+
 mod vector2;
 mod vector2_math;
 
@@ -57,6 +59,7 @@ pub use math_constants::MathConstants;
 pub use math_methods::MathMethods;
 
 // The trigonometric approximation functions need to be `pub` for benchmarking, but are not documented for general use.
+pub use is_scalar::IsScalar;
 #[doc(hidden)]
 pub use math_approximations::{cos_approx_f32, sin_approx_f32, sin_cos_approx_f32}; // needed for benchmarks
 

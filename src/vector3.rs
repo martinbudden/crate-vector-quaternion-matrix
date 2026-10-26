@@ -10,7 +10,7 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use crate::{MathConstants, MathMethods, Quaternion, QuaternionMath, Vector2, vector3_math::Vector3Math};
+use crate::{IsScalar, MathConstants, MathMethods, Quaternion, QuaternionMath, Vector2, vector3_math::Vector3Math};
 
 /// 3-dimensional `{x, y, z}` vector of `f32` values<br>
 pub type Vector3f32 = Vector3<f32>;
@@ -143,7 +143,7 @@ where
 
 impl<T> One for Vector3<T>
 where
-    T: Copy + ConstZero + ConstOne + PartialEq + Sub<Output = T> + Vector3Math,
+    T: Copy + One + PartialEq + Add<Output = T> + Mul<Output = T>,
 {
     /// Unit vector.
     /// ```
@@ -156,12 +156,12 @@ where
     /// ```
     #[inline]
     fn one() -> Self {
-        Self::ONE
+        Self { x: T::one(), y: T::one(), z: T::one() }
     }
 
     #[inline]
     fn is_one(&self) -> bool {
-        *self == Self::one()
+        self.x.is_one() && self.y.is_one() && self.z.is_one()
     }
 }
 
@@ -176,7 +176,7 @@ where
 /// ```
 impl<T> ConstOne for Vector3<T>
 where
-    T: Copy + ConstZero + ConstOne + PartialEq + Sub<Output = T> + Vector3Math,
+    T: Copy + ConstZero + ConstOne + PartialEq + Sub<Output = T> + Mul<Output = T>,
 {
     const ONE: Self = Self { x: T::ONE, y: T::ONE, z: T::ONE };
 }
@@ -407,7 +407,8 @@ where
 impl<T, Rhs, Out> Mul<Rhs> for Vector3<T>
 where
     T: Copy + Mul<Rhs, Output = Out>,
-    Rhs: Copy,
+    // Since Vector3 doesn't implement ` + IsScalar` this will avoid conflict with multiply vector elementwise
+    Rhs: Copy + IsScalar,
 {
     type Output = Vector3<Out>;
 
@@ -434,16 +435,17 @@ where
     /// ```
     #[inline]
     fn mul_assign(&mut self, k: T) {
-        *self = *self * k;
+        self.x = self.x * k;
+        self.y = self.y * k;
+        self.z = self.z * k;
     }
 }
 
 // **** Mul Elementwise ****
 
-#[cfg(not(feature = "uom"))]
-impl<T> Mul<Vector3<T>> for Vector3<T>
+impl<T> Mul<Self> for Vector3<T>
 where
-    T: Copy + Add<T, Output = T> + Mul<T, Output = T>,
+    T: Mul<Output = T>,
 {
     type Output = Self;
 
@@ -489,7 +491,8 @@ where
 impl<T, Rhs, Out> Div<Rhs> for Vector3<T>
 where
     T: Copy + Div<Rhs, Output = Out>,
-    Rhs: Copy,
+    // Since Vector3 doesn't implement `IsScalar` this will avoid conflict with divide vector elementwise
+    Rhs: Copy + IsScalar,
 {
     type Output = Vector3<Out>;
 
@@ -515,13 +518,14 @@ where
     #[inline]
     fn div_assign(&mut self, k: T) {
         let k_reciprocal = T::one() / k;
-        *self = self.mul(k_reciprocal);
+        self.x = self.x * k_reciprocal;
+        self.y = self.y * k_reciprocal;
+        self.z = self.z * k_reciprocal;
     }
 }
 
 // **** Div Elementwise ****
 
-#[cfg(not(feature = "uom"))]
 impl<T> Div<Vector3<T>> for Vector3<T>
 where
     T: Div<T, Output = T>,
@@ -1036,7 +1040,8 @@ where
         if norm_squared == T::zero() {
             return self;
         }
-        self * norm_squared.sqrt_reciprocal()
+        let sqrt_reciprocal = norm_squared.sqrt_reciprocal();
+        Self { x: self.x * sqrt_reciprocal, y: self.y * sqrt_reciprocal, z: self.z * sqrt_reciprocal }
     }
 
     /// Normalize the vector in place, checking if the norm is zero.
@@ -1063,7 +1068,8 @@ where
     #[must_use]
     pub fn normalize_unchecked(self) -> Self {
         let norm_squared = self.norm_squared();
-        self * norm_squared.sqrt_reciprocal()
+        let sqrt_reciprocal = norm_squared.sqrt_reciprocal();
+        Self { x: self.x * sqrt_reciprocal, y: self.y * sqrt_reciprocal, z: self.z * sqrt_reciprocal }
     }
 
     /// Normalize the vector in place, not checking if the norm is zero.
@@ -1243,7 +1249,7 @@ where
 
 impl<T> Vector3<T>
 where
-    T: Copy + Zero + One + Sub<Output = T> + Vector3Math + MathMethods + QuaternionMath,
+    T: Copy + Zero + One + Sub<Output = T> + Vector3Math + MathMethods + QuaternionMath + IsScalar,
 {
     #[inline]
     #[must_use]

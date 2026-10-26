@@ -36,6 +36,7 @@ check-std = [ "check", "--no-default-features", "--features", "std"]
 check-std-libm = [ "check", "--no-default-features", "--features", "std, libm"]
 check-serde = [ "check", "--no-default-features", "--features", "serde"]
 check-storage = [ "check", "--no-default-features", "--features", "storage"]
+check-uom = [ "check", "--no-default-features", "--features", "uom, libm"]
 
 # Run using: 'CARGO_BUILD_WARNINGS=allow rustup run nightly cargo check-simd'
 check-simd = "check --features simd,align"
