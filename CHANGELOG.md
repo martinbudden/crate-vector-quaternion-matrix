@@ -29,6 +29,7 @@ At some point [0.1.0] to [0.1.11] will be [YANKED]
 - implemented vector elementwise `min`, `max` and `clamp` functions.
 - quaternion elementwise multiplication (Hadamard product).
 - quaternion spherical linear interpolation (slerp).
+- quaternion `from_roll_pitch_degrees` function.
 
 ### Changed
 

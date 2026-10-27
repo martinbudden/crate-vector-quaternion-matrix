@@ -1299,6 +1299,11 @@ where
         }
     }
 
+    /// Create a Quaternion from roll and pitch Euler angles (in degrees), assumes yaw angle is zero.
+    pub fn from_roll_pitch_degrees(roll_degrees: T, pitch_degrees: T) -> Self {
+        Self::from_roll_pitch_radians(roll_degrees.to_radians(), pitch_degrees.to_radians())
+    }
+
     /// Create a Quaternion from roll Euler angle (in radians), assumes pitch and roll angles are zero.
     pub fn from_roll_radians(roll_radians: T) -> Self {
         let half: T = T::one() / (T::one() + T::one());
