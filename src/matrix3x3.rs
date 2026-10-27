@@ -543,7 +543,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: Copy + Zero + One,
+    T: Copy + ConstZero + ConstOne,
 {
     /// Identity matrix.
     /// Alias for `one()` that does not require `num_traits::One`.
@@ -558,12 +558,12 @@ where
     #[rustfmt::skip]
     #[inline]
     #[must_use]
-    pub fn identity() -> Self {
+    pub const fn identity() -> Self {
         Self {
             a: [
-                T::one(),  T::zero(), T::zero(),
-                T::zero(), T::one(),  T::zero(),
-                T::zero(), T::zero(), T::one()
+                T::ONE,  T::ZERO, T::ZERO,
+                T::ZERO, T::ONE,  T::ZERO,
+                T::ZERO, T::ZERO, T::ONE
             ],
         }
     }

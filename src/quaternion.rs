@@ -201,7 +201,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Zero + One,
+    T: ConstZero + ConstOne,
 {
     /// Unit quaternion.
     /// Alias for `one()` that does not require `num_traits::One`.
@@ -213,8 +213,8 @@ where
     /// ```
     #[inline]
     #[must_use]
-    pub fn identity() -> Self {
-        Self { w: T::one(), x: T::zero(), y: T::zero(), z: T::zero() }
+    pub const fn identity() -> Self {
+        Self { w: T::ONE, x: T::ZERO, y: T::ZERO, z: T::ZERO }
     }
 }
 
