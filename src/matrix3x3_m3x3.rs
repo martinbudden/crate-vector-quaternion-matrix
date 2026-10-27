@@ -421,7 +421,7 @@ where
 {
     type Output = Self;
 
-    /// Multiply matrix by constant and add another matrix.
+    /// Multiply matrix by a scalar and add another matrix.
     /// ```
     /// # use vqm::Matrix3x3xM3x3f32;
     /// # use num_traits::MulAdd;
@@ -449,7 +449,7 @@ where
     T: Copy,
     Matrix3x3<T>: Mul<T, Output = Matrix3x3<T>> + Add<Matrix3x3<T>, Output = Matrix3x3<T>>,
 {
-    /// Multiply matrix by constant and add another matrix in place.
+    /// Multiply matrix by a scalar and add another matrix in place.
     /// ```
     /// # use vqm::Matrix3x3xM3x3f32;
     /// # use num_traits::MulAddAssign;

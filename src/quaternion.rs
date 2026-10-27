@@ -318,7 +318,7 @@ where
 {
     type Output = Self;
 
-    /// Multiply quaternion by constant and add another quaternion.
+    /// Multiply quaternion by a scalar and add another quaternion.
     /// ```
     /// # use vqm::Quaternionf32;
     /// # use num_traits::MulAdd;
@@ -341,7 +341,7 @@ impl<T> MulAddAssign<T> for Quaternion<T>
 where
     T: Copy + QuaternionMath,
 {
-    /// Multiply quaternion by constant and add another quaternion in place.
+    /// Multiply quaternion by a scalar and add another quaternion in place.
     /// ```
     /// # use vqm::Quaternionf32;
     /// # use num_traits::MulAddAssign;

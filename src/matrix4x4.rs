@@ -1020,7 +1020,7 @@ where
 {
     type Output = Self;
 
-    /// Multiply matrix by constant and add another matrix.
+    /// Multiply matrix by a scalar and add another matrix.
     /// ```
     /// # use vqm::Matrix4x4f32;
     /// # use num_traits::MulAdd;
@@ -1051,7 +1051,7 @@ impl<T> MulAddAssign<T> for Matrix4x4<T>
 where
     T: Copy + Matrix4x4Math,
 {
-    /// Multiply matrix by constant and add another matrix in place.
+    /// Multiply matrix by a scalar and add another matrix in place.
     /// ```
     /// # use vqm::Matrix4x4f32;
     /// # use num_traits::MulAddAssign;
