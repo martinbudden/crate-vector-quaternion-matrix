@@ -569,4 +569,50 @@ mod tests {
 
         assert!(actual.is_near(expected, EPSILON));
     }
+    #[test]
+    fn test_non_zero_slerp_midpoint() {
+        // Raw values [2.0, 1.0, -1.0, 3.0] divided by magnitude sqrt(15)
+        let q_start = Quaternionf32::new(0.5163978, 0.2581989, -0.2581989, 0.7745967);
+
+        // Raw values [-1.0, 4.0, 2.0, 1.0] divided by magnitude sqrt(22)
+        let q_end = Quaternionf32::new(-0.2132007, 0.8528029, 0.4264014, 0.2132007);
+
+        // Expected target midpoint (t = 0.5)
+        let expected_mid = Quaternionf32::new(0.1986187, 0.7277963, 0.1101863, 0.6470874);
+
+        let actual_mid = q_start.slerp(q_end, 0.5);
+
+        // Check every individual element to verify perfect structural matching
+        // A delta of 1e-4 is highly rigorous for single-precision float math
+        let epsilon = 1e-4;
+
+        assert!(
+            (actual_mid.w - expected_mid.w).abs() < epsilon,
+            "W element variance! Expected {}, Got {}",
+            expected_mid.w,
+            actual_mid.w
+        );
+        assert!(
+            (actual_mid.x - expected_mid.x).abs() < epsilon,
+            "X element variance! Expected {}, Got {}",
+            expected_mid.x,
+            actual_mid.x
+        );
+        assert!(
+            (actual_mid.y - expected_mid.y).abs() < epsilon,
+            "Y element variance! Expected {}, Got {}",
+            expected_mid.y,
+            actual_mid.y
+        );
+        assert!(
+            (actual_mid.z - expected_mid.z).abs() < epsilon,
+            "Z element variance! Expected {}, Got {}",
+            expected_mid.z,
+            actual_mid.z
+        );
+
+        // Verify it preserved perfect normalization bounds
+        let magnitude = actual_mid.norm();
+        assert!((magnitude - 1.0).abs() < 1e-5, "Resulting quaternion is not unit length!");
+    }
 }

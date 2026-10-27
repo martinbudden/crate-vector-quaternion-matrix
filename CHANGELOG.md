@@ -27,6 +27,8 @@ At some point [0.1.0] to [0.1.11] will be [YANKED]
 
 - implemented `One` and `ConstOne` traits for vectors.
 - implemented vector elementwise `min`, `max` and `clamp` functions.
+- quaternion elementwise multiplication (Hadamard product).
+- quaternion spherical linear interpolation (slerp).
 
 ### Changed
 

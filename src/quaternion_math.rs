@@ -10,7 +10,8 @@ use core::{
 const _: () = assert!(size_of::<Quaternion<f32>>() == 16);
 const _: () = assert!(align_of::<Quaternion<f32>>() == 16);
 
-use crate::Quaternion;
+#[allow(unused)]
+use crate::{Quaternion, math_methods::MathMethods}; // for acos
 
 // **** From ****
 
@@ -51,6 +52,7 @@ pub trait QuaternionMath: Sized {
     fn q_mul(other: Quaternion<Self>, other: Quaternion<Self>) -> Quaternion<Self>;
     fn q_conjugate(this: Quaternion<Self>) -> Quaternion<Self>;
     fn q_dot(this: Quaternion<Self>, other: Quaternion<Self>) -> Self;
+    fn q_slerp(this: Quaternion<Self>, other: Quaternion<Self>, t: Self) -> Quaternion<Self>;
 }
 
 // **** SIMD-accelerated implementation for f32 ****
@@ -198,6 +200,63 @@ impl QuaternionMath for f32 {
             this.w * other.w + this.x * other.x + this.y * other.y + this.z * other.z
         }
     }
+
+    /// Spherical Linear Interpolation (SLERP) matching vqm's API conventions.
+    /// Interpolates smoothly between `q0` and `q1` by amount `t` [0.0 to 1.0].
+    #[inline(always)]
+    fn q_slerp(this: Quaternion<Self>, other: Quaternion<Self>, t: Self) -> Quaternion<Self> {
+        // Clamp interpolation factor to safe boundaries
+        let t = t.clamp(0.0, 1.0);
+
+        // Calculate the cosine of the angle between quaternions via their dot product
+        // Hamilton convention: q0.w * q1.w + q0.x * q1.x + q0.y * q1.y + q0.z * q1.z
+        let mut dot = this.w * other.w + this.x * other.x + this.y * other.y + this.z * other.z;
+
+        // Enforce shortest-path tracking.
+        // If the dot product is negative, the quaternions have opposite polarities,
+        // so negate one of the quaternions to loop over the short arc.
+        let mut other = other;
+        if dot < 0.0 {
+            dot = -dot;
+            other.w = -other.w;
+            other.x = -other.x;
+            other.y = -other.y;
+            other.z = -other.z;
+        }
+
+        // Handle identical/parallel inputs (Safe guard against division-by-zero)
+        // If the inputs are incredibly close, sin(theta) approaches zero.
+        // We fallback to a standard linear interpolation (LERP) and normalize.
+        if dot > 0.9995 {
+            let w0 = 1.0 - t;
+            let w1 = t;
+            return Quaternion::new(
+                this.w * w0 + other.w * w1,
+                this.x * w0 + other.x * w1,
+                this.y * w0 + other.y * w1,
+                this.z * w0 + other.z * w1,
+            )
+            .normalize();
+        }
+
+        // Standard SLERP calculation
+        // Calculate the half-angle theta between orientations
+        let theta_0 = dot.acos(); // Angle between input quaternions
+        let theta = theta_0 * t; // Angle to the target interpolation step
+
+        let (sin_theta, cos_theta) = theta.sin_cos();
+        let sin_theta_0 = theta_0.sin(); // Only 1 final sin call for the denominator
+
+        // Calculate Davis scale factors
+        let s1 = sin_theta / sin_theta_0;
+        let s0 = cos_theta - dot * s1;
+        Quaternion::new(
+            this.w * s0 + other.w * s1,
+            this.x * s0 + other.x * s1,
+            this.y * s0 + other.y * s1,
+            this.z * s0 + other.z * s1,
+        )
+    }
 }
 
 // **** f64 ****
@@ -262,5 +321,61 @@ impl QuaternionMath for f64 {
     #[inline(always)]
     fn q_dot(this: Quaternion<Self>, other: Quaternion<Self>) -> Self {
         this.w * other.w + this.x * other.x + this.y * other.y + this.z * other.z
+    }
+    /// Spherical Linear Interpolation (SLERP) matching vqm's API conventions.
+    /// Interpolates smoothly between `q0` and `q1` by amount `t` [0.0 to 1.0].
+    #[inline(always)]
+    fn q_slerp(this: Quaternion<Self>, other: Quaternion<Self>, t: Self) -> Quaternion<Self> {
+        // Clamp interpolation factor to safe boundaries
+        let t = t.clamp(0.0, 1.0);
+
+        // Calculate the cosine of the angle between quaternions via their dot product
+        // Hamilton convention: q0.w * q1.w + q0.x * q1.x + q0.y * q1.y + q0.z * q1.z
+        let mut dot = this.w * other.w + this.x * other.x + this.y * other.y + this.z * other.z;
+
+        // Enforce shortest-path tracking.
+        // If the dot product is negative, the quaternions have opposite polarities,
+        // so negate one of the quaternions to loop over the short arc.
+        let mut other = other;
+        if dot < 0.0 {
+            dot = -dot;
+            other.w = -other.w;
+            other.x = -other.x;
+            other.y = -other.y;
+            other.z = -other.z;
+        }
+
+        // Handle identical/parallel inputs (Safe guard against division-by-zero)
+        // If the inputs are incredibly close, sin(theta) approaches zero.
+        // We fallback to a standard linear interpolation (LERP) and normalize.
+        if dot > 0.9995 {
+            let w0 = 1.0 - t;
+            let w1 = t;
+            return Quaternion::new(
+                this.w * w0 + other.w * w1,
+                this.x * w0 + other.x * w1,
+                this.y * w0 + other.y * w1,
+                this.z * w0 + other.z * w1,
+            )
+            .normalize();
+        }
+
+        // Standard SLERP calculation
+        // Calculate the half-angle theta between orientations
+        let theta_0 = dot.acos(); // Angle between input quaternions
+        let theta = theta_0 * t; // Angle to the target interpolation step
+
+        let (sin_theta, cos_theta) = theta.sin_cos();
+        let sin_theta_0 = theta_0.sin(); // Only 1 final sin call for the denominator
+
+        // Calculate Davis scale factors
+        let s1 = sin_theta / sin_theta_0;
+        let s0 = cos_theta - dot * s1;
+        Quaternion::new(
+            this.w * s0 + other.w * s1,
+            this.x * s0 + other.x * s1,
+            this.y * s0 + other.y * s1,
+            this.z * s0 + other.z * s1,
+        )
     }
 }

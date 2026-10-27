@@ -472,6 +472,28 @@ where
     }
 }
 
+// **** Mul Elementwise ****
+
+impl<T> Quaternion<T>
+where
+    T: FloatCore,
+{
+    /// Elementwise multiply a quaternion by another quaternion (Hadamard product).
+    /// ```
+    /// # use vqm::Quaternionf32;
+    /// let v = Quaternionf32::new(2.0, 5.0, 11.0, 17.0);
+    /// let u = Quaternionf32::new(3.0, 7.0, 13.0, 19.0);
+    /// let r = v.hadamard(u);
+    ///
+    /// assert_eq!(r, Quaternionf32 { w: 6.0, x: 35.0, y: 143.0, z: 323.0 });
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn hadamard(self, other: Self) -> Self {
+        Self { w: self.w * other.w, x: self.x * other.x, y: self.y * other.y, z: self.z * other.z }
+    }
+}
+
 // **** Div by scalar ****
 
 impl<T> Div<T> for Quaternion<T>
@@ -611,6 +633,26 @@ where
     #[must_use]
     pub fn lerp(self, other: Self, t: T) -> Self {
         self + (other - self) * t
+    }
+}
+
+impl<T> Quaternion<T>
+where
+    T: Copy + QuaternionMath,
+{
+    /// Spherical Linear Interpolation between two quaternions.
+    /// ```
+    /// # use vqm::Quaternionf32;
+    /// let q = Quaternionf32::new(2.0, 1.0, -1.0, 3.0).normalize();
+    /// let r = Quaternionf32::new(-1.0, 4.0, 2.0, 1.0).normalize();
+    /// let s = q.slerp(r, 0.5);
+    ///
+    /// assert!(s.is_near(Quaternionf32::new(0.19861867, 0.7277963, 0.11018632, 0.64708747), 1e-5));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn slerp(self, other: Self, t: T) -> Self {
+        T::q_slerp(self, other, t)
     }
 }
 

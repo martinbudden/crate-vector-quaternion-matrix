@@ -449,7 +449,7 @@ where
 {
     type Output = Self;
 
-    /// Elementwise multiply a vector by another vector.
+    /// Elementwise multiply a vector by another vector (Hadamard product).
     /// ```
     /// # use vqm::Vector3f32;
     /// let v = Vector3f32::new(2.0, 5.0, 11.0);
