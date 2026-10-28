@@ -10,9 +10,7 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-#[cfg(feature = "uom")]
-use crate::IsScalar;
-use crate::{MathConstants, MathMethods, vector2_math::Vector2Math};
+use crate::{IsScalar, MathConstants, MathMethods, vector2_math::Vector2Math};
 
 /// 2-dimensional `{x, y}` vector of `f32` values<br>
 pub type Vector2f32 = Vector2<f32>;
@@ -250,13 +248,14 @@ where
 
 // **** MulAdd ****
 
-impl<T> MulAdd<T> for Vector2<T>
+impl<T, R> MulAdd<R> for Vector2<T>
 where
-    T: Copy + Mul<T, Output = T> + Add<T, Output = T>,
+    T: Copy + Mul<R, Output = T> + Add<T, Output = T>,
+    R: Copy + IsScalar,
 {
     type Output = Self;
 
-    /// Multiply vector by constant and add another vector.
+    /// Multiply vector by a scalar and add another vector.
     /// ```
     /// # use vqm::Vector2f32;
     /// # use num_traits::MulAdd;
@@ -268,18 +267,42 @@ where
     /// assert_eq!(r, Vector2f32 { x: 49.0, y: 122.0 });
     /// ```
     #[inline]
-    fn mul_add(self, k: T, other: Self) -> Self {
+    fn mul_add(self, k: R, other: Self) -> Self {
         Self { x: self.x * k + other.x, y: self.y * k + other.y }
+    }
+}
+
+impl<T> MulAdd<Vector2<T>> for Vector2<T>
+where
+    T: Copy + Mul<T, Output = T> + Add<T, Output = T>,
+{
+    type Output = Self;
+
+    /// Elementwise multiply vector by a vector (take Hadamard product) and add another vector.
+    /// ```
+    /// # use vqm::Vector2f32;
+    /// # use num_traits::MulAdd;
+    /// let mut v = Vector2f32::new(2.0, 5.0);
+    /// let w = Vector2f32::new(3.0, 7.0);
+    /// let k = Vector2f32::new(23.0, 29.0);
+    /// let r = v.mul_add(k, w);
+    ///
+    /// assert_eq!(r, Vector2f32 { x: 49.0, y: 152.0 });
+    /// ```
+    #[inline]
+    fn mul_add(self, k: Self, other: Self) -> Self {
+        Self { x: self.x * k.x + other.x, y: self.y * k.y + other.y }
     }
 }
 
 // **** MulAddAssign ****
 
-impl<T> MulAddAssign<T> for Vector2<T>
+impl<T, R> MulAddAssign<R> for Vector2<T>
 where
-    T: Copy + Add<T, Output = T> + Mul<T, Output = T>,
+    T: Copy + Mul<R, Output = T> + Add<T, Output = T>,
+    R: Copy + IsScalar,
 {
-    /// Multiply vector by constant and add another vector in place.
+    /// Multiply vector by a scalar and add another vector in place.
     /// ```
     /// # use vqm::Vector2f32;
     /// # use num_traits::MulAddAssign;
@@ -291,8 +314,8 @@ where
     /// assert_eq!(v, Vector2f32 { x: 49.0, y: 122.0 });
     /// ```
     #[inline]
-    fn mul_add_assign(&mut self, k: T, other: Self) {
-        *self = self.mul_add(k, other);
+    fn mul_add_assign(&mut self, k: R, other: Self) {
+        *self = Self { x: self.x * k + other.x, y: self.y * k + other.y };
     }
 }
 

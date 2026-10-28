@@ -254,13 +254,14 @@ where
 
 // **** MulAdd ****
 
-impl<T> MulAdd<T> for Vector3<T>
+impl<T, R> MulAdd<R> for Vector3<T>
 where
-    T: Copy + Mul<T, Output = T> + Add<T, Output = T>,
+    T: Copy + Mul<R, Output = T> + Add<T, Output = T>,
+    R: Copy + IsScalar,
 {
     type Output = Self;
 
-    /// Multiply vector by constant and add another vector.
+    /// Multiply vector by a scalar and add another vector.
     /// ```
     /// # use vqm::Vector3f32;
     /// # use num_traits::MulAdd;
@@ -272,18 +273,42 @@ where
     /// assert_eq!(r, Vector3f32 { x: 49.0, y: 122.0, z: 266.0 });
     /// ```
     #[inline]
-    fn mul_add(self, k: T, other: Self) -> Self {
+    fn mul_add(self, k: R, other: Self) -> Self {
         Self { x: self.x * k + other.x, y: self.y * k + other.y, z: self.z * k + other.z }
+    }
+}
+
+impl<T> MulAdd<Vector3<T>> for Vector3<T>
+where
+    T: Copy + Mul<T, Output = T> + Add<T, Output = T>,
+{
+    type Output = Self;
+
+    /// Elementwise multiply vector by a vector (take Hadamard product) and add another vector.
+    /// ```
+    /// # use vqm::Vector3f32;
+    /// # use num_traits::MulAdd;
+    /// let mut v = Vector3f32::new(2.0, 5.0, 11.0);
+    /// let w = Vector3f32::new(3.0, 7.0, 13.0);
+    /// let k = Vector3f32::new(23.0, 29.0, 31.0);
+    /// let r = v.mul_add(k, w);
+    ///
+    /// assert_eq!(r, Vector3f32 { x: 49.0, y: 152.0, z: 354.0 });
+    /// ```
+    #[inline]
+    fn mul_add(self, k: Self, other: Self) -> Self {
+        Self { x: self.x * k.x + other.x, y: self.y * k.y + other.y, z: self.z * k.z + other.z }
     }
 }
 
 // **** MulAddAssign ****
 
-impl<T> MulAddAssign<T> for Vector3<T>
+impl<T, R> MulAddAssign<R> for Vector3<T>
 where
-    T: Copy + Add<T, Output = T> + Mul<T, Output = T>,
+    T: Copy + Mul<R, Output = T> + Add<T, Output = T>,
+    R: Copy + IsScalar,
 {
-    /// Multiply vector by constant and add another vector in place.
+    /// Multiply vector by a scalar and add another vector in place.
     /// ```
     /// # use vqm::Vector3f32;
     /// # use num_traits::MulAddAssign;
@@ -295,8 +320,8 @@ where
     /// assert_eq!(v, Vector3f32 { x: 49.0, y: 122.0, z: 266.0 });
     /// ```
     #[inline]
-    fn mul_add_assign(&mut self, k: T, other: Self) {
-        *self = self.mul_add(k, other);
+    fn mul_add_assign(&mut self, k: R, other: Self) {
+        *self = Self { x: self.x * k + other.x, y: self.y * k + other.y, z: self.z * k + other.z };
     }
 }
 

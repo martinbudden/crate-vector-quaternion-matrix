@@ -21,12 +21,13 @@ Once the API has stabilized this project will adopt semantic versioning, the fir
 
 At some point [0.1.0] to [0.1.11] will be [YANKED]
 
-## [0.1.19] - 2026-11-xx
+## [0.1.19] - 2026-10-28
 
 ### Added
 
 - implemented `One` and `ConstOne` traits for vectors.
 - implemented vector elementwise `min`, `max` and `clamp` functions.
+- implemented vector elementwise `mul_add` functions.
 - quaternion elementwise multiplication (Hadamard product).
 - quaternion spherical linear interpolation (slerp).
 - quaternion `from_roll_pitch_degrees` function.
