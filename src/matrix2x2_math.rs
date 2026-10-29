@@ -41,24 +41,61 @@ impl From<f32x4> for Matrix2x2<f32> {
 
 // **** Math ****
 
-/// Math functions for Matrix2x2.
+/// Core mathematical operations and linear algebra extensions for 2x2 matrices.
 pub trait Matrix2x2Math: Sized {
+    /// Calculates the element-wise negation of the matrix (`-this`).
     fn m2x2_neg(this: Matrix2x2<Self>) -> Matrix2x2<Self>;
+
+    /// Calculates the element-wise absolute value of the matrix.
     fn m2x2_abs(this: Matrix2x2<Self>) -> Matrix2x2<Self>;
-    fn m2x2_add(this: Matrix2x2<Self>, this: Matrix2x2<Self>) -> Matrix2x2<Self>;
+
+    /// Calculates the sum of two matrices (`this + other`).
+    fn m2x2_add(this: Matrix2x2<Self>, other: Matrix2x2<Self>) -> Matrix2x2<Self>;
+
+    /// Multiplies every element of the matrix by a scalar (`this * other`).
     fn m2x2_mul_scalar(this: Matrix2x2<Self>, other: Self) -> Matrix2x2<Self>;
+
+    /// Divides every element of the matrix by a scalar (`this / other`).
     fn m2x2_div_scalar(this: Matrix2x2<Self>, other: Self) -> Matrix2x2<Self>;
+
+    /// Calculates fused multiply-add of the matrix and the scalar k (`this * k + other`).
     fn m2x2_mul_add(this: Matrix2x2<Self>, k: Self, other: Matrix2x2<Self>) -> Matrix2x2<Self>;
+
+    /// Transforms a column vector by multiplying it on the left by this matrix (`matrix * vector`).
     fn m2x2_mul_vector(this: Matrix2x2<Self>, other: Vector2<Self>) -> Vector2<Self>;
+
+    /// Transforms a row vector by multiplying it on the right by this matrix (`vector * matrix`).
     fn m2x2_vector_mul(this: Vector2<Self>, other: Matrix2x2<Self>) -> Vector2<Self>;
+
+    /// Calculates the outer product of a column vector and a row vector, yielding a 2x2 matrix (`col * row`).
     fn m2x2_vector_outer_product(col: Vector2<Self>, row: Vector2<Self>) -> Matrix2x2<Self>;
+
+    /// Calculates product of two matrices (`this * other`).
     fn m2x2_mul(this: Matrix2x2<Self>, other: Matrix2x2<Self>) -> Matrix2x2<Self>;
+
+    /// Calculates the matrix trace, the sum of the elements along the main diagonal.
     fn m2x2_trace(this: Matrix2x2<Self>) -> Self;
+
+    /// Calculates the sum of the squared elements along the main diagonal.
     fn m2x2_trace_sum_squares(this: Matrix2x2<Self>) -> Self;
+
+    /// Calculates the sum of all the elements in the matrix.
     fn m2x2_sum(this: Matrix2x2<Self>) -> Self;
+
+    /// Calculates the arithmetic mean of all the elements of the matrix.
     fn m2x2_mean(this: Matrix2x2<Self>) -> Self;
+
+    /// Calculates the product of all the elements of the matrix.
     fn m2x2_product(this: Matrix2x2<Self>) -> Self;
+
+    /// Calculates the matrix determinant.
     fn m2x2_determinant(this: Matrix2x2<Self>) -> Self;
+
+    /// Calculates the adjugate of the matrix and its determinant.
+    ///
+    /// Returns a tuple containing:
+    /// 1. `Matrix2x2` adjugate matrix.
+    /// 2. The scalar determinant value of the original matrix.
     fn m2x2_adjugate(this: Matrix2x2<Self>) -> (Matrix2x2<Self>, Self);
 }
 

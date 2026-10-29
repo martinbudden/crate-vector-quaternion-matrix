@@ -25,25 +25,64 @@ const M44: usize = 15;
 
 // **** Math ****
 
-/// Math functions for Matrix4x4.<br>
+/// Core mathematical operations and linear algebra extensions for 4x4 matrices.<br>
 pub trait Matrix4x4Math: Sized {
+    /// Calculates the element-wise negation of the matrix (`-this`).
     fn m4x4_neg(this: Matrix4x4<Self>) -> Matrix4x4<Self>;
+
+    /// Calculates the element-wise absolute value of the matrix.
     fn m4x4_abs(this: Matrix4x4<Self>) -> Matrix4x4<Self>;
-    fn m4x4_add(this: Matrix4x4<Self>, this: Matrix4x4<Self>) -> Matrix4x4<Self>;
+
+    /// Calculates the sum of two matrices (`this + other`).
+    fn m4x4_add(this: Matrix4x4<Self>, other: Matrix4x4<Self>) -> Matrix4x4<Self>;
+
+    /// Multiplies every element of the matrix by a scalar (`this * other`).
     fn m4x4_mul_scalar(this: Matrix4x4<Self>, other: Self) -> Matrix4x4<Self>;
+
+    /// Divides every element of the matrix by a scalar (`this / other`).
     fn m4x4_div_scalar(this: Matrix4x4<Self>, other: Self) -> Matrix4x4<Self>;
+
+    /// Calculates fused multiply-add of the matrix and the scalar k (`this * k + other`).
     fn m4x4_mul_add(this: Matrix4x4<Self>, k: Self, other: Matrix4x4<Self>) -> Matrix4x4<Self>;
+
+    /// Transforms a column vector by multiplying it on the left by this matrix (`matrix * vector`).
     fn m4x4_mul_vector(this: Matrix4x4<Self>, other: Vector4<Self>) -> Vector4<Self>;
+
+    /// Transforms a row vector by multiplying it on the right by this matrix (`vector * matrix`).
     fn m4x4_vector_mul(this: Vector4<Self>, other: Matrix4x4<Self>) -> Vector4<Self>;
-    fn m4x4_vector_outer_product(col: Vector4<Self>, row: Vector4<Self>) -> Matrix4x4<Self>;
+
+    /// Calculates the outer product of a quaternion with itself, yielding a 4x4 matrix..
     fn m4x4_quaternion_outer_product(this: Quaternion<Self>) -> Matrix4x4<Self>;
+
+    /// Calculates the outer product of a column vector and a row vector, yielding a 4x4 matrix (`col * row`).
+    fn m4x4_vector_outer_product(col: Vector4<Self>, row: Vector4<Self>) -> Matrix4x4<Self>;
+
+    /// Calculates product of two matrices (`this * other`).
     fn m4x4_mul(this: Matrix4x4<Self>, other: Matrix4x4<Self>) -> Matrix4x4<Self>;
-    fn m4x4_determinant(this: Matrix4x4<Self>) -> Self;
+
+    /// Calculates the matrix trace, the sum of the elements along the main diagonal.
     fn m4x4_trace(this: Matrix4x4<Self>) -> Self;
+
+    /// Calculates the sum of the squared elements along the main diagonal.
     fn m4x4_trace_sum_squares(this: Matrix4x4<Self>) -> Self;
+
+    /// Calculates the sum of all the elements in the matrix.
     fn m4x4_sum(this: Matrix4x4<Self>) -> Self;
+
+    /// Calculates the arithmetic mean of all the elements of the matrix.
     fn m4x4_mean(this: Matrix4x4<Self>) -> Self;
+
+    /// Calculates the product of all the elements of the matrix.
     fn m4x4_product(this: Matrix4x4<Self>) -> Self;
+
+    /// Calculates the matrix determinant.
+    fn m4x4_determinant(this: Matrix4x4<Self>) -> Self;
+
+    /// Calculates the adjugate of the matrix and its determinant.
+    ///
+    /// Returns a tuple containing:
+    /// 1. `Matrix4x4` adjugate matrix.
+    /// 2. The scalar determinant value of the original matrix.
     fn m4x4_adjugate(this: Matrix4x4<Self>) -> (Matrix4x4<Self>, Self);
 }
 

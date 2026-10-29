@@ -27,12 +27,15 @@ pub type Quaternionf64 = Quaternion<f64>;
 #[cfg_attr(feature = "std", derive(derive_more::Display))]
 #[cfg_attr(feature = "std", display("Q{{w:{w}, x:{x}, y:{y}, z:{z}}}"))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
-#[allow(missing_docs)]
 #[repr(C, align(16))]
 pub struct Quaternion<T> {
+    /// The scalar (real) component, often representing `cos(theta/2)`.
     pub w: T,
+    /// The X component of the imaginary (vector) axis of rotation.
     pub x: T,
+    /// The Y component of the imaginary (vector) axis of rotation.
     pub y: T,
+    /// The Z component of the imaginary (vector) axis of rotation.
     pub z: T,
 }
 
@@ -1231,18 +1234,21 @@ impl<T> Quaternion<T>
 where
     T: FloatCore + MathMethods,
 {
+    /// Calculate roll angle of quaternion, in radians.
     #[inline]
     pub fn calculate_roll_radians(self) -> T {
         let half = T::one() / (T::one() + T::one());
         (self.w * self.x + self.y * self.z).atan2(half - self.x * self.x - self.y * self.y)
     }
 
+    /// Calculate pitch angle of quaternion, in radians.
     #[inline]
     pub fn calculate_pitch_radians(self) -> T {
         let two = T::one() + T::one();
         (two * (self.w * self.y - self.x * self.z)).asin()
     }
 
+    /// Calculate yaw angle of quaternion, in radians.
     #[inline]
     pub fn calculate_yaw_radians(self) -> T {
         let half = T::one() / (T::one() + T::one());
@@ -1348,7 +1354,7 @@ impl<T> Quaternion<T>
 where
     T: Copy + QuaternionMath,
 {
-    // Return the conjugate of the quaternion.
+    /// Return the conjugate of the quaternion.
     #[inline]
     #[must_use]
     pub fn conjugate(self) -> Self {
@@ -1385,6 +1391,7 @@ where
         }
     }
 
+    /// Convenience function to return gravity vector of quaternion.
     #[inline]
     pub fn gravity(self) -> Vector3<T> {
         let two = T::one() + T::one();
@@ -1395,6 +1402,7 @@ where
         }
     }
 
+    /// Convenience function to return half of gravity vector of quaternion.
     #[inline]
     pub fn half_gravity(self) -> Vector3<T> {
         let half: T = T::one() / (T::one() + T::one());
@@ -1410,16 +1418,19 @@ impl<T> Quaternion<T>
 where
     T: Copy + MathMethods + FloatCore,
 {
+    /// Calculate roll angle of quaternion, in degrees.
     #[inline]
     pub fn calculate_roll_degrees(self) -> T {
         self.calculate_roll_radians().to_degrees()
     }
 
+    /// Calculate pitch angle of quaternion, in degrees.
     #[inline]
     pub fn calculate_pitch_degrees(self) -> T {
         self.calculate_pitch_radians().to_degrees()
     }
 
+    /// Calculate yaw angle of quaternion, in degrees.
     #[inline]
     pub fn calculate_yaw_degrees(self) -> T {
         self.calculate_yaw_radians().to_degrees()

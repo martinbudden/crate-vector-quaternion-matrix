@@ -39,14 +39,23 @@ impl<T> PostcardValue<'_> for Matrix2x2<T> where T: Serialize + for<'de> Deseria
 
 /// Constants to index matrix elements.
 impl<T> Matrix2x2<T> {
+    /// Size of array representing matrix.
     pub const SIZE: usize = 4;
+    /// Number of rows in matrix.
     pub const ROW_COUNT: usize = 2;
+    /// Number of columns in matrix.
     pub const COL_COUNT: usize = 2;
+
     // Column 1
+    /// Index of the element at row 1, column 1 (linear index 0).
     pub const M11: usize = 0;
+    /// Index of the element at row 2, column 1 (linear index 1).
     pub const M21: usize = 1;
+
     // Column 2
+    /// Index of the element at row 1, column 2 (linear index 3).
     pub const M12: usize = 2;
+    /// Index of the element at row 2, column 1 (linear index 3).
     pub const M22: usize = 3;
 }
 
@@ -2012,11 +2021,46 @@ impl<T> Matrix2x2<T> {
         unsafe { core::slice::from_raw_parts_mut(self.a.as_mut_ptr().cast::<[T; 2]>(), 2) }
     }
 
+    /// Returns an iterator over immutable references to the columns of the matrix.
+    ///
+    /// The columns are yielded in sequential order from left to right (Column 1, then Column 2).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vqm::Matrix2x2f32;
+    ///
+    /// let matrix = Matrix2x2f32::identity();
+    /// let mut col_iter = matrix.iter_columns();
+    ///
+    /// assert_eq!(col_iter.next(), Some(&[1.0, 0.0]));
+    /// assert_eq!(col_iter.next(), Some(&[0.0, 1.0]));
+    /// assert_eq!(col_iter.next(), None);
+    /// ```
     #[inline]
     pub fn iter_columns(&self) -> Matrix2x2Columns<'_, T> {
         Matrix2x2Columns { inner: self.columns().iter() }
     }
 
+    /// Returns an iterator over mutable references to the columns of the matrix.
+    ///
+    /// The columns are yielded in sequential order from left to right, allowing in-place
+    /// modification of individual column vectors.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vqm::Matrix2x2f32;
+    ///
+    /// let mut matrix = Matrix2x2f32::identity();
+    ///
+    /// for col in matrix.iter_columns_mut() {
+    ///     col[0] *= 2.0;
+    /// }
+    ///
+    /// let mut col_iter = matrix.iter_columns();
+    /// assert_eq!(col_iter.next(), Some(&[2.0, 0.0]));
+    /// ```
     #[inline]
     pub fn iter_columns_mut(&mut self) -> Matrix2x2ColumnsMut<'_, T> {
         Matrix2x2ColumnsMut { inner: self.columns_mut().iter_mut() }

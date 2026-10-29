@@ -35,6 +35,7 @@
 
 /// `no_std` implementations of `std` math functions in method call syntax<br>
 /// eg `x.sin()`, `x.cos()` etc.<br><br>
+#[allow(missing_docs)]
 pub trait MathMethods: Sized {
     #[must_use]
     fn sin_cos(self) -> (Self, Self);

@@ -45,6 +45,9 @@ check-simd = "check --features simd,align"
 
 test-simd = "test --features simd,align"
 
+tp = "tarpaulin --ignore-tests --run-types Tests"
+dc = "tarpaulin --doc --ignore-tests --run-types Doctests"
+
 # Continuous Integration
 ci = "run --package xtask --bin xtask"
 # MSRV

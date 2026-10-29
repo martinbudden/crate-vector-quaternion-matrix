@@ -26,11 +26,14 @@ pub type Vector4f64 = Vector4<f64>;
 #[cfg_attr(feature = "std", display("V{{x:{x}, y:{y}, z:{z}, t:{t}}}"))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
 #[repr(C, align(16))]
-#[allow(missing_docs)]
 pub struct Vector4<T> {
+    /// x-axis component.
     pub x: T,
+    /// y-axis component.
     pub y: T,
+    /// x-axis component.
     pub z: T,
+    /// t-axis component.
     pub t: T,
 }
 
@@ -435,7 +438,14 @@ where
 {
     type Output = Vector4<Out>;
 
-    /// Multiply a vector by a scalar.
+    /// Multiply vector by a scalar.
+    /// ```
+    /// # use vqm::Vector4f32;
+    /// let v = Vector4f32::new(2.0, 3.0, 5.0, 7.0);
+    /// let r = v * 2.0;
+    ///
+    /// assert_eq!(r, Vector4f32 { x: 4.0, y: 6.0, z: 10.0, t: 14.0 });
+    /// ```
     #[inline]
     fn mul(self, rhs: Rhs) -> Self::Output {
         Vector4 { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs, t: self.t * rhs }
@@ -521,6 +531,13 @@ where
     type Output = Vector4<Out>;
 
     /// Divide a vector by a scalar.
+    /// ```
+    /// # use vqm::Vector4f32;
+    /// let v = Vector4f32::new(2.0, 3.0, 5.0, 7.0);
+    /// let r = v / 2.0;
+    ///
+    /// assert_eq!(r, Vector4f32 { x: 1.0, y: 1.5, z: 2.5, t: 3.5 });
+    /// ```
     #[inline]
     fn div(self, rhs: Rhs) -> Vector4<Out> {
         Vector4::<Out> { x: self.x / rhs, y: self.y / rhs, z: self.z / rhs, t: self.t / rhs }

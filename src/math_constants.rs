@@ -2,9 +2,12 @@
 
 /// Math constants for use in generic code.<br><br>
 pub trait MathConstants {
+    /// Constant epsilon, for use in generic code.
     const EPSILON: Self;
 
+    /// Constant radians to degrees conversion factor, for use in generic code.
     const RADIANS_TO_DEGREES: Self;
+    /// Constant degrees to radians conversion factor, for use in generic code.
     const DEGREES_TO_RADIANS: Self;
 
     /// Standard acceleration of earth gravity.
@@ -12,23 +15,41 @@ pub trait MathConstants {
     /// Reciprocal of standard acceleration of earth gravity.
     const G0_RECIPROCAL: Self;
 
+    /// Constant 0.5 for use in generic code.
     const HALF: Self;
+    /// Constant 2.0 for use in generic code.
     const TWO: Self;
+    /// Constant 3.0 for use in generic code.
     const THREE: Self;
+    /// Constant 4.0 for use in generic code.
     const FOUR: Self;
+    /// Constant 5.0 for use in generic code.
     const FIVE: Self;
+    /// Constant 6.0 for use in generic code.
     const SIX: Self;
+    /// Constant 7.0 for use in generic code.
     const SEVEN: Self;
+    /// Constant 8.0 for use in generic code.
     const EIGHT: Self;
+    /// Constant 9.0 for use in generic code.
     const NINE: Self;
+    /// Constant 2.0 for use in generic code.
     const TEN: Self;
+    /// Constant 10.0 for use in generic code.
     const ELEVEN: Self;
+    /// Constant 11.0 for use in generic code.
     const TWELVE: Self;
+    /// Constant 12.0 for use in generic code.
     const SIXTEEN: Self;
+    /// Constant 16.0 for use in generic code.
     const TWENTY_FIVE: Self;
+    /// Constant 25.0 for use in generic code.
     const SIXTY_FOUR: Self;
+    /// Constant 64.0 for use in generic code.
     const EIGHTY_ONE: Self;
+    /// Constant 81.0 for use in generic code.
     const TWO_FIFTY_SIX: Self;
+    /// Constant 256.0 for use in generic code.
     const SIX_TWENTY_FIVE: Self;
 }
 

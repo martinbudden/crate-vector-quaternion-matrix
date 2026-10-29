@@ -26,9 +26,10 @@ pub type Vector2f64 = Vector2<f64>;
 #[cfg_attr(feature = "std", display("V{{x:{x}, y:{y}}}"))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
 #[repr(C, align(8))]
-#[allow(missing_docs)]
 pub struct Vector2<T> {
+    /// x-axis component.
     pub x: T,
+    /// y-axis component.
     pub y: T,
 }
 
@@ -424,7 +425,14 @@ where
 {
     type Output = Vector2<Out>;
 
-    /// Multiply a vector by a scalar.
+    /// Multiply vector by a scalar.
+    /// ```
+    /// # use vqm::Vector2f32;
+    /// let v = Vector2f32::new(2.0, 5.0);
+    /// let r = v * 2.0;
+    ///
+    /// assert_eq!(r, Vector2f32 { x: 4.0, y: 10.0 });
+    /// ```
     #[inline]
     fn mul(self, rhs: Rhs) -> Self::Output {
         Vector2 { x: self.x * rhs, y: self.y * rhs }
@@ -508,6 +516,13 @@ where
     type Output = Vector2<Out>;
 
     /// Divide a vector by a scalar.
+    /// ```
+    /// # use vqm::Vector2f32;
+    /// let v = Vector2f32::new(2.0, 3.0);
+    /// let r = v / 2.0;
+    ///
+    /// assert_eq!(r, Vector2f32 { x: 1.0, y: 1.5 });
+    /// ```
     #[inline]
     fn div(self, rhs: Rhs) -> Vector2<Out> {
         Vector2::<Out> { x: self.x / rhs, y: self.y / rhs }
@@ -991,6 +1006,10 @@ where
     /// let v = Vector2f32::new(0.0, 0.0);
     /// let n = v.normalize();
     /// assert_eq!(Vector2f32 { x: 0.0, y: 0.0 }, n);
+    /// let v = Vector2f32::new(3.0, 4.0);
+    /// let n = v.normalize();
+    /// assert_eq!(Vector2f32 { x: 0.6, y: 0.8 }, n);
+    /// assert_eq!(n.norm(), 1.0);
     /// ```
     #[inline]
     #[must_use]

@@ -20,25 +20,68 @@ const M33: usize = 8;
 
 // **** Math ****
 
-/// Math functions for Matrix3x3.<br>
+/// Core mathematical operations and linear algebra extensions for 3x3 matrices.
 pub trait Matrix3x3Math: Sized {
+    /// Calculates the element-wise negation of the matrix (`-this`).
     fn m3x3_neg(this: Matrix3x3<Self>) -> Matrix3x3<Self>;
+
+    /// Calculates the element-wise absolute value of the matrix.
     fn m3x3_abs(this: Matrix3x3<Self>) -> Matrix3x3<Self>;
-    fn m3x3_add(this: Matrix3x3<Self>, this: Matrix3x3<Self>) -> Matrix3x3<Self>;
+
+    /// Calculates the sum of two matrices (`this + other`).
+    fn m3x3_add(this: Matrix3x3<Self>, other: Matrix3x3<Self>) -> Matrix3x3<Self>;
+
+    /// Multiplies every element of the matrix by a scalar (`this * other`).
     fn m3x3_mul_scalar(this: Matrix3x3<Self>, other: Self) -> Matrix3x3<Self>;
+
+    /// Divides every element of the matrix by a scalar (`this / other`).
     fn m3x3_div_scalar(this: Matrix3x3<Self>, other: Self) -> Matrix3x3<Self>;
+
+    /// Calculates fused multiply-add of the matrix and the scalar k (`this * k + other`).
     fn m3x3_mul_add(this: Matrix3x3<Self>, k: Self, other: Matrix3x3<Self>) -> Matrix3x3<Self>;
+
+    /// Transforms a column vector by multiplying it on the left by this matrix (`matrix * vector`).
     fn m3x3_mul_vector(this: Matrix3x3<Self>, other: Vector3<Self>) -> Vector3<Self>;
+
+    /// Transforms a row vector by multiplying it on the right by this matrix (`vector * matrix`).
     fn m3x3_vector_mul(this: Vector3<Self>, other: Matrix3x3<Self>) -> Vector3<Self>;
+
+    /// Calculates the outer product of a column vector and a row vector, yielding a 3x3 matrix (`col * row`).
     fn m3x3_vector_outer_product(col: Vector3<Self>, row: Vector3<Self>) -> Matrix3x3<Self>;
+
+    /// Calculates product of two matrices (`this * other`).
     fn m3x3_mul(this: Matrix3x3<Self>, other: Matrix3x3<Self>) -> Matrix3x3<Self>;
+
+    /// Calculates the matrix trace, the sum of the elements along the main diagonal.
     fn m3x3_trace(this: Matrix3x3<Self>) -> Self;
+
+    /// Calculates the sum of the squared elements along the main diagonal.
     fn m3x3_trace_sum_squares(this: Matrix3x3<Self>) -> Self;
+
+    /// Calculates the sum of all the elements in the matrix.
     fn m3x3_sum(this: Matrix3x3<Self>) -> Self;
+
+    /// Calculates the arithmetic mean of all the elements of the matrix.
     fn m3x3_mean(this: Matrix3x3<Self>) -> Self;
+
+    /// Calculates the product of all the elements of the matrix.
     fn m3x3_product(this: Matrix3x3<Self>) -> Self;
+
+    /// Calculates the matrix determinant.
     fn m3x3_determinant(this: Matrix3x3<Self>) -> Self;
+
+    /// Calculates the adjugate of the matrix and its determinant.
+    ///
+    /// Returns a tuple containing:
+    /// 1. `Matrix3x3` adjugate matrix.
+    /// 2. The scalar determinant value of the original matrix.
     fn m3x3_adjugate(this: Matrix3x3<Self>) -> (Matrix3x3<Self>, Self);
+
+    /// Calculates the adjugate of the matrix and its determinant, assuming the matrix is symmetric.
+    ///
+    /// Returns a tuple containing:
+    /// 1. `Matrix3x3` adjugate matrix.
+    /// 2. The scalar determinant value of the original matrix.
     fn m3x3_adjugate_symmetric(this: Matrix3x3<Self>) -> (Matrix3x3<Self>, Self);
 }
 

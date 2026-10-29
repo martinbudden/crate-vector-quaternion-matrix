@@ -44,11 +44,12 @@ derive_more = { version = "2.1.1", default-features = false, features = ["displa
 uom = { version = "0.38.0", default-features = false, features = ["si", "f32"], optional = true } # so autoconvert, in particular,  is disabled
 
 [dev-dependencies]
-vqm = { path = ".", features = ["libm", "serde", "storage"] }
+vqm = { path = ".", features = ["libm", "serde", "storage", "uom"] }
 #vqm = { path = ".", default-features = false }
 criterion = { version = "0.8.2", features = ["html_reports"] }
 rand = "0.10.3"
 approx = { version = "0.5.1", default-features = false }
+proptest = { version = "1.12.0" }
 
 # see https://doc.rust-lang.org/cargo/reference/profiles.html
 [profile.dev]

@@ -51,22 +51,36 @@ impl<T: fmt::Debug> fmt::Debug for Matrix3x3xM3x3<T> {
 }
 
 /// Constants to index matrix elements.
-#[allow(missing_docs)]
 impl<T> Matrix3x3xM3x3<T> {
+    /// Size of array representing matrix.
     pub const SIZE: usize = 9;
+    /// Number of rows in matrix.
     pub const ROW_COUNT: usize = 3;
+    /// Number of columns in matrix.
     pub const COL_COUNT: usize = 3;
+
     // Column 1
+    /// Index of the element at row 1, column 1 (linear index 0).
     pub const M11: usize = 0;
+    /// Index of the element at row 1, column 1 (linear index 1).
     pub const M21: usize = 1;
+    /// Index of the element at row 1, column 1 (linear index 2).
     pub const M31: usize = 2;
+
     // Column 2
+    /// Index of the element at row 1, column 2 (linear index 3).
     pub const M12: usize = 3;
+    /// Index of the element at row 2, column 2 (linear index 4).
     pub const M22: usize = 4;
+    /// Index of the element at row 3, column 2 (linear index 5).
     pub const M32: usize = 5;
+
     // Column 3
+    /// Index of the element at row 1, column 3 (linear index 6).
     pub const M13: usize = 6;
+    /// Index of the element at row 2, column 3 (linear index 7).
     pub const M23: usize = 7;
+    /// Index of the element at row 3, column 3 (linear index 8).
     pub const M33: usize = 8;
 }
 
@@ -1047,11 +1061,13 @@ impl<T> Matrix3x3xM3x3<T>
 where
     T: Copy,
 {
+    /// Returns an iterator over the columns of the matrix as owned 3-element arrays.
     #[inline]
     pub fn cols(&self) -> impl Iterator<Item = [T; 9]> + '_ {
         (0..9).map(|col| self.column(col))
     }
 
+    /// Returns column of matrix as an array.
     #[inline]
     pub fn column(&self, col: usize) -> [T; 9] {
         debug_assert!(col < 9);
@@ -1074,6 +1090,7 @@ where
 // **** Column Iterators ****
 
 impl<T> Matrix3x3xM3x3<T> {
+    /// Column iterator.
     #[inline]
     pub fn iter_columns(&self) -> Matrix9Columns<'_, T> {
         Matrix9Columns::new(self)

@@ -40,20 +40,35 @@ impl<T> PostcardValue<'_> for Matrix3x3<T> where T: Serialize + for<'de> Deseria
 
 /// Constants to index matrix elements.
 impl<T> Matrix3x3<T> {
+    /// Size of array representing matrix.
     pub const SIZE: usize = 9;
+    /// Number of rows in matrix.
     pub const ROW_COUNT: usize = 3;
+    /// Number of columns in matrix.
     pub const COL_COUNT: usize = 3;
+
     // Column 1
+    /// Index of the element at row 1, column 1 (linear index 0).
     pub const M11: usize = 0;
+    /// Index of the element at row 1, column 1 (linear index 1).
     pub const M21: usize = 1;
+    /// Index of the element at row 1, column 1 (linear index 2).
     pub const M31: usize = 2;
+
     // Column 2
+    /// Index of the element at row 1, column 2 (linear index 3).
     pub const M12: usize = 3;
+    /// Index of the element at row 2, column 2 (linear index 4).
     pub const M22: usize = 4;
+    /// Index of the element at row 3, column 2 (linear index 5).
     pub const M32: usize = 5;
+
     // Column 3
+    /// Index of the element at row 1, column 3 (linear index 6).
     pub const M13: usize = 6;
+    /// Index of the element at row 2, column 3 (linear index 7).
     pub const M23: usize = 7;
+    /// Index of the element at row 3, column 3 (linear index 8).
     pub const M33: usize = 8;
 }
 
@@ -2298,11 +2313,47 @@ impl<T> Matrix3x3<T> {
         unsafe { core::slice::from_raw_parts_mut(self.a.as_mut_ptr().cast::<[T; 3]>(), 3) }
     }
 
+    /// Returns an iterator over immutable references to the columns of the matrix.
+    ///
+    /// The columns are yielded in sequential order from left to right (Column 1, then Column 2, then Column 3).
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vqm::Matrix3x3f32;
+    ///
+    /// let matrix = Matrix3x3f32::identity();
+    /// let mut col_iter = matrix.iter_columns();
+    ///
+    /// assert_eq!(col_iter.next(), Some(&[1.0, 0.0, 0.0]));
+    /// assert_eq!(col_iter.next(), Some(&[0.0, 1.0, 0.0]));
+    /// assert_eq!(col_iter.next(), Some(&[0.0, 0.0, 1.0]));
+    /// assert_eq!(col_iter.next(), None);
+    /// ```
     #[inline]
     pub fn iter_columns(&self) -> Matrix3x3Columns<'_, T> {
         Matrix3x3Columns { inner: self.columns().iter() }
     }
 
+    /// Returns an iterator over mutable references to the columns of the matrix.
+    ///
+    /// The columns are yielded in sequential order from left to right, allowing in-place
+    /// modification of individual column vectors.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use vqm::Matrix3x3f32;
+    ///
+    /// let mut matrix = Matrix3x3f32::identity();
+    ///
+    /// for col in matrix.iter_columns_mut() {
+    ///     col[0] *= 2.0;
+    /// }
+    ///
+    /// let mut col_iter = matrix.iter_columns();
+    /// assert_eq!(col_iter.next(), Some(&[2.0, 0.0, 0.0]));
+    /// ```
     #[inline]
     pub fn iter_columns_mut(&mut self) -> Matrix3x3ColumnsMut<'_, T> {
         Matrix3x3ColumnsMut { inner: self.columns_mut().iter_mut() }

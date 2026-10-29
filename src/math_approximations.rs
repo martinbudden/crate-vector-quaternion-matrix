@@ -340,6 +340,7 @@ where
     if q & 2 == 0 { sin_cos } else { (-sin_cos.0, -sin_cos.1) }
 }
 
+/// sin(x) calculated using Padé approximant.
 #[inline(always)]
 #[must_use]
 pub fn sin_approx_f32(x: f32) -> f32 {
@@ -350,6 +351,7 @@ pub fn sin_approx_f32(x: f32) -> f32 {
     sin_quadrant(r, q as i32)
 }
 
+/// sin(x) calculated using Padé approximant.
 #[inline(always)]
 #[must_use]
 pub fn sin_approx_f64(x: f64) -> f64 {
@@ -360,6 +362,7 @@ pub fn sin_approx_f64(x: f64) -> f64 {
     sin_quadrant(r, q as i32)
 }
 
+/// cos(x) calculated using Padé approximant.
 #[inline(always)]
 #[must_use]
 pub fn cos_approx_f32(x: f32) -> f32 {
@@ -370,6 +373,7 @@ pub fn cos_approx_f32(x: f32) -> f32 {
     cos_quadrant(r, q as i32)
 }
 
+/// cos(x) calculated using Padé approximant.
 #[inline(always)]
 #[must_use]
 pub fn cos_approx_f64(x: f64) -> f64 {
@@ -380,6 +384,7 @@ pub fn cos_approx_f64(x: f64) -> f64 {
     cos_quadrant(r, q as i32)
 }
 
+/// `sin_cos(x)` calculated using Padé approximants.
 #[inline(always)]
 #[must_use]
 pub fn sin_cos_approx_f32(x: f32) -> (f32, f32) {
@@ -390,6 +395,7 @@ pub fn sin_cos_approx_f32(x: f32) -> (f32, f32) {
     sin_cos_quadrant(r, q as i32)
 }
 
+/// `sin_cos(x)` calculated using Padé approximants.
 #[inline(always)]
 #[must_use]
 pub fn sin_cos_approx_f64(x: f64) -> (f64, f64) {

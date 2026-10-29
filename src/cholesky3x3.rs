@@ -6,6 +6,8 @@ impl<T> Matrix3x3<T>
 where
     T: Copy + FloatCore + MathMethods + ConstZero,
 {
+    /// Returns a wrapped Cholesky lower decomposition of a matrix if the matrix is positive definite, otherwise `None`.
+    /// The input matrix is assumed to be symmetric and only the lower-triangular part is read.
     #[must_use]
     #[inline]
     pub fn cholesky(self) -> Option<Cholesky3x3<T>> {
@@ -18,11 +20,10 @@ pub type Cholesky3x3f32 = Cholesky3x3<f32>;
 /// Cholesky 3x3 matrix of `f64` values<br><br>
 pub type Cholesky3x3f64 = Cholesky3x3<f64>;
 
+/// Array representing the lower triangular Cholesky solver of a matrix.
+/// Note: the diagonals are stored as reciprocals.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Cholesky3x3<T> {
-    /// The lower triangular matrix.
-    /// Note: the diagonals are stored as reciprocals.
-    /// Just stores the lower triangle.
     a: [T; CHOLESKY_3X3_SIZE],
 }
 
@@ -32,19 +33,21 @@ impl<T> Cholesky3x3<T>
 where
     T: Copy + FloatCore + MathMethods + ConstZero,
 {
+    /// Size of lower triangular array representing Cholesky solver.
     pub const SIZE: usize = CHOLESKY_3X3_SIZE;
 
     // Column 1
-    pub const M11: usize = 0;
-    pub const M21: usize = 1;
-    pub const M31: usize = 2;
+    const M11: usize = 0;
+    const M21: usize = 1;
+    const M31: usize = 2;
     // Column 2
-    pub const M22: usize = 3;
-    pub const M32: usize = 4;
+    const M22: usize = 3;
+    const M32: usize = 4;
     // Column 3
-    pub const M33: usize = 5;
+    const M33: usize = 5;
 
-    /// Returns a wrapped Cholesky lower triangular matrix if m is positive definite, otherwise `None`.
+    /// Returns a wrapped Cholesky lower decomposition of a matrix if the matrix is positive definite, otherwise `None`.
+    /// The matrix is assumed to be symmetric and only the lower-triangular part is read.
     /// Note: internally the diagonal values are stored as reciprocals, but this is transparent to the user.
     /// ```
     /// # use vqm::{Cholesky3x3f32, Matrix3x3f32};
@@ -106,6 +109,8 @@ where
         Some(Self { a: ret })
     }
 
+    /// Returns a wrapped Cholesky lower decomposition of a matrix, from an array representing the lower triangular array of said matrix.
+    /// Returns `None` if the  matrix is not positive definite.
     #[allow(clippy::many_single_char_names)]
     #[must_use]
     pub fn from_lower_triangle_array(a: [T; 6]) -> Option<Self> {
@@ -163,6 +168,7 @@ where
         ])
     }
 
+    /// Solves A * x = b, for array x and positive-definite matrix A, by using the Cholesky lower-triangular form.
     #[must_use]
     #[inline]
     pub fn solve_array(self, a: [T; 3]) -> [T; 3] {
@@ -182,7 +188,7 @@ where
         [x0, x1, x2]
     }
 
-    /// Solves A * x = b, for positive-definite A by using the Cholesky lower-triangular form.
+    /// Solves A * x = b, for vector x and positive-definite matrix A, by using the Cholesky lower-triangular form.
     /// ```
     /// # use vqm::{Cholesky3x3f32, Matrix3x3f32, Vector3f32};
     /// let A = Matrix3x3f32::new([
@@ -190,13 +196,15 @@ where
     ///     3.0, 5.0, 11.0,
     ///     7.0, 11.0, 29.0,
     /// ]);
+    ///     let b = Vector3f32 { x: 17.0, y: 23.0, z: 31.0 };
+    ///
     /// let option = Cholesky3x3f32::new(A);
     /// assert!(option.is_some());
     /// if let Some(cholesky) = option {
     ///     // Solve Ax = b, for x
-    ///     let b = Vector3f32 { x: 17.0, y: 23.0, z: 31.0 };
     ///     let x = cholesky.solve_vector(b);
     ///     assert!(x.is_near(Vector3f32 { x: 29.0, y: 1.5, z: -6.5 }, 5e-5));
+    ///     assert!((A * x).is_near(b, 5e-4));
     /// }
     /// ```
     #[must_use]
@@ -205,7 +213,7 @@ where
         Vector3 { x: a[0], y: a[1], z: a[2] }
     }
 
-    /// Solves A * X = B, for X.
+    /// Solves A * X = b, for matrix X and positive-definite matrix A, by using the Cholesky lower-triangular form.
     /// ```
     /// # use vqm::{Cholesky3x3f32, Matrix3x3f32};
     /// let A = Matrix3x3f32::new([
@@ -243,7 +251,7 @@ where
         Matrix3x3 { a }
     }
 
-    /// Equivalent to `solve_matrix(B.transpose()).transpose()`
+    /// Equivalent to `solve_matrix(B.transpose()).transpose()`.
     /// ```
     /// # use vqm::{Cholesky3x3f32, Matrix3x3f32};
     /// let A = Matrix3x3f32::new([

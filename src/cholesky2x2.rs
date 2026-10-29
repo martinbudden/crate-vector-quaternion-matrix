@@ -6,7 +6,10 @@ impl<T> Matrix2x2<T>
 where
     T: Copy + FloatCore + MathMethods + ConstZero,
 {
+    /// Returns a wrapped Cholesky lower decomposition of a matrix if the matrix is positive definite, otherwise `None`.
+    /// The input matrix is assumed to be symmetric and only the lower-triangular part is read.
     #[must_use]
+    #[inline]
     pub fn cholesky(self) -> Option<Cholesky2x2<T>> {
         Cholesky2x2::new(self)
     }
@@ -17,11 +20,10 @@ pub type Cholesky2x2f32 = Cholesky2x2<f32>;
 /// Cholesky 2x2 matrix of `f64` values<br><br>
 pub type Cholesky2x2f64 = Cholesky2x2<f64>;
 
+/// Array representing the lower triangular Cholesky solver of a matrix.
+/// Note: the diagonals are stored as reciprocals.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Cholesky2x2<T> {
-    /// The lower triangular matrix.
-    /// Note: the diagonals are stored as reciprocals.
-    /// Just stores the lower triangle.
     a: [T; CHOLESKY_2X2_SIZE],
 }
 
@@ -31,15 +33,17 @@ impl<T> Cholesky2x2<T>
 where
     T: Copy + FloatCore + MathMethods + ConstZero,
 {
+    /// Size of lower triangular array representing Cholesky solver.
     pub const SIZE: usize = CHOLESKY_2X2_SIZE;
 
     // Column 1
-    pub const M11: usize = 0;
-    pub const M21: usize = 1;
+    const M11: usize = 0;
+    const M21: usize = 1;
     // Column 2
-    pub const M22: usize = 2;
+    const M22: usize = 2;
 
-    /// Returns a wrapped Cholesky lower triangular matrix if m is positive definite, otherwise `None`.
+    /// Returns a wrapped Cholesky lower decomposition of a matrix if the matrix is positive definite, otherwise `None`.
+    /// The matrix is assumed to be symmetric and only the lower-triangular part is read.
     /// Note: internally the diagonal values are stored as reciprocals, but this is transparent to the user.
     /// ```
     /// # use vqm::{Cholesky2x2f32, Matrix2x2f32};
@@ -86,6 +90,8 @@ where
         Some(Self { a: ret })
     }
 
+    /// Returns a wrapped Cholesky lower decomposition of a matrix, from an array representing the lower triangular array of said matrix.
+    /// Returns `None` if the  matrix is not positive definite.
     #[allow(clippy::many_single_char_names)]
     #[must_use]
     pub fn from_lower_triangle_array(a: [T; 3]) -> Option<Self> {
@@ -129,6 +135,7 @@ where
         ])
     }
 
+    /// Solves A * x = b, for array x and positive-definite matrix A, by using the Cholesky lower-triangular form.
     #[must_use]
     #[inline]
     pub fn solve_array(self, a: [T; 2]) -> [T; 2] {
@@ -153,11 +160,12 @@ where
     ///     2.0, 3.0,
     ///     3.0, 5.0
     /// ]);
+    ///     let b = Vector2f32 { x: 13.0, y: 17.0 };
+    ///
     /// let option = Cholesky2x2f32::new(A);
     /// assert!(option.is_some());
     /// if let Some(cholesky) = option {
     ///     // Solve Ax = b, for x
-    ///     let b = Vector2f32 { x: 13.0, y: 17.0 };
     ///     let x = cholesky.solve_vector(b);
     ///     assert!(x.is_near(Vector2f32 { x: 14.0, y: -5.0 }, 5e-5));
     /// }
@@ -168,7 +176,7 @@ where
         Vector2 { x: a[0], y: a[1] }
     }
 
-    /// Solves A * X = B, for X.
+    /// Solves A * X = b, for matrix X and positive-definite matrix A, by using the Cholesky lower-triangular form.
     /// ```
     /// # use vqm::{Cholesky2x2f32, Matrix2x2f32};
     /// let A = Matrix2x2f32::new([
@@ -203,7 +211,7 @@ where
         Matrix2x2 { a }
     }
 
-    /// Equivalent to `solve_matrix(B.transpose()).transpose()`
+    /// Equivalent to `solve_matrix(B.transpose()).transpose()`.
     /// ```
     /// # use vqm::{Cholesky2x2f32, Matrix2x2f32};
     /// let A = Matrix2x2f32::new([

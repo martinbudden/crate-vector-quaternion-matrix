@@ -1,10 +1,10 @@
-#![cfg_attr(feature = "uom", doc = include_str!("../README.md"))]
+#![doc = include_str!("../README.md")]
 #![cfg_attr(feature = "simd", feature(portable_simd, min_specialization))]
 #![no_std]
 #![deny(clippy::unwrap_used)]
 #![deny(clippy::expect_used)]
 #![deny(clippy::panic)]
-//#![deny(missing_docs)]
+#![deny(missing_docs)]
 #![deny(
     missing_copy_implementations,
     missing_debug_implementations,

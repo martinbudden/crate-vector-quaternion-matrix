@@ -39,19 +39,29 @@ impl From<f32x4> for Quaternion<f32> {
 
 // **** Math ****
 
-/// Math functions for Quaternion.<br><br>
-#[allow(missing_docs)]
+/// Core mathematical operations for quaternions.<br><br>
 pub trait QuaternionMath: Sized {
+    /// Calculates the element-wise negation of the quaternion (`-this`).
     fn q_neg(this: Quaternion<Self>) -> Quaternion<Self>;
+    /// Calculates the sum of two quaternions (`this + other`).
     fn q_add(this: Quaternion<Self>, this: Quaternion<Self>) -> Quaternion<Self>;
+    /// Multiplies the quaternion by a scalar.
     fn q_mul_scalar(this: Quaternion<Self>, a: Self) -> Quaternion<Self>;
+    /// Divides the quaternion by a scalar.
     fn q_div_scalar(this: Quaternion<Self>, a: Self) -> Quaternion<Self>;
+    /// Calculates fused multiply-add of the quaternion and the scalar k.
     fn q_mul_add(this: Quaternion<Self>, k: Self, other: Quaternion<Self>) -> Quaternion<Self>;
+    /// Calculates the square of the magnitude of the quaternion.
     fn q_norm_squared(this: Quaternion<Self>) -> Self;
+    /// Returns true if the quaternion is normalized, within a tolerance of epsilon.
     fn q_is_normalized(this: Quaternion<Self>, epsilon: Self) -> bool;
+    /// Calculates the product of two quaternions.
     fn q_mul(other: Quaternion<Self>, other: Quaternion<Self>) -> Quaternion<Self>;
+    /// Calculates the conjugate of a quaternion.
     fn q_conjugate(this: Quaternion<Self>) -> Quaternion<Self>;
+    /// Calculates the dot product of two quaternions.
     fn q_dot(this: Quaternion<Self>, other: Quaternion<Self>) -> Self;
+    /// Spherical Linear Interpolation between two quaternions.
     fn q_slerp(this: Quaternion<Self>, other: Quaternion<Self>, t: Self) -> Quaternion<Self>;
 }
 

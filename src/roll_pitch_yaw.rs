@@ -25,9 +25,10 @@ pub type RollPitchf64 = RollPitch<f64>;
 #[cfg_attr(feature = "std", derive(derive_more::Display))]
 #[cfg_attr(feature = "std", display("RP{{roll:{roll}, pitch:{pitch}}}"))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
-#[allow(missing_docs)]
 pub struct RollPitch<T> {
+    /// roll Euler angle.
     pub roll: T,
+    /// pitch Euler angle.
     pub pitch: T,
 }
 
@@ -55,11 +56,14 @@ impl<T> RollPitch<T>
 where
     T: Copy + Mul<Output = T> + MathConstants,
 {
+    /// Convert `RollPitch` from radians to degrees.
     #[inline]
     #[must_use]
     pub fn to_degrees(self) -> Self {
         Self { roll: self.roll * T::RADIANS_TO_DEGREES, pitch: self.pitch * T::RADIANS_TO_DEGREES }
     }
+
+    /// Convert `RollPitch` from degrees to radians.
     #[inline]
     #[must_use]
     pub fn to_radians(self) -> Self {
@@ -71,11 +75,14 @@ impl<T> RollPitch<T>
 where
     T: Copy + FloatCore,
 {
+    /// Return a copy of the `RollPitch` with all components set to their absolute values.
     #[inline]
     #[must_use]
     pub fn abs(self) -> Self {
         Self { roll: self.roll.abs(), pitch: self.pitch.abs() }
     }
+
+    /// Return a copy of the `RollPitch` with all components clamped to the specified range.
     #[inline]
     #[must_use]
     pub fn clamp(self, min: T, max: T) -> Self {
@@ -98,10 +105,12 @@ where
 #[cfg_attr(feature = "std", derive(derive_more::Display))]
 #[cfg_attr(feature = "std", display("RPY{{roll:{roll}, pitch:{pitch}, yaw:{yaw}}}"))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
-#[allow(missing_docs)]
 pub struct RollPitchYaw<T> {
+    /// roll Euler angle.
     pub roll: T,
+    /// pitch Euler angle.
     pub pitch: T,
+    /// yaw Euler angle.
     pub yaw: T,
 }
 
@@ -129,6 +138,7 @@ impl<T> RollPitchYaw<T>
 where
     T: Copy + Mul<Output = T> + MathConstants,
 {
+    /// Convert `RollPitchYaw` from radians to degrees.
     #[inline]
     #[must_use]
     pub fn to_degrees(self) -> Self {
@@ -138,6 +148,8 @@ where
             yaw: self.yaw * T::RADIANS_TO_DEGREES,
         }
     }
+
+    /// Convert `RollPitchYaw` from degrees to radians.
     #[inline]
     #[must_use]
     pub fn to_radians(self) -> Self {
@@ -153,11 +165,14 @@ impl<T> RollPitchYaw<T>
 where
     T: Copy + FloatCore,
 {
+    /// Return a copy of the `RollPitchYaw` with all components set to their absolute values.
     #[inline]
     #[must_use]
     pub fn abs(self) -> Self {
         Self { roll: self.roll.abs(), pitch: self.pitch.abs(), yaw: self.yaw.abs() }
     }
+
+    /// Return a copy of the `RollPitchYaw` with all components clamped to the specified range.
     #[inline]
     #[must_use]
     pub fn clamp(self, min: T, max: T) -> Self {

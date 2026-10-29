@@ -29,10 +29,12 @@ pub type Vector3f64 = Vector3<f64>;
 // Conditionally apply alignment based on "align" feature
 #[cfg_attr(feature = "align", repr(C, align(16)))]
 #[cfg_attr(not(feature = "align"), repr(C))]
-#[allow(missing_docs)]
 pub struct Vector3<T> {
+    /// x-axis component.
     pub x: T,
+    /// y-axis component.
     pub y: T,
+    /// z-axis component.
     pub z: T,
 }
 
