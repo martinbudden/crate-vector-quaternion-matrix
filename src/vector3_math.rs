@@ -14,7 +14,8 @@ const _: () = assert!(size_of::<Vector3<f32>>() == 16 && align_of::<Vector3<f32>
 #[cfg(not(any(feature = "align", feature = "simd")))]
 const _: () = assert!(size_of::<Vector3<f32>>() == 12 && align_of::<Vector3<f32>>() == 4);
 
-use crate::Vector3;
+#[allow(unused)]
+use crate::{Vector3, math_methods::MathMethods};
 
 // **** From ****
 
@@ -58,6 +59,7 @@ pub trait Vector3Math: Sized {
     fn v3_min_element(this: Vector3<Self>) -> Self;
     fn v3_dot(this: Vector3<Self>, other: Vector3<Self>) -> Self;
     fn v3_cross(this: Vector3<Self>, other: Vector3<Self>) -> Vector3<Self>;
+    fn v3_slerp(this: Vector3<Self>, other: Vector3<Self>, t: Self) -> Vector3<Self>;
 }
 
 // **** SIMD-accelerated implementation for f32 ****
@@ -262,6 +264,37 @@ impl Vector3Math for f32 {
             }
         }
     }
+
+    fn v3_slerp(this: Vector3<Self>, other: Vector3<Self>, t: Self) -> Vector3<Self> {
+        // Calculate the cosine of the angle between the two vectors via the dot product
+        let dot = this.x * other.x + this.y * other.y + this.z * other.z;
+        // Clamp the dot product to avoid precision errors outside the domain of acos().
+        let cos_omega = dot.clamp(-1.0, 1.0);
+        // Calculate the absolute angle between the vectors (omega).
+        let omega = cos_omega.acos();
+
+        // Handle edge cases where vectors are near colinear to avoid division-by-zero.
+        // If the angle is near zero, fallback to linear interpolation (Lerp).
+        if omega.abs() < 1e-5 {
+            let one_minus_t = 1.0 - t;
+            return Vector3 {
+                x: this.x * one_minus_t + other.x * t,
+                y: this.y * one_minus_t + other.y * t,
+                z: this.z * one_minus_t + other.z * t,
+            };
+        }
+
+        // Calculate Slerp weighting factors.
+        let sin_omega = omega.sin();
+        let sin_omega_reciprocal = 1.0 / sin_omega;
+        let (sin_t_omega, cos_t_omega) = (t * omega).sin_cos();
+
+        let s0 = (sin_omega * cos_t_omega - cos_omega * sin_t_omega) * sin_omega_reciprocal;
+        let s1 = sin_t_omega * sin_omega_reciprocal;
+
+        // Scale and combine components.
+        Vector3 { x: this.x * s0 + other.x * s1, y: this.y * s0 + other.y * s1, z: this.z * s0 + other.z * s1 }
+    }
 }
 
 // **** f64 ****
@@ -345,6 +378,36 @@ impl Vector3Math for f64 {
             z: this.x * other.y - this.y * other.x,
         }
     }
+    fn v3_slerp(this: Vector3<Self>, other: Vector3<Self>, t: Self) -> Vector3<Self> {
+        // Calculate the cosine of the angle between the two vectors via the dot product
+        let dot = this.x * other.x + this.y * other.y + this.z * other.z;
+        // Clamp the dot product to avoid precision errors outside the domain of acos().
+        let cos_omega = dot.clamp(-1.0, 1.0);
+        // Calculate the absolute angle between the vectors (omega).
+        let omega = cos_omega.acos();
+
+        // Handle edge cases where vectors are near colinear to avoid division-by-zero.
+        // If the angle is near zero, fallback to linear interpolation (Lerp).
+        if omega.abs() < 1e-5 {
+            let one_minus_t = 1.0 - t;
+            return Vector3 {
+                x: this.x * one_minus_t + other.x * t,
+                y: this.y * one_minus_t + other.y * t,
+                z: this.z * one_minus_t + other.z * t,
+            };
+        }
+
+        // Calculate Slerp weighting factors.
+        let sin_omega = omega.sin();
+        let sin_omega_reciprocal = 1.0 / sin_omega;
+        let (sin_t_omega, cos_t_omega) = (t * omega).sin_cos();
+
+        let s0 = (sin_omega * cos_t_omega - cos_omega * sin_t_omega) * sin_omega_reciprocal;
+        let s1 = sin_t_omega * sin_omega_reciprocal;
+
+        // Scale and combine components.
+        Vector3 { x: this.x * s0 + other.x * s1, y: this.y * s0 + other.y * s1, z: this.z * s0 + other.z * s1 }
+    }
 }
 
 impl Vector3Math for i16 {
@@ -427,6 +490,12 @@ impl Vector3Math for i16 {
             z: this.x * other.y - this.y * other.x,
         }
     }
+    fn v3_slerp(this: Vector3<Self>, other: Vector3<Self>, t: Self) -> Vector3<Self> {
+        debug_assert!(false, "slerp not meaningful for i16 vectors");
+        _ = other;
+        _ = t;
+        this
+    }
 }
 
 impl Vector3Math for i32 {
@@ -508,5 +577,11 @@ impl Vector3Math for i32 {
             y: this.z * other.x - this.x * other.z,
             z: this.x * other.y - this.y * other.x,
         }
+    }
+    fn v3_slerp(this: Vector3<Self>, other: Vector3<Self>, t: Self) -> Vector3<Self> {
+        debug_assert!(false, "slerp not meaningful for i16 vectors");
+        _ = other;
+        _ = t;
+        this
     }
 }

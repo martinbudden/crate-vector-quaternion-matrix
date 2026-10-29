@@ -439,7 +439,14 @@ where
 {
     type Output = Vector3<Out>;
 
-    /// Multiply a vector by a scalar.
+    /// Multiply vector by a scalar.
+    /// ```
+    /// # use vqm::Vector3f32;
+    /// let v = Vector3f32::new(2.0, 5.0, 11.0);
+    /// let r = v * 2.0;
+    ///
+    /// assert_eq!(r, Vector3f32 { x: 4.0, y: 10.0, z: 22.0 });
+    /// ```
     #[inline]
     fn mul(self, rhs: Rhs) -> Self::Output {
         Vector3 { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs }
@@ -524,6 +531,13 @@ where
     type Output = Vector3<Out>;
 
     /// Divide a vector by a scalar.
+    /// ```
+    /// # use vqm::Vector3f32;
+    /// let v = Vector3f32::new(2.0, 3.0, 5.0);
+    /// let r = v / 2.0;
+    ///
+    /// assert_eq!(r, Vector3f32 { x: 1.0, y: 1.5, z: 2.5 });
+    /// ```
     #[inline]
     fn div(self, rhs: Rhs) -> Vector3<Out> {
         Vector3::<Out> { x: self.x / rhs, y: self.y / rhs, z: self.z / rhs }
@@ -642,6 +656,24 @@ where
     #[must_use]
     pub fn lerp(self, other: Self, t: T) -> Self {
         self + (other - self) * t
+    }
+}
+
+impl<T> Vector3<T>
+where
+    T: Copy + Vector3Math,
+{
+    /// Spherical Linear Interpolation between two vectors.
+    /// ```
+    /// # use vqm::Vector3f32;
+    /// let v = Vector3f32::new(2.0, 1.0, -1.0).normalize();
+    /// let w = Vector3f32::new(-1.0, 4.0, 2.0).normalize();
+    /// let r = v.slerp(w, 0.5);
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn slerp(self, other: Self, t: T) -> Self {
+        T::v3_slerp(self, other, t)
     }
 }
 
