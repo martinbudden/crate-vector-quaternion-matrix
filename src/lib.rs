@@ -27,14 +27,11 @@ mod sqrt_approximations;
 mod is_scalar;
 
 mod vector2;
-mod vector2_math;
 
 mod vector3;
 mod vector3_buf;
-mod vector3_math;
 
 mod vector4;
-mod vector4_math;
 
 mod cholesky2x2;
 mod matrix2x2;

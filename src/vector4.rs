@@ -10,7 +10,7 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use crate::{IsScalar, MathConstants, MathMethods, Vector2, Vector3, vector4_math::Vector4Math};
+use crate::{IsScalar, MathConstants, MathMethods, Vector2, Vector3};
 
 /// 4-dimensional `{x, y, z, t}` vector of `f32` values<br>
 pub type Vector4f32 = Vector4<f32>;
@@ -127,7 +127,7 @@ where
 
 impl<T> Vector4<T>
 where
-    T: FloatCore + Vector4Math,
+    T: FloatCore,
 {
     /// Return true if vector is near other.
     /// ```
@@ -394,7 +394,7 @@ impl Mul<Vector4<f32>> for f32 {
     /// ```
     #[inline]
     fn mul(self, other: Vector4<f32>) -> Vector4<f32> {
-        f32::v4_mul_scalar(other, self)
+        Vector4 { x: other.x * self, y: other.y * self, z: other.z * self, t: other.t * self }
     }
 }
 
@@ -1153,7 +1153,7 @@ where
 
 impl<T> Vector4<T>
 where
-    T: Vector4Math,
+    T: PartialOrd,
 {
     /// Return the max element in the vector.
     /// ```
@@ -1167,7 +1167,19 @@ where
     /// ```
     #[inline]
     pub fn max_element(self) -> T {
-        T::v4_max_element(self)
+        if self.x > self.y {
+            if self.x > self.z {
+                if self.x > self.t { self.x } else { self.t }
+            } else {
+                if self.z > self.t { self.z } else { self.t }
+            }
+        } else {
+            if self.y > self.z {
+                if self.y > self.t { self.y } else { self.t }
+            } else {
+                if self.z > self.t { self.z } else { self.t }
+            }
+        }
     }
 
     /// Return the max element in the vector.
@@ -1182,7 +1194,19 @@ where
     /// ```
     #[inline]
     pub fn min_element(self) -> T {
-        T::v4_min_element(self)
+        if self.x < self.y {
+            if self.x < self.z {
+                if self.x < self.t { self.x } else { self.t }
+            } else {
+                if self.z < self.t { self.z } else { self.t }
+            }
+        } else {
+            if self.y < self.z {
+                if self.y < self.t { self.y } else { self.t }
+            } else {
+                if self.z < self.t { self.z } else { self.t }
+            }
+        }
     }
 }
 

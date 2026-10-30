@@ -5,6 +5,9 @@ pub trait MathConstants {
     /// Constant epsilon, for use in generic code.
     const EPSILON: Self;
 
+    /// Small value for checking if a value is near zero.
+    const ONE_E_MINUS_5: Self;
+
     /// Constant radians to degrees conversion factor, for use in generic code.
     const RADIANS_TO_DEGREES: Self;
     /// Constant degrees to radians conversion factor, for use in generic code.
@@ -56,6 +59,8 @@ pub trait MathConstants {
 impl MathConstants for f32 {
     const EPSILON: Self = f32::EPSILON;
 
+    const ONE_E_MINUS_5: f32 = 1e-5;
+
     const RADIANS_TO_DEGREES: f32 = 180.0 / core::f32::consts::PI;
     const DEGREES_TO_RADIANS: f32 = core::f32::consts::PI / 180.0;
 
@@ -84,6 +89,8 @@ impl MathConstants for f32 {
 
 impl MathConstants for f64 {
     const EPSILON: Self = f64::EPSILON;
+
+    const ONE_E_MINUS_5: f64 = 1e-5;
 
     const RADIANS_TO_DEGREES: f64 = 180.0 / core::f64::consts::PI;
     const DEGREES_TO_RADIANS: f64 = core::f64::consts::PI / 180.0;

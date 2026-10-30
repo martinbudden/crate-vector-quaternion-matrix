@@ -21,6 +21,17 @@ Once the API has stabilized this project will adopt semantic versioning, the fir
 
 At some point [0.1.0] to [0.1.11] will be [YANKED]
 
+## [0.1.20] - 2026-11-xx
+
+### Added
+
+### Changed
+
+### Removed
+
+- `Vector2Math`, `Vector3Math`, and `Vector4Math` traits since they impend `uom`, `simd`,
+  and downstream vectorization of structs (eg `PtFilter`s and `PidController`s).
+
 ## [0.1.19] - 2026-10-28
 
 ### Added

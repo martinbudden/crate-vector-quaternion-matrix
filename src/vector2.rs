@@ -10,7 +10,7 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use crate::{IsScalar, MathConstants, MathMethods, vector2_math::Vector2Math};
+use crate::{IsScalar, MathConstants, MathMethods};
 
 /// 2-dimensional `{x, y}` vector of `f32` values<br>
 pub type Vector2f32 = Vector2<f32>;
@@ -82,7 +82,7 @@ where
 /// Const zero vector.
 /// ```
 /// # use vqm::Vector2f32;
-/// # use num_traits::{zero,Zero,ConstZero};
+/// # use num_traits::{Zero,ConstZero};
 /// let z = Vector2f32::ZERO;
 /// assert!(z.is_zero());
 /// assert_eq!(z, Vector2f32 { x: 0.0, y: 0.0 });
@@ -119,7 +119,7 @@ where
 
 impl<T> Vector2<T>
 where
-    T: FloatCore + Vector2Math,
+    T: FloatCore,
 {
     /// Return true if vector is near other.
     /// ```
@@ -380,7 +380,7 @@ impl Mul<Vector2<f32>> for f32 {
     /// ```
     #[inline]
     fn mul(self, other: Vector2<f32>) -> Vector2<f32> {
-        f32::v2_mul_scalar(other, self)
+        Vector2 { x: other.x * self, y: other.y * self }
     }
 }
 
@@ -775,7 +775,7 @@ where
 
 impl<T> Vector2<T>
 where
-    T: Vector2Math,
+    T: Add<Output = T> + Mul<Output = T>,
 {
     /// Vector dot product.
     /// ```
@@ -789,7 +789,7 @@ where
     /// ```
     #[inline]
     pub fn dot(self, other: Self) -> T {
-        T::v2_dot(self, other)
+        self.x * other.x + self.y * other.y
     }
 }
 
@@ -1189,7 +1189,7 @@ where
 
 impl<T> Vector2<T>
 where
-    T: Vector2Math,
+    T: PartialOrd,
 {
     /// Return the max element in the vector.
     /// ```
@@ -1201,7 +1201,7 @@ where
     /// ```
     #[inline]
     pub fn max_element(self) -> T {
-        T::v2_max_element(self)
+        if self.x > self.y { self.x } else { self.y }
     }
 
     /// Return the min element in the vector.
@@ -1214,7 +1214,7 @@ where
     /// ```
     #[inline]
     pub fn min_element(self) -> T {
-        T::v2_min_element(self)
+        if self.x < self.y { self.x } else { self.y }
     }
 }
 

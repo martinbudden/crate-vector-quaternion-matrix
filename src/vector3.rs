@@ -10,10 +10,7 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use crate::{
-    IsScalar, MathConstants, MathMethods, Quaternion, Vector2, quaternion_math::QuaternionMath,
-    vector3_math::Vector3Math,
-};
+use crate::{IsScalar, MathConstants, MathMethods, Quaternion, Vector2, quaternion_math::QuaternionMath};
 
 /// 3-dimensional `{x, y, z}` vector of `f32` values<br>
 pub type Vector3f32 = Vector3<f32>;
@@ -129,7 +126,7 @@ where
 
 impl<T> Vector3<T>
 where
-    T: FloatCore + Vector3Math,
+    T: FloatCore,
 {
     /// Return true if vector is near other.
     /// ```
@@ -390,7 +387,7 @@ impl Mul<Vector3<f32>> for f32 {
     /// ```
     #[inline]
     fn mul(self, other: Vector3<f32>) -> Vector3<f32> {
-        f32::v3_mul_scalar(other, self)
+        Vector3 { x: other.x * self, y: other.y * self, z: other.z * self }
     }
 }
 
@@ -664,7 +661,7 @@ where
 
 impl<T> Vector3<T>
 where
-    T: Copy + Vector3Math,
+    T: Copy + One + Add<Output = T> + Sub<Output = T> + MathMethods + MathConstants + FloatCore,
 {
     /// Spherical Linear Interpolation between two vectors.
     /// ```
@@ -676,7 +673,34 @@ where
     #[inline]
     #[must_use]
     pub fn slerp(self, other: Self, t: T) -> Self {
-        T::v3_slerp(self, other, t)
+        // Calculate the cosine of the angle between the two vectors via the dot product
+        let dot = self.x * other.x + self.y * other.y + self.z * other.z;
+        // Clamp the dot product to avoid precision errors outside the domain of acos().
+        let cos_omega = dot.clamp(-T::one(), T::one());
+        // Calculate the absolute angle between the vectors (omega).
+        let omega = cos_omega.acos();
+
+        // Handle edge cases where vectors are near colinear to avoid division-by-zero.
+        // If the angle is near zero, fallback to linear interpolation (Lerp).
+        if omega.abs() < T::ONE_E_MINUS_5 {
+            let one_minus_t = T::one() - t;
+            return Vector3 {
+                x: self.x * one_minus_t + other.x * t,
+                y: self.y * one_minus_t + other.y * t,
+                z: self.z * one_minus_t + other.z * t,
+            };
+        }
+
+        // Calculate Slerp weighting factors.
+        let sin_omega = omega.sin();
+        let sin_omega_reciprocal = T::one() / sin_omega;
+        let (sin_t_omega, cos_t_omega) = (t * omega).sin_cos();
+
+        let s0 = (sin_omega * cos_t_omega - cos_omega * sin_t_omega) * sin_omega_reciprocal;
+        let s1 = sin_t_omega * sin_omega_reciprocal;
+
+        // Scale and combine components.
+        Vector3 { x: self.x * s0 + other.x * s1, y: self.y * s0 + other.y * s1, z: self.z * s0 + other.z * s1 }
     }
 }
 
@@ -1300,7 +1324,7 @@ where
 
 impl<T> Vector3<T>
 where
-    T: Vector3Math,
+    T: PartialOrd,
 {
     /// Return the max element in the vector.
     /// ```
@@ -1314,7 +1338,11 @@ where
     /// ```
     #[inline]
     pub fn max_element(self) -> T {
-        T::v3_max_element(self)
+        if self.x > self.y {
+            if self.x > self.z { self.x } else { self.z }
+        } else {
+            if self.y > self.z { self.y } else { self.z }
+        }
     }
 
     /// Return the min element in the vector.
@@ -1329,13 +1357,17 @@ where
     /// ```
     #[inline]
     pub fn min_element(self) -> T {
-        T::v3_min_element(self)
+        if self.x < self.y {
+            if self.x < self.z { self.x } else { self.z }
+        } else {
+            if self.y < self.z { self.y } else { self.z }
+        }
     }
 }
 
 impl<T> Vector3<T>
 where
-    T: Copy + Zero + One + Sub<Output = T> + Vector3Math + MathMethods + QuaternionMath + IsScalar,
+    T: Copy + Zero + One + Sub<Output = T> + MathMethods + QuaternionMath + IsScalar,
 {
     #[inline]
     #[must_use]
