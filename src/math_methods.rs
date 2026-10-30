@@ -35,40 +35,60 @@
 
 /// `no_std` implementations of `std` math functions in method call syntax<br>
 /// eg `x.sin()`, `x.cos()` etc.<br><br>
-#[allow(missing_docs)]
+/// Angles are expressed in radians.
 pub trait MathMethods: Sized {
+    /// Calculates the sine and cosine of an angle simultaneously.
+    /// Returns a tuple containing `(sin(self), cos(self))`.
     #[must_use]
     fn sin_cos(self) -> (Self, Self);
+    /// Calculates the sine of an angle, measured in radians.
     #[must_use]
     fn sin(self) -> Self;
+    /// Calculates the cosine of an angle, measured in radians.
     #[must_use]
     fn cos(self) -> Self;
+    /// Calculates the tangent of an angle, measured in radians.
     #[must_use]
     fn tan(self) -> Self;
+    /// Calculates the arcsine of a value.
     #[must_use]
     fn asin(self) -> Self;
+    /// Calculates the arccosine of a value.
     #[must_use]
     fn acos(self) -> Self;
+    /// Calculates the four-quadrant arctangent of `self / y`.
+    /// Returns the angle in radians corresponding to the Cartesian coordinates `(y, self)`.
     #[must_use]
     fn atan2(self, y: Self) -> Self;
+    /// Calculates the arctangent of a value.
     #[must_use]
     fn atan(self) -> Self;
+    /// Calculates the square root of a value.
     #[must_use]
     fn sqrt(self) -> Self;
+    /// Calculates the reciprocal of the square root of a value.
     #[must_use]
     fn sqrt_reciprocal(self) -> Self;
+    /// Calculates the exponential function, raising Euler's number to a power.
     #[must_use]
     fn exp(self) -> Self;
+
+    /// Calculates two raised to the power of `self`.
     #[must_use]
     fn exp2(self) -> Self;
+    /// Calculates the natural logarithm of a value.
     #[must_use]
     fn ln(self) -> Self;
+    /// Calculates the base-2 logarithm of a value.
     #[must_use]
     fn log2(self) -> Self;
+    /// Calculates the base-10 logarithm of a value.
     #[must_use]
     fn log10(self) -> Self;
+    /// Calculates the logarithm of a value using the specified base.
     #[must_use]
     fn log(self, base: Self) -> Self;
+    /// Raises a value to a floating-point power.
     #[must_use]
     fn powf(self, e: Self) -> Self;
 }
