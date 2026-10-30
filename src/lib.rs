@@ -4,8 +4,8 @@
 #![deny(clippy::unwrap_used)]
 #![deny(clippy::expect_used)]
 #![deny(clippy::panic)]
-#![deny(missing_docs)]
 #![deny(
+    missing_docs,
     missing_copy_implementations,
     missing_debug_implementations,
     trivial_casts,

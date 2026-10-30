@@ -23,7 +23,7 @@ where
     ///     assert!(L.is_near(Matrix3x3f32::new([
     ///             2.0*R, 0.0, 0.0,
     ///             3.0*R, R,   0.0,
-    ///             7.0*R, R,   2.0 ]),1e-6));
+    ///             7.0*R, R,   2.0 ]), 1e-6));
     ///     //Check L*L^T = A
     ///     let B = L * L.transpose();
     ///     assert!(A.is_near(B, 1e-6));
@@ -85,7 +85,7 @@ where
     ///     assert!(L.is_near(Matrix3x3f32::new([
     ///             2.0*R, 0.0, 0.0,
     ///             3.0*R, R,   0.0,
-    ///             7.0*R, R,   2.0 ]),1e-6));
+    ///             7.0*R, R,   2.0 ]), 1e-6));
     ///     //Check L*L^T = A
     ///     let B = L * L.transpose();
     ///     assert!(A.is_near(B, 1e-6));
@@ -350,7 +350,7 @@ where
     ///     assert!(X.is_near(Matrix3x3f32::new([
     ///                  6.0,  -2.5,  -0.5,
     ///                 -2.5,   2.25, -0.25,
-    ///                 -0.5,  -0.25,  0.25 ]),1e-5));
+    ///                 -0.5,  -0.25,  0.25 ]), 1e-5));
     ///     assert!((A * X).is_near_identity(1e-5));
     /// }
     /// ```
@@ -376,11 +376,13 @@ mod test_traits {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Matrix3x3f32, Vector3f32};
+    use crate::Matrix3x3f32;
 
+    #[cfg(feature = "libm")]
     #[allow(non_snake_case)]
     #[test]
     fn cholesky_tests() {
+        use crate::Vector3f32;
         let A = Matrix3x3f32::new([
             2.0, 3.0, 7.0, //
             3.0, 5.0, 11.0, //

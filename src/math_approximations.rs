@@ -9,6 +9,132 @@ use num_traits::{Num, float::FloatCore};
 
 // For sin and cos functions r (remainder) is in range [-0.5, 0.5] and pre-scaled by 2/PI.
 
+#[cfg(all(not(feature = "std"), not(feature = "libm")))]
+impl super::MathMethods for f32 {
+    fn sin_cos(self) -> (Self, Self) {
+        sin_cos_approx_f32(self)
+    }
+    fn sin(self) -> Self {
+        sin_approx_f32(self)
+    }
+    fn cos(self) -> Self {
+        cos_approx_f32(self)
+    }
+    fn tan(self) -> Self {
+        tan_approx_f32(self)
+    }
+    fn asin(self) -> Self {
+        asin_approx_f32(self)
+    }
+    fn acos(self) -> Self {
+        acos_approx_f32(self)
+    }
+    // note: atan2(x, y) = x.atan2(y)
+    fn atan2(self, y: Self) -> Self {
+        atan2_approx_f32(self, y)
+    }
+    fn atan(self) -> Self {
+        atan2_approx_f32(self, 1.0)
+    }
+    fn sqrt(self) -> f32 {
+        super::sqrt_approximations::sqrt_f32(self)
+    }
+    fn sqrt_reciprocal(self) -> f32 {
+        super::sqrt_approximations::sqrt_reciprocal_f32(self)
+    }
+    #[inline(always)]
+    fn exp(self) -> Self {
+        exp_approx_f32(self)
+    }
+    #[inline(always)]
+    fn exp2(self) -> Self {
+        exp2_approx_f32(self)
+    }
+    #[inline(always)]
+    fn ln(self) -> Self {
+        ln_approx_f32(self)
+    }
+    #[inline(always)]
+    fn log2(self) -> Self {
+        log2_approx_f32(self)
+    }
+    #[inline(always)]
+    fn log10(self) -> Self {
+        log10_approx_f32(self)
+    }
+    #[inline(always)]
+    fn log(self, base: Self) -> Self {
+        log_approx_f32(self, base)
+    }
+    #[inline(always)]
+    fn powf(self, e: Self) -> Self {
+        powf_approx_f32(self, e)
+    }
+}
+
+#[cfg(all(not(feature = "std"), not(feature = "libm")))]
+impl super::MathMethods for f64 {
+    fn sin_cos(self) -> (Self, Self) {
+        sin_cos_approx_f64(self)
+    }
+    fn sin(self) -> Self {
+        sin_approx_f64(self)
+    }
+    fn cos(self) -> Self {
+        cos_approx_f64(self)
+    }
+    fn tan(self) -> Self {
+        tan_approx_f64(self)
+    }
+    fn asin(self) -> Self {
+        asin_approx_f64(self)
+    }
+    fn acos(self) -> Self {
+        acos_approx_f64(self)
+    }
+    // note: atan2(x, y) = x.atan2(y)
+    fn atan2(self, y: Self) -> Self {
+        atan2_approx_f64(self, y)
+    }
+    fn atan(self) -> Self {
+        atan2_approx_f64(self, 1.0)
+    }
+    fn sqrt(self) -> f64 {
+        super::sqrt_approximations::sqrt_f64(self)
+    }
+    fn sqrt_reciprocal(self) -> f64 {
+        super::sqrt_approximations::sqrt_reciprocal_f64(self)
+    }
+    #[inline(always)]
+    fn exp(self) -> Self {
+        exp_approx_f64(self)
+    }
+    #[inline(always)]
+    fn exp2(self) -> Self {
+        exp2_approx_f64(self)
+    }
+    #[inline(always)]
+    fn ln(self) -> Self {
+        ln_approx_f64(self)
+    }
+    #[inline(always)]
+    fn log2(self) -> Self {
+        log2_approx_f64(self)
+    }
+    #[inline(always)]
+    fn log10(self) -> Self {
+        log10_approx_f64(self)
+    }
+    #[inline(always)]
+    fn log(self, base: Self) -> Self {
+        log_approx_f64(self, base)
+    }
+    #[inline(always)]
+    fn powf(self, e: Self) -> Self {
+        powf_approx_f64(self, e)
+    }
+}
+
 trait Sin5Coefficients {
     const SIN_C1: Self;
     const SIN_C3: Self;

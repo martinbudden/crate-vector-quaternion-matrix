@@ -33,13 +33,13 @@ pub fn sqrt_f64(x: f64) -> f64 {
 
 #[allow(unused)]
 #[inline(always)]
-pub fn sqrt_approx_f32(x: f32) -> f32 {
+fn sqrt_approx_f32(x: f32) -> f32 {
     1.0 / sqrt_reciprocal_approx_f32(x)
 }
 
 #[allow(unused)]
 #[inline(always)]
-pub fn sqrt_approx_f64(x: f64) -> f64 {
+fn sqrt_approx_f64(x: f64) -> f64 {
     1.0 / sqrt_reciprocal_approx_f64(x)
 }
 
@@ -80,17 +80,19 @@ pub fn sqrt_reciprocal_f64(x: f64) -> f64 {
 #[allow(clippy::excessive_precision)]
 #[allow(unused)]
 #[inline(always)]
-pub fn sqrt_reciprocal_approx_f32(x: f32) -> f32 {
+fn sqrt_reciprocal_approx_f32(x: f32) -> f32 {
     let i = 0x_5F1F_1412 - (x.to_bits().cast_signed() >> 1);
     // Initial estimate for Newton's method.
     let y = f32::from_bits(i.cast_unsigned());
     // First iteration of Newton's method.
     y * (1.690_002_31 - 0.714_158_168 * x * y * y)
+    // Second iteration
+    //y *(1.5 - 0.5 * x * y * y)
 }
 
 #[allow(unused)]
 #[inline(always)]
-pub fn sqrt_reciprocal_approx_f64(x: f64) -> f64 {
+fn sqrt_reciprocal_approx_f64(x: f64) -> f64 {
     #[allow(clippy::cast_possible_truncation)]
     f64::from(sqrt_reciprocal_approx_f32(x as f32))
 }
@@ -127,6 +129,7 @@ mod tests {
     fn sqrt_reciprocal_quake() {
         assert_eq!(quake_sqrt_reciprocal_approx_f32(4.0), 0.499_154_06);
         assert_eq!(sqrt_reciprocal_approx_f32(4.0), 0.500_059_37);
+        //assert_eq!(sqrt_reciprocal_approx_f32(4.0), 0.5);
     }
     #[cfg(feature = "libm")]
     #[test]

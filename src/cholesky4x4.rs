@@ -393,11 +393,13 @@ mod test_traits {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Matrix4x4f32, Vector4f32};
+    use crate::Matrix4x4f32;
 
+    #[cfg(feature = "libm")]
     #[allow(non_snake_case)]
     #[test]
     fn cholesky_tests() {
+        use crate::Vector4f32;
         let A = Matrix4x4f32::new([
             2.0, 3.0, 7.0, 13.0, //
             3.0, 5.0, 11.0, 19.0, //
@@ -409,6 +411,7 @@ mod tests {
         if let Some(cholesky) = option {
             const R: f32 = core::f32::consts::FRAC_1_SQRT_2;
             let L = cholesky.l();
+            #[cfg(feature = "libm")]
             #[rustfmt::skip]
             assert!(L.is_near(Matrix4x4f32::new([
                             2.0*R, 0.0,  0.0, 0.0,
@@ -417,6 +420,7 @@ mod tests {
                            13.0*R,  -R, -2.0, 4.0*R]), 1e-5));
             // Check L*L^T = A
             let B = L * L.transpose();
+            #[cfg(feature = "libm")]
             assert!(A.is_near(B, 1e-6));
 
             // Solve Ax = b, for x

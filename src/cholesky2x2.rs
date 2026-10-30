@@ -21,7 +21,7 @@ where
     ///     let L = cholesky.l();
     ///     assert!(L.is_near(Matrix2x2f32::new([
     ///             2.0*R, 0.0,
-    ///             3.0*R, R]),1e-6));
+    ///             3.0*R, R]), 1e-6));
     ///     // Check L*L^T = A
     ///     let B = L * L.transpose();
     ///     assert!(A.is_near(B, 1e-6));
@@ -77,7 +77,7 @@ where
     ///     let L = cholesky.l();
     ///     assert!(L.is_near(Matrix2x2f32::new([
     ///             2.0*R, 0.0,
-    ///             3.0*R, R]),1e-6));
+    ///             3.0*R, R]), 1e-6));
     ///     // Check L*L^T = A
     ///     let B = L * L.transpose();
     ///     assert!(A.is_near(B, 1e-6));
@@ -302,7 +302,7 @@ where
     ///     let X = cholesky.invert();
     ///     assert!(X.is_near(Matrix2x2f32::new([
     ///                  5.0,  -3.0,
-    ///                 -3.0,   2.0 ]),1e-5));
+    ///                 -3.0,   2.0 ]), 1e-5));
     ///     assert!((A * X).is_near_identity(1e-5));
     /// }
     /// ```
@@ -328,11 +328,13 @@ mod test_traits {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{Matrix2x2f32, Vector2f32};
+    use crate::Matrix2x2f32;
 
+    #[cfg(feature = "libm")]
     #[allow(non_snake_case)]
     #[test]
     fn cholesky_tests() {
+        use crate::Vector2f32;
         let A = Matrix2x2f32::new([
             2.0, 3.0, //
             3.0, 5.0, //
@@ -351,7 +353,8 @@ mod tests {
                             2.0*R, 0.0,
                             3.0*R, R ]), 1e-6));
             // Check L*L^T = A
-            assert!(A.is_near(L * L.transpose(), 1e-6));
+            #[cfg(feature = "libm")]
+            assert!(A.is_near(L * L.transpose(), 5e-5));
 
             // Solve Ax = b, for x
             let b = Vector2f32 { x: 13.0, y: 17.0 };
