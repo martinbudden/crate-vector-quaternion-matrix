@@ -10,7 +10,10 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use crate::{IsScalar, MathConstants, MathMethods, Quaternion, QuaternionMath, Vector2, vector3_math::Vector3Math};
+use crate::{
+    IsScalar, MathConstants, MathMethods, Quaternion, Vector2, quaternion_math::QuaternionMath,
+    vector3_math::Vector3Math,
+};
 
 /// 3-dimensional `{x, y, z}` vector of `f32` values<br>
 pub type Vector3f32 = Vector3<f32>;
@@ -1142,6 +1145,30 @@ where
     pub fn normalize_unchecked_in_place(&mut self) -> &mut Self {
         *self = self.normalize_unchecked();
         self
+    }
+}
+
+impl<T> Vector3<T>
+where
+    T: FloatCore + MathMethods,
+{
+    /// Return normalized form of the vector, checking if the norm is zero,
+    /// and scaling to avoid floating point overflow.
+    #[must_use]
+    pub fn normalize_scaled(self) -> Self {
+        // Find the largest absolute component to use as a scaling factor
+        let max_element = self.x.abs().max(self.y.abs()).max(self.z.abs());
+        if max_element == T::zero() || !max_element.is_finite() {
+            return self;
+        }
+        // Scale down to prevent overflow during squaring
+        let scaled_x = self.x / max_element;
+        let scaled_y = self.y / max_element;
+        let scaled_z = self.z / max_element;
+        let scaled_norm_squared = scaled_x * scaled_x + scaled_y * scaled_y + scaled_z * scaled_z;
+        // Calculate reciprocal and rescale back to the original relative scale
+        let sqrt_reciprocal = scaled_norm_squared.sqrt_reciprocal();
+        Self { x: scaled_x * sqrt_reciprocal, y: scaled_y * sqrt_reciprocal, z: scaled_z * sqrt_reciprocal }
     }
 }
 

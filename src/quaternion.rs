@@ -11,7 +11,7 @@ use {
 };
 
 use crate::math_methods::MathMethods;
-use crate::{QuaternionMath, Vector3};
+use crate::{Vector3, quaternion_math::QuaternionMath};
 
 /// Quaternion of `f32` values<br>
 pub type Quaternionf32 = Quaternion<f32>;

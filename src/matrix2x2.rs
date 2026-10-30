@@ -12,7 +12,7 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use crate::{MathConstants, Matrix2x2Math, Vector2};
+use crate::{MathConstants, Vector2, matrix2x2_math::Matrix2x2Math};
 
 /// 2x2 matrix of `f32` values<br>
 pub type Matrix2x2f32 = Matrix2x2<f32>;

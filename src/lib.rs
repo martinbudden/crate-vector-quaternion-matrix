@@ -71,20 +71,16 @@ pub use vector3_buf::SliceTooShortError;
 pub use vector4::{Vector4, Vector4f32, Vector4f64};
 
 pub use quaternion::{Quaternion, Quaternionf32, Quaternionf64};
-pub use quaternion_math::QuaternionMath;
 pub use roll_pitch_yaw::{RollPitch, RollPitchYaw, RollPitchYawf32, RollPitchYawf64, RollPitchf32, RollPitchf64};
 
 pub use cholesky2x2::{Cholesky2x2, Cholesky2x2f32, Cholesky2x2f64};
 pub use matrix2x2::{Matrix2x2, Matrix2x2f32, Matrix2x2f64};
-pub use matrix2x2_math::Matrix2x2Math;
 
 pub use cholesky3x3::{Cholesky3x3, Cholesky3x3f32, Cholesky3x3f64};
 pub use matrix3x3::{Matrix3x3, Matrix3x3f32, Matrix3x3f64};
-pub use matrix3x3_math::Matrix3x3Math;
 
 pub use matrix3x3_m2x2::{Matrix3x3xM2x2, Matrix3x3xM2x2f32, Matrix3x3xM2x2f64};
 pub use matrix3x3_m3x3::{Matrix3x3xM3x3, Matrix3x3xM3x3f32, Matrix3x3xM3x3f64};
 
 pub use cholesky4x4::{Cholesky4x4, Cholesky4x4f32, Cholesky4x4f64};
 pub use matrix4x4::{Matrix4x4, Matrix4x4f32, Matrix4x4f64};
-pub use matrix4x4_math::Matrix4x4Math;
