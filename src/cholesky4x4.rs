@@ -8,6 +8,25 @@ where
 {
     /// Returns a wrapped Cholesky lower decomposition of a matrix if the matrix is positive definite, otherwise `None`.
     /// The input matrix is assumed to be symmetric and only the lower-triangular part is read.
+    /// ```
+    /// # use vqm::{Cholesky4x4f32, Matrix4x4f32};
+    /// let A = Matrix4x4f32::new([
+    ///      2.0,  3.0,  7.0, 13.0,
+    ///      3.0,  5.0, 11.0, 19.0,
+    ///      7.0, 11.0, 29.0, 41.0,
+    ///     13.0, 19.0, 41.0, 97.0,
+    /// ]);
+    /// let option = A.cholesky();
+    /// assert!(option.is_some());
+    /// if let Some(cholesky) = option {
+    ///     const R: f32 = core::f32::consts::FRAC_1_SQRT_2;
+    ///     assert!(cholesky.l().is_near(Matrix4x4f32::new([
+    ///                     2.0*R, 0.0,  0.0, 0.0,
+    ///                     3.0*R,   R,  0.0, 0.0,
+    ///                     7.0*R,   R,  2.0, 0.0,
+    ///                    13.0*R,  -R, -2.0, 4.0*R]), 1e-5));
+    /// }
+    /// ```
     #[must_use]
     #[inline]
     pub fn cholesky(self) -> Option<Cholesky4x4<T>> {
@@ -205,6 +224,24 @@ where
     }
 
     /// Solves A * x = b, for array x and positive-definite matrix A, by using the Cholesky lower-triangular form.
+    /// ```
+    /// # use vqm::{Cholesky4x4f32, Matrix4x4f32, Vector4f32};
+    /// let A = Matrix4x4f32::new([
+    ///      2.0,  3.0,  7.0, 13.0,
+    ///      3.0,  5.0, 11.0, 19.0,
+    ///      7.0, 11.0, 29.0, 41.0,
+    ///     13.0, 19.0, 41.0, 97.0,
+    /// ]);
+    /// let b = [ 17.0, 23.0, 31.0, 47.0 ];
+    ///
+    /// let option = Cholesky4x4f32::new(A);
+    /// assert!(option.is_some());
+    /// if let Some(cholesky) = option {
+    ///     // Solve Ax = b, for x
+    ///     let x = cholesky.solve_array(b);
+    ///     assert!( ((x[0] - 144.0).abs() < 5e-4) && ((x[1] - 1.5).abs() < 5e-4) && ((x[2] + 18.0).abs() < 5e-4) && ((x[3] + 11.5).abs() < 5e-4) );
+    /// }
+    /// ```
     #[must_use]
     #[inline]
     pub fn solve_array(self, a: [T; 4]) -> [T; 4] {

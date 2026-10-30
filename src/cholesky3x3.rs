@@ -8,6 +8,27 @@ where
 {
     /// Returns a wrapped Cholesky lower decomposition of a matrix if the matrix is positive definite, otherwise `None`.
     /// The input matrix is assumed to be symmetric and only the lower-triangular part is read.
+    /// ```
+    /// # use vqm::{Cholesky3x3f32, Matrix3x3f32};
+    /// let A = Matrix3x3f32::new([
+    ///     2.0, 3.0, 7.0,
+    ///     3.0, 5.0, 11.0,
+    ///     7.0, 11.0, 29.0
+    /// ]);
+    /// let option = A.cholesky();
+    /// assert!(option.is_some());
+    /// if let Some(cholesky) = option {
+    ///     const R: f32 = core::f32::consts::FRAC_1_SQRT_2;
+    ///     let L = cholesky.l();
+    ///     assert!(L.is_near(Matrix3x3f32::new([
+    ///             2.0*R, 0.0, 0.0,
+    ///             3.0*R, R,   0.0,
+    ///             7.0*R, R,   2.0 ]),1e-6));
+    ///     //Check L*L^T = A
+    ///     let B = L * L.transpose();
+    ///     assert!(A.is_near(B, 1e-6));
+    /// }
+    /// ```
     #[must_use]
     #[inline]
     pub fn cholesky(self) -> Option<Cholesky3x3<T>> {
@@ -169,6 +190,23 @@ where
     }
 
     /// Solves A * x = b, for array x and positive-definite matrix A, by using the Cholesky lower-triangular form.
+    /// ```
+    /// # use vqm::{Cholesky3x3f32, Matrix3x3f32, Vector3f32};
+    /// let A = Matrix3x3f32::new([
+    ///     2.0, 3.0, 7.0,
+    ///     3.0, 5.0, 11.0,
+    ///     7.0, 11.0, 29.0,
+    /// ]);
+    /// let b = [ 17.0, 23.0, 31.0 ];
+    ///
+    /// let option = Cholesky3x3f32::new(A);
+    /// assert!(option.is_some());
+    /// if let Some(cholesky) = option {
+    ///     // Solve Ax = b, for x
+    ///     let x = cholesky.solve_array(b);
+    ///     assert!( ((x[0] - 29.0).abs() < 5e-5) && ((x[1] - 1.5).abs() < 5e-5) && ((x[2] + 6.5).abs() < 5e-5) );
+    /// }
+    /// ```
     #[must_use]
     #[inline]
     pub fn solve_array(self, a: [T; 3]) -> [T; 3] {
@@ -196,7 +234,7 @@ where
     ///     3.0, 5.0, 11.0,
     ///     7.0, 11.0, 29.0,
     /// ]);
-    ///     let b = Vector3f32 { x: 17.0, y: 23.0, z: 31.0 };
+    /// let b = Vector3f32 { x: 17.0, y: 23.0, z: 31.0 };
     ///
     /// let option = Cholesky3x3f32::new(A);
     /// assert!(option.is_some());

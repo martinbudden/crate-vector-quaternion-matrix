@@ -8,6 +8,25 @@ where
 {
     /// Returns a wrapped Cholesky lower decomposition of a matrix if the matrix is positive definite, otherwise `None`.
     /// The input matrix is assumed to be symmetric and only the lower-triangular part is read.
+    /// ```
+    /// # use vqm::{Cholesky2x2f32, Matrix2x2f32};
+    /// let A = Matrix2x2f32::new([
+    ///     2.0, 3.0,
+    ///     3.0, 5.0
+    /// ]);
+    /// let option = A.cholesky();
+    /// assert!(option.is_some());
+    /// if let Some(cholesky) = option {
+    ///     const R: f32 = core::f32::consts::FRAC_1_SQRT_2;
+    ///     let L = cholesky.l();
+    ///     assert!(L.is_near(Matrix2x2f32::new([
+    ///             2.0*R, 0.0,
+    ///             3.0*R, R]),1e-6));
+    ///     // Check L*L^T = A
+    ///     let B = L * L.transpose();
+    ///     assert!(A.is_near(B, 1e-6));
+    /// }
+    /// ```
     #[must_use]
     #[inline]
     pub fn cholesky(self) -> Option<Cholesky2x2<T>> {
@@ -136,6 +155,22 @@ where
     }
 
     /// Solves A * x = b, for array x and positive-definite matrix A, by using the Cholesky lower-triangular form.
+    /// ```
+    /// # use vqm::{Cholesky2x2f32, Matrix2x2f32, Vector2f32};
+    /// let A = Matrix2x2f32::new([
+    ///     2.0, 3.0,
+    ///     3.0, 5.0
+    /// ]);
+    /// let b = [ 13.0, 17.0 ];
+    ///
+    /// let option = Cholesky2x2f32::new(A);
+    /// assert!(option.is_some());
+    /// if let Some(cholesky) = option {
+    ///     // Solve Ax = b, for x
+    ///     let x = cholesky.solve_array(b);
+    ///     assert!( ((x[0] - 14.0).abs() < 5e-5) && ((x[1] + 5.0).abs() < 5e-5) );
+    /// }
+    /// ```
     #[must_use]
     #[inline]
     pub fn solve_array(self, a: [T; 2]) -> [T; 2] {
@@ -160,7 +195,7 @@ where
     ///     2.0, 3.0,
     ///     3.0, 5.0
     /// ]);
-    ///     let b = Vector2f32 { x: 13.0, y: 17.0 };
+    /// let b = Vector2f32 { x: 13.0, y: 17.0 };
     ///
     /// let option = Cholesky2x2f32::new(A);
     /// assert!(option.is_some());
