@@ -428,7 +428,7 @@ where
     /// Zero matrix.
     /// ```
     /// # use vqm::Matrix3x3f32;
-    /// # use num_traits::{Zero,zero};
+    /// # use num_traits::Zero;
     /// let z = Matrix3x3f32::zero();
     ///
     /// assert_eq!(z, Matrix3x3f32::new([ 0.0, 0.0, 0.0,
@@ -441,6 +441,13 @@ where
         Self { a: [T::zero(); 9] }
     }
 
+    /// Tests if matrix is zero.
+    /// ```
+    /// # use vqm::Matrix3x3f32;
+    /// # use num_traits::Zero;
+    /// let z = Matrix3x3f32::zero();
+    /// assert!(z.is_zero());
+    /// ```
     #[inline]
     fn is_zero(&self) -> bool {
         *self == Self::zero()
@@ -454,7 +461,7 @@ where
     /// Const zero matrix.
     /// ```
     /// # use vqm::Matrix3x3f32;
-    /// # use num_traits::{zero,Zero,ConstZero};
+    /// # use num_traits::{Zero,ConstZero};
     /// let m = Matrix3x3f32::ZERO;
     /// assert!(m.is_zero());
     /// ```

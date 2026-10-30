@@ -351,6 +351,13 @@ where
         Self { a: [T::zero(); 4] }
     }
 
+    /// Tests if matrix is zero.
+    /// ```
+    /// # use vqm::Matrix2x2f32;
+    /// # use num_traits::Zero;
+    /// let z = Matrix2x2f32::zero();
+    /// assert!(z.is_zero());
+    /// ```
     #[inline]
     fn is_zero(&self) -> bool {
         *self == Self::zero()
@@ -364,7 +371,7 @@ where
     /// Const zero matrix.
     /// ```
     /// # use vqm::Matrix2x2f32;
-    /// # use num_traits::{zero,Zero,ConstZero};
+    /// # use num_traits::{Zero,ConstZero};
     /// let m = Matrix2x2f32::ZERO;
     /// assert!(m.is_zero());
     /// ```

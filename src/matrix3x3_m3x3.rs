@@ -210,6 +210,13 @@ where
         Self { a: [Matrix3x3::<T>::zero(); 9] }
     }
 
+    /// Tests if matrix is zero.
+    /// ```
+    /// # use vqm::Matrix3x3xM3x3f32;
+    /// # use num_traits::Zero;
+    /// let z = Matrix3x3xM3x3f32::zero();
+    /// assert!(z.is_zero());
+    /// ```
     #[inline]
     fn is_zero(&self) -> bool {
         *self == Self::zero()
