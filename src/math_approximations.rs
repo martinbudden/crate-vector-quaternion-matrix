@@ -408,14 +408,14 @@ pub fn sin_cos_approx_f64(x: f64) -> (f64, f64) {
 
 #[inline(always)]
 #[must_use]
-pub fn tan_approx_f32(x: f32) -> f32 {
+fn tan_approx_f32(x: f32) -> f32 {
     let (sin, cos) = sin_cos_approx_f32(x);
     sin / cos
 }
 
 #[inline(always)]
 #[must_use]
-pub fn tan_approx_f64(x: f64) -> f64 {
+fn tan_approx_f64(x: f64) -> f64 {
     let (sin, cos) = sin_cos_approx_f64(x);
     sin / cos
 }
@@ -423,7 +423,7 @@ pub fn tan_approx_f64(x: f64) -> f64 {
 /// Arctangent of y/x (f32).
 #[inline(always)]
 #[must_use]
-pub fn atan2_approx_f32(y: f32, x: f32) -> f32 {
+fn atan2_approx_f32(y: f32, x: f32) -> f32 {
     if x == 0.0 && y == 0.0 {
         return 0.0;
     }
@@ -456,39 +456,39 @@ pub fn atan2_approx_f32(y: f32, x: f32) -> f32 {
 
 #[inline(always)]
 #[must_use]
-pub fn atan2_approx_f64(y: f64, x: f64) -> f64 {
+fn atan2_approx_f64(y: f64, x: f64) -> f64 {
     #[allow(clippy::cast_possible_truncation)]
     f64::from(atan2_approx_f32(y as f32, x as f32))
 }
 
 #[inline(always)]
 #[must_use]
-pub fn asin_approx_f32(x: f32) -> f32 {
+fn asin_approx_f32(x: f32) -> f32 {
     atan2_approx_f32(x, super::sqrt_approximations::sqrt_f32(1.0 - x * x))
 }
 
 #[inline(always)]
 #[must_use]
-pub fn asin_approx_f64(x: f64) -> f64 {
+fn asin_approx_f64(x: f64) -> f64 {
     atan2_approx_f64(x, super::sqrt_approximations::sqrt_f64(1.0 - x * x))
 }
 
 #[inline(always)]
 #[must_use]
-pub fn acos_approx_f32(x: f32) -> f32 {
+fn acos_approx_f32(x: f32) -> f32 {
     atan2_approx_f32(super::sqrt_approximations::sqrt_f32(1.0 - x * x), x)
 }
 
 #[inline(always)]
 #[must_use]
-pub fn acos_approx_f64(x: f64) -> f64 {
+fn acos_approx_f64(x: f64) -> f64 {
     atan2_approx_f64(super::sqrt_approximations::sqrt_f64(1.0 - x * x), x)
 }
 
 /// Approximates e^x for f32 using range reduction and a Taylor series.
 #[inline(always)]
 #[must_use]
-pub fn exp_approx_f32(x: f32) -> f32 {
+fn exp_approx_f32(x: f32) -> f32 {
     const LN_2: f32 = core::f32::consts::LN_2;
     const FRAC_1_LN_2: f32 = 1.0 / LN_2;
 
@@ -516,27 +516,27 @@ pub fn exp_approx_f32(x: f32) -> f32 {
 
 #[inline(always)]
 #[must_use]
-pub fn exp_approx_f64(x: f64) -> f64 {
+fn exp_approx_f64(x: f64) -> f64 {
     #[allow(clippy::cast_possible_truncation)]
     f64::from(exp_approx_f32(x as f32))
 }
 
 #[inline(always)]
 #[must_use]
-pub fn exp2_approx_f32(x: f32) -> f32 {
+fn exp2_approx_f32(x: f32) -> f32 {
     exp_approx_f32(x * core::f32::consts::LN_2)
 }
 
 #[inline(always)]
 #[must_use]
-pub fn exp2_approx_f64(x: f64) -> f64 {
+fn exp2_approx_f64(x: f64) -> f64 {
     exp_approx_f64(x * core::f64::consts::LN_2)
 }
 
 /// Approximates ln(x) for f32 using range reduction and a Padé approximation.
 #[inline]
 #[must_use]
-pub fn ln_approx_f32(x: f32) -> f32 {
+fn ln_approx_f32(x: f32) -> f32 {
     if x <= 0.0 || x.is_nan() {
         return f32::NAN;
     }
@@ -570,50 +570,50 @@ pub fn ln_approx_f32(x: f32) -> f32 {
 
 #[inline(always)]
 #[must_use]
-pub fn ln_approx_f64(x: f64) -> f64 {
+fn ln_approx_f64(x: f64) -> f64 {
     #[allow(clippy::cast_possible_truncation)]
     f64::from(ln_approx_f32(x as f32))
 }
 
 #[inline(always)]
 #[must_use]
-pub fn log2_approx_f32(x: f32) -> f32 {
+fn log2_approx_f32(x: f32) -> f32 {
     ln_approx_f32(x) * core::f32::consts::LOG2_E
 }
 
 #[inline(always)]
 #[must_use]
-pub fn log2_approx_f64(x: f64) -> f64 {
+fn log2_approx_f64(x: f64) -> f64 {
     ln_approx_f64(x) * core::f64::consts::LOG2_E
 }
 
 #[inline(always)]
 #[must_use]
-pub fn log10_approx_f32(x: f32) -> f32 {
+fn log10_approx_f32(x: f32) -> f32 {
     ln_approx_f32(x) * core::f32::consts::LOG10_E
 }
 
 #[inline(always)]
 #[must_use]
-pub fn log10_approx_f64(x: f64) -> f64 {
+fn log10_approx_f64(x: f64) -> f64 {
     ln_approx_f64(x) * core::f64::consts::LOG10_E
 }
 
 #[inline(always)]
 #[must_use]
-pub fn log_approx_f32(x: f32, base: f32) -> f32 {
+fn log_approx_f32(x: f32, base: f32) -> f32 {
     ln_approx_f32(x) / ln_approx_f32(base)
 }
 
 #[inline(always)]
 #[must_use]
-pub fn log_approx_f64(x: f64, base: f64) -> f64 {
+fn log_approx_f64(x: f64, base: f64) -> f64 {
     ln_approx_f64(x) / ln_approx_f64(base)
 }
 
 #[inline]
 #[must_use]
-pub fn powf_approx_f32(base: f32, exponent: f32) -> f32 {
+fn powf_approx_f32(base: f32, exponent: f32) -> f32 {
     if exponent == 0.0 {
         return 1.0;
     }
@@ -634,7 +634,7 @@ pub fn powf_approx_f32(base: f32, exponent: f32) -> f32 {
 
 #[inline(always)]
 #[must_use]
-pub fn powf_approx_f64(base: f64, exponent: f64) -> f64 {
+fn powf_approx_f64(base: f64, exponent: f64) -> f64 {
     if exponent == 0.0 {
         return 1.0;
     }
