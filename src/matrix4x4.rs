@@ -1337,7 +1337,7 @@ where
     ///   67.0*131.0 + 73.0*113.0 + 83.0*107.0 +  97.0*101.0,
     /// ]));
     ///
-    /// # use num_traits::{One,one};
+    /// # use num_traits::One;
     ///
     /// let i = Matrix4x4f32::one();
     /// let r2 = m * i;

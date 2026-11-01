@@ -61,6 +61,8 @@ pub trait QuaternionMath: Sized {
     fn q_conjugate(this: Quaternion<Self>) -> Quaternion<Self>;
     /// Calculates the dot product of two quaternions.
     fn q_dot(this: Quaternion<Self>, other: Quaternion<Self>) -> Self;
+    /// Elementwise multiply a quaternion by another quaternion (Hadamard product).
+    fn q_hadamard(other: Quaternion<Self>, other: Quaternion<Self>) -> Quaternion<Self>;
     /// Spherical Linear Interpolation between two quaternions.
     fn q_slerp(this: Quaternion<Self>, other: Quaternion<Self>, t: Self) -> Quaternion<Self>;
 }
@@ -211,6 +213,19 @@ impl QuaternionMath for f32 {
         }
     }
 
+    #[inline(always)]
+    fn q_hadamard(this: Quaternion<Self>, other: Quaternion<Self>) -> Quaternion<Self> {
+        #[cfg(feature = "simd")]
+        {
+            let this_simd = f32x4::from(this);
+            let other_simd = f32x4::from(other);
+
+            this_simd * other_simd
+        }
+        #[cfg(not(feature = "simd"))]
+        Quaternion { w: this.w * other.w, x: this.x * other.x, y: this.y * other.y, z: this.z * other.z }
+    }
+
     /// Spherical Linear Interpolation (SLERP) matching vqm's API conventions.
     /// Interpolates smoothly between `q0` and `q1` by amount `t` [0.0 to 1.0].
     #[inline(always)]
@@ -332,6 +347,12 @@ impl QuaternionMath for f64 {
     fn q_dot(this: Quaternion<Self>, other: Quaternion<Self>) -> Self {
         this.w * other.w + this.x * other.x + this.y * other.y + this.z * other.z
     }
+
+    #[inline(always)]
+    fn q_hadamard(this: Quaternion<Self>, other: Quaternion<Self>) -> Quaternion<Self> {
+        Quaternion { w: this.w * other.w, x: this.x * other.x, y: this.y * other.y, z: this.z * other.z }
+    }
+
     /// Spherical Linear Interpolation (SLERP) matching vqm's API conventions.
     /// Interpolates smoothly between `q0` and `q1` by amount `t` [0.0 to 1.0].
     #[inline(always)]

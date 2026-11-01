@@ -87,7 +87,7 @@ where
 /// Const zero vector.
 /// ```
 /// # use vqm::Vector3f32;
-/// # use num_traits::{zero,Zero,ConstZero};
+/// # use num_traits::{Zero,ConstZero};
 /// let z = Vector3f32::ZERO;
 /// assert!(z.is_zero());
 /// assert_eq!(z, Vector3f32 { x: 0.0, y: 0.0, z: 0.0 });
@@ -101,7 +101,7 @@ where
 
 impl<T> Vector3<T>
 where
-    T: FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Return true if vector is near zero.
     /// ```
@@ -126,7 +126,7 @@ where
 
 impl<T> Vector3<T>
 where
-    T: FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Return true if vector is near other.
     /// ```
@@ -661,7 +661,15 @@ where
 
 impl<T> Vector3<T>
 where
-    T: Copy + One + Add<Output = T> + Sub<Output = T> + MathMethods + MathConstants + FloatCore,
+    T: Copy
+        + One
+        + Neg<Output = T>
+        + Add<Output = T>
+        + Sub<Output = T>
+        + MathMethods
+        + MathConstants
+        + Signed
+        + PartialOrd,
 {
     /// Spherical Linear Interpolation between two vectors.
     /// ```
@@ -676,7 +684,13 @@ where
         // Calculate the cosine of the angle between the two vectors via the dot product
         let dot = self.x * other.x + self.y * other.y + self.z * other.z;
         // Clamp the dot product to avoid precision errors outside the domain of acos().
-        let cos_omega = dot.clamp(-T::one(), T::one());
+        let cos_omega = if dot < -T::one() {
+            -T::one()
+        } else if dot > T::one() {
+            T::one()
+        } else {
+            dot
+        };
         // Calculate the absolute angle between the vectors (omega).
         let omega = cos_omega.acos();
 
@@ -708,14 +722,11 @@ where
 
 impl<T> Vector3<T>
 where
-    T: FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Compare two vectors with a tolerance.
     #[inline]
-    pub fn approx_eq(&self, other: &Self, epsilon: T) -> bool
-    where
-        T: FloatCore,
-    {
+    pub fn approx_eq(&self, other: &Self, epsilon: T) -> bool {
         (self.x - other.x).abs() <= epsilon
             && (self.y - other.y).abs() <= epsilon
             && (self.z - other.z).abs() <= epsilon

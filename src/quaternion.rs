@@ -90,7 +90,7 @@ where
     /// Zero quaternion.
     /// ```
     /// # use vqm::Quaternionf32;
-    /// # use num_traits::{zero,Zero};
+    /// # use num_traits::Zero;
     /// let z = Quaternionf32::zero();
     /// assert!(z.is_zero());
     /// assert_eq!(z, Quaternionf32 { w:0.0, x: 0.0, y: 0.0, z: 0.0 });
@@ -123,7 +123,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Return true if quaternion is near zero.
     /// ```
@@ -145,7 +145,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: FloatCore + QuaternionMath,
+    T: Copy + Signed + PartialOrd + QuaternionMath,
 {
     /// Return true if quaternion is near other.
     /// ```
@@ -164,7 +164,7 @@ where
 
 impl<T> One for Quaternion<T>
 where
-    T: Copy + ConstZero + ConstOne + PartialEq + Sub<Output = T> + Mul<Output = T> + QuaternionMath,
+    T: Copy + ConstZero + ConstOne + PartialEq + QuaternionMath,
 {
     /// Unit quaternion.
     /// ```
@@ -197,7 +197,7 @@ where
 /// ```
 impl<T> ConstOne for Quaternion<T>
 where
-    T: Copy + ConstZero + ConstOne + PartialEq + Sub<Output = T> + QuaternionMath,
+    T: Copy + ConstZero + ConstOne + PartialEq + QuaternionMath,
 {
     const ONE: Self = Self { w: T::ONE, x: T::ZERO, y: T::ZERO, z: T::ZERO };
 }
@@ -223,7 +223,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: One + FloatCore,
+    T: Copy + One + Signed + PartialOrd,
 {
     /// Return true if quaternion is near the unit quaternion.
     /// ```
@@ -479,7 +479,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: FloatCore,
+    T: Copy + QuaternionMath,
 {
     /// Elementwise multiply a quaternion by another quaternion (Hadamard product).
     /// ```
@@ -493,7 +493,7 @@ where
     #[inline]
     #[must_use]
     pub fn hadamard(self, other: Self) -> Self {
-        Self { w: self.w * other.w, x: self.x * other.x, y: self.y * other.y, z: self.z * other.z }
+        T::q_hadamard(self, other)
     }
 }
 
@@ -663,14 +663,11 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Compare two quaternions with a tolerance.
     #[inline]
-    pub fn approx_eq(&self, other: &Self, epsilon: T) -> bool
-    where
-        T: FloatCore,
-    {
+    pub fn approx_eq(&self, other: &Self, epsilon: T) -> bool {
         (self.w - other.w).abs() <= epsilon
             && (self.x - other.x).abs() <= epsilon
             && (self.y - other.y).abs() <= epsilon
@@ -1093,7 +1090,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: FloatCore + MathMethods,
+    T: Copy + Zero + One + Add<Output = T> + Sub<Output = T> + Div<Output = T> + MathMethods + PartialEq + PartialOrd,
 {
     /// Returns the cosine of the Euler roll angle.
     ///

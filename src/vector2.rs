@@ -96,7 +96,7 @@ where
 
 impl<T> Vector2<T>
 where
-    T: FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Return true if vector is near zero.
     /// ```
@@ -119,7 +119,7 @@ where
 
 impl<T> Vector2<T>
 where
-    T: FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Return true if vector is near other.
     /// ```
@@ -643,14 +643,11 @@ where
 
 impl<T> Vector2<T>
 where
-    T: FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Compare two vectors with a tolerance.
     #[inline]
-    pub fn approx_eq(&self, other: &Self, epsilon: T) -> bool
-    where
-        T: FloatCore,
-    {
+    pub fn approx_eq(&self, other: &Self, epsilon: T) -> bool {
         (self.x - other.x).abs() <= epsilon && (self.y - other.y).abs() <= epsilon
     }
 }

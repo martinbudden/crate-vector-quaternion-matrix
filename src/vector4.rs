@@ -86,7 +86,7 @@ where
 /// Const zero vector.
 /// ```
 /// # use vqm::Vector4f32;
-/// # use num_traits::{zero,Zero,ConstZero};
+/// # use num_traits::{Zero,ConstZero};
 /// let z = Vector4f32::ZERO;
 /// assert!(z.is_zero());
 /// assert_eq!(z, Vector4f32 { x: 0.0, y: 0.0, z: 0.0, t: 0.0 });
@@ -100,7 +100,7 @@ where
 
 impl<T> Vector4<T>
 where
-    T: FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Return true if vector is near zero.
     /// ```
@@ -127,7 +127,7 @@ where
 
 impl<T> Vector4<T>
 where
-    T: FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Return true if vector is near other.
     /// ```
@@ -668,14 +668,11 @@ where
 
 impl<T> Vector4<T>
 where
-    T: FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Compare two vectors with a tolerance.
     #[inline]
-    pub fn approx_eq(&self, other: &Self, epsilon: T) -> bool
-    where
-        T: FloatCore,
-    {
+    pub fn approx_eq(&self, other: &Self, epsilon: T) -> bool {
         (self.x - other.x).abs() <= epsilon
             && (self.y - other.y).abs() <= epsilon
             && (self.z - other.z).abs() <= epsilon

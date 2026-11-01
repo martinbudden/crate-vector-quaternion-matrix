@@ -231,7 +231,7 @@ where
     /// Const zero matrix.
     /// ```
     /// # use vqm::Matrix3x3xM3x3f32;
-    /// # use num_traits::{zero,Zero,ConstZero};
+    /// # use num_traits::{Zero,ConstZero};
     /// let m = Matrix3x3xM3x3f32::ZERO;
     /// assert!(m.is_zero());
     /// ```

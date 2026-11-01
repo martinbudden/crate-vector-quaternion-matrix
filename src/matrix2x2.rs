@@ -339,7 +339,7 @@ where
     /// Zero matrix.
     /// ```
     /// # use vqm::Matrix2x2f32;
-    /// # use num_traits::{Zero,zero};
+    /// # use num_traits::Zero;
     /// let z = Matrix2x2f32::zero();
     ///
     /// assert_eq!(z, Matrix2x2f32::new([ 0.0, 0.0,
