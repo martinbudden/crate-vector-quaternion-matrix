@@ -2162,3 +2162,15 @@ impl<T> DoubleEndedIterator for Matrix2x2ColumnsMut<'_, T> {
         self.inner.next_back()
     }
 }
+
+// **** From ****
+
+// **** From Array ****
+
+impl<T> From<[T; MATRIX_2X2_SIZE]> for Matrix2x2<T> {
+    /// Matrix from 1D array.
+    #[inline]
+    fn from(input: [T; MATRIX_2X2_SIZE]) -> Self {
+        Self { a: input }
+    }
+}

@@ -25,7 +25,12 @@ At some point [0.1.0] to [0.1.11] will be [YANKED]
 
 ### Added
 
+- `M2x2UpperTriangularArray`, `M3x3UpperTriangularArray`, and `M4x4UpperTriangularArray`.
+
 ### Changed
+
+- Improved handling of matrix `SIZE`.
+- reduced dependency of Matrix on `FloatCore`.
 
 ### Removed
 

@@ -36,6 +36,7 @@ mod vector4;
 mod cholesky2x2;
 mod matrix2x2;
 mod matrix2x2_math;
+mod uta2x2;
 
 mod cholesky3x3;
 mod matrix3x3;
@@ -48,6 +49,7 @@ mod matrix3x3_m3x3;
 mod cholesky4x4;
 mod matrix4x4;
 mod matrix4x4_math;
+mod uta4x4;
 
 mod quaternion;
 mod quaternion_math;
@@ -75,6 +77,7 @@ pub use roll_pitch_yaw::{RollPitch, RollPitchYaw, RollPitchYawf32, RollPitchYawf
 
 pub use cholesky2x2::{Cholesky2x2, Cholesky2x2f32, Cholesky2x2f64};
 pub use matrix2x2::{Matrix2x2, Matrix2x2f32, Matrix2x2f64};
+pub use uta2x2::{M2x2UpperTriangularArray, M2x2UpperTriangularArrayf32, M2x2UpperTriangularArrayf64};
 
 pub use cholesky3x3::{Cholesky3x3, Cholesky3x3f32, Cholesky3x3f64};
 pub use matrix3x3::{Matrix3x3, Matrix3x3f32, Matrix3x3f64};
@@ -85,3 +88,4 @@ pub use matrix3x3_m3x3::{Matrix3x3xM3x3, Matrix3x3xM3x3f32, Matrix3x3xM3x3f64};
 
 pub use cholesky4x4::{Cholesky4x4, Cholesky4x4f32, Cholesky4x4f64};
 pub use matrix4x4::{Matrix4x4, Matrix4x4f32, Matrix4x4f64};
+pub use uta4x4::{M4x4UpperTriangularArray, M4x4UpperTriangularArrayf32, M4x4UpperTriangularArrayf64};
