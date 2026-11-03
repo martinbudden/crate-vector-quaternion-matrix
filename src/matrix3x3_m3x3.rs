@@ -3,7 +3,7 @@ use core::ops::{
     Add, AddAssign, Deref, DerefMut, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Range, RangeFull,
     RangeInclusive, Sub, SubAssign,
 };
-use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Zero, float::FloatCore};
+use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Signed, Zero, float::FloatCore};
 
 use crate::{MathConstants, Matrix2x2, Matrix3x3, Matrix4x4, matrix3x3_math::Matrix3x3Math};
 
@@ -240,7 +240,7 @@ where
 
 impl<T> Matrix3x3xM3x3<T>
 where
-    T: Copy + FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Return true if matrix is near zero.
     /// ```
@@ -335,7 +335,7 @@ where
 
 impl<T> Matrix3x3xM3x3<T>
 where
-    T: Copy + FloatCore,
+    T: Copy + Signed + PartialOrd,
     Matrix3x3xM3x3<T>: One + Sub<Output = Matrix3x3xM3x3<T>>,
 {
     /// Return true if matrix is near identity.
@@ -988,12 +988,12 @@ where
 
 impl<T> Matrix3x3xM3x3<T>
 where
-    T: Matrix3x3Math + MathConstants + PartialOrd + FloatCore,
+    T: ConstZero + ConstOne + Matrix3x3Math + MathConstants + PartialOrd,
 {
     /// Return the sum of all elements of the matrix.
     #[inline]
     pub fn sum(self) -> T {
-        let mut sum: T = T::zero();
+        let mut sum: T = T::ZERO;
         for a in self.a {
             sum = sum + a.sum();
         }
@@ -1003,7 +1003,7 @@ where
     /// Return the product of all elements of the matrix.
     #[inline]
     pub fn product(self) -> T {
-        let mut product: T = T::one();
+        let mut product: T = T::ONE;
         for a in self.a {
             product = product * a.product();
         }

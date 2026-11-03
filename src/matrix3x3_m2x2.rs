@@ -3,7 +3,7 @@ use core::ops::{
     Add, AddAssign, Deref, DerefMut, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Range, RangeFull,
     RangeInclusive, Sub, SubAssign,
 };
-use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Zero, float::FloatCore};
+use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Signed, Zero, float::FloatCore};
 
 use crate::{MathConstants, Matrix2x2, Matrix4x4, matrix2x2_math::Matrix2x2Math};
 
@@ -234,7 +234,7 @@ where
 
 impl<T> Matrix3x3xM2x2<T>
 where
-    T: Copy + FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Return true if matrix is near zero.
     /// ```
@@ -329,7 +329,7 @@ where
 
 impl<T> Matrix3x3xM2x2<T>
 where
-    T: Copy + FloatCore,
+    T: Copy + Signed + PartialOrd,
     Matrix3x3xM2x2<T>: One + Sub<Output = Matrix3x3xM2x2<T>>,
 {
     /// Return true if matrix is near identity.

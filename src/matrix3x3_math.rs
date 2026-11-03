@@ -121,21 +121,21 @@ impl Matrix3x3Math for f32 {
     }
 
     #[inline(always)]
-    fn m3x3_mul_vector(this: Matrix3x3<Self>, other: Vector3<Self>) -> Vector3<Self> {
+    fn m3x3_mul_vector(this: Matrix3x3<Self>, v: Vector3<Self>) -> Vector3<Self> {
         Vector3 {
-            x: this.a[M11] * other.x + this.a[M12] * other.y + this.a[M13] * other.z,
-            y: this.a[M21] * other.x + this.a[M22] * other.y + this.a[M23] * other.z,
-            z: this.a[M31] * other.x + this.a[M32] * other.y + this.a[M33] * other.z,
+            x: this.a[M11] * v.x + this.a[M12] * v.y + this.a[M13] * v.z,
+            y: this.a[M21] * v.x + this.a[M22] * v.y + this.a[M23] * v.z,
+            z: this.a[M31] * v.x + this.a[M32] * v.y + this.a[M33] * v.z,
         }
     }
 
     #[rustfmt::skip]
     #[inline(always)]
-    fn m3x3_vector_mul(this: Vector3<Self>, other: Matrix3x3<Self>) -> Vector3<Self> {
+    fn m3x3_vector_mul(v: Vector3<Self>, other: Matrix3x3<Self>) -> Vector3<Self> {
         Vector3 {
-            x: this.x * other.a[M11] + this.y * other.a[M21] + this.z * other.a[M31],
-            y: this.x * other.a[M12] + this.y * other.a[M22] + this.z * other.a[M32],
-            z: this.x * other.a[M13] + this.y * other.a[M23] + this.z * other.a[M33],
+            x: v.x * other.a[M11] + v.y * other.a[M21] + v.z * other.a[M31],
+            y: v.x * other.a[M12] + v.y * other.a[M22] + v.z * other.a[M32],
+            z: v.x * other.a[M13] + v.y * other.a[M23] + v.z * other.a[M33],
         }
     }
 

@@ -4,7 +4,7 @@ use core::ops::{
     RangeInclusive, Sub, SubAssign,
 };
 use core::slice::{ChunksExact, ChunksExactMut, Iter, IterMut};
-use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Zero, float::FloatCore};
+use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Signed, Zero};
 #[cfg(feature = "storage")]
 use sequential_storage::map::PostcardValue;
 #[cfg(feature = "serde")]
@@ -33,8 +33,9 @@ pub type Matrix4x4f64 = Matrix4x4<f64>;
 #[cfg_attr(not(feature = "align"), repr(C, align(16)))]
 pub struct Matrix4x4<T> {
     // Flattened 4x4 matrix: 16 elements in column-major order
-    pub(crate) a: [T; 16],
+    pub(crate) a: [T; MATRIX_4X4_SIZE],
 }
+const MATRIX_4X4_SIZE: usize = 16;
 
 #[cfg(feature = "storage")]
 impl<T> PostcardValue<'_> for Matrix4x4<T> where T: Serialize + for<'de> Deserialize<'de> {}
@@ -65,7 +66,7 @@ where
 /// Constants to index matrix elements.
 impl<T> Matrix4x4<T> {
     /// Size of array representing matrix.
-    pub const SIZE: usize = 16;
+    pub const SIZE: usize = MATRIX_4X4_SIZE;
     /// Number of rows in matrix.
     pub const ROW_COUNT: usize = 4;
     /// Number of columns in matrix.
@@ -136,7 +137,7 @@ where
     /// assert_eq!(m[Matrix4x4f32::M21], 5.0);
     /// ```
     #[inline]
-    pub const fn new(a: [T; 16]) -> Self {
+    pub const fn new(a: [T; MATRIX_4X4_SIZE]) -> Self {
         Self::from_row_array(a)
     }
 }
@@ -158,7 +159,7 @@ where
     /// ```
     #[inline]
     pub const fn from_element(value: T) -> Self {
-        Self { a: [value; 16] }
+        Self { a: [value; MATRIX_4X4_SIZE] }
     }
 
     /// Matrix from array of row vectors.
@@ -222,7 +223,7 @@ where
     ///                                   67.0, 73.0, 83.0,  97.0]));
     /// ```
     #[inline]
-    pub const fn from_row_array(a: [T; 16]) -> Self {
+    pub const fn from_row_array(a: [T; MATRIX_4X4_SIZE]) -> Self {
         Self {
             a: [
                 a[0], a[4], a[8], a[12], //
@@ -246,7 +247,7 @@ where
     ///                                  127.0, 109.0, 103.0,  97.0]));
     /// ```
     #[inline]
-    pub const fn from_column_array(a: [T; 16]) -> Self {
+    pub const fn from_column_array(a: [T; MATRIX_4X4_SIZE]) -> Self {
         Self { a }
     }
 
@@ -346,7 +347,7 @@ where
         if slice.len() != 16 {
             return None;
         }
-        let mut a = [slice[0]; 16];
+        let mut a = [slice[0]; MATRIX_4X4_SIZE];
         a.copy_from_slice(&slice[0..16]);
         Some(Self { a })
     }
@@ -469,7 +470,7 @@ where
     /// ```
     #[inline]
     fn zero() -> Self {
-        Self { a: [T::zero(); 16] }
+        Self { a: [T::zero(); MATRIX_4X4_SIZE] }
     }
 
     /// Tests if matrix is zero.
@@ -496,12 +497,12 @@ where
     /// let m = Matrix4x4f32::ZERO;
     /// assert!(m.is_zero());
     /// ```
-    const ZERO: Self = Self { a: [T::ZERO; 16] };
+    const ZERO: Self = Self { a: [T::ZERO; MATRIX_4X4_SIZE] };
 }
 
 impl<T> Matrix4x4<T>
 where
-    T: FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Return true if matrix is near zero.
     /// ```
@@ -528,7 +529,7 @@ where
 
 impl<T> Matrix4x4<T>
 where
-    T: FloatCore + Matrix4x4Math,
+    T: Copy + Signed + PartialOrd + Matrix4x4Math,
 {
     /// Return true if matrix is near other.
     /// ```
@@ -636,7 +637,7 @@ where
 
 impl<T> Matrix4x4<T>
 where
-    T: One + FloatCore,
+    T: One + Copy + Signed + PartialOrd,
 {
     /// Return true if matrix is near identity.
     /// ```
@@ -680,7 +681,7 @@ where
 
 impl<T> Matrix4x4<T>
 where
-    T: FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Return true if matrix is symmetric.
     /// ```
@@ -692,6 +693,7 @@ where
     /// assert!(m.is_symmetric(1.01e-3));
     /// assert!(!m.is_symmetric(1.01e-4));
     /// ```
+    #[inline]
     pub fn is_symmetric(self, epsilon: T) -> bool {
         if (self.a[Self::M12] - self.a[Self::M21]).abs() > epsilon
             || (self.a[Self::M13] - self.a[Self::M31]).abs() > epsilon
@@ -710,7 +712,7 @@ where
 
 impl<T> Neg for Matrix4x4<T>
 where
-    T: Copy + Matrix4x4Math,
+    T: Matrix4x4Math,
 {
     type Output = Self;
 
@@ -738,7 +740,7 @@ where
 
 impl<T> Add for Matrix4x4<T>
 where
-    T: Copy + Matrix4x4Math,
+    T: Matrix4x4Math,
 {
     type Output = Self;
 
@@ -775,7 +777,7 @@ where
 
 impl<T> Matrix4x4<T>
 where
-    T: FloatCore + AddAssign,
+    T: Copy + AddAssign,
 {
     /// Add a diagonal matrix.
     /// ```
@@ -1167,6 +1169,8 @@ where
     }
 }
 
+// **** SCALAR ****
+
 // **** Pre-multiply ****
 
 impl Mul<Matrix4x4<f32>> for f32 {
@@ -1194,13 +1198,27 @@ impl Mul<Matrix4x4<f32>> for f32 {
 
 impl Mul<Matrix4x4<f64>> for f64 {
     type Output = Matrix4x4<f64>;
+    /// Pre-multiply a matrix by a scalar.
+    /// ```
+    /// # use vqm::Matrix4x4f64;
+    /// let m = Matrix4x4f64::new([  2.0, 17.0, 59.0, 127.0,
+    ///                              5.0, 11.0, 47.0, 109.0,
+    ///                             23.0, 31.0, 41.0, 103.0,
+    ///                             67.0, 73.0, 83.0,  97.0]);
+    /// let r = 2.0 * m;
+    ///
+    /// assert_eq!(r, Matrix4x4f64::new([  4.0, 34.0, 118.0, 254.0,
+    ///                                   10.0, 22.0,  94.0, 218.0,
+    ///                                   46.0, 62.0,  82.0, 206.0,
+    ///                                  134.0,146.0, 166.0, 194.0]));
+    /// ```
     #[inline]
     fn mul(self, other: Matrix4x4<f64>) -> Matrix4x4<f64> {
         f64::m4x4_mul_scalar(other, self)
     }
 }
 
-// **** Mul Scalar ****
+// **** Mul ****
 
 impl<T> Mul<T> for Matrix4x4<T>
 where
@@ -1246,28 +1264,9 @@ where
     }
 }
 
-impl<T> Mul<Vector4<T>> for Matrix4x4<T>
-where
-    T: Matrix4x4Math,
-{
-    type Output = Vector4<T>;
+// **** VECTOR ****
 
-    /// Multiply a vector by a matrix.
-    /// ```
-    /// # use vqm::{Matrix4x4f32, Vector4f32};
-    /// let m = Matrix4x4f32::new([  2.0, 17.0, 59.0, 127.0,
-    ///                              5.0, 11.0, 47.0, 109.0,
-    ///                             23.0, 31.0, 41.0, 103.0,
-    ///                             67.0, 73.0, 83.0,  97.0]);
-    /// let v = Vector4f32{x:3.0, y:7.0, z:13.0, t:17.0};
-    /// let r = m * v;
-    /// assert_eq!(r, Vector4f32{x:3051.0, y:2556.0, z:2570.0, t:3440.0});
-    /// ```
-    #[inline]
-    fn mul(self, other: Vector4<T>) -> Vector4<T> {
-        T::m4x4_mul_vector(self, other)
-    }
-}
+// **** Pre-multiply ****
 
 #[cfg(not(feature = "uom"))]
 impl<T> Mul<Matrix4x4<T>> for Vector4<T>
@@ -1290,6 +1289,31 @@ where
     #[inline]
     fn mul(self, other: Matrix4x4<T>) -> Self {
         T::m4x4_vector_mul(self, other)
+    }
+}
+
+// **** Post-multiply ****
+
+impl<T> Mul<Vector4<T>> for Matrix4x4<T>
+where
+    T: Matrix4x4Math,
+{
+    type Output = Vector4<T>;
+
+    /// Multiply a vector by a matrix.
+    /// ```
+    /// # use vqm::{Matrix4x4f32, Vector4f32};
+    /// let m = Matrix4x4f32::new([  2.0, 17.0, 59.0, 127.0,
+    ///                              5.0, 11.0, 47.0, 109.0,
+    ///                             23.0, 31.0, 41.0, 103.0,
+    ///                             67.0, 73.0, 83.0,  97.0]);
+    /// let v = Vector4f32{x:3.0, y:7.0, z:13.0, t:17.0};
+    /// let r = m * v;
+    /// assert_eq!(r, Vector4f32{x:3051.0, y:2556.0, z:2570.0, t:3440.0});
+    /// ```
+    #[inline]
+    fn mul(self, other: Vector4<T>) -> Vector4<T> {
+        T::m4x4_mul_vector(self, other)
     }
 }
 
@@ -1352,7 +1376,7 @@ where
 
 impl<T> Matrix4x4<T>
 where
-    T: FloatCore,
+    T: Copy + Mul<Output = T>,
 {
     /// Multiply by a diagonal matrix.
     /// ```
@@ -1648,7 +1672,7 @@ where
 
 // **** AsRef ****
 
-impl<T> AsRef<[T; 16]> for Matrix4x4<T> {
+impl<T> AsRef<[T; MATRIX_4X4_SIZE]> for Matrix4x4<T> {
     /// Immutable reference to the raw array.
     /// ```
     /// # use vqm::Matrix4x4f32;
@@ -1660,12 +1684,12 @@ impl<T> AsRef<[T; 16]> for Matrix4x4<T> {
     /// assert_eq!(5.0, a[Matrix4x4f32::M21]);
     /// ```
     #[inline]
-    fn as_ref(&self) -> &[T; 16] {
+    fn as_ref(&self) -> &[T; MATRIX_4X4_SIZE] {
         &self.a
     }
 }
 
-impl<T> AsMut<[T; 16]> for Matrix4x4<T> {
+impl<T> AsMut<[T; MATRIX_4X4_SIZE]> for Matrix4x4<T> {
     /// Mutable reference to the raw array.
     /// ```
     /// # use vqm::Matrix4x4f32;
@@ -1678,7 +1702,7 @@ impl<T> AsMut<[T; 16]> for Matrix4x4<T> {
     /// assert_eq!(7.0, m[4]);
     /// ```
     #[inline]
-    fn as_mut(&mut self) -> &mut [T; 16] {
+    fn as_mut(&mut self) -> &mut [T; MATRIX_4X4_SIZE] {
         &mut self.a
     }
 }
@@ -2092,7 +2116,7 @@ where
 
 impl<T> Matrix4x4<T>
 where
-    T: FloatCore,
+    T: Copy + PartialOrd,
 {
     /// Return a copy of the matrix with all elements clamped to the specified range.
     /// ```
@@ -2113,7 +2137,14 @@ where
     pub fn clamp(self, min: T, max: T) -> Self {
         let mut a = self.a;
         for it in &mut a {
-            *it = it.clamp(min, max);
+            //*it = it.clamp(min, max);
+            *it = if *it < min {
+                min
+            } else if *it > max {
+                max
+            } else {
+                *it
+            };
         }
         Self { a }
     }
@@ -2279,7 +2310,7 @@ where
 
 impl<T> Matrix4x4<T>
 where
-    T: Matrix4x4Math + FloatCore + MathConstants,
+    T: Matrix4x4Math + MathConstants + Copy + Signed + PartialOrd,
 {
     /// Return the inverse of this matrix. Returns self if the determinant is zero.
     /// ```
@@ -2323,7 +2354,7 @@ where
 
 impl<T> Matrix4x4<T>
 where
-    T: Matrix4x4Math + MathConstants + PartialOrd + FloatCore,
+    T: Copy + ConstZero + Signed + PartialOrd + Matrix4x4Math + MathConstants,
 {
     /// Return inverse of matrix or `T::zero()` if not invertible.
     /// ```
@@ -2343,7 +2374,7 @@ where
     pub fn inverse_or_zero(self) -> Self {
         let (adjugate, determinant) = self.adjugate();
         if determinant.abs() < T::EPSILON {
-            return Self::zero();
+            return Self::ZERO;
         }
         adjugate / determinant
     }
@@ -2691,10 +2722,10 @@ impl<T> DoubleEndedIterator for Matrix4x4ColumnsMut<'_, T> {
 
 // **** From Array ****
 
-impl<T> From<[T; 16]> for Matrix4x4<T> {
+impl<T> From<[T; MATRIX_4X4_SIZE]> for Matrix4x4<T> {
     /// Matrix from 1D array.
     #[inline]
-    fn from(input: [T; 16]) -> Self {
+    fn from(input: [T; MATRIX_4X4_SIZE]) -> Self {
         Self { a: input }
     }
 }

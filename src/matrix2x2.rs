@@ -3,7 +3,7 @@ use core::ops::{
     RangeInclusive, Sub, SubAssign,
 };
 use core::slice::{ChunksExact, ChunksExactMut, Iter, IterMut};
-use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Zero, float::FloatCore};
+use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Signed, Zero};
 #[cfg(feature = "storage")]
 use sequential_storage::map::PostcardValue;
 #[cfg(feature = "serde")]
@@ -31,8 +31,9 @@ pub type Matrix2x2f64 = Matrix2x2<f64>;
 #[repr(C, align(16))]
 pub struct Matrix2x2<T> {
     // Flattened 2x2 matrix: 4 elements in column-major order
-    pub(crate) a: [T; 4],
+    pub(crate) a: [T; MATRIX_2X2_SIZE],
 }
+const MATRIX_2X2_SIZE: usize = 4;
 
 #[cfg(feature = "storage")]
 impl<T> PostcardValue<'_> for Matrix2x2<T> where T: Serialize + for<'de> Deserialize<'de> {}
@@ -40,7 +41,7 @@ impl<T> PostcardValue<'_> for Matrix2x2<T> where T: Serialize + for<'de> Deseria
 /// Constants to index matrix elements.
 impl<T> Matrix2x2<T> {
     /// Size of array representing matrix.
-    pub const SIZE: usize = 4;
+    pub const SIZE: usize = MATRIX_2X2_SIZE;
     /// Number of rows in matrix.
     pub const ROW_COUNT: usize = 2;
     /// Number of columns in matrix.
@@ -74,7 +75,7 @@ where
     ///                                    5.0, 11.0]));
     /// ```
     #[inline]
-    pub const fn new(a: [T; 4]) -> Self {
+    pub const fn new(a: [T; MATRIX_2X2_SIZE]) -> Self {
         Self::from_row_array(a)
     }
 }
@@ -94,7 +95,7 @@ where
     /// ```
     #[inline]
     pub const fn from_element(value: T) -> Self {
-        Self { a: [value; 4] }
+        Self { a: [value; MATRIX_2X2_SIZE] }
     }
 
     /// Matrix from array of row vectors.
@@ -142,7 +143,7 @@ where
     ///                                    5.0, 11.0]));
     /// ```
     #[inline]
-    pub const fn from_row_array(a: [T; 4]) -> Self {
+    pub const fn from_row_array(a: [T; MATRIX_2X2_SIZE]) -> Self {
         Self {
             a: [
                 a[0], a[2], //
@@ -160,7 +161,7 @@ where
     ///                                   17.0,  11.0]));
     /// ```
     #[inline]
-    pub const fn from_column_array(a: [T; 4]) -> Self {
+    pub const fn from_column_array(a: [T; MATRIX_2X2_SIZE]) -> Self {
         Self { a }
     }
 
@@ -241,11 +242,11 @@ where
     /// ```
     #[inline]
     pub fn try_from_column_slice(slice: &[T]) -> Option<Self> {
-        if slice.len() != 4 {
+        if slice.len() != MATRIX_2X2_SIZE {
             return None;
         }
-        let mut a = [slice[0]; 4];
-        a.copy_from_slice(&slice[0..4]);
+        let mut a = [slice[0]; MATRIX_2X2_SIZE];
+        a.copy_from_slice(&slice[0..MATRIX_2X2_SIZE]);
         Some(Self { a })
     }
 }
@@ -348,7 +349,7 @@ where
     /// ```
     #[inline]
     fn zero() -> Self {
-        Self { a: [T::zero(); 4] }
+        Self { a: [T::zero(); MATRIX_2X2_SIZE] }
     }
 
     /// Tests if matrix is zero.
@@ -375,12 +376,12 @@ where
     /// let m = Matrix2x2f32::ZERO;
     /// assert!(m.is_zero());
     /// ```
-    const ZERO: Self = Self { a: [T::ZERO; 4] };
+    const ZERO: Self = Self { a: [T::ZERO; MATRIX_2X2_SIZE] };
 }
 
 impl<T> Matrix2x2<T>
 where
-    T: FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Return true if matrix is near zero.
     /// ```
@@ -405,7 +406,7 @@ where
 
 impl<T> Matrix2x2<T>
 where
-    T: FloatCore + Matrix2x2Math,
+    T: Copy + Signed + PartialOrd + Matrix2x2Math,
 {
     /// Return true if matrix is near other.
     /// ```
@@ -498,7 +499,7 @@ where
 
 impl<T> Matrix2x2<T>
 where
-    T: One + FloatCore,
+    T: One + Copy + Signed + PartialOrd,
 {
     /// Return true if matrix is near identity.
     /// ```
@@ -524,7 +525,7 @@ where
 
 impl<T> Matrix2x2<T>
 where
-    T: FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Return true if matrix is symmetric.
     /// ```
@@ -534,6 +535,7 @@ where
     /// assert!(m.is_symmetric(1.01e-3));
     /// assert!(!m.is_symmetric(1.01e-4));
     /// ```
+    #[inline]
     pub fn is_symmetric(self, epsilon: T) -> bool {
         if (self.a[Self::M12] - self.a[Self::M21]).abs() > epsilon {
             return false;
@@ -601,7 +603,7 @@ where
 
 impl<T> Matrix2x2<T>
 where
-    T: FloatCore + AddAssign,
+    T: Copy + AddAssign,
 {
     /// Add a diagonal matrix.
     /// ```
@@ -902,6 +904,8 @@ where
     }
 }
 
+// **** SCALAR ****
+
 // **** Pre-multiply ****
 
 impl Mul<Matrix2x2<f32>> for f32 {
@@ -925,13 +929,23 @@ impl Mul<Matrix2x2<f32>> for f32 {
 
 impl Mul<Matrix2x2<f64>> for f64 {
     type Output = Matrix2x2<f64>;
+    /// Pre-multiply a matrix by a scalar.
+    /// ```
+    /// # use vqm::Matrix2x2f64;
+    /// let m = Matrix2x2f64::new([  2.0, 17.0,
+    ///                              5.0, 11.0]);
+    /// let r = 2.0 * m;
+    ///
+    /// assert_eq!(r, Matrix2x2f64::new([  4.0, 34.0,
+    ///                                   10.0, 22.0]));
+    /// ```
     #[inline]
     fn mul(self, other: Matrix2x2<f64>) -> Matrix2x2<f64> {
         f64::m2x2_mul_scalar(other, self)
     }
 }
 
-// **** Mul Scalar ****
+// **** Mul ****
 
 impl<T> Mul<T> for Matrix2x2<T>
 where
@@ -977,28 +991,9 @@ where
     }
 }
 
-impl<T> Mul<Vector2<T>> for Matrix2x2<T>
-where
-    T: Matrix2x2Math,
-{
-    type Output = Vector2<T>;
+// **** VECTOR ****
 
-    /// Multiply a vector by a matrix.
-    /// ```
-    /// # use vqm::Matrix2x2f32;
-    /// # use vqm::Vector2f32;
-    /// let mut m = Matrix2x2f32::new([  2.0, 17.0,
-    ///                                  5.0, 11.0]);
-    /// let v = Vector2f32{x:3.0, y:7.0};
-    /// let r = m * v;
-    ///
-    /// assert_eq!(r, Vector2f32{x:2.0*3.0 + 17.0*7.0, y:5.0*3.0 + 11.0*7.0});
-    /// ```
-    #[inline]
-    fn mul(self, other: Vector2<T>) -> Vector2<T> {
-        T::m2x2_mul_vector(self, other)
-    }
-}
+// **** Pre-multiply ****
 
 #[cfg(not(feature = "uom"))]
 impl<T> Mul<Matrix2x2<T>> for Vector2<T>
@@ -1021,6 +1016,31 @@ where
     #[inline]
     fn mul(self, other: Matrix2x2<T>) -> Self {
         T::m2x2_vector_mul(self, other)
+    }
+}
+
+// **** Post-multiply ****
+
+impl<T> Mul<Vector2<T>> for Matrix2x2<T>
+where
+    T: Matrix2x2Math,
+{
+    type Output = Vector2<T>;
+
+    /// Multiply a vector by a matrix.
+    /// ```
+    /// # use vqm::Matrix2x2f32;
+    /// # use vqm::Vector2f32;
+    /// let mut m = Matrix2x2f32::new([  2.0, 17.0,
+    ///                                  5.0, 11.0]);
+    /// let v = Vector2f32{x:3.0, y:7.0};
+    /// let r = m * v;
+    ///
+    /// assert_eq!(r, Vector2f32{x:2.0*3.0 + 17.0*7.0, y:5.0*3.0 + 11.0*7.0});
+    /// ```
+    #[inline]
+    fn mul(self, other: Vector2<T>) -> Vector2<T> {
+        T::m2x2_mul_vector(self, other)
     }
 }
 
@@ -1061,7 +1081,7 @@ where
 
 impl<T> Matrix2x2<T>
 where
-    T: FloatCore,
+    T: Copy + Mul<Output = T>,
 {
     /// Multiply by a diagonal matrix.
     /// ```
@@ -1261,7 +1281,7 @@ where
 
 // **** AsRef ****
 
-impl<T> AsRef<[T; 4]> for Matrix2x2<T> {
+impl<T> AsRef<[T; MATRIX_2X2_SIZE]> for Matrix2x2<T> {
     /// Immutable reference to the raw array.
     /// ```
     /// # use vqm::Matrix2x2f32;
@@ -1271,12 +1291,12 @@ impl<T> AsRef<[T; 4]> for Matrix2x2<T> {
     /// assert_eq!(5.0, a[Matrix2x2f32::M21]);
     /// ```
     #[inline]
-    fn as_ref(&self) -> &[T; 4] {
+    fn as_ref(&self) -> &[T; MATRIX_2X2_SIZE] {
         &self.a
     }
 }
 
-impl<T> AsMut<[T; 4]> for Matrix2x2<T> {
+impl<T> AsMut<[T; MATRIX_2X2_SIZE]> for Matrix2x2<T> {
     /// Immutable reference to the raw array.
     /// ```
     /// # use vqm::Matrix2x2f32;
@@ -1287,7 +1307,7 @@ impl<T> AsMut<[T; 4]> for Matrix2x2<T> {
     /// assert_eq!(7.0, m[2]);
     /// ```
     #[inline]
-    fn as_mut(&mut self) -> &mut [T; 4] {
+    fn as_mut(&mut self) -> &mut [T; MATRIX_2X2_SIZE] {
         &mut self.a
     }
 }
@@ -1616,7 +1636,7 @@ where
 
 impl<T> Matrix2x2<T>
 where
-    T: FloatCore,
+    T: Copy + PartialOrd,
 {
     /// Return a copy of the matrix with all elements clamped to the specified range.
     /// ```
@@ -1633,7 +1653,14 @@ where
     pub fn clamp(self, min: T, max: T) -> Self {
         let mut a = self.a;
         for it in &mut a {
-            *it = it.clamp(min, max);
+            //*it = it.clamp(min, max);
+            *it = if *it < min {
+                min
+            } else if *it > max {
+                max
+            } else {
+                *it
+            };
         }
         Self { a }
     }
@@ -1762,7 +1789,7 @@ where
 
 impl<T> Matrix2x2<T>
 where
-    T: Matrix2x2Math + FloatCore + MathConstants,
+    T: Matrix2x2Math + MathConstants + Copy + Signed + PartialOrd,
 {
     /// Return the inverse of this matrix. Returns self if the determinant is zero.
     /// ```
@@ -1802,7 +1829,7 @@ where
 
 impl<T> Matrix2x2<T>
 where
-    T: Matrix2x2Math + MathConstants + PartialOrd + FloatCore,
+    T: Matrix2x2Math + MathConstants + Copy + Signed + PartialOrd,
 {
     /// Return inverse of matrix or `T::zero()` if not invertible.
     /// ```

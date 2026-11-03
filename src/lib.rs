@@ -40,6 +40,7 @@ mod matrix2x2_math;
 mod cholesky3x3;
 mod matrix3x3;
 mod matrix3x3_math;
+mod uta3x3;
 
 mod matrix3x3_m2x2;
 mod matrix3x3_m3x3;
@@ -54,6 +55,8 @@ mod roll_pitch_yaw;
 
 pub use math_constants::MathConstants;
 pub use math_methods::MathMethods;
+pub use matrix2x2_math::Matrix2x2Math;
+pub use quaternion_math::QuaternionMath;
 
 // The trigonometric approximation functions need to be `pub` for benchmarking, but are not documented for general use.
 pub use is_scalar::IsScalar;
@@ -75,6 +78,7 @@ pub use matrix2x2::{Matrix2x2, Matrix2x2f32, Matrix2x2f64};
 
 pub use cholesky3x3::{Cholesky3x3, Cholesky3x3f32, Cholesky3x3f64};
 pub use matrix3x3::{Matrix3x3, Matrix3x3f32, Matrix3x3f64};
+pub use uta3x3::{M3x3UpperTriangularArray, M3x3UpperTriangularArrayf32, M3x3UpperTriangularArrayf64};
 
 pub use matrix3x3_m2x2::{Matrix3x3xM2x2, Matrix3x3xM2x2f32, Matrix3x3xM2x2f64};
 pub use matrix3x3_m3x3::{Matrix3x3xM3x3, Matrix3x3xM3x3f32, Matrix3x3xM3x3f64};

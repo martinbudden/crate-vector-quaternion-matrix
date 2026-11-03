@@ -3,7 +3,7 @@ use core::ops::{
     RangeInclusive, Sub, SubAssign,
 };
 use core::slice::{ChunksExact, ChunksExactMut, Iter, IterMut};
-use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Zero, float::FloatCore};
+use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Signed, Zero};
 #[cfg(feature = "storage")]
 use sequential_storage::map::PostcardValue;
 #[cfg(feature = "serde")]
@@ -35,8 +35,9 @@ pub type Matrix3x3f64 = Matrix3x3<f64>;
 #[cfg_attr(not(feature = "align"), repr(C))]
 pub struct Matrix3x3<T> {
     // Flattened 3x3 matrix: 9 elements in column-major order
-    pub(crate) a: [T; 9],
+    pub(crate) a: [T; MATRIX_3X3_SIZE],
 }
+const MATRIX_3X3_SIZE: usize = 9;
 
 #[cfg(feature = "storage")]
 impl<T> PostcardValue<'_> for Matrix3x3<T> where T: Serialize + for<'de> Deserialize<'de> {}
@@ -44,7 +45,7 @@ impl<T> PostcardValue<'_> for Matrix3x3<T> where T: Serialize + for<'de> Deseria
 /// Constants to index matrix elements.
 impl<T> Matrix3x3<T> {
     /// Size of array representing matrix.
-    pub const SIZE: usize = 9;
+    pub const SIZE: usize = MATRIX_3X3_SIZE;
     /// Number of rows in matrix.
     pub const ROW_COUNT: usize = 3;
     /// Number of columns in matrix.
@@ -92,7 +93,7 @@ where
     ///                                   23.0, 31.0, 41.0]));
     /// ```
     #[inline]
-    pub const fn new(a: [T; 9]) -> Self {
+    pub const fn new(a: [T; MATRIX_3X3_SIZE]) -> Self {
         Self::from_row_array(a)
     }
 }
@@ -113,7 +114,7 @@ where
     /// ```
     #[inline]
     pub const fn from_element(value: T) -> Self {
-        Self { a: [value; 9] }
+        Self { a: [value; MATRIX_3X3_SIZE] }
     }
 
     /// Matrix from array of row vectors.
@@ -169,7 +170,7 @@ where
     ///                                   23.0, 31.0, 41.0]));
     /// ```
     #[inline]
-    pub const fn from_row_array(a: [T; 9]) -> Self {
+    pub const fn from_row_array(a: [T; MATRIX_3X3_SIZE]) -> Self {
         Self {
             a: [
                 a[0], a[3], a[6], //
@@ -190,7 +191,7 @@ where
     ///                                   59.0,  47.0,  41.0]));
     /// ```
     #[inline]
-    pub const fn from_column_array(a: [T; 9]) -> Self {
+    pub const fn from_column_array(a: [T; MATRIX_3X3_SIZE]) -> Self {
         Self { a }
     }
 
@@ -325,7 +326,7 @@ where
         if slice.len() != 9 {
             return None;
         }
-        let mut a = [slice[0]; 9];
+        let mut a = [slice[0]; MATRIX_3X3_SIZE];
         a.copy_from_slice(&slice[0..9]);
         Some(Self { a })
     }
@@ -438,7 +439,7 @@ where
     /// ```
     #[inline]
     fn zero() -> Self {
-        Self { a: [T::zero(); 9] }
+        Self { a: [T::zero(); MATRIX_3X3_SIZE] }
     }
 
     /// Tests if matrix is zero.
@@ -465,12 +466,12 @@ where
     /// let m = Matrix3x3f32::ZERO;
     /// assert!(m.is_zero());
     /// ```
-    const ZERO: Self = Self { a: [T::ZERO; 9] };
+    const ZERO: Self = Self { a: [T::ZERO; MATRIX_3X3_SIZE] };
 }
 
 impl<T> Matrix3x3<T>
 where
-    T: FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Return true if matrix is near zero.
     /// ```
@@ -496,7 +497,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: FloatCore + Matrix3x3Math,
+    T: Copy + Signed + PartialOrd + Matrix3x3Math,
 {
     /// Return true if matrix is near other.
     /// ```
@@ -596,7 +597,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: One + FloatCore,
+    T: One + Copy + Signed + PartialOrd,
 {
     /// Return true if matrix is near identity.
     /// ```
@@ -632,7 +633,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: FloatCore,
+    T: Copy + Signed + PartialOrd,
 {
     /// Return true if matrix is symmetric.
     /// ```
@@ -643,6 +644,7 @@ where
     /// assert!(m.is_symmetric(1.01e-3));
     /// assert!(!m.is_symmetric(1.01e-4));
     /// ```
+    #[inline]
     pub fn is_symmetric(self, epsilon: T) -> bool {
         if (self.a[Self::M12] - self.a[Self::M21]).abs() > epsilon
             || (self.a[Self::M13] - self.a[Self::M31]).abs() > epsilon
@@ -718,7 +720,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: FloatCore + AddAssign,
+    T: Copy + AddAssign,
 {
     /// Add a diagonal matrix.
     /// ```
@@ -1067,6 +1069,8 @@ where
     }
 }
 
+// **** SCALAR ****
+
 // **** Pre-multiply ****
 
 impl Mul<Matrix3x3<f32>> for f32 {
@@ -1093,13 +1097,25 @@ impl Mul<Matrix3x3<f32>> for f32 {
 impl Mul<Matrix3x3<f64>> for f64 {
     type Output = Matrix3x3<f64>;
 
+    /// Pre-multiply a matrix by a scalar.
+    /// ```
+    /// # use vqm::Matrix3x3f64;
+    /// let m = Matrix3x3f64::new([  2.0, 17.0, 59.0,
+    ///                              5.0, 11.0, 47.0,
+    ///                             23.0, 31.0, 41.0]);
+    /// let r = 2.0 * m;
+    ///
+    /// assert_eq!(r, Matrix3x3f64::new([  4.0, 34.0, 118.0,
+    ///                                   10.0, 22.0,  94.0,
+    ///                                   46.0, 62.0,  82.0]));
+    /// ```
     #[inline]
     fn mul(self, other: Matrix3x3<f64>) -> Matrix3x3<f64> {
         f64::m3x3_mul_scalar(other, self)
     }
 }
 
-// **** Mul Scalar ****
+// **** Mul ****
 
 impl<T> Mul<T> for Matrix3x3<T>
 where
@@ -1149,29 +1165,9 @@ where
     }
 }
 
-impl<T> Mul<Vector3<T>> for Matrix3x3<T>
-where
-    T: Matrix3x3Math,
-{
-    type Output = Vector3<T>;
+// **** VECTOR ****
 
-    /// Multiply a vector by a matrix.
-    /// ```
-    /// # use vqm::Matrix3x3f32;
-    /// # use vqm::Vector3f32;
-    /// let m = Matrix3x3f32::new([  2.0, 17.0, 59.0,
-    ///                              5.0, 11.0, 47.0,
-    ///                             23.0, 31.0, 41.0]);
-    /// let v = Vector3f32{x:3.0, y:7.0, z:13.0};
-    /// let r = m * v;
-    ///
-    /// assert_eq!(r, Vector3f32{x:892.0, y:703.0, z:819.0});
-    /// ```
-    #[inline]
-    fn mul(self, other: Vector3<T>) -> Vector3<T> {
-        T::m3x3_mul_vector(self, other)
-    }
-}
+// **** Pre-multiply ****
 
 #[cfg(not(feature = "uom"))]
 impl<T> Mul<Matrix3x3<T>> for Vector3<T>
@@ -1194,6 +1190,32 @@ where
     #[inline]
     fn mul(self, other: Matrix3x3<T>) -> Self {
         T::m3x3_vector_mul(self, other)
+    }
+}
+
+// **** Post-multiply ****
+
+impl<T> Mul<Vector3<T>> for Matrix3x3<T>
+where
+    T: Matrix3x3Math,
+{
+    type Output = Vector3<T>;
+
+    /// Multiply a vector by a matrix.
+    /// ```
+    /// # use vqm::Matrix3x3f32;
+    /// # use vqm::Vector3f32;
+    /// let m = Matrix3x3f32::new([  2.0, 17.0, 59.0,
+    ///                              5.0, 11.0, 47.0,
+    ///                             23.0, 31.0, 41.0]);
+    /// let v = Vector3f32{x:3.0, y:7.0, z:13.0};
+    /// let r = m * v;
+    ///
+    /// assert_eq!(r, Vector3f32{x:892.0, y:703.0, z:819.0});
+    /// ```
+    #[inline]
+    fn mul(self, other: Vector3<T>) -> Vector3<T> {
+        T::m3x3_mul_vector(self, other)
     }
 }
 
@@ -1237,7 +1259,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: FloatCore,
+    T: Copy + Mul<Output = T>,
 {
     /// Multiply by a diagonal matrix.
     /// ```
@@ -1468,7 +1490,7 @@ where
 
 // **** AsRef ****
 
-impl<T> AsRef<[T; 9]> for Matrix3x3<T> {
+impl<T> AsRef<[T; MATRIX_3X3_SIZE]> for Matrix3x3<T> {
     /// Immutable reference to the raw array
     /// ```
     /// # use vqm::Matrix3x3f32;
@@ -1479,12 +1501,12 @@ impl<T> AsRef<[T; 9]> for Matrix3x3<T> {
     /// assert_eq!(5.0, a[Matrix3x3f32::M21]);
     /// ```
     #[inline]
-    fn as_ref(&self) -> &[T; 9] {
+    fn as_ref(&self) -> &[T; MATRIX_3X3_SIZE] {
         &self.a
     }
 }
 
-impl<T> AsMut<[T; 9]> for Matrix3x3<T> {
+impl<T> AsMut<[T; MATRIX_3X3_SIZE]> for Matrix3x3<T> {
     /// Mutable reference to the raw array
     /// ```
     /// # use vqm::Matrix3x3f32;
@@ -1496,7 +1518,7 @@ impl<T> AsMut<[T; 9]> for Matrix3x3<T> {
     /// assert_eq!(7.0, m[Matrix3x3f32::M12]);
     /// ```
     #[inline]
-    fn as_mut(&mut self) -> &mut [T; 9] {
+    fn as_mut(&mut self) -> &mut [T; MATRIX_3X3_SIZE] {
         &mut self.a
     }
 }
@@ -1862,7 +1884,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: FloatCore,
+    T: Copy + PartialOrd,
 {
     /// Return a copy of the matrix with all elements clamped to the specified range.
     /// ```
@@ -1881,7 +1903,14 @@ where
     pub fn clamp(self, min: T, max: T) -> Self {
         let mut a = self.a;
         for it in &mut a {
-            *it = it.clamp(min, max);
+            //*it = it.clamp(min, max);
+            *it = if *it < min {
+                min
+            } else if *it > max {
+                max
+            } else {
+                *it
+            };
         }
         Self { a }
     }
@@ -2043,7 +2072,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: Matrix3x3Math + FloatCore + MathConstants,
+    T: Matrix3x3Math + MathConstants + Copy + Signed + PartialOrd,
 {
     /// Return the inverse of this matrix. Returns self if the determinant is zero.
     /// ```
@@ -2085,7 +2114,7 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: Matrix3x3Math + MathConstants + PartialOrd + FloatCore,
+    T: Copy + ConstZero + Signed + PartialOrd + Matrix3x3Math + MathConstants,
 {
     /// Return inverse of matrix or `T::zero()` if not invertible.
     /// ```
@@ -2104,7 +2133,7 @@ where
     pub fn inverse_or_zero(self) -> Self {
         let (adjugate, determinant) = self.adjugate();
         if determinant.abs() < T::EPSILON {
-            return Self::zero();
+            return Self::ZERO;
         }
         adjugate / determinant
     }
@@ -2436,10 +2465,10 @@ impl<T> DoubleEndedIterator for Matrix3x3ColumnsMut<'_, T> {
 
 // **** From Array ****
 
-impl<T> From<[T; 9]> for Matrix3x3<T> {
+impl<T> From<[T; MATRIX_3X3_SIZE]> for Matrix3x3<T> {
     /// Matrix from 1D array.
     #[inline]
-    fn from(input: [T; 9]) -> Self {
+    fn from(input: [T; MATRIX_3X3_SIZE]) -> Self {
         Self { a: input }
     }
 }
@@ -2524,7 +2553,15 @@ where
 
 impl<T> From<Matrix3x3<T>> for Quaternion<T>
 where
-    T: Copy + One + FloatCore + MathMethods + QuaternionMath,
+    T: Copy
+        + ConstZero
+        + ConstOne
+        + PartialOrd
+        + Neg<Output = T>
+        + Sub<Output = T>
+        + Div<Output = T>
+        + MathMethods
+        + QuaternionMath,
 {
     /// Create quaternion from a rotation matrix.
     ///
@@ -2532,18 +2569,18 @@ where
     /// Note that Day's paper uses the [Shuster multiplication convention](https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation#Alternative_conventions),
     /// rather than the Hamilton multiplication convention used by the Quaternion class.
     fn from(m: Matrix3x3<T>) -> Self {
-        let half = T::one() / (T::one() + T::one());
+        let half = T::ONE / (T::ONE + T::ONE);
         // Choose largest scale factor from 4w, 4x, 4y, and 4z, to avoid a scale factor of zero, or numerical instabilities caused by division of a small scale factor.
-        if m.a[8] < T::zero() {
+        if m.a[8] < T::ZERO {
             // |(x,y)| is bigger than |(z,w)|?
             if m.a[0] > m.a[4] {
                 // |x| bigger than |y|, so use x-form
-                let t = T::one() + (m.a[0] - m.a[4]) - m.a[8]; // 1 + 2(xx - yy) - 1 + 2(xx + yy) = 4xx
+                let t = T::ONE + (m.a[0] - m.a[4]) - m.a[8]; // 1 + 2(xx - yy) - 1 + 2(xx + yy) = 4xx
                 let q = Self { w: m.a[7] - m.a[5], x: t, y: m.a[1] + m.a[3], z: m.a[6] + m.a[2] };
                 return q * t.sqrt_reciprocal() * half;
             }
             // |y| bigger than |x|, so use y-form
-            let t = T::one() - (m.a[0] - m.a[4]) - m.a[8]; // 1 - 2(xx - yy) - 1 + 2(xx + yy) = 4yy
+            let t = T::ONE - (m.a[0] - m.a[4]) - m.a[8]; // 1 - 2(xx - yy) - 1 + 2(xx + yy) = 4yy
             let q = Self { w: m.a[2] - m.a[6], x: m.a[1] + m.a[3], y: t, z: m.a[5] + m.a[7] };
             return q * t.sqrt_reciprocal() * half;
         }
