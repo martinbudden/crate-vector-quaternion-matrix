@@ -252,6 +252,7 @@ A specialization generally won't be considered for inclusion to support a single
 3. `Matrix3x3::mul_diagonal_vector` - multiplies a vector which is treated as a diagonal matrix by a matrix.
 4. `Matrix3x3::add_diagonal_vector` - adds a vector which is treated as a diagonal matrix to a matrix.
 5. Cholesky decomposition of matrices, so Cholesky solvers can be used instead of matrix inversion.
+6. `UpperTriangularArray` representation of symmetric matrices, for computationally more efficient matrix inversion and vector multiplication.
 
 ## Usage by other crates
 
