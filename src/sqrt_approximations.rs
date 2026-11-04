@@ -1,5 +1,11 @@
 #![allow(clippy::inline_always)]
+// This module contains functions for approximating square roots and inverse square roots for `f32` and `f64` types.
+// The implementations use a combination of hardware instructions (for ARM architectures with VFP2 support)
+// and software approximations based on the fast inverse square root algorithm.
 
+
+/// Calculates the square root of a `f32` value using hardware instructions if available
+/// otherwise falling back to a software approximation.
 #[allow(unused)]
 #[inline(always)]
 pub fn sqrt_f32(x: f32) -> f32 {
@@ -24,6 +30,8 @@ pub fn sqrt_f32(x: f32) -> f32 {
     }
 }
 
+/// Calculates the square root of a `f64` value by casting it to `f32`,
+/// using the `sqrt_f32` function, and then casting the result back to `f64`.
 #[allow(unused)]
 #[inline(always)]
 pub fn sqrt_f64(x: f64) -> f64 {
@@ -43,6 +51,8 @@ fn sqrt_approx_f64(x: f64) -> f64 {
     1.0 / sqrt_reciprocal_approx_f64(x)
 }
 
+/// Calculates the reciprocal of the square root of a `f32` value using hardware instructions if available
+/// otherwise falling back to a software approximation.
 #[allow(unused)]
 #[inline(always)]
 pub fn sqrt_reciprocal_f32(x: f32) -> f32 {
@@ -67,6 +77,8 @@ pub fn sqrt_reciprocal_f32(x: f32) -> f32 {
     }
 }
 
+/// Calculates the reciprocal of the square root of a `f64` value by casting it to `f32`,
+/// using the `sqrt_reciprocal_f32` function, and then casting the result back to `f64`.
 #[allow(unused)]
 #[inline(always)]
 pub fn sqrt_reciprocal_f64(x: f64) -> f64 {
