@@ -26,6 +26,11 @@ At some point [0.1.0] to [0.1.11] will be [YANKED]
 ### Added
 
 - `M2x2UpperTriangularArray`, `M3x3UpperTriangularArray`, and `M4x4UpperTriangularArray`.
+- elementwise `MulAssign` and `DivAssign` for all vectors.
+- elementwise `reciprocal` function for all vectors.
+- Safe index access functions `get` and `get_mut` for all vectors.
+- `angle`, `project_onto`, `reject_from`, `reflect`, and `signum` functions for all vectors.
+- `signed_angle_about_axis` and `orthonormal_basis` functions for `Vector3`.
 
 ### Changed
 

@@ -3,7 +3,6 @@
 // The implementations use a combination of hardware instructions (for ARM architectures with VFP2 support)
 // and software approximations based on the fast inverse square root algorithm.
 
-
 /// Calculates the square root of a `f32` value using hardware instructions if available
 /// otherwise falling back to a software approximation.
 #[allow(unused)]

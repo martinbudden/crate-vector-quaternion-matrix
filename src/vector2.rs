@@ -483,6 +483,26 @@ where
     }
 }
 
+impl<T> MulAssign<Self> for Vector2<T>
+where
+    T: Copy + Mul<Output = T>,
+{
+    /// In-place elementwise multiply a vector by another vector (Hadamard product).
+    /// ```
+    /// # use vqm::Vector2f32;
+    /// let mut v = Vector2f32::new(2.0, 5.0);
+    /// let u = Vector2f32::new(3.0, 7.0);
+    /// v *= u;
+    ///
+    /// assert_eq!(v, Vector2f32 { x: 6.0, y: 35.0 });
+    /// ```
+    #[inline]
+    fn mul_assign(&mut self, other: Self) {
+        self.x = self.x * other.x;
+        self.y = self.y * other.y;
+    }
+}
+
 // **** Div by scalar ****
 
 #[cfg(not(feature = "uom"))]
@@ -572,6 +592,45 @@ where
     }
 }
 
+impl<T> DivAssign<Self> for Vector2<T>
+where
+    T: Copy + Div<T, Output = T>,
+{
+    /// In-place elementwise divide a vector by another vector.
+    /// ```
+    /// # use vqm::Vector2f32;
+    /// let mut v = Vector2f32::new(3.0, 7.0);
+    /// let u = Vector2f32::new(2.0, 5.0);
+    /// v /= u;
+    ///
+    /// assert_eq!(v, Vector2f32 { x: 1.5, y: 1.4 });
+    /// ```
+    #[inline]
+    fn div_assign(&mut self, other: Self) {
+        self.x = self.x / other.x;
+        self.y = self.y / other.y;
+    }
+}
+
+impl<T> Vector2<T>
+where
+    T: Copy + ConstOne + Div<Output = T>,
+{
+    /// Elementwise reciprocal of a vector.
+    /// ```
+    /// # use vqm::Vector2f32;
+    /// let v = Vector2f32::new(2.0, 4.0);
+    /// let r = v.reciprocal();
+    ///
+    /// assert_eq!(r, Vector2f32 { x: 0.5, y: 0.25 });
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn reciprocal(self) -> Self {
+        Self { x: T::ONE / self.x, y: T::ONE / self.y }
+    }
+}
+
 // **** Index ****
 
 impl<T> Index<usize> for Vector2<T> {
@@ -611,6 +670,26 @@ impl<T> IndexMut<usize> for Vector2<T> {
         match index {
             0 => &mut self.x,
             _ => &mut self.y,
+        }
+    }
+}
+
+impl<T> Vector2<T> {
+    /// Safe index accessor.
+    pub fn get(&self, index: usize) -> Option<&T> {
+        match index {
+            0 => Some(&self.x),
+            1 => Some(&self.y),
+            _ => None,
+        }
+    }
+
+    /// Safe index accessor.
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
+        match index {
+            0 => Some(&mut self.x),
+            1 => Some(&mut self.y),
+            _ => None,
         }
     }
 }
@@ -863,6 +942,71 @@ impl<T> Vector2<T> {
         Out: Sub<Output = Out>,
     {
         self.x * rhs.y - self.y * rhs.x
+    }
+}
+
+// **** utilities ****
+
+impl<T> Vector2<T> {
+    /// Calculate the angle between two non-zero vectors, in radians.
+    /// Returns a value in the range [0, PI].
+    /// Both vectors must be non-zero.
+    pub fn angle(self, other: Self) -> T
+    where
+        T: FloatCore + ConstOne + MathMethods,
+    {
+        let multiplier = (self.norm_squared() * other.norm_squared()).sqrt_reciprocal();
+        let cosine = (self.dot(other) * multiplier).clamp(-T::ONE, T::ONE);
+        cosine.acos()
+    }
+
+    /// Calculate the projection of one vector onto another.
+    /// `other` must be non-zero.
+    #[must_use]
+    pub fn project_onto(self, other: Self) -> Self
+    where
+        T: Copy + Add<Output = T> + Mul<Output = T> + Div<Output = T> + IsScalar,
+    {
+        other * (self.dot(other) / other.dot(other))
+    }
+
+    /// Calculate the component of a vector perpendicular to another vector.
+    /// `other` must be non-zero.
+    #[must_use]
+    pub fn reject_from(self, other: Self) -> Self
+    where
+        T: Copy + Add<Output = T> + Mul<Output = T> + Div<Output = T> + IsScalar,
+        Vector2<T>: Sub<Output = Vector2<T>>,
+    {
+        self - self.project_onto(other)
+    }
+
+    /// Reflects a vector about a surface normal.
+    /// Assumes `normal` has unit length.
+    #[must_use]
+    pub fn reflect(self, normal: Self) -> Self
+    where
+        T: Copy + Add<Output = T> + Mul<Output = T> + IsScalar,
+        Vector2<T>: Sub<Output = Vector2<T>>,
+    {
+        let projection = normal * self.dot(normal);
+        self - projection - projection
+    }
+
+    /// Returns the sign of each component.
+    /// ```
+    /// # use vqm::Vector2f32;
+    /// let v = Vector2f32::new(2.0, 0.0);
+    /// let w = v.signum();
+    ///
+    /// assert_eq!(w, Vector2f32::new(1.0, 1.0));
+    /// ```
+    #[must_use]
+    pub fn signum(self) -> Self
+    where
+        T: Signed,
+    {
+        Self { x: self.x.signum(), y: self.y.signum() }
     }
 }
 

@@ -280,7 +280,7 @@ where
     }
 }
 
-impl<T> MulAdd<Vector3<T>> for Vector3<T>
+impl<T> MulAdd<Self> for Vector3<T>
 where
     T: Copy + Mul<T, Output = T> + Add<T, Output = T>,
 {
@@ -498,6 +498,27 @@ where
     }
 }
 
+impl<T> MulAssign<Self> for Vector3<T>
+where
+    T: Copy + Mul<Output = T>,
+{
+    /// In-place elementwise multiply a vector by another vector (Hadamard product).
+    /// ```
+    /// # use vqm::Vector3f32;
+    /// let mut v = Vector3f32::new(2.0, 5.0, 11.0);
+    /// let u = Vector3f32::new(3.0, 7.0, 13.0);
+    /// v *= u;
+    ///
+    /// assert_eq!(v, Vector3f32 { x: 6.0, y: 35.0, z: 143.0 });
+    /// ```
+    #[inline]
+    fn mul_assign(&mut self, other: Self) {
+        self.x = self.x * other.x;
+        self.y = self.y * other.y;
+        self.z = self.z * other.z;
+    }
+}
+
 // **** Div by scalar ****
 
 #[cfg(not(feature = "uom"))]
@@ -567,7 +588,7 @@ where
 
 // **** Div Elementwise ****
 
-impl<T> Div<Vector3<T>> for Vector3<T>
+impl<T> Div<Self> for Vector3<T>
 where
     T: Div<T, Output = T>,
 {
@@ -576,15 +597,55 @@ where
     /// Elementwise divide a vector by another vector.
     /// ```
     /// # use vqm::Vector3f32;
-    /// let v = Vector3f32::new(3.0, 7.0, 13.0);
+    /// let v = Vector3f32::new(3.0, 15.0, 49.5);
     /// let u = Vector3f32::new(2.0, 5.0, 11.0);
     /// let r = v / u;
     ///
-    /// assert_eq!(r, Vector3f32 { x: 1.5, y: 1.4, z: 13.0 / 11.0 });
+    /// assert_eq!(r, Vector3f32 { x: 1.5, y: 3.0, z: 4.5 });
     /// ```
     #[inline]
     fn div(self, other: Self) -> Self {
         Self { x: self.x / other.x, y: self.y / other.y, z: self.z / other.z }
+    }
+}
+
+impl<T> DivAssign<Self> for Vector3<T>
+where
+    T: Copy + Div<T, Output = T>,
+{
+    /// In-place elementwise divide a vector by another vector.
+    /// ```
+    /// # use vqm::Vector3f32;
+    /// let mut v = Vector3f32::new(3.0, 15.0, 49.5);
+    /// let u = Vector3f32::new(2.0, 5.0, 11.0);
+    /// v /= u;
+    ///
+    /// assert_eq!(v, Vector3f32 { x: 1.5, y: 3.0, z: 4.5 });
+    /// ```
+    #[inline]
+    fn div_assign(&mut self, other: Self) {
+        self.x = self.x / other.x;
+        self.y = self.y / other.y;
+        self.z = self.z / other.z;
+    }
+}
+
+impl<T> Vector3<T>
+where
+    T: Copy + ConstOne + Div<Output = T>,
+{
+    /// Elementwise reciprocal of a vector.
+    /// ```
+    /// # use vqm::Vector3f32;
+    /// let v = Vector3f32::new(2.0, 4.0, 8.0);
+    /// let r = v.reciprocal();
+    ///
+    /// assert_eq!(r, Vector3f32 { x: 0.5, y: 0.25, z: 0.125 });
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn reciprocal(self) -> Self {
+        Self { x: T::ONE / self.x, y: T::ONE / self.y, z: T::ONE / self.z }
     }
 }
 
@@ -631,6 +692,28 @@ impl<T> IndexMut<usize> for Vector3<T> {
             0 => &mut self.x,
             1 => &mut self.y,
             _ => &mut self.z,
+        }
+    }
+}
+
+impl<T> Vector3<T> {
+    /// Safe index accessor.
+    pub fn get(&self, index: usize) -> Option<&T> {
+        match index {
+            0 => Some(&self.x),
+            1 => Some(&self.y),
+            2 => Some(&self.z),
+            _ => None,
+        }
+    }
+
+    /// Safe index accessor.
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut T> {
+        match index {
+            0 => Some(&mut self.x),
+            1 => Some(&mut self.y),
+            2 => Some(&mut self.z),
+            _ => None,
         }
     }
 }
@@ -982,6 +1065,186 @@ impl<T> Vector3<T> {
             y: (self.z * rhs.x) - (self.x * rhs.z),
             z: (self.x * rhs.y) - (self.y * rhs.x),
         }
+    }
+}
+
+// **** utilities ****
+
+impl<T> Vector3<T> {
+    /// Calculate the angle between two non-zero vectors, in radians.
+    /// Returns a value in the range [0, PI].
+    /// Both vectors must be non-zero.
+    pub fn angle(self, other: Self) -> T
+    where
+        T: FloatCore + ConstOne + MathMethods,
+    {
+        let multiplier = (self.norm_squared() * other.norm_squared()).sqrt_reciprocal();
+        let cosine = (self.dot(other) * multiplier).clamp(-T::ONE, T::ONE);
+        cosine.acos()
+    }
+
+    /// Calculate the projection of one vector onto another.
+    /// `other` must be non-zero.
+    #[must_use]
+    pub fn project_onto(self, other: Self) -> Self
+    where
+        T: Copy + Add<Output = T> + Mul<Output = T> + Div<Output = T> + IsScalar,
+    {
+        other * (self.dot(other) / other.dot(other))
+    }
+
+    /// Calculate the component of a vector perpendicular to another vector.
+    /// `other` must be non-zero.
+    #[must_use]
+    pub fn reject_from(self, other: Self) -> Self
+    where
+        T: Copy + Add<Output = T> + Mul<Output = T> + Div<Output = T> + IsScalar,
+        Vector3<T>: Sub<Output = Vector3<T>>,
+    {
+        self - self.project_onto(other)
+    }
+
+    /// Reflects a vector about a surface normal.
+    /// Assumes `normal` has unit length.
+    #[must_use]
+    pub fn reflect(self, normal: Self) -> Self
+    where
+        T: Copy + Add<Output = T> + Mul<Output = T> + IsScalar,
+        Vector3<T>: Sub<Output = Vector3<T>>,
+    {
+        let projection = normal * self.dot(normal);
+        self - projection - projection
+    }
+
+    /// Returns the sign of each component.
+    /// ```
+    /// # use vqm::Vector3f32;
+    /// let v = Vector3f32::new(2.0, 0.0, -11.0);
+    /// let w = v.signum();
+    ///
+    /// assert_eq!(w, Vector3f32::new(1.0, 1.0, -1.0));
+    /// ```
+    #[must_use]
+    pub fn signum(self) -> Self
+    where
+        T: Signed,
+    {
+        Self { x: self.x.signum(), y: self.y.signum(), z: self.z.signum() }
+    }
+
+    /// Calculate the signed angle from one vector to another about an axis.
+    ///
+    /// Returns an angle in radians in the range [-PI, PI].
+    ///
+    /// The angle follows the right-hand rule about `axis`.
+    ///
+    /// Returns `None` if the axis is zero or either vector is parallel
+    /// to the axis.
+    /// ```
+    /// # use vqm::Vector3f32;
+    /// let x = Vector3f32::new(1.0, 0.0, 0.0);
+    /// let y = Vector3f32::new(0.0, 1.0, 0.0);
+    /// let z = Vector3f32::new(0.0, 0.0, 1.0);
+    /// let option = x.signed_angle_about_axis(y, z);
+    /// assert!(option.is_some());
+    /// if let Some(angle) = option {
+    ///     assert!((angle - core::f32::consts::FRAC_PI_2).abs() < 1e-6);
+    /// }
+    /// let option = y.signed_angle_about_axis(x, z);
+    /// if let Some(angle) = option {
+    ///     assert!((angle + core::f32::consts::FRAC_PI_2).abs() < 1e-6);
+    /// }
+    /// ```
+    pub fn signed_angle_about_axis(self, other: Self, axis: Self) -> Option<T>
+    where
+        T: FloatCore + ConstZero + ConstOne + MathMethods + IsScalar,
+        Vector3<T>: Sub<Output = Vector3<T>>,
+    {
+        let axis_norm_sq = axis.norm_squared();
+
+        if axis_norm_sq == T::ZERO {
+            return None;
+        }
+
+        // Project both vectors onto the plane perpendicular to the axis.
+        let a = self.reject_from(axis);
+        let b = other.reject_from(axis);
+
+        let a_norm_sq = a.norm_squared();
+        let b_norm_sq = b.norm_squared();
+
+        if a_norm_sq == T::ZERO || b_norm_sq == T::ZERO {
+            return None;
+        }
+
+        // Normalize the axis and projected vectors.
+        let axis_unit = axis * axis_norm_sq.sqrt_reciprocal();
+        let a_unit = a * a_norm_sq.sqrt_reciprocal();
+        let b_unit = b * b_norm_sq.sqrt_reciprocal();
+
+        // atan2 preserves the sign of the angle.
+        let sin_theta = axis_unit.dot(a_unit.cross(b_unit));
+        let cos_theta = a_unit.dot(b_unit);
+
+        Some(sin_theta.atan2(cos_theta))
+    }
+
+    /// Construct an orthonormal basis perpendicular to this vector.
+    ///
+    /// Returns two unit vectors perpendicular to this vector and
+    /// to each other.
+    ///
+    /// The resulting basis follows the right-hand rule.
+    ///
+    /// Returns `None` if this vector is zero.
+    /// ```
+    /// # use vqm::Vector3f32;
+    /// let n = Vector3f32::new(1.0, 2.0, 3.0);
+    /// let option = n.orthonormal_basis();
+    /// if let Some((u,v)) = option {
+    ///     // Both are unit vectors.
+    ///     assert!((u.norm() - 1.0).abs() < 1e-6);
+    ///     assert!((v.norm() - 1.0).abs() < 1e-6);
+    ///     // Both are perpendicular to n.
+    ///     let n = n.normalize();
+    ///     assert!(n.dot(u).abs() < 1e-6);
+    ///     assert!(n.dot(v).abs() < 1e-6);
+    ///     // They are perpendicular to each other.
+    ///     assert!(u.dot(v).abs() < 1e-6);
+    ///     // Right-handed basis.
+    ///     assert!(u.cross(v).is_near(n, 1e-6));
+    /// }
+    /// ```
+    #[must_use]
+    pub fn orthonormal_basis(self) -> Option<(Self, Self)>
+    where
+        T: FloatCore + ConstZero + ConstOne + MathMethods + IsScalar,
+    {
+        let norm_sq = self.norm_squared();
+
+        if norm_sq == T::ZERO {
+            return None;
+        }
+
+        // Normalize the input vector.
+        let n = self * norm_sq.sqrt_reciprocal();
+
+        // Choose the coordinate axis least aligned with n.
+        let helper = if n.x.abs() <= n.y.abs() && n.x.abs() <= n.z.abs() {
+            Self::new(T::ONE, T::ZERO, T::ZERO)
+        } else if n.y.abs() <= n.z.abs() {
+            Self::new(T::ZERO, T::ONE, T::ZERO)
+        } else {
+            Self::new(T::ZERO, T::ZERO, T::ONE)
+        };
+
+        // Construct the two perpendicular unit vectors.
+        let u = n.cross(helper);
+        let u = u * u.norm_squared().sqrt_reciprocal();
+
+        let v = n.cross(u);
+
+        Some((u, v))
     }
 }
 
