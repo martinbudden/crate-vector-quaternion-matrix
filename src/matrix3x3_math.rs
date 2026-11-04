@@ -58,6 +58,9 @@ pub trait Matrix3x3Math: Sized {
     /// Calculates the sum of the squared elements along the main diagonal.
     fn m3x3_trace_sum_squares(this: Matrix3x3<Self>) -> Self;
 
+    /// Calculates the sum of the squares of all the elements (the Frobenius norm squared).
+    fn m3x3_norm_squared(this: Matrix3x3<Self>) -> Self;
+
     /// Calculates the sum of all the elements in the matrix.
     fn m3x3_sum(this: Matrix3x3<Self>) -> Self;
 
@@ -234,6 +237,11 @@ impl Matrix3x3Math for f32 {
         {
             this.a[M11] * this.a[M11] + this.a[M22] * this.a[M22] + this.a[M33] * this.a[M33]
         }
+    }
+
+    #[inline(always)]
+    fn m3x3_norm_squared(this: Matrix3x3<Self>) -> Self {
+        this.a.iter().map(|x| *x * *x).sum()
     }
 
     #[inline(always)]
@@ -464,6 +472,11 @@ impl Matrix3x3Math for f64 {
     #[inline(always)]
     fn m3x3_trace_sum_squares(this: Matrix3x3<Self>) -> Self {
         this.a[M11] * this.a[M11] + this.a[M22] * this.a[M22] + this.a[M33] * this.a[M33]
+    }
+
+    #[inline(always)]
+    fn m3x3_norm_squared(this: Matrix3x3<Self>) -> Self {
+        this.a.iter().map(|x| *x * *x).sum()
     }
 
     #[inline(always)]

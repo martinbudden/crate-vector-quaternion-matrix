@@ -49,6 +49,7 @@
         "expf",
         "foldhash",
         "fract",
+        "Frobenius",
         "getrandom",
         "Hadamard",
         "hashbrown",

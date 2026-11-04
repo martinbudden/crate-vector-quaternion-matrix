@@ -78,6 +78,8 @@ pub trait Matrix2x2Math: Sized {
 
     /// Calculates the sum of the squared elements along the main diagonal.
     fn m2x2_trace_sum_squares(this: Matrix2x2<Self>) -> Self;
+    /// Calculates the sum of the squares of all the elements (the Frobenius norm squared).
+    fn m2x2_norm_squared(this: Matrix2x2<Self>) -> Self;
 
     /// Calculates the sum of all the elements in the matrix.
     fn m2x2_sum(this: Matrix2x2<Self>) -> Self;
@@ -243,6 +245,11 @@ impl Matrix2x2Math for f32 {
     }
 
     #[inline(always)]
+    fn m2x2_norm_squared(this: Matrix2x2<Self>) -> Self {
+        this.a.iter().map(|x| *x * *x).sum()
+    }
+
+    #[inline(always)]
     fn m2x2_sum(this: Matrix2x2<Self>) -> Self {
         this.a.iter().sum()
     }
@@ -379,6 +386,11 @@ impl Matrix2x2Math for f64 {
     #[inline(always)]
     fn m2x2_trace_sum_squares(this: Matrix2x2<Self>) -> Self {
         this.a[M11] * this.a[M11] + this.a[M22] * this.a[M22]
+    }
+
+    #[inline(always)]
+    fn m2x2_norm_squared(this: Matrix2x2<Self>) -> Self {
+        this.a.iter().map(|x| *x * *x).sum()
     }
 
     #[inline(always)]

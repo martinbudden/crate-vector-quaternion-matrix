@@ -31,6 +31,9 @@ At some point [0.1.0] to [0.1.11] will be [YANKED]
 - Safe index access functions `get` and `get_mut` for all vectors.
 - `angle`, `project_onto`, `reject_from`, `reflect`, and `signum` functions for all vectors.
 - `signed_angle_about_axis` and `orthonormal_basis` functions for `Vector3`.
+- `norm` and `norm_squared` for matrices.
+- `is_orthogonal` and `is_rotation_matrix` for matrices.
+- `from_skew_symmetric` for `Matrix2x2` and `Matrix3x3`.
 
 ### Changed
 

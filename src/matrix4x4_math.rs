@@ -66,6 +66,9 @@ pub trait Matrix4x4Math: Sized {
     /// Calculates the sum of the squared elements along the main diagonal.
     fn m4x4_trace_sum_squares(this: Matrix4x4<Self>) -> Self;
 
+    /// Calculates the sum of the squares of all the elements (the Frobenius norm squared).
+    fn m4x4_norm_squared(this: Matrix4x4<Self>) -> Self;
+
     /// Calculates the sum of all the elements in the matrix.
     fn m4x4_sum(this: Matrix4x4<Self>) -> Self;
 
@@ -269,6 +272,11 @@ impl Matrix4x4Math for f32 {
     #[inline(always)]
     fn m4x4_trace_sum_squares(this: Matrix4x4<Self>) -> Self {
         this.a[M11] * this.a[M11] + this.a[M22] * this.a[M22] + this.a[M33] * this.a[M33] + this.a[M44] * this.a[M44]
+    }
+
+    #[inline(always)]
+    fn m4x4_norm_squared(this: Matrix4x4<Self>) -> Self {
+        this.a.iter().map(|x| *x * *x).sum()
     }
 
     #[inline(always)]
@@ -548,6 +556,10 @@ impl Matrix4x4Math for f64 {
         }
     }
 
+    #[inline(always)]
+    fn m4x4_norm_squared(this: Matrix4x4<Self>) -> Self {
+        this.a.iter().map(|x| *x * *x).sum()
+    }
     #[inline(always)]
     fn m4x4_sum(this: Matrix4x4<Self>) -> Self {
         this.a.iter().sum()

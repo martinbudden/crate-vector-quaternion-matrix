@@ -374,6 +374,7 @@ where
             ]
         }
     }
+
     /// Create a matrix with the diagonal set to a vector.
     /// ```
     /// # use vqm::{Matrix3x3f32,Vector3f32};
@@ -390,6 +391,33 @@ where
                 v.x,     T::ZERO, T::ZERO,
                 T::ZERO, v.y,     T::ZERO,
                 T::ZERO, T::ZERO, v.z,
+            ]
+        }
+    }
+}
+
+impl<T> Matrix3x3<T>
+where
+    T: Copy + ConstZero + Neg<Output = T>,
+{
+    /// Create a skew-symmetric matrix from a vector.
+    /// A skew-symmetric matrix satisfies:
+    ///     S^T = -S
+    /// ```
+    /// # use vqm::{Matrix3x3f32,Vector3f32};
+    /// let m = Matrix3x3f32::from_skew_symmetric(Vector3f32::new(2.0, 3.0, 5.0));
+    /// assert_eq!(m, Matrix3x3f32::new([ 0.0, -5.0,  3.0,
+    ///                                   5.0,  0.0, -2.0,
+    ///                                  -3.0,  2.0,  0.0]));
+    /// ```
+    #[rustfmt::skip]
+    #[inline]
+    pub fn from_skew_symmetric(v: Vector3<T>) -> Self {
+        Self {
+            a: [
+                T::ZERO, v.z,     -v.y,
+               -v.z,     T::ZERO, v.x,
+                v.y,    -v.x,     T::ZERO,
             ]
         }
     }
@@ -628,6 +656,24 @@ where
             return false;
         }
         true
+    }
+}
+
+impl<T> Matrix3x3<T>
+where
+    T: One + Copy + Signed + PartialOrd + Matrix3x3Math,
+{
+    /// Returns true if matrix is orthogonal.
+    /// A matrix is orthogonal if its transpose multiplied by itself is equal to the identity matrix.
+    /// `epsilon` specifies the tolerance used for floating-point comparisons.
+    pub fn is_orthogonal(self, epsilon: T) -> bool {
+        let product = self.transpose() * self;
+        product.is_near_identity(epsilon)
+    }
+
+    /// Returns true if matrix is a rotation matrix.
+    pub fn is_rotation_matrix(&self, epsilon: T) -> bool {
+        self.is_orthogonal(epsilon) && (self.determinant() - T::one()).abs() <= epsilon
     }
 }
 
@@ -2196,6 +2242,41 @@ where
     #[inline]
     pub fn trace_sum_squares(self) -> T {
         T::m3x3_trace_sum_squares(self)
+    }
+
+    /// Return Frobenius norm squared of the matrix, that is the sum of the squares of all the elements.
+    /// ```
+    /// # use vqm::Matrix3x3f32;
+    /// let m = Matrix3x3f32::new([  2.0, 17.0, 59.0,
+    ///                              5.0, 11.0, 47.0,
+    ///                             23.0, 31.0, 41.0]);
+    /// let n = m.norm_squared();
+    ///
+    /// assert_eq!(n, 9300.0);
+    /// ```
+    #[inline]
+    pub fn norm_squared(self) -> T {
+        T::m3x3_norm_squared(self)
+    }
+}
+
+impl<T> Matrix3x3<T>
+where
+    T: Matrix3x3Math + MathMethods,
+{
+    /// Return Frobenius norm of the matrix, that is the square root of the sum of the squares of all the elements.
+    /// ```
+    /// # use vqm::Matrix3x3f32;
+    /// let m = Matrix3x3f32::new([  2.0, 17.0, 59.0,
+    ///                              5.0, 11.0, 47.0,
+    ///                             23.0, 31.0, 41.0]);
+    /// let n = m.norm();
+    ///
+    /// assert!((n - 96.43650761).abs() < 1e-6);
+    /// ```
+    #[inline]
+    pub fn norm(self) -> T {
+        T::m3x3_norm_squared(self).sqrt()
     }
 }
 
