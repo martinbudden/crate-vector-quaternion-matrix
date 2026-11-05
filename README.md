@@ -128,6 +128,70 @@ let orientation = Quaternionf32::from_roll_pitch_yaw_degrees(15.0, 60.0, 120.0);
 let pitch = orientation.calculate_pitch_degrees();
 ```
 
+## Mathematical methods
+
+The `MathMethods` trait enables the use of method-call syntax, ie `x.sin()`, in a `no_std` environment.
+
+When the `libm` feature is on, the underlying `libm` function is used, so, for example, `x.sin()`  uses `libm::sinf(x)`
+if `x` is `f32` and `libm::sin(x)` if `x` is `f64`.
+
+When both the `libm` and `std` features are off, `vqm` internal approximations are used, ie `sin_approx_f32(x)` and `sin_approx_f64(x)`.
+
+Some examples:
+
+```rust
+use vqm::MathMethods;
+
+let theta = 30.0_f32.to_radians();
+
+let s = theta.sin();
+let c = theta.cos();
+let a = s.asin();
+
+let y = 4.0_f32;
+let x = y.sqrt();
+let z = y.sqrt_reciprocal();
+```
+
+## Symmetric matrices and upper triangular arrays
+
+`vqm` can represent a symmetric matrix as an upper triangular array (UTA), eg `M3x3UpperTriangularArrayf32`.
+This representation was initially implemented to support Kalman filters, where symmetric matrices are widely used.
+
+The UTA form is computationally more efficient for calculating inverses and multiplying vectors.
+Also, since it is smaller (six `f32`s rather than 9, for a 3x3 `f32` matrix), more complex complications
+can be done entirely within a microprocessor's floating point register bank.
+
+An example:
+
+```rust
+# use vqm::{M3x3UpperTriangularArrayf32, Matrix3x3f32, Vector3f32};
+
+fn calculation() -> Option<Vector3f32> {
+   let tolerance = 1e-6; // maximum allowed deviation from symmetric
+   let m = Matrix3x3f32::new([
+      2.0,  3.0,  7.0,
+      3.0,  5.0, 11.0,
+      7.0, 11.0, 29.0
+   ]);
+   let v = Vector3f32::new(0.1, 2.3, 1.7);
+
+   let uta = M3x3UpperTriangularArrayf32::try_from_symmetric_matrix(m, tolerance)?;
+   assert_eq!(uta, M3x3UpperTriangularArrayf32::new([2.0, 3.0, 7.0,
+                                                          5.0, 11.0,
+                                                               29.0]));
+   let u = uta * v;
+
+   let m_inv = M3x3UpperTriangularArrayf32::try_inverse_from_symmetric_matrix(m, tolerance)?;
+   assert_eq!(m_inv, M3x3UpperTriangularArrayf32::new([6.0, -2.5,  -0.5,
+                                                             2.25, -0.25,
+                                                                    0.25]));
+   let w = m_inv * v;
+
+   Some(w)
+}
+```
+
 ## Comparison with other crates
 
 There are currently a number of Rust crates that support vector math, quaternions, and matrices. The most notable being
@@ -252,7 +316,7 @@ A specialization generally won't be considered for inclusion to support a single
 3. `Matrix3x3::mul_diagonal_vector` - multiplies a vector which is treated as a diagonal matrix by a matrix.
 4. `Matrix3x3::add_diagonal_vector` - adds a vector which is treated as a diagonal matrix to a matrix.
 5. Cholesky decomposition of matrices, so Cholesky solvers can be used instead of matrix inversion.
-6. `UpperTriangularArray` representation of symmetric matrices, for computationally more efficient matrix inversion and vector multiplication.
+6. Upper triangular array representation of symmetric matrices, for computationally more efficient matrix inversion and vector multiplication.
 
 ## Usage by other crates
 
@@ -261,6 +325,7 @@ A specialization generally won't be considered for inclusion to support a single
 1. [signal-filters](https://crates.io/crates/signal-filters)
    `BiquadFilters` and `PT` filters are templated and provide vector implementations for parallel filtering of values on all axes.
 2. [sensor-fusion](https://crates.io/crates/sensor-fusion) - extensively uses vectors, quaternions, and matrices for sensor fusion filters
+   (eg Mahony, Madgwick, and Kalman filters).
 3. [motor-mixers](https://crates.io/crates/motor-mixers) - uses `Vector3f32` and `BiquadFilterVector3f32` in notch filters to filter
    IMU data based on motor RPM.
 4. [imu-sensors](https://crates.io/crates/imu-sensors) - uses `Vector3f32` to return scaled gyro and acceleration readings from the IMU.
