@@ -1953,6 +1953,32 @@ where
         *self = self.clamp(min, max);
         self
     }
+
+    /// Ensure the diagonal elements are at least the specified value..
+    /// ```
+    /// # use vqm::Matrix3x3f32;
+    /// let mut m = Matrix3x3f32::new([  2.0, 17.0,  -59.0,
+    ///                                  5.0,  0.01,  47.0,
+    ///                                 23.0, 31.0,  -41.0]);
+    /// m.enforce_diagonal_lower_bound(0.1);
+    ///
+    /// assert_eq!(m, Matrix3x3f32::new([ 2.0, 17.0, -59.0,
+    ///                                   5.0,  0.1,  47.0,
+    ///                                  23.0, 31.0,  0.1]));
+    /// ```
+    #[inline]
+    pub fn enforce_diagonal_lower_bound(&mut self, min: T) -> &mut Self {
+        if self.a[Self::M11] < min {
+            self.a[Self::M11] = min;
+        }
+        if self.a[Self::M22] < min {
+            self.a[Self::M22] = min;
+        }
+        if self.a[Self::M33] < min {
+            self.a[Self::M33] = min;
+        }
+        self
+    }
 }
 
 impl<T> Matrix3x3<T>

@@ -1700,6 +1700,27 @@ where
         *self = self.clamp(min, max);
         self
     }
+
+    /// Ensure the diagonal elements are at least the specified value..
+    /// ```
+    /// # use vqm::Matrix2x2f32;
+    /// let mut m = Matrix2x2f32::new([  2.0, 17.0,
+    ///                                  5.0,  0.01]);
+    /// m.enforce_diagonal_lower_bound(0.1);
+    ///
+    /// assert_eq!(m, Matrix2x2f32::new([ 2.0, 17.0,
+    ///                                   5.0,  0.1]));
+    /// ```
+    #[inline]
+    pub fn enforce_diagonal_lower_bound(&mut self, min: T) -> &mut Self {
+        if self.a[Self::M11] < min {
+            self.a[Self::M11] = min;
+        }
+        if self.a[Self::M22] < min {
+            self.a[Self::M22] = min;
+        }
+        self
+    }
 }
 
 impl<T> Matrix2x2<T>
