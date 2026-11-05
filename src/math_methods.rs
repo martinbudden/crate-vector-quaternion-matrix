@@ -34,8 +34,8 @@
 // x.hypot()
 
 /// `no_std` implementations of `std` math functions in method call syntax<br>
-/// eg `x.sin()`, `x.cos()` etc.<br><br>
-/// Angles are expressed in radians.
+/// eg `x.sin()`, `x.cos()` etc.<br>
+// Angles are expressed in radians.
 pub trait MathMethods: Sized {
     /// Calculates the sine and cosine of an angle simultaneously.
     /// Returns a tuple containing `(sin(self), cos(self))`.

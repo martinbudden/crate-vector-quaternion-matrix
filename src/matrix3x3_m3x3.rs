@@ -19,7 +19,7 @@ pub type Matrix3x3xM3x3f64 = Matrix3x3xM3x3<f64>;
 /// In particular matrix by matrix multiply, determinant, adjugate, and inverse are not provided.<br>
 /// Functions to extract and utilize 3x3 sub-matrices are provided.<br>
 /// Aliases `Matrix3x3xM3x3f32` and `Matrix3x3xM3x3f64` are provided.<br>
-/// Internal implementation is a flat array of nine `Matrix3x3`s.
+/// Internal implementation is a flat array of nine `Matrix3x3`s.<br><br>
 #[derive(Clone, Copy, PartialEq)]
 #[repr(C)]
 pub struct Matrix3x3xM3x3<T> {

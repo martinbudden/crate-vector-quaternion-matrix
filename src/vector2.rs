@@ -20,7 +20,7 @@ pub type Vector2f64 = Vector2<f64>;
 // **** Define ****
 
 /// `Vector2<T>`: 2D vector of type `T`.<br>
-/// Aliases `Vector2f32` and `Vector2f64` are provided.<br><br>
+/// Aliases `Vector2f32` and `Vector2f64` are provided.<br>
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 #[cfg_attr(feature = "std", derive(derive_more::Display))]
 #[cfg_attr(feature = "std", display("V{{x:{x}, y:{y}}}"))]

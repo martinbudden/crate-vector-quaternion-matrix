@@ -44,7 +44,7 @@ pub trait QuaternionMath: Sized {
     /// Calculates the element-wise negation of the quaternion (`-this`).
     fn q_neg(this: Quaternion<Self>) -> Quaternion<Self>;
     /// Calculates the sum of two quaternions (`this + other`).
-    fn q_add(this: Quaternion<Self>, this: Quaternion<Self>) -> Quaternion<Self>;
+    fn q_add(this: Quaternion<Self>, other: Quaternion<Self>) -> Quaternion<Self>;
     /// Multiplies the quaternion by a scalar.
     fn q_mul_scalar(this: Quaternion<Self>, a: Self) -> Quaternion<Self>;
     /// Divides the quaternion by a scalar.

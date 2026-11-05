@@ -9,7 +9,7 @@ pub type M4x4UpperTrianglef32 = M4x4UpperTriangle<f32>;
 pub type M4x4UpperTrianglef64 = M4x4UpperTriangle<f64>;
 
 /// A 4x4 symmetric matrix stored as a flat 6-element array (Upper-Triangular layout).<br><br>
-/// ```
+/// ```text
 /// [m11, m12, m13, m14,
 ///       m22, m23, m24,
 ///            m33, m34,

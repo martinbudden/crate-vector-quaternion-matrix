@@ -1,6 +1,6 @@
 #![allow(clippy::excessive_precision)]
 
-/// Math constants for use in generic code.<br><br>
+/// Math constants for use in generic code.<br>
 pub trait MathConstants {
     /// Constant epsilon, for use in generic code.
     const EPSILON: Self;

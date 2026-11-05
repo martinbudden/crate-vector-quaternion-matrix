@@ -9,7 +9,7 @@ pub type M3x3UpperTrianglef32 = M3x3UpperTriangle<f32>;
 pub type M3x3UpperTrianglef64 = M3x3UpperTriangle<f64>;
 
 /// A 3x3 symmetric matrix stored as a flat 6-element array (Upper-Triangular layout).
-/// ```
+/// ```text
 /// [m11, m12, m13,
 ///       m22, m23,
 ///            m33]

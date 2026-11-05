@@ -8,7 +8,7 @@ pub type Cholesky4x4f32 = Cholesky4x4<f32>;
 pub type Cholesky4x4f64 = Cholesky4x4<f64>;
 
 /// Array representing the lower triangular Cholesky solver of a matrix.
-/// Note: the diagonals are stored as reciprocals.
+/// Note: the diagonals are stored as reciprocals.<br><br>
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Cholesky4x4<T> {
     a: [T; CHOLESKY_4X4_SIZE],
