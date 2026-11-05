@@ -2,38 +2,6 @@ use num_traits::{ConstOne, ConstZero, float::FloatCore};
 
 use crate::{MathMethods, Matrix2x2, Vector2};
 
-impl<T> Matrix2x2<T>
-where
-    T: Copy + FloatCore + MathMethods + ConstZero,
-{
-    /// Returns a wrapped Cholesky lower decomposition of a matrix if the matrix is positive definite, otherwise `None`.
-    /// The input matrix is assumed to be symmetric and only the lower-triangular part is read.
-    /// ```
-    /// # use vqm::{Cholesky2x2f32, Matrix2x2f32};
-    /// let A = Matrix2x2f32::new([
-    ///     2.0, 3.0,
-    ///     3.0, 5.0
-    /// ]);
-    /// let option = A.cholesky();
-    /// assert!(option.is_some());
-    /// if let Some(cholesky) = option {
-    ///     const R: f32 = core::f32::consts::FRAC_1_SQRT_2;
-    ///     let L = cholesky.l();
-    ///     assert!(L.is_near(Matrix2x2f32::new([
-    ///             2.0*R, 0.0,
-    ///             3.0*R, R]), 1e-6));
-    ///     // Check L*L^T = A
-    ///     let B = L * L.transpose();
-    ///     assert!(A.is_near(B, 1e-6));
-    /// }
-    /// ```
-    #[must_use]
-    #[inline]
-    pub fn cholesky(self) -> Option<Cholesky2x2<T>> {
-        Cholesky2x2::new(self)
-    }
-}
-
 /// Cholesky2x2 matrix of `f32` values<br>
 pub type Cholesky2x2f32 = Cholesky2x2<f32>;
 /// Cholesky 2x2 matrix of `f64` values<br><br>
@@ -310,6 +278,40 @@ where
     #[must_use]
     pub fn invert(self) -> Matrix2x2<T> {
         self.solve_matrix(Matrix2x2::identity())
+    }
+}
+
+// **** MATRIX ****
+
+impl<T> Matrix2x2<T>
+where
+    T: Copy + FloatCore + MathMethods + ConstZero,
+{
+    /// Returns a wrapped Cholesky lower decomposition of a matrix if the matrix is positive definite, otherwise `None`.
+    /// The input matrix is assumed to be symmetric and only the lower-triangular part is read.
+    /// ```
+    /// # use vqm::{Cholesky2x2f32, Matrix2x2f32};
+    /// let A = Matrix2x2f32::new([
+    ///     2.0, 3.0,
+    ///     3.0, 5.0
+    /// ]);
+    /// let option = A.cholesky();
+    /// assert!(option.is_some());
+    /// if let Some(cholesky) = option {
+    ///     const R: f32 = core::f32::consts::FRAC_1_SQRT_2;
+    ///     let L = cholesky.l();
+    ///     assert!(L.is_near(Matrix2x2f32::new([
+    ///             2.0*R, 0.0,
+    ///             3.0*R, R]), 1e-6));
+    ///     // Check L*L^T = A
+    ///     let B = L * L.transpose();
+    ///     assert!(A.is_near(B, 1e-6));
+    /// }
+    /// ```
+    #[must_use]
+    #[inline]
+    pub fn cholesky(self) -> Option<Cholesky2x2<T>> {
+        Cholesky2x2::new(self)
     }
 }
 

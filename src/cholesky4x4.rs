@@ -2,38 +2,6 @@ use num_traits::{ConstOne, ConstZero, float::FloatCore};
 
 use crate::{MathMethods, Matrix4x4, Vector4};
 
-impl<T> Matrix4x4<T>
-where
-    T: Copy + FloatCore + MathMethods + ConstZero,
-{
-    /// Returns a wrapped Cholesky lower decomposition of a matrix if the matrix is positive definite, otherwise `None`.
-    /// The input matrix is assumed to be symmetric and only the lower-triangular part is read.
-    /// ```
-    /// # use vqm::{Cholesky4x4f32, Matrix4x4f32};
-    /// let A = Matrix4x4f32::new([
-    ///      2.0,  3.0,  7.0, 13.0,
-    ///      3.0,  5.0, 11.0, 19.0,
-    ///      7.0, 11.0, 29.0, 41.0,
-    ///     13.0, 19.0, 41.0, 97.0,
-    /// ]);
-    /// let option = A.cholesky();
-    /// assert!(option.is_some());
-    /// if let Some(cholesky) = option {
-    ///     const R: f32 = core::f32::consts::FRAC_1_SQRT_2;
-    ///     assert!(cholesky.l().is_near(Matrix4x4f32::new([
-    ///                     2.0*R, 0.0,  0.0, 0.0,
-    ///                     3.0*R,   R,  0.0, 0.0,
-    ///                     7.0*R,   R,  2.0, 0.0,
-    ///                    13.0*R,  -R, -2.0, 4.0*R]), 1e-5));
-    /// }
-    /// ```
-    #[must_use]
-    #[inline]
-    pub fn cholesky(self) -> Option<Cholesky4x4<T>> {
-        Cholesky4x4::new(self)
-    }
-}
-
 /// Cholesky4x4 matrix of `f32` values<br>
 pub type Cholesky4x4f32 = Cholesky4x4<f32>;
 /// Cholesky 4x4 matrix of `f64` values<br><br>
@@ -375,6 +343,40 @@ where
     #[must_use]
     pub fn invert(self) -> Matrix4x4<T> {
         self.solve_matrix(Matrix4x4::identity())
+    }
+}
+
+// **** MATRIX ****
+
+impl<T> Matrix4x4<T>
+where
+    T: Copy + FloatCore + MathMethods + ConstZero,
+{
+    /// Returns a wrapped Cholesky lower decomposition of a matrix if the matrix is positive definite, otherwise `None`.
+    /// The input matrix is assumed to be symmetric and only the lower-triangular part is read.
+    /// ```
+    /// # use vqm::{Cholesky4x4f32, Matrix4x4f32};
+    /// let A = Matrix4x4f32::new([
+    ///      2.0,  3.0,  7.0, 13.0,
+    ///      3.0,  5.0, 11.0, 19.0,
+    ///      7.0, 11.0, 29.0, 41.0,
+    ///     13.0, 19.0, 41.0, 97.0,
+    /// ]);
+    /// let option = A.cholesky();
+    /// assert!(option.is_some());
+    /// if let Some(cholesky) = option {
+    ///     const R: f32 = core::f32::consts::FRAC_1_SQRT_2;
+    ///     assert!(cholesky.l().is_near(Matrix4x4f32::new([
+    ///                     2.0*R, 0.0,  0.0, 0.0,
+    ///                     3.0*R,   R,  0.0, 0.0,
+    ///                     7.0*R,   R,  2.0, 0.0,
+    ///                    13.0*R,  -R, -2.0, 4.0*R]), 1e-5));
+    /// }
+    /// ```
+    #[must_use]
+    #[inline]
+    pub fn cholesky(self) -> Option<Cholesky4x4<T>> {
+        Cholesky4x4::new(self)
     }
 }
 

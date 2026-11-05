@@ -1,5 +1,5 @@
 use core::ops::{Add, Div, Index, Mul, Sub};
-use num_traits::Signed;
+use num_traits::{ConstOne, Signed};
 
 use crate::{MathConstants, Matrix2x2, Vector2};
 
@@ -16,13 +16,13 @@ pub type M2x2UpperTrianglef64 = M2x2UpperTriangle<f64>;
 /// This convention is used by libraries such as BLAS, LAPACK, and Intel MKL.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct M2x2UpperTriangle<T> {
-    pub(crate) a: [T; UTA_2X2_SIZE],
+    pub(crate) a: [T; UT_2X2_SIZE],
 }
-const UTA_2X2_SIZE: usize = 3;
+const UT_2X2_SIZE: usize = 3;
 
 impl<T> M2x2UpperTriangle<T> {
     /// Size of upper triangular array.
-    pub const SIZE: usize = UTA_2X2_SIZE;
+    pub const SIZE: usize = UT_2X2_SIZE;
 
     // Row 1
     const M11: usize = 0;
@@ -37,40 +37,41 @@ impl<T> M2x2UpperTriangle<T>
 where
     T: Copy,
 {
-    /// Create an upper-triangular array.
+    /// Create an upper-triangle.
     /// ```
     /// # use vqm::M2x2UpperTrianglef32;
-    /// let uta = M2x2UpperTrianglef32::new([
+    /// let ut = M2x2UpperTrianglef32::new([
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
     /// ```
     #[inline]
-    pub const fn new(a: [T; UTA_2X2_SIZE]) -> Self {
+    pub const fn new(a: [T; UT_2X2_SIZE]) -> Self {
         Self { a }
     }
 }
 
 // **** Other constructors ****
 
-impl<T> M2x2UpperTriangle<T>
-where
-    T: Copy + Signed + Sub<Output = T> + PartialOrd + MathConstants,
-{
-    /// Create an `M2x2UpperTriangle` from a symmetric Matrix2x2.
+impl<T> M2x2UpperTriangle<T> {
+    /// Create an `M2x2UpperTriangle` from a Matrix2x2.
     /// Does not check if the matrix is symmetric.
     /// ```
     /// # use vqm::{M2x2UpperTrianglef32, Matrix2x2f32};
     /// let m = Matrix2x2f32::new([
     ///     2.0,  3.0,
-    ///     3.0,  5.0,
+    ///     7.0,  5.0,
     /// ]);
-    /// let uta = M2x2UpperTrianglef32::from_symmetric_matrix(m);
-    /// assert_eq!(uta, M2x2UpperTrianglef32::new([2.0, 3.0, 5.0]));
+    /// let ut = M2x2UpperTrianglef32::from_matrix(m);
+    /// assert_eq!(ut, M2x2UpperTrianglef32::new([2.0, 3.0,
+    ///                                                5.0]));
     /// ```
     #[rustfmt::skip]
     #[inline]
-    pub fn from_symmetric_matrix(m: Matrix2x2<T>) -> Self {
+    pub fn from_matrix(m: Matrix2x2<T>) -> Self
+    where
+        T: Copy,
+    {
         Self { a: [
             m[Matrix2x2::<T >::M11], m[Matrix2x2::<T >::M12],
                                      m[Matrix2x2::<T >::M22],
@@ -85,18 +86,22 @@ where
     ///     2.0,  3.0,
     ///     3.0,  5.0,
     /// ]);
-    /// let option = M2x2UpperTrianglef32::try_from_symmetric_matrix(m, 1e-6);
+    /// let option = M2x2UpperTrianglef32::try_from_matrix(m, 1e-6);
     /// assert!(option.is_some());
-    /// if let Some(uta) = option {
-    ///     assert_eq!(uta, M2x2UpperTrianglef32::new([2.0, 3.0, 5.0]));
+    /// if let Some(ut) = option {
+    ///     assert_eq!(ut, M2x2UpperTrianglef32::new([2.0, 3.0,
+    ///                                                     5.0]));
     /// }
     /// ```
     #[inline]
-    pub fn try_from_symmetric_matrix(m: Matrix2x2<T>, epsilon: T) -> Option<Self> {
+    pub fn try_from_matrix(m: Matrix2x2<T>, epsilon: T) -> Option<Self>
+    where
+        T: Copy + Signed + PartialOrd,
+    {
         if !m.is_symmetric(epsilon) {
             return None;
         }
-        Some(Self::from_symmetric_matrix(m))
+        Some(Self::from_matrix(m))
     }
 
     /// Tries to create an `M2x2UpperTriangle` from the inverse of a symmetric Matrix2x2.
@@ -107,18 +112,22 @@ where
     ///     2.0, 3.0,
     ///     3.0, 5.0,
     /// ]);
-    /// let option = M2x2UpperTrianglef32::try_inverse_from_symmetric_matrix(m, 1e-6);
+    /// let option = M2x2UpperTrianglef32::try_inverse_from_matrix(m, 1e-6);
     /// assert!(option.is_some());
-    /// if let Some(uta) = option {
-    ///     assert_eq!(uta, M2x2UpperTrianglef32::new([5.0, -3.0, 2.0]));
-    ///     let n = Matrix2x2f32::from(uta);
+    /// if let Some(ut) = option {
+    ///     assert_eq!(ut, M2x2UpperTrianglef32::new([5.0, -3.0,
+    ///                                                      2.0]));
+    ///     let n = Matrix2x2f32::from(ut);
     ///     let i = m * n;
     ///     assert_eq!(i, Matrix2x2f32::identity());
     /// }
     /// ```
     #[rustfmt::skip]
     #[inline]
-    pub fn try_inverse_from_symmetric_matrix(m: Matrix2x2<T>, epsilon: T) -> Option<Self> {
+    pub fn try_inverse_from_matrix(m: Matrix2x2<T>, epsilon: T) -> Option<Self>
+    where
+        T: Copy + ConstOne + Signed + Sub<Output = T> + PartialOrd + MathConstants,
+    {
         if !m.is_symmetric(epsilon) {
             return None;
         }
@@ -128,35 +137,35 @@ where
         ] }
         .try_inverse(epsilon)
     }
-}
 
-impl<T> M2x2UpperTriangle<T>
-where
-    T: Copy
-        + Add<Output = T>
-        + Sub<Output = T>
-        + Mul<Output = T>
-        + Div<Output = T>
-        + Signed
-        + PartialOrd
-        + MathConstants,
-{
-    /// Try and invert Upper Triangular Array.
+    /// Try and invert Upper Triangle.
     /// Returns `None` if the matrix determinant is zero within a tolerance of `epsilon`.
     /// ```
     /// # use vqm::M2x2UpperTrianglef32;
-    /// let uta = M2x2UpperTrianglef32::new([
+    /// let ut = M2x2UpperTrianglef32::new([
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
-    /// let option = uta.try_inverse(1e-6);
+    /// let option = ut.try_inverse(1e-6);
     /// assert!(option.is_some());
-    /// if let Some(uta) = option {
-    ///     assert_eq!(uta, M2x2UpperTrianglef32::new([5.0, -3.0, 2.0]));
+    /// if let Some(ut) = option {
+    ///     assert_eq!(ut, M2x2UpperTrianglef32::new([5.0, -3.0,
+    ///                                                      2.0]));
     /// }
     /// ```
     #[inline]
-    pub fn try_inverse(self, epsilon: T) -> Option<Self> {
+    pub fn try_inverse(self, epsilon: T) -> Option<Self>
+    where
+        T: Copy
+            + ConstOne
+            + Add<Output = T>
+            + Sub<Output = T>
+            + Mul<Output = T>
+            + Div<Output = T>
+            + Signed
+            + PartialOrd
+            + MathConstants,
+    {
         // Calculate the cofactors needed for the determinant.
         // Calculate determinant using the first row cofactors
         let determinant = self.a[Self::M11] * self.a[Self::M22] - self.a[Self::M12] * self.a[Self::M12];
@@ -166,7 +175,7 @@ where
             return None;
         }
 
-        let determinant_reciprocal = T::one() / determinant;
+        let determinant_reciprocal = T::ONE / determinant;
 
         Some(Self {
             a: [
@@ -180,29 +189,31 @@ where
 
 // **** VECTOR ****
 
+// **** Pre-multiply ****
+
 impl<T> Mul<M2x2UpperTriangle<T>> for Vector2<T>
 where
     T: Copy + Add<Output = T> + Mul<Output = T>,
 {
     type Output = Vector2<T>;
-    /// Post-multiplies this UTA by a 2D vector.
-    /// Calculates: Result = v * uta.
+    /// Pre-multiplies an upper triangle by a 2D vector.
+    /// Calculates: Result = v * ut.
     /// ```
     /// # use vqm::{M2x2UpperTrianglef32,Vector2f32};
-    /// let uta = M2x2UpperTrianglef32::new([
+    /// let ut = M2x2UpperTrianglef32::new([
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
     /// let v = Vector2f32::new(13.0, 17.0);
-    /// let r = v * uta;
+    /// let r = v * ut;
     /// assert_eq!(r, Vector2f32::new(77.0, 124.0));
     /// ```
     #[inline]
-    fn mul(self, uta: M2x2UpperTriangle<T>) -> Vector2<T> {
-        type Uta<T> = M2x2UpperTriangle<T>;
+    fn mul(self, ut: M2x2UpperTriangle<T>) -> Vector2<T> {
+        type Ut<T> = M2x2UpperTriangle<T>;
         Vector2 {
-            x: self.x * uta.a[Uta::<T>::M11] + self.y * uta.a[Uta::<T>::M12],
-            y: self.x * uta.a[Uta::<T>::M12] + self.y * uta.a[Uta::<T>::M22],
+            x: self.x * ut.a[Ut::<T>::M11] + self.y * ut.a[Ut::<T>::M12],
+            y: self.x * ut.a[Ut::<T>::M12] + self.y * ut.a[Ut::<T>::M22],
         }
     }
 }
@@ -214,19 +225,19 @@ where
     T: Copy + Add<Output = T> + Mul<Output = T>,
 {
     type Output = Vector2<T>;
-    /// Post-multiplies this UTA by a 2D vector.
+    /// Post-multiplies this upper triangle by a 2D vector.
     ///
-    /// Calculates: Result = uta * v.
+    /// Calculates: Result = ut * v.
     /// ```
     /// # use vqm::{M2x2UpperTrianglef32, Vector2f32, Matrix2x2f32};
-    /// let uta = M2x2UpperTrianglef32::new([
+    /// let ut = M2x2UpperTrianglef32::new([
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
     /// let v = Vector2f32::new(13.0, 17.0);
-    /// let r = uta * v;
+    /// let r = ut * v;
     /// assert_eq!(r, Vector2f32::new(77.0, 124.0));
-    /// let m = Matrix2x2f32::from(uta);
+    /// let m = Matrix2x2f32::from(ut);
     /// let r2 = m * v;
     /// assert_eq!(r, r2);
     /// ```
@@ -249,28 +260,28 @@ where
 {
     type Output = Matrix2x2<T>;
 
-    /// Pre-multiplies this UTA by a 2x2 matrix.
-    /// Calculates: Result = m * uta.
+    /// Pre-multiplies this upper triangle by a 2x2 matrix.
+    /// Calculates: Result = m * ut.
     /// ```
     /// # use vqm::{M2x2UpperTrianglef32, Matrix2x2f32};
-    /// let uta = M2x2UpperTrianglef32::new([
+    /// let ut = M2x2UpperTrianglef32::new([
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
     /// let m = Matrix2x2f32::new([ 13.0, 17.0,
     ///                             19.0, 37.0]);
-    /// let r = m * uta;
+    /// let r = m * ut;
     /// assert_eq!(r, Matrix2x2f32::new([   77.0,  124.0,
     ///                                    149.0,  242.0]));
-    /// let n = Matrix2x2f32::from(uta);
+    /// let n = Matrix2x2f32::from(ut);
     /// let r2 = m * n;
     /// assert_eq!(r, r2);
     /// ```
     #[inline]
-    fn mul(self, uta: M2x2UpperTriangle<T>) -> Matrix2x2<T> {
-        let a11 = uta.a[0];
-        let a12 = uta.a[1];
-        let a13 = uta.a[2];
+    fn mul(self, ut: M2x2UpperTriangle<T>) -> Matrix2x2<T> {
+        let a11 = ut.a[0];
+        let a12 = ut.a[1];
+        let a13 = ut.a[2];
 
         // Cache rows of M into registers to prevent strided latency stalls
         // Row 1
@@ -299,21 +310,21 @@ where
 {
     type Output = Matrix2x2<T>;
 
-    /// Post-multiplies this UTA by a 2x2 matrix.
+    /// Post-multiplies this upper triangle by a 2x2 matrix.
     ///
-    /// Calculates: Result = uta * m.
+    /// Calculates: Result = ut * m.
     /// ```
     /// # use vqm::{M2x2UpperTrianglef32, Matrix2x2f32};
-    /// let uta = M2x2UpperTrianglef32::new([
+    /// let ut = M2x2UpperTrianglef32::new([
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
     /// let m = Matrix2x2f32::new([ 13.0, 17.0,
     ///                             19.0, 37.0]);
-    /// let r = uta * m;
+    /// let r = ut * m;
     /// assert_eq!(r, Matrix2x2f32::new([  83.0,  145.0,
     ///                                   134.0,  236.0]));
-    /// let n = Matrix2x2f32::from(uta);
+    /// let n = Matrix2x2f32::from(ut);
     /// let r2 = n * m;
     /// assert_eq!(r, r2);
     /// ```
@@ -344,17 +355,17 @@ where
 impl<T> Index<usize> for M2x2UpperTriangle<T> {
     type Output = T;
 
-    /// Access uta element by index.
+    /// Access upper triangle element by index.
     /// ```
     /// # use vqm::M2x2UpperTrianglef32;
-    /// let uta = M2x2UpperTrianglef32::new([
+    /// let ut = M2x2UpperTrianglef32::new([
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
     ///
-    /// assert_eq!(uta[0], 2.0);
-    /// assert_eq!(uta[1], 3.0);
-    /// assert_eq!(uta[2], 5.0);
+    /// assert_eq!(ut[0], 2.0);
+    /// assert_eq!(ut[1], 3.0);
+    /// assert_eq!(ut[2], 5.0);
     /// ```
     #[inline]
     fn index(&self, index: usize) -> &T {
@@ -369,21 +380,62 @@ where
     /// Matrix2x2 from `M2x2UpperTriangle`.
     /// ```
     /// # use vqm::{M2x2UpperTrianglef32, Matrix2x2f32};
-    /// let uta = M2x2UpperTrianglef32::new([
+    /// let ut = M2x2UpperTrianglef32::new([
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
-    /// let m = Matrix2x2f32::from(uta);
+    /// let m = Matrix2x2f32::from(ut);
     /// assert_eq!(m, Matrix2x2f32::new([
     ///     2.0,  3.0,
     ///     3.0,  5.0,
     /// ]));
     #[rustfmt::skip]
     #[inline]
-    fn from(uta: M2x2UpperTriangle<T>) -> Self {
+    fn from(ut: M2x2UpperTriangle<T>) -> Self {
         Self { a: [
-            uta[0], uta[1],
-            uta[1], uta[2],
+            ut[0], ut[1],
+            ut[1], ut[2],
         ] }
+    }
+}
+
+// **** MATRIX ****
+
+impl<T> Matrix2x2<T>
+where
+    T: Copy,
+{
+    /// Returns the upper triangle (including diagonal) of a matrix as a `M2x2UpperTrianglef32`.
+    /// The lower triangle of the matrix is ignored.
+    /// ```
+    /// # use vqm::{M2x2UpperTrianglef32, Matrix2x2f32};
+    /// let M = Matrix2x2f32::new([
+    ///     2.0, 3.0,
+    ///     7.0, 5.0
+    /// ]);
+    /// let ut = M.upper_triangle();
+    /// assert_eq!(ut, M2x2UpperTrianglef32::new([2.0, 3.0,
+    ///                                                5.0]));
+    /// ```
+    #[rustfmt::skip]
+    #[must_use]
+    #[inline]
+    pub fn upper_triangle(self) -> M2x2UpperTriangle<T> {
+        M2x2UpperTriangle::<T> { a: [
+            self.a[Self::M11], self.a[Self::M12],
+                               self.a[Self::M22],
+        ]}
+    }
+}
+
+#[cfg(test)]
+mod test_traits {
+    use super::*;
+
+    fn is_full<T: Sized + Send + Sync + Unpin + Copy + Clone + Default + PartialEq>() {}
+
+    #[test]
+    fn normal_types() {
+        is_full::<M2x2UpperTriangle<f32>>();
     }
 }

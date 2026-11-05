@@ -1,5 +1,5 @@
 use core::ops::{Add, Div, Index, Mul, Sub};
-use num_traits::Signed;
+use num_traits::{ConstOne, Signed};
 
 use crate::{MathConstants, Matrix3x3, Vector3};
 
@@ -17,13 +17,13 @@ pub type M3x3UpperTrianglef64 = M3x3UpperTriangle<f64>;
 /// This convention is used by libraries such as BLAS, LAPACK, and Intel MKL.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct M3x3UpperTriangle<T> {
-    pub(crate) a: [T; UTA_3X3_SIZE],
+    pub(crate) a: [T; UT_3X3_SIZE],
 }
-const UTA_3X3_SIZE: usize = 6;
+const UT_3X3_SIZE: usize = 6;
 
 impl<T> M3x3UpperTriangle<T> {
     /// Size of upper triangular array.
-    pub const SIZE: usize = UTA_3X3_SIZE;
+    pub const SIZE: usize = UT_3X3_SIZE;
 
     // Row 1
     const M11: usize = 0;
@@ -42,42 +42,44 @@ impl<T> M3x3UpperTriangle<T>
 where
     T: Copy,
 {
-    /// Create an upper-triangular array.
+    /// Create an upper-triangle.
     /// ```
     /// # use vqm::M3x3UpperTrianglef32;
-    /// let uta = M3x3UpperTrianglef32::new([
+    /// let ut = M3x3UpperTrianglef32::new([
     ///     2.0, 3.0,  7.0,
     ///          5.0, 11.0,
     ///               29.0
     /// ]);
     /// ```
     #[inline]
-    pub const fn new(a: [T; UTA_3X3_SIZE]) -> Self {
+    pub const fn new(a: [T; UT_3X3_SIZE]) -> Self {
         Self { a }
     }
 }
 
 // **** Other constructors ****
 
-impl<T> M3x3UpperTriangle<T>
-where
-    T: Copy + Signed + Sub<Output = T> + PartialOrd + MathConstants,
-{
-    /// Create an `M3x3UpperTriangle` from a symmetric Matrix3x3.
+impl<T> M3x3UpperTriangle<T> {
+    /// Create an `M3x3UpperTriangle` from a Matrix3x3.
     /// Does not check if the matrix is symmetric.
     /// ```
     /// # use vqm::{M3x3UpperTrianglef32, Matrix3x3f32};
     /// let m = Matrix3x3f32::new([
     ///     2.0,  3.0,  7.0,
-    ///     3.0,  5.0, 11.0,
-    ///     7.0, 11.0, 29.0
+    ///     4.0,  5.0, 11.0,
+    ///     6.0,  8.0, 29.0
     /// ]);
-    /// let uta = M3x3UpperTrianglef32::from_symmetric_matrix(m);
-    /// assert_eq!(uta, M3x3UpperTrianglef32::new([2.0, 3.0, 7.0, 5.0, 11.0, 29.0]));
+    /// let ut = M3x3UpperTrianglef32::from_matrix(m);
+    /// assert_eq!(ut, M3x3UpperTrianglef32::new([2.0, 3.0,  7.0,
+    ///                                                 5.0, 11.0,
+    ///                                                      29.0]));
     /// ```
     #[rustfmt::skip]
     #[inline]
-    pub fn from_symmetric_matrix(m: Matrix3x3<T>) -> Self {
+    pub fn from_matrix(m: Matrix3x3<T>) -> Self
+    where
+        T: Copy,
+    {
         Self { a: [
             m[Matrix3x3::<T >::M11], m[Matrix3x3::<T >::M12], m[Matrix3x3::<T >::M13],
                                      m[Matrix3x3::<T >::M22], m[Matrix3x3::<T >::M23],
@@ -94,18 +96,23 @@ where
     ///     3.0,  5.0, 11.0,
     ///     7.0, 11.0, 29.0
     /// ]);
-    /// let option = M3x3UpperTrianglef32::try_from_symmetric_matrix(m, 1e-6);
+    /// let option = M3x3UpperTrianglef32::try_from_matrix(m, 1e-6);
     /// assert!(option.is_some());
-    /// if let Some(uta) = option {
-    ///     assert_eq!(uta, M3x3UpperTrianglef32::new([2.0, 3.0, 7.0, 5.0, 11.0, 29.0]));
+    /// if let Some(ut) = option {
+    ///     assert_eq!(ut, M3x3UpperTrianglef32::new([2.0, 3.0,  7.0,
+    ///                                                     5.0, 11.0,
+    ///                                                          29.0]));
     /// }
     /// ```
     #[inline]
-    pub fn try_from_symmetric_matrix(m: Matrix3x3<T>, epsilon: T) -> Option<Self> {
+    pub fn try_from_matrix(m: Matrix3x3<T>, epsilon: T) -> Option<Self>
+    where
+        T: Copy + Signed + PartialOrd,
+    {
         if !m.is_symmetric(epsilon) {
             return None;
         }
-        Some(Self::from_symmetric_matrix(m))
+        Some(Self::from_matrix(m))
     }
 
     /// Tries to create an `M3x3UpperTriangle` from the inverse of a symmetric Matrix3x3.
@@ -113,22 +120,27 @@ where
     /// ```
     /// # use vqm::{M3x3UpperTrianglef32, Matrix3x3f32};
     /// let m = Matrix3x3f32::new([
-    ///     2.0, 3.0, 7.0,
-    ///     3.0, 5.0, 11.0,
+    ///     2.0,  3.0,  7.0,
+    ///     3.0,  5.0, 11.0,
     ///     7.0, 11.0, 29.0
     /// ]);
-    /// let option = M3x3UpperTrianglef32::try_inverse_from_symmetric_matrix(m, 1e-6);
+    /// let option = M3x3UpperTrianglef32::try_inverse_from_matrix(m, 1e-6);
     /// assert!(option.is_some());
-    /// if let Some(uta) = option {
-    ///     assert_eq!(uta, M3x3UpperTrianglef32::new([6.0, -2.5, -0.5, 2.25, -0.25, 0.25]));
-    ///     let n = Matrix3x3f32::from(uta);
+    /// if let Some(ut) = option {
+    ///     assert_eq!(ut, M3x3UpperTrianglef32::new([6.0, -2.5,  -0.5,
+    ///                                                      2.25, -0.25,
+    ///                                                             0.25]));
+    ///     let n = Matrix3x3f32::from(ut);
     ///     let i = m * n;
     ///     assert_eq!(i, Matrix3x3f32::identity());
     /// }
     /// ```
     #[rustfmt::skip]
     #[inline]
-    pub fn try_inverse_from_symmetric_matrix(m: Matrix3x3<T>, epsilon: T) -> Option<Self> {
+    pub fn try_inverse_from_matrix(m: Matrix3x3<T>, epsilon: T) -> Option<Self>
+    where
+        T: Copy + ConstOne + Signed + Sub<Output = T> + PartialOrd + MathConstants,
+    {
         if !m.is_symmetric(epsilon) {
             return None;
         }
@@ -139,36 +151,37 @@ where
         ] }
         .try_inverse(epsilon)
     }
-}
 
-impl<T> M3x3UpperTriangle<T>
-where
-    T: Copy
-        + Add<Output = T>
-        + Sub<Output = T>
-        + Mul<Output = T>
-        + Div<Output = T>
-        + Signed
-        + PartialOrd
-        + MathConstants,
-{
     /// Try and invert Upper Triangular Array.
     /// Returns `None` if the matrix determinant is zero within a tolerance of `epsilon`.
     /// ```
     /// # use vqm::M3x3UpperTrianglef32;
-    /// let uta = M3x3UpperTrianglef32::new([
+    /// let ut = M3x3UpperTrianglef32::new([
     ///     2.0, 3.0,  7.0,
     ///          5.0, 11.0,
     ///               29.0
     /// ]);
-    /// let option = uta.try_inverse(1e-6);
+    /// let option = ut.try_inverse(1e-6);
     /// assert!(option.is_some());
-    /// if let Some(uta) = option {
-    ///     assert_eq!(uta, M3x3UpperTrianglef32::new([6.0, -2.5, -0.5, 2.25, -0.25, 0.25]));
+    /// if let Some(ut) = option {
+    ///     assert_eq!(ut, M3x3UpperTrianglef32::new([6.0, -2.5,  -0.5,
+    ///                                                     2.25, -0.25,
+    ///                                                            0.25]));
     /// }
     /// ```
     #[inline]
-    pub fn try_inverse(self, epsilon: T) -> Option<Self> {
+    pub fn try_inverse(self, epsilon: T) -> Option<Self>
+    where
+        T: Copy
+            + ConstOne
+            + Add<Output = T>
+            + Sub<Output = T>
+            + Mul<Output = T>
+            + Div<Output = T>
+            + Signed
+            + PartialOrd
+            + MathConstants,
+    {
         // Calculate the cofactors needed for the determinant.
         let c11 = self.a[Self::M22] * self.a[Self::M33] - self.a[Self::M23] * self.a[Self::M23];
         let c12 = self.a[Self::M13] * self.a[Self::M23] - self.a[Self::M12] * self.a[Self::M33];
@@ -182,7 +195,7 @@ where
             return None;
         }
 
-        let determinant_reciprocal = T::one() / determinant;
+        let determinant_reciprocal = T::ONE / determinant;
 
         // Calculate remaining cofactors
         let c22 = self.a[Self::M11] * self.a[Self::M33] - self.a[Self::M13] * self.a[Self::M13];
@@ -204,31 +217,33 @@ where
 
 // **** VECTOR ****
 
+// **** Pre-multiply ****
+
 impl<T> Mul<M3x3UpperTriangle<T>> for Vector3<T>
 where
     T: Copy + Add<Output = T> + Mul<Output = T>,
 {
     type Output = Vector3<T>;
-    /// Pre-multiplies this UTA by a 3D vector.
-    /// Calculates: Result = v * uta.
+    /// Pre-multiplies an upper triangle by a 3D vector.
+    /// Calculates: Result = v * ut.
     /// ```
     /// # use vqm::{M3x3UpperTrianglef32, Vector3f32};
-    /// let uta = M3x3UpperTrianglef32::new([
+    /// let ut = M3x3UpperTrianglef32::new([
     ///     2.0, 3.0,  7.0,
     ///          5.0, 11.0,
     ///               29.0
     /// ]);
     /// let v = Vector3f32::new(13.0, 17.0, 19.0);
-    /// let r = v * uta;
+    /// let r = v * ut;
     /// assert_eq!(r, Vector3f32::new(210.0, 333.0, 829.0));
     /// ```
     #[inline]
-    fn mul(self, uta: M3x3UpperTriangle<T>) -> Vector3<T> {
-        type Uta<T> = M3x3UpperTriangle<T>;
+    fn mul(self, ut: M3x3UpperTriangle<T>) -> Vector3<T> {
+        type Ut<T> = M3x3UpperTriangle<T>;
         Vector3 {
-            x: self.x * uta.a[Uta::<T>::M11] + self.y * uta.a[Uta::<T>::M12] + self.z * uta.a[Uta::<T>::M13],
-            y: self.x * uta.a[Uta::<T>::M12] + self.y * uta.a[Uta::<T>::M22] + self.z * uta.a[Uta::<T>::M23],
-            z: self.x * uta.a[Uta::<T>::M13] + self.y * uta.a[Uta::<T>::M23] + self.z * uta.a[Uta::<T>::M33],
+            x: self.x * ut.a[Ut::<T>::M11] + self.y * ut.a[Ut::<T>::M12] + self.z * ut.a[Ut::<T>::M13],
+            y: self.x * ut.a[Ut::<T>::M12] + self.y * ut.a[Ut::<T>::M22] + self.z * ut.a[Ut::<T>::M23],
+            z: self.x * ut.a[Ut::<T>::M13] + self.y * ut.a[Ut::<T>::M23] + self.z * ut.a[Ut::<T>::M33],
         }
     }
 }
@@ -240,20 +255,20 @@ where
     T: Copy + Add<Output = T> + Mul<Output = T>,
 {
     type Output = Vector3<T>;
-    /// Post-multiplies this UTA by a 3D vector.
+    /// Post-multiplies this upper triangle by a 3D vector.
     ///
-    /// Calculates: Result = uta * v.
+    /// Calculates: Result = ut * v.
     /// ```
     /// # use vqm::{M3x3UpperTrianglef32, Vector3f32, Matrix3x3f32};
-    /// let uta = M3x3UpperTrianglef32::new([
+    /// let ut = M3x3UpperTrianglef32::new([
     ///     2.0, 3.0,  7.0,
     ///          5.0, 11.0,
     ///               29.0
     /// ]);
     /// let v = Vector3f32::new(13.0, 17.0, 19.0);
-    /// let r = uta * v;
+    /// let r = ut * v;
     /// assert_eq!(r, Vector3f32::new(210.0, 333.0, 829.0));
-    /// let m = Matrix3x3f32::from(uta);
+    /// let m = Matrix3x3f32::from(ut);
     /// let r2 = m * v;
     /// assert_eq!(r, r2);
     /// ```
@@ -277,11 +292,11 @@ where
 {
     type Output = Matrix3x3<T>;
 
-    /// Pre-multiplies this UTA by a 3x3 matrix.
-    /// Calculates: Result = m * uta.
+    /// Pre-multiplies this upper triangle by a 3x3 matrix.
+    /// Calculates: Result = m * ut.
     /// ```
     /// # use vqm::{M3x3UpperTrianglef32, Matrix3x3f32};
-    /// let uta = M3x3UpperTrianglef32::new([
+    /// let ut = M3x3UpperTrianglef32::new([
     ///     2.0, 3.0,  7.0,
     ///          5.0, 11.0,
     ///               29.0
@@ -289,22 +304,22 @@ where
     /// let m = Matrix3x3f32::new([ 13.0, 17.0, 59.0,
     ///                             19.0, 37.0, 47.0,
     ///                             23.0, 31.0, 41.0]);
-    /// let r = m * uta;
+    /// let r = m * ut;
     /// assert_eq!(r, Matrix3x3f32::new([  490.0,  773.0, 1989.0,
     ///                                    478.0,  759.0, 1903.0,
     ///                                    426.0,  675.0, 1691.0]));
-    /// let n = Matrix3x3f32::from(uta);
+    /// let n = Matrix3x3f32::from(ut);
     /// let r2 = m * n;
     /// assert_eq!(r, r2);
     /// ```
     #[inline]
-    fn mul(self, uta: M3x3UpperTriangle<T>) -> Matrix3x3<T> {
-        let a11 = uta.a[0];
-        let a12 = uta.a[1];
-        let a13 = uta.a[2];
-        let a22 = uta.a[3];
-        let a23 = uta.a[4];
-        let a33 = uta.a[5];
+    fn mul(self, ut: M3x3UpperTriangle<T>) -> Matrix3x3<T> {
+        let a11 = ut.a[0];
+        let a12 = ut.a[1];
+        let a13 = ut.a[2];
+        let a22 = ut.a[3];
+        let a23 = ut.a[4];
+        let a33 = ut.a[5];
 
         // Cache rows of M into registers to prevent strided latency stalls
         // Row 1
@@ -347,12 +362,12 @@ where
 {
     type Output = Matrix3x3<T>;
 
-    /// Post-multiplies this UTA by a 3x3 matrix.
+    /// Post-multiplies this upper triangle by a 3x3 matrix.
     ///
-    /// Calculates: Result = uta * m.
+    /// Calculates: Result = ut * m.
     /// ```
     /// # use vqm::{M3x3UpperTrianglef32, Matrix3x3f32};
-    /// let uta = M3x3UpperTrianglef32::new([
+    /// let ut = M3x3UpperTrianglef32::new([
     ///     2.0, 3.0,  7.0,
     ///          5.0, 11.0,
     ///               29.0
@@ -360,11 +375,11 @@ where
     /// let m = Matrix3x3f32::new([ 13.0, 17.0, 59.0,
     ///                             19.0, 37.0, 47.0,
     ///                             23.0, 31.0, 41.0]);
-    /// let r = uta * m;
+    /// let r = ut * m;
     /// assert_eq!(r, Matrix3x3f32::new([  244.0,  362.0,  546.0,
     ///                                    387.0,  577.0,  863.0,
     ///                                    967.0, 1425.0, 2119.0]));
-    /// let n = Matrix3x3f32::from(uta);
+    /// let n = Matrix3x3f32::from(ut);
     /// let r2 = n * m;
     /// assert_eq!(r, r2);
     /// ```
@@ -410,27 +425,29 @@ where
 impl<T> Index<usize> for M3x3UpperTriangle<T> {
     type Output = T;
 
-    /// Access uta element by index.
+    /// Access upper triangle element by index.
     /// ```
     /// # use vqm::M3x3UpperTrianglef32;
-    /// let uta = M3x3UpperTrianglef32::new([
+    /// let ut = M3x3UpperTrianglef32::new([
     ///     2.0, 3.0,  7.0,
     ///          5.0, 11.0,
     ///               29.0
     /// ]);
     ///
-    /// assert_eq!(uta[0], 2.0);
-    /// assert_eq!(uta[1], 3.0);
-    /// assert_eq!(uta[2], 7.0);
-    /// assert_eq!(uta[3], 5.0);
-    /// assert_eq!(uta[4], 11.0);
-    /// assert_eq!(uta[5], 29.0);
+    /// assert_eq!(ut[0], 2.0);
+    /// assert_eq!(ut[1], 3.0);
+    /// assert_eq!(ut[2], 7.0);
+    /// assert_eq!(ut[3], 5.0);
+    /// assert_eq!(ut[4], 11.0);
+    /// assert_eq!(ut[5], 29.0);
     /// ```
     #[inline]
     fn index(&self, index: usize) -> &T {
         &self.a[index]
     }
 }
+
+// **** MATRIX ****
 
 impl<T> From<M3x3UpperTriangle<T>> for Matrix3x3<T>
 where
@@ -439,12 +456,12 @@ where
     /// Matrix3x3 from `M3x3UpperTriangle`.
     /// ```
     /// # use vqm::{M3x3UpperTrianglef32, Matrix3x3f32};
-    /// let uta = M3x3UpperTrianglef32::new([
+    /// let ut = M3x3UpperTrianglef32::new([
     ///     2.0, 3.0,  7.0,
     ///          5.0, 11.0,
     ///               29.0
     /// ]);
-    /// let m = Matrix3x3f32::from(uta);
+    /// let m = Matrix3x3f32::from(ut);
     /// assert_eq!(m, Matrix3x3f32::new([
     ///     2.0,  3.0,  7.0,
     ///     3.0,  5.0, 11.0,
@@ -452,11 +469,53 @@ where
     /// ]));
     #[rustfmt::skip]
     #[inline]
-    fn from(uta: M3x3UpperTriangle<T>) -> Self {
+    fn from(ut: M3x3UpperTriangle<T>) -> Self {
         Self { a: [
-            uta[0], uta[1], uta[2],
-            uta[1], uta[3], uta[4],
-            uta[2], uta[4], uta[5],
+            ut[0], ut[1], ut[2],
+            ut[1], ut[3], ut[4],
+            ut[2], ut[4], ut[5],
         ] }
+    }
+}
+
+impl<T> Matrix3x3<T>
+where
+    T: Copy,
+{
+    /// Returns the upper triangle (including diagonal) of a matrix as a `M3x3UpperTriangle`.
+    /// The lower triangle of the matrix is ignored.
+    /// ```
+    /// # use vqm::{M3x3UpperTrianglef32, Matrix3x3f32};
+    /// let M = Matrix3x3f32::new([
+    ///     2.0,  3.0,  7.0,
+    ///     4.0,  5.0, 11.0,
+    ///     6.0,  8.0, 29.0
+    /// ]);
+    /// let ut = M.upper_triangle();
+    /// assert_eq!(ut, M3x3UpperTrianglef32::new([2.0, 3.0,  7.0,
+    ///                                                 5.0, 11.0,
+    ///                                                      29.0]));
+    /// ```
+    #[rustfmt::skip]
+    #[must_use]
+    #[inline]
+    pub fn upper_triangle(self) -> M3x3UpperTriangle<T> {
+        M3x3UpperTriangle::<T> { a: [
+            self.a[Self::M11], self.a[Self::M12], self.a[Self::M13],
+                               self.a[Self::M22], self.a[Self::M23],
+                                                  self.a[Self::M33],
+        ]}
+    }
+}
+
+#[cfg(test)]
+mod test_traits {
+    use super::*;
+
+    fn is_full<T: Sized + Send + Sync + Unpin + Copy + Clone + Default + PartialEq>() {}
+
+    #[test]
+    fn normal_types() {
+        is_full::<M3x3UpperTriangle<f32>>();
     }
 }

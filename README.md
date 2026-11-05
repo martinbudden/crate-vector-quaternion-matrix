@@ -176,16 +176,16 @@ fn calculation() -> Option<Vector3f32> {
    ]);
    let v = Vector3f32::new(0.1, 2.3, 1.7);
 
-   let uta = M3x3UpperTrianglef32::try_from_symmetric_matrix(m, tolerance)?;
+   let uta = M3x3UpperTrianglef32::try_from_matrix(m, tolerance)?;
    assert_eq!(uta, M3x3UpperTrianglef32::new([2.0, 3.0, 7.0,
-                                                          5.0, 11.0,
-                                                               29.0]));
+                                                   5.0, 11.0,
+                                                        29.0]));
    let u = uta * v;
 
-   let m_inv = M3x3UpperTrianglef32::try_inverse_from_symmetric_matrix(m, tolerance)?;
+   let m_inv = M3x3UpperTrianglef32::try_inverse_from_matrix(m, tolerance)?;
    assert_eq!(m_inv, M3x3UpperTrianglef32::new([6.0, -2.5,  -0.5,
-                                                             2.25, -0.25,
-                                                                    0.25]));
+                                                      2.25, -0.25,
+                                                             0.25]));
    let w = m_inv * v;
 
    Some(w)
