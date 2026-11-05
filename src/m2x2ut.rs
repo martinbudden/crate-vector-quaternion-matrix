@@ -4,24 +4,23 @@ use num_traits::Signed;
 use crate::{MathConstants, Matrix2x2, Vector2};
 
 /// Upper-Triangular Array representing a 2x2 matrix of `f32` values<br>
-pub type M2x2UpperTriangularArrayf32 = M2x2UpperTriangularArray<f32>;
+pub type M2x2UpperTrianglef32 = M2x2UpperTriangle<f32>;
 /// Upper-Triangular Array representing a 2x2 matrix of `f64` values<br><br>
-pub type M2x2UpperTriangularArrayf64 = M2x2UpperTriangularArray<f64>;
+pub type M2x2UpperTrianglef64 = M2x2UpperTriangle<f64>;
 
-/// A 2x2 symmetric matrix stored as a flat 6-element array (Upper-Triangular layout):
-/// `[m11, m12, m13,
-///        m22, m23,
-///             m33]`.
+/// A 2x2 symmetric matrix stored as a flat 3-element array (Upper-Triangular layout):
+/// `[m11, m12,
+///        m22]`.
 /// Also known as Voigt Notation or Mandel Notation.
 /// The overwhelming historical convention is to use upper-triangular rather than lower-triangular layout.
 /// This convention is used by libraries such as BLAS, LAPACK, and Intel MKL.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
-pub struct M2x2UpperTriangularArray<T> {
+pub struct M2x2UpperTriangle<T> {
     pub(crate) a: [T; UTA_2X2_SIZE],
 }
 const UTA_2X2_SIZE: usize = 3;
 
-impl<T> M2x2UpperTriangularArray<T> {
+impl<T> M2x2UpperTriangle<T> {
     /// Size of upper triangular array.
     pub const SIZE: usize = UTA_2X2_SIZE;
 
@@ -34,14 +33,14 @@ impl<T> M2x2UpperTriangularArray<T> {
 
 // **** New ****
 
-impl<T> M2x2UpperTriangularArray<T>
+impl<T> M2x2UpperTriangle<T>
 where
     T: Copy,
 {
     /// Create an upper-triangular array.
     /// ```
-    /// # use vqm::M2x2UpperTriangularArrayf32;
-    /// let uta = M2x2UpperTriangularArrayf32::new([
+    /// # use vqm::M2x2UpperTrianglef32;
+    /// let uta = M2x2UpperTrianglef32::new([
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
@@ -54,20 +53,20 @@ where
 
 // **** Other constructors ****
 
-impl<T> M2x2UpperTriangularArray<T>
+impl<T> M2x2UpperTriangle<T>
 where
     T: Copy + Signed + Sub<Output = T> + PartialOrd + MathConstants,
 {
-    /// Create an `M2x2UpperTriangularArray` from a symmetric Matrix2x2.
+    /// Create an `M2x2UpperTriangle` from a symmetric Matrix2x2.
     /// Does not check if the matrix is symmetric.
     /// ```
-    /// # use vqm::{M2x2UpperTriangularArrayf32, Matrix2x2f32};
+    /// # use vqm::{M2x2UpperTrianglef32, Matrix2x2f32};
     /// let m = Matrix2x2f32::new([
     ///     2.0,  3.0,
     ///     3.0,  5.0,
     /// ]);
-    /// let uta = M2x2UpperTriangularArrayf32::from_symmetric_matrix(m);
-    /// assert_eq!(uta, M2x2UpperTriangularArrayf32::new([2.0, 3.0, 5.0]));
+    /// let uta = M2x2UpperTrianglef32::from_symmetric_matrix(m);
+    /// assert_eq!(uta, M2x2UpperTrianglef32::new([2.0, 3.0, 5.0]));
     /// ```
     #[rustfmt::skip]
     #[inline]
@@ -78,18 +77,18 @@ where
         ]}
     }
 
-    /// Tries to create an `M2x2UpperTriangularArray` from a symmetric Matrix2x2.
+    /// Tries to create an `M2x2UpperTriangle` from a symmetric Matrix2x2.
     /// Returns `None` if the input matrix is not symmetric within floating-point tolerance `epsilon`.
     /// ```
-    /// # use vqm::{M2x2UpperTriangularArrayf32, Matrix2x2f32};
+    /// # use vqm::{M2x2UpperTrianglef32, Matrix2x2f32};
     /// let m = Matrix2x2f32::new([
     ///     2.0,  3.0,
     ///     3.0,  5.0,
     /// ]);
-    /// let option = M2x2UpperTriangularArrayf32::try_from_symmetric_matrix(m, 1e-6);
+    /// let option = M2x2UpperTrianglef32::try_from_symmetric_matrix(m, 1e-6);
     /// assert!(option.is_some());
     /// if let Some(uta) = option {
-    ///     assert_eq!(uta, M2x2UpperTriangularArrayf32::new([2.0, 3.0, 5.0]));
+    ///     assert_eq!(uta, M2x2UpperTrianglef32::new([2.0, 3.0, 5.0]));
     /// }
     /// ```
     #[inline]
@@ -100,18 +99,18 @@ where
         Some(Self::from_symmetric_matrix(m))
     }
 
-    /// Tries to create an `M2x2UpperTriangularArray` from the inverse of a symmetric Matrix2x2.
+    /// Tries to create an `M2x2UpperTriangle` from the inverse of a symmetric Matrix2x2.
     /// Returns `None` if the input matrix is not symmetric, or not invertible because the determinant is zero within floating-point tolerance `epsilon`.
     /// ```
-    /// # use vqm::{M2x2UpperTriangularArrayf32, Matrix2x2f32};
+    /// # use vqm::{M2x2UpperTrianglef32, Matrix2x2f32};
     /// let m = Matrix2x2f32::new([
     ///     2.0, 3.0,
     ///     3.0, 5.0,
     /// ]);
-    /// let option = M2x2UpperTriangularArrayf32::try_inverse_from_symmetric_matrix(m, 1e-6);
+    /// let option = M2x2UpperTrianglef32::try_inverse_from_symmetric_matrix(m, 1e-6);
     /// assert!(option.is_some());
     /// if let Some(uta) = option {
-    ///     assert_eq!(uta, M2x2UpperTriangularArrayf32::new([5.0, -3.0, 2.0]));
+    ///     assert_eq!(uta, M2x2UpperTrianglef32::new([5.0, -3.0, 2.0]));
     ///     let n = Matrix2x2f32::from(uta);
     ///     let i = m * n;
     ///     assert_eq!(i, Matrix2x2f32::identity());
@@ -131,7 +130,7 @@ where
     }
 }
 
-impl<T> M2x2UpperTriangularArray<T>
+impl<T> M2x2UpperTriangle<T>
 where
     T: Copy
         + Add<Output = T>
@@ -145,15 +144,15 @@ where
     /// Try and invert Upper Triangular Array.
     /// Returns `None` if the matrix determinant is zero within a tolerance of `epsilon`.
     /// ```
-    /// # use vqm::M2x2UpperTriangularArrayf32;
-    /// let uta = M2x2UpperTriangularArrayf32::new([
+    /// # use vqm::M2x2UpperTrianglef32;
+    /// let uta = M2x2UpperTrianglef32::new([
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
     /// let option = uta.try_inverse(1e-6);
     /// assert!(option.is_some());
     /// if let Some(uta) = option {
-    ///     assert_eq!(uta, M2x2UpperTriangularArrayf32::new([5.0, -3.0, 2.0]));
+    ///     assert_eq!(uta, M2x2UpperTrianglef32::new([5.0, -3.0, 2.0]));
     /// }
     /// ```
     #[inline]
@@ -181,7 +180,7 @@ where
 
 // **** VECTOR ****
 
-impl<T> Mul<M2x2UpperTriangularArray<T>> for Vector2<T>
+impl<T> Mul<M2x2UpperTriangle<T>> for Vector2<T>
 where
     T: Copy + Add<Output = T> + Mul<Output = T>,
 {
@@ -189,8 +188,8 @@ where
     /// Post-multiplies this UTA by a 2D vector.
     /// Calculates: Result = v * uta.
     /// ```
-    /// # use vqm::{M2x2UpperTriangularArrayf32,Vector2f32};
-    /// let uta = M2x2UpperTriangularArrayf32::new([
+    /// # use vqm::{M2x2UpperTrianglef32,Vector2f32};
+    /// let uta = M2x2UpperTrianglef32::new([
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
@@ -199,8 +198,8 @@ where
     /// assert_eq!(r, Vector2f32::new(77.0, 124.0));
     /// ```
     #[inline]
-    fn mul(self, uta: M2x2UpperTriangularArray<T>) -> Vector2<T> {
-        type Uta<T> = M2x2UpperTriangularArray<T>;
+    fn mul(self, uta: M2x2UpperTriangle<T>) -> Vector2<T> {
+        type Uta<T> = M2x2UpperTriangle<T>;
         Vector2 {
             x: self.x * uta.a[Uta::<T>::M11] + self.y * uta.a[Uta::<T>::M12],
             y: self.x * uta.a[Uta::<T>::M12] + self.y * uta.a[Uta::<T>::M22],
@@ -210,7 +209,7 @@ where
 
 // **** Post-multiply ****
 
-impl<T> Mul<Vector2<T>> for M2x2UpperTriangularArray<T>
+impl<T> Mul<Vector2<T>> for M2x2UpperTriangle<T>
 where
     T: Copy + Add<Output = T> + Mul<Output = T>,
 {
@@ -219,8 +218,8 @@ where
     ///
     /// Calculates: Result = uta * v.
     /// ```
-    /// # use vqm::{M2x2UpperTriangularArrayf32, Vector2f32, Matrix2x2f32};
-    /// let uta = M2x2UpperTriangularArrayf32::new([
+    /// # use vqm::{M2x2UpperTrianglef32, Vector2f32, Matrix2x2f32};
+    /// let uta = M2x2UpperTrianglef32::new([
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
@@ -244,7 +243,7 @@ where
 
 // **** Pre-multiply ****
 
-impl<T> Mul<M2x2UpperTriangularArray<T>> for Matrix2x2<T>
+impl<T> Mul<M2x2UpperTriangle<T>> for Matrix2x2<T>
 where
     T: Copy + Add<Output = T> + Mul<Output = T>,
 {
@@ -253,8 +252,8 @@ where
     /// Pre-multiplies this UTA by a 2x2 matrix.
     /// Calculates: Result = m * uta.
     /// ```
-    /// # use vqm::{M2x2UpperTriangularArrayf32, Matrix2x2f32};
-    /// let uta = M2x2UpperTriangularArrayf32::new([
+    /// # use vqm::{M2x2UpperTrianglef32, Matrix2x2f32};
+    /// let uta = M2x2UpperTrianglef32::new([
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
@@ -268,7 +267,7 @@ where
     /// assert_eq!(r, r2);
     /// ```
     #[inline]
-    fn mul(self, uta: M2x2UpperTriangularArray<T>) -> Matrix2x2<T> {
+    fn mul(self, uta: M2x2UpperTriangle<T>) -> Matrix2x2<T> {
         let a11 = uta.a[0];
         let a12 = uta.a[1];
         let a13 = uta.a[2];
@@ -294,7 +293,7 @@ where
 
 // **** Post-multiply ****
 
-impl<T> Mul<Matrix2x2<T>> for M2x2UpperTriangularArray<T>
+impl<T> Mul<Matrix2x2<T>> for M2x2UpperTriangle<T>
 where
     T: Copy + Add<Output = T> + Mul<Output = T>,
 {
@@ -304,8 +303,8 @@ where
     ///
     /// Calculates: Result = uta * m.
     /// ```
-    /// # use vqm::{M2x2UpperTriangularArrayf32, Matrix2x2f32};
-    /// let uta = M2x2UpperTriangularArrayf32::new([
+    /// # use vqm::{M2x2UpperTrianglef32, Matrix2x2f32};
+    /// let uta = M2x2UpperTrianglef32::new([
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
@@ -342,13 +341,13 @@ where
 
 // **** Index ****
 
-impl<T> Index<usize> for M2x2UpperTriangularArray<T> {
+impl<T> Index<usize> for M2x2UpperTriangle<T> {
     type Output = T;
 
     /// Access uta element by index.
     /// ```
-    /// # use vqm::M2x2UpperTriangularArrayf32;
-    /// let uta = M2x2UpperTriangularArrayf32::new([
+    /// # use vqm::M2x2UpperTrianglef32;
+    /// let uta = M2x2UpperTrianglef32::new([
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
@@ -363,14 +362,14 @@ impl<T> Index<usize> for M2x2UpperTriangularArray<T> {
     }
 }
 
-impl<T> From<M2x2UpperTriangularArray<T>> for Matrix2x2<T>
+impl<T> From<M2x2UpperTriangle<T>> for Matrix2x2<T>
 where
     T: Copy,
 {
-    /// Matrix2x2 from `M2x2UpperTriangularArray`.
+    /// Matrix2x2 from `M2x2UpperTriangle`.
     /// ```
-    /// # use vqm::{M2x2UpperTriangularArrayf32, Matrix2x2f32};
-    /// let uta = M2x2UpperTriangularArrayf32::new([
+    /// # use vqm::{M2x2UpperTrianglef32, Matrix2x2f32};
+    /// let uta = M2x2UpperTrianglef32::new([
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
@@ -381,7 +380,7 @@ where
     /// ]));
     #[rustfmt::skip]
     #[inline]
-    fn from(uta: M2x2UpperTriangularArray<T>) -> Self {
+    fn from(uta: M2x2UpperTriangle<T>) -> Self {
         Self { a: [
             uta[0], uta[1],
             uta[1], uta[2],

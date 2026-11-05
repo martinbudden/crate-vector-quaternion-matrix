@@ -2457,7 +2457,6 @@ where
     #[inline]
     pub fn trace_sum_squares(self) -> T {
         T::m4x4_trace_sum_squares(self)
-
     }
     /// Return Frobenius norm squared of the matrix, that is the sum of the squares of all the elements.
     /// ```

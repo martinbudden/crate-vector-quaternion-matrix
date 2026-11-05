@@ -34,22 +34,22 @@ mod vector3_buf;
 mod vector4;
 
 mod cholesky2x2;
+mod m2x2ut;
 mod matrix2x2;
 mod matrix2x2_math;
-mod uta2x2;
 
 mod cholesky3x3;
+mod m3x3ut;
 mod matrix3x3;
 mod matrix3x3_math;
-mod uta3x3;
 
 mod matrix3x3_m2x2;
 mod matrix3x3_m3x3;
 
 mod cholesky4x4;
+mod m4x4ut;
 mod matrix4x4;
 mod matrix4x4_math;
-mod uta4x4;
 
 mod quaternion;
 mod quaternion_math;
@@ -76,16 +76,16 @@ pub use quaternion::{Quaternion, Quaternionf32, Quaternionf64};
 pub use roll_pitch_yaw::{RollPitch, RollPitchYaw, RollPitchYawf32, RollPitchYawf64, RollPitchf32, RollPitchf64};
 
 pub use cholesky2x2::{Cholesky2x2, Cholesky2x2f32, Cholesky2x2f64};
+pub use m2x2ut::{M2x2UpperTriangle, M2x2UpperTrianglef32, M2x2UpperTrianglef64};
 pub use matrix2x2::{Matrix2x2, Matrix2x2f32, Matrix2x2f64};
-pub use uta2x2::{M2x2UpperTriangularArray, M2x2UpperTriangularArrayf32, M2x2UpperTriangularArrayf64};
 
 pub use cholesky3x3::{Cholesky3x3, Cholesky3x3f32, Cholesky3x3f64};
+pub use m3x3ut::{M3x3UpperTriangle, M3x3UpperTrianglef32, M3x3UpperTrianglef64};
 pub use matrix3x3::{Matrix3x3, Matrix3x3f32, Matrix3x3f64};
-pub use uta3x3::{M3x3UpperTriangularArray, M3x3UpperTriangularArrayf32, M3x3UpperTriangularArrayf64};
 
 pub use matrix3x3_m2x2::{Matrix3x3xM2x2, Matrix3x3xM2x2f32, Matrix3x3xM2x2f64};
 pub use matrix3x3_m3x3::{Matrix3x3xM3x3, Matrix3x3xM3x3f32, Matrix3x3xM3x3f64};
 
 pub use cholesky4x4::{Cholesky4x4, Cholesky4x4f32, Cholesky4x4f64};
+pub use m4x4ut::{M4x4UpperTriangle, M4x4UpperTrianglef32, M4x4UpperTrianglef64};
 pub use matrix4x4::{Matrix4x4, Matrix4x4f32, Matrix4x4f64};
-pub use uta4x4::{M4x4UpperTriangularArray, M4x4UpperTriangularArrayf32, M4x4UpperTriangularArrayf64};

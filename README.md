@@ -153,9 +153,9 @@ let x = y.sqrt();
 let z = y.sqrt_reciprocal();
 ```
 
-## Symmetric matrices and upper triangular arrays
+## Symmetric matrix upper triangles
 
-`vqm` can represent a symmetric matrix as an upper triangular array (UTA), eg `M3x3UpperTriangularArrayf32`.
+`vqm` can represent a symmetric matrix as an upper triangular array (UTA), eg `M3x3UpperTrianglef32`.
 This representation was initially implemented to support Kalman filters, where symmetric matrices are widely used.
 
 The UTA form is computationally more efficient for calculating inverses and multiplying vectors.
@@ -165,7 +165,7 @@ can be done entirely within a microprocessor's floating point register bank.
 An example:
 
 ```rust
-# use vqm::{M3x3UpperTriangularArrayf32, Matrix3x3f32, Vector3f32};
+# use vqm::{M3x3UpperTrianglef32, Matrix3x3f32, Vector3f32};
 
 fn calculation() -> Option<Vector3f32> {
    let tolerance = 1e-6; // maximum allowed deviation from symmetric
@@ -176,14 +176,14 @@ fn calculation() -> Option<Vector3f32> {
    ]);
    let v = Vector3f32::new(0.1, 2.3, 1.7);
 
-   let uta = M3x3UpperTriangularArrayf32::try_from_symmetric_matrix(m, tolerance)?;
-   assert_eq!(uta, M3x3UpperTriangularArrayf32::new([2.0, 3.0, 7.0,
+   let uta = M3x3UpperTrianglef32::try_from_symmetric_matrix(m, tolerance)?;
+   assert_eq!(uta, M3x3UpperTrianglef32::new([2.0, 3.0, 7.0,
                                                           5.0, 11.0,
                                                                29.0]));
    let u = uta * v;
 
-   let m_inv = M3x3UpperTriangularArrayf32::try_inverse_from_symmetric_matrix(m, tolerance)?;
-   assert_eq!(m_inv, M3x3UpperTriangularArrayf32::new([6.0, -2.5,  -0.5,
+   let m_inv = M3x3UpperTrianglef32::try_inverse_from_symmetric_matrix(m, tolerance)?;
+   assert_eq!(m_inv, M3x3UpperTrianglef32::new([6.0, -2.5,  -0.5,
                                                              2.25, -0.25,
                                                                     0.25]));
    let w = m_inv * v;
