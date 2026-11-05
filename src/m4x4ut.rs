@@ -1,21 +1,23 @@
-use core::ops::{Add, Div, Index, Mul, Sub};
+use core::ops::{Add, Index, Mul, Neg, Sub};
 use num_traits::{ConstOne, Signed};
 
-use crate::{MathConstants, Matrix4x4, Vector4};
+use crate::{MathConstants, MathMethods, Matrix4x4, Vector4};
 
-/// Upper-Triangular Array representing a 4x4 matrix of `f32` values<br>
+/// Upper triangular array representing a 4x4 matrix of `f32` values<br>
 pub type M4x4UpperTrianglef32 = M4x4UpperTriangle<f32>;
-/// Upper-Triangular Array representing a 4x4 matrix of `f64` values<br><br>
+/// Upper triangular array representing a 4x4 matrix of `f64` values<br><br>
 pub type M4x4UpperTrianglef64 = M4x4UpperTriangle<f64>;
 
-/// A 4x4 symmetric matrix stored as a flat 6-element array (Upper-Triangular layout):
-/// `[m11, m12, m13, m14,
-///        m22, m23, m24,
-///             m33, m34,
-///                  m44]`.
+/// A 4x4 symmetric matrix stored as a flat 6-element array (Upper-Triangular layout).<br><br>
+/// ```
+/// [m11, m12, m13, m14,
+///       m22, m23, m24,
+///            m33, m34,
+///                 m44]
+/// ```
 /// Also known as Voigt Notation or Mandel Notation.
-/// The overwhelming historical convention is to use upper-triangular rather than lower-triangular layout.
-/// This convention is used by libraries such as BLAS, LAPACK, and Intel MKL.
+// The overwhelming historical convention is to use upper-triangular rather than lower-triangular layout.
+// This convention is used by libraries such as BLAS, LAPACK, and Intel MKL.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct M4x4UpperTriangle<T> {
     pub(crate) a: [T; UT_4X4_SIZE],
@@ -179,27 +181,18 @@ impl<T> M4x4UpperTriangle<T> {
     ///                 29.0, 41.0,
     ///                       97.0,
     /// ]);
-    /// let option = ut.try_inverse(1e-6);
-    /// if let Some(ut_inv) = option {
-    ///    let expected = M4x4UpperTrianglef32::new([18.5, -2.5,  -1.75, -1.25,
-    ///                                                     2.25, -0.25,  0.0,
-    ///                                                            0.375, 0.125,
-    ///                                                                   0.125]);
-    ///    assert_eq!(ut_inv, expected);
-    /// }
+    /// let (adjugate, determinant) = ut.adjugate();
+    /// assert_eq!(determinant, 32.0);
+    /// let expected = M4x4UpperTrianglef32::new([592.0, -80.0, -56.0, -40.0,
+    ///                                                   72.0,  -8.0,   0.0,
+    ///                                                          12.0,   4.0,
+    ///                                                                  4.0]);
+    /// assert_eq!(adjugate, expected);
     /// ```
     #[inline]
-    pub fn try_inverse(&self, epsilon: T) -> Option<Self>
+    pub fn adjugate(self) -> (Self, T)
     where
-        T: Copy
-            + ConstOne
-            + Add<Output = T>
-            + Sub<Output = T>
-            + Mul<Output = T>
-            + Div<Output = T>
-            + Signed
-            + PartialOrd
-            + MathConstants,
+        T: Copy + ConstOne + Neg<Output = T> + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
     {
         let m11 = self.a[0];
         let m12 = self.a[1];
@@ -220,8 +213,9 @@ impl<T> M4x4UpperTriangle<T> {
         let m24_sq = m24 * m24;
         let m34_sq = m34 * m34;
 
+        let two = T::ONE + T::ONE;
         // Calculate the 3x3 cofactors
-        let c11 = m22 * m33 * m44 - m22 * m34_sq - m23_sq * m44 + T::TWO * m23 * m24 * m34 - m24_sq * m33;
+        let c11 = m22 * m33 * m44 - m22 * m34_sq - m23_sq * m44 + two * m23 * m24 * m34 - m24_sq * m33;
         let c12 =
             -m12 * m33 * m44 + m12 * m34_sq + m13 * m23 * m44 - m13 * m24 * m34 - m14 * m23 * m34 + m14 * m24 * m33;
         let c13 =
@@ -229,49 +223,241 @@ impl<T> M4x4UpperTriangle<T> {
         let c14 =
             -m12 * m23 * m34 + m12 * m24 * m33 + m13 * m22 * m34 - m13 * m23 * m24 - m14 * m22 * m33 + m14 * m23_sq;
 
-        let c22 = m11 * m33 * m44 - m11 * m34_sq - m13_sq * m44 + T::TWO * m13 * m14 * m34 - m14_sq * m33;
+        let c22 = m11 * m33 * m44 - m11 * m34_sq - m13_sq * m44 + two * m13 * m14 * m34 - m14_sq * m33;
         let c23 =
             -m11 * m23 * m44 + m11 * m24 * m34 + m12 * m13 * m44 - m12 * m14 * m34 - m13 * m14 * m24 + m14_sq * m23;
         let c24 =
             m11 * m23 * m34 - m11 * m24 * m33 - m12 * m13 * m34 + m12 * m14 * m33 + m13_sq * m24 - m13 * m14 * m23;
 
-        let c33 = m11 * m22 * m44 - m11 * m24_sq - m12_sq * m44 + T::TWO * m12 * m14 * m24 - m14_sq * m22;
+        let c33 = m11 * m22 * m44 - m11 * m24_sq - m12_sq * m44 + two * m12 * m14 * m24 - m14_sq * m22;
         let c34 =
             -m11 * m22 * m34 + m11 * m23 * m24 + m12_sq * m34 - m12 * m13 * m24 - m12 * m14 * m23 + m13 * m14 * m22;
-        let c44 = m11 * m22 * m33 - m11 * m23_sq - m12_sq * m33 + T::TWO * m12 * m13 * m23 - m13_sq * m22;
+        let c44 = m11 * m22 * m33 - m11 * m23_sq - m12_sq * m33 + two * m12 * m13 * m23 - m13_sq * m22;
 
         // Calculate determinant via Laplace expansion of the first row
         let determinant = m11 * c11 + m12 * c12 + m13 * c13 + m14 * c14;
 
-        // Numerical Stability Check
-        let mut largest = m11.abs();
+        (Self { a: [c11, c12, c13, c14, c22, c23, c24, c33, c34, c44] }, determinant)
+    }
+
+    /// Try and invert Upper Triangular Array.
+    /// Returns `None` if the matrix determinant is zero within a tolerance of `epsilon`.
+    /// ```
+    /// # use vqm::M4x4UpperTrianglef32;
+    /// let ut = M4x4UpperTrianglef32::new([
+    ///      2.0,  3.0,  7.0, 13.0,
+    ///            5.0, 11.0, 19.0,
+    ///                 29.0, 41.0,
+    ///                       97.0,
+    /// ]);
+    /// let option = ut.try_inverse(1e-6);
+    /// if let Some(ut_inv) = option {
+    ///    let expected = M4x4UpperTrianglef32::new([18.5, -2.5,  -1.75, -1.25,
+    ///                                                     2.25, -0.25,  0.0,
+    ///                                                            0.375, 0.125,
+    ///                                                                   0.125]);
+    ///    assert_eq!(ut_inv, expected);
+    /// }
+    /// ```
+    #[inline]
+    pub fn try_inverse(self, epsilon: T) -> Option<Self>
+    where
+        T: Copy + ConstOne + Signed + PartialOrd + MathConstants,
+    {
+        let (adjugate, determinant) = self.adjugate();
+        // Guard against singular matrix.
+        let mut largest = self.a[0].abs();
         for i in 1..Self::SIZE {
             if self.a[i].abs() > largest {
                 largest = self.a[i].abs();
             }
         }
         let safety_threshold = largest * T::EPSILON * T::EIGHT + epsilon;
-
         if determinant.abs() < safety_threshold {
             return None;
         }
-
         let determinant_reciprocal = T::ONE / determinant;
+        Some(adjugate * determinant_reciprocal)
+    }
+    /// Return the sum of all the elements on the diagonal.
+    /// ```
+    /// # use vqm::M4x4UpperTrianglef32;
+    /// let ut = M4x4UpperTrianglef32::new([
+    ///      2.0,  3.0,  7.0, 13.0,
+    ///            5.0, 11.0, 19.0,
+    ///                 29.0, 41.0,
+    ///                       97.0,
+    /// ]);
+    /// let n = ut.trace();
+    ///
+    /// assert_eq!(n, 133.0);
+    /// ```
+    #[inline]
+    pub fn trace(self) -> T
+    where
+        T: Copy + Add<Output = T>,
+    {
+        self.a[0] + self.a[4] + self.a[7] + self.a[9]
+    }
 
-        Some(Self {
+    /// Return the sum of the squares of all the elements on the diagonal.
+    /// ```
+    /// # use vqm::M4x4UpperTrianglef32;
+    /// let ut = M4x4UpperTrianglef32::new([
+    ///      2.0,  3.0,  7.0, 13.0,
+    ///            5.0, 11.0, 19.0,
+    ///                 29.0, 41.0,
+    ///                       97.0,
+    /// ]);
+    /// let n = ut.trace_sum_squares();
+    ///
+    /// assert_eq!(n, 10_279.0);
+    /// ```
+    #[inline]
+    pub fn trace_sum_squares(self) -> T
+    where
+        T: Copy + Add<Output = T> + Mul<Output = T>,
+    {
+        self.a[0] * self.a[0] + self.a[4] * self.a[4] + self.a[7] * self.a[7] + self.a[9] * self.a[9]
+    }
+
+    /// Return norm squared of the upper triangle, that is the sum of the squares of all the elements.
+    /// ```
+    /// # use vqm::M4x4UpperTrianglef32;
+    /// let ut = M4x4UpperTrianglef32::new([
+    ///      2.0,  3.0,  7.0, 13.0,
+    ///            5.0, 11.0, 19.0,
+    ///                 29.0, 41.0,
+    ///                       97.0,
+    /// ]);
+    /// let n = ut.norm_squared();
+    ///
+    /// assert_eq!(n, 12669.0);
+    /// ```
+    #[inline]
+    pub fn norm_squared(self) -> T
+    where
+        T: Copy + Add<Output = T> + Mul<Output = T>,
+    {
+        let mut sum = self.a[0] * self.a[0];
+        for i in 1..Self::SIZE {
+            sum = sum + self.a[i] * self.a[i];
+        }
+
+        sum
+    }
+
+    /// Return norm of the upper triangle, that is the square root of the sum of the squares of all the elements.
+    /// ```
+    /// # use vqm::M4x4UpperTrianglef32;
+    /// let ut = M4x4UpperTrianglef32::new([
+    ///      2.0,  3.0,  7.0, 13.0,
+    ///            5.0, 11.0, 19.0,
+    ///                 29.0, 41.0,
+    ///                       97.0,
+    /// ]);
+    /// let n = ut.norm();
+    ///
+    /// assert!((n - 112.556652402).abs() < 1e-6);
+    /// ```
+    #[inline]
+    pub fn norm(self) -> T
+    where
+        T: Copy + Add<Output = T> + Mul<Output = T> + MathMethods,
+    {
+        self.norm_squared().sqrt()
+    }
+
+    /// Return norm squared of the matrix represented by this upper triangle.
+    /// ```
+    /// # use vqm::{M4x4UpperTrianglef32, Matrix4x4f32};
+    /// let ut = M4x4UpperTrianglef32::new([
+    ///      2.0,  3.0,  7.0, 13.0,
+    ///            5.0, 11.0, 19.0,
+    ///                 29.0, 41.0,
+    ///                       97.0,
+    /// ]);
+    /// let n = ut.matrix_norm_squared();
+    ///
+    /// assert_eq!(n, 15059.0);
+    /// let m = Matrix4x4f32::from(ut);
+    /// assert_eq!(n, m.norm_squared());
+    /// ```
+    #[inline]
+    pub fn matrix_norm_squared(self) -> T
+    where
+        T: Copy + Add<Output = T> + Mul<Output = T>,
+    {
+        self.norm_squared()
+            + self.a[1] * self.a[1]
+            + self.a[2] * self.a[2]
+            + self.a[3] * self.a[3]
+            + self.a[5] * self.a[5]
+            + self.a[6] * self.a[6]
+            + self.a[8] * self.a[8]
+    }
+
+    /// Return norm of the matrix represented by this upper triangle.
+    /// ```
+    /// # use vqm::M4x4UpperTrianglef32;
+    /// let ut = M4x4UpperTrianglef32::new([
+    ///      2.0,  3.0,  7.0, 13.0,
+    ///            5.0, 11.0, 19.0,
+    ///                 29.0, 41.0,
+    ///                       97.0,
+    /// ]);
+    /// let n = ut.matrix_norm();
+    ///
+    /// assert!((n - 122.715117243).abs() < 1e-6);
+    /// ```
+    #[inline]
+    pub fn matrix_norm(self) -> T
+    where
+        T: Copy + Add<Output = T> + Mul<Output = T> + MathMethods,
+    {
+        self.matrix_norm_squared().sqrt()
+    }
+}
+
+// **** Scalar ****
+
+impl<T> Mul<T> for M4x4UpperTriangle<T>
+where
+    T: Copy + Mul<Output = T>,
+{
+    type Output = Self;
+
+    /// Post-multiply upper triangle by a scalar.
+    /// ```
+    /// # use vqm::M4x4UpperTrianglef32;
+    /// let ut = M4x4UpperTrianglef32::new([
+    ///      2.0,  3.0,  7.0, 13.0,
+    ///            5.0, 11.0, 19.0,
+    ///                 29.0, 41.0,
+    ///                       97.0,
+    /// ]);
+    /// let r = ut * 2.0;
+    /// assert_eq!(r, M4x4UpperTrianglef32::new([4.0, 6.0, 14.0,  26.0,
+    ///                                              10.0, 22.0,  38.0,
+    ///                                                    58.0,  82.0,
+    ///                                                          194.0]));
+    /// ```
+    #[inline]
+    fn mul(self, k: T) -> Self {
+        Self {
             a: [
-                c11 * determinant_reciprocal,
-                c12 * determinant_reciprocal,
-                c13 * determinant_reciprocal,
-                c14 * determinant_reciprocal,
-                c22 * determinant_reciprocal,
-                c23 * determinant_reciprocal,
-                c24 * determinant_reciprocal,
-                c33 * determinant_reciprocal,
-                c34 * determinant_reciprocal,
-                c44 * determinant_reciprocal,
+                self.a[0] * k,
+                self.a[1] * k,
+                self.a[2] * k,
+                self.a[3] * k,
+                self.a[4] * k,
+                self.a[5] * k,
+                self.a[6] * k,
+                self.a[7] * k,
+                self.a[8] * k,
+                self.a[9] * k,
             ],
-        })
+        }
     }
 }
 

@@ -1,19 +1,21 @@
-use core::ops::{Add, Div, Index, Mul, Sub};
+use core::ops::{Add, Index, Mul, Neg, Sub};
 use num_traits::{ConstOne, Signed};
 
-use crate::{MathConstants, Matrix2x2, Vector2};
+use crate::{MathConstants, MathMethods, Matrix2x2, Vector2};
 
-/// Upper-Triangular Array representing a 2x2 matrix of `f32` values<br>
+/// Upper triangular array representing a 2x2 matrix of `f32` values<br>
 pub type M2x2UpperTrianglef32 = M2x2UpperTriangle<f32>;
-/// Upper-Triangular Array representing a 2x2 matrix of `f64` values<br><br>
+/// Upper triangular array representing a 2x2 matrix of `f64` values<br><br>
 pub type M2x2UpperTrianglef64 = M2x2UpperTriangle<f64>;
 
-/// A 2x2 symmetric matrix stored as a flat 3-element array (Upper-Triangular layout):
-/// `[m11, m12,
-///        m22]`.
+/// A 2x2 symmetric matrix stored as a flat 3-element array (Upper-Triangular layout).
+/// ```
+/// [m11, m12,
+///        m22]
+/// ```
 /// Also known as Voigt Notation or Mandel Notation.
-/// The overwhelming historical convention is to use upper-triangular rather than lower-triangular layout.
-/// This convention is used by libraries such as BLAS, LAPACK, and Intel MKL.
+// The overwhelming historical convention is to use upper-triangular rather than lower-triangular layout.
+// This convention is used by libraries such as BLAS, LAPACK, and Intel MKL.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct M2x2UpperTriangle<T> {
     pub(crate) a: [T; UT_2X2_SIZE],
@@ -146,44 +148,191 @@ impl<T> M2x2UpperTriangle<T> {
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
+    /// let (adjugate, determinant) = ut.adjugate();
+    /// assert_eq!(determinant, 1.0);
+    /// assert_eq!(adjugate, M2x2UpperTrianglef32::new([5.0, -3.0,
+    ///                                                       2.0]));
+    /// ```
+    #[inline]
+    pub fn adjugate(self) -> (Self, T)
+    where
+        T: Copy + Neg<Output = T> + Sub<Output = T> + Mul<Output = T>,
+        // Calculate the cofactors needed for the determinant.
+        // Calculate determinant using the first row cofactors
+    {
+        let determinant = self.a[Self::M11] * self.a[Self::M22] - self.a[Self::M12] * self.a[Self::M12];
+
+        // Guard against singular matrix.
+
+        (Self { a: [self.a[Self::M22], -self.a[Self::M12], self.a[Self::M11]] }, determinant)
+    }
+
+    /// Try and invert Upper Triangle.
+    /// Returns `None` if the matrix determinant is zero within a tolerance of `epsilon`.
+    /// ```
+    /// # use vqm::M2x2UpperTrianglef32;
+    /// let ut = M2x2UpperTrianglef32::new([
+    ///     2.0, 3.0,
+    ///          5.0,
+    /// ]);
     /// let option = ut.try_inverse(1e-6);
     /// assert!(option.is_some());
     /// if let Some(ut) = option {
     ///     assert_eq!(ut, M2x2UpperTrianglef32::new([5.0, -3.0,
-    ///                                                      2.0]));
+    ///                                                     2.0]));
     /// }
     /// ```
     #[inline]
     pub fn try_inverse(self, epsilon: T) -> Option<Self>
     where
-        T: Copy
-            + ConstOne
-            + Add<Output = T>
-            + Sub<Output = T>
-            + Mul<Output = T>
-            + Div<Output = T>
-            + Signed
-            + PartialOrd
-            + MathConstants,
+        T: Copy + ConstOne + Signed + PartialOrd,
     {
-        // Calculate the cofactors needed for the determinant.
-        // Calculate determinant using the first row cofactors
-        let determinant = self.a[Self::M11] * self.a[Self::M22] - self.a[Self::M12] * self.a[Self::M12];
-
+        let (adjugate, determinant) = self.adjugate();
         // Guard against singular matrix.
         if determinant.abs() < epsilon {
             return None;
         }
-
         let determinant_reciprocal = T::ONE / determinant;
+        Some(adjugate * determinant_reciprocal)
+    }
 
-        Some(Self {
-            a: [
-                self.a[Self::M22] * determinant_reciprocal,
-                -self.a[Self::M12] * determinant_reciprocal,
-                self.a[Self::M11] * determinant_reciprocal,
-            ],
-        })
+    /// Return the sum of all the elements on the diagonal.
+    /// ```
+    /// # use vqm::M2x2UpperTrianglef32;
+    /// let ut = M2x2UpperTrianglef32::new([
+    ///     2.0, 3.0,
+    ///          5.0,
+    /// ]);
+    /// let n = ut.trace();
+    ///
+    /// assert_eq!(n, 7.0);
+    /// ```
+    #[inline]
+    pub fn trace(self) -> T
+    where
+        T: Copy + Add<Output = T>,
+    {
+        self.a[0] + self.a[2]
+    }
+
+    /// Return the sum of the squares of all the elements on the diagonal.
+    /// ```
+    /// # use vqm::M2x2UpperTrianglef32;
+    /// let ut = M2x2UpperTrianglef32::new([
+    ///     2.0, 3.0,
+    ///          5.0,
+    /// ]);
+    /// let n = ut.trace_sum_squares();
+    ///
+    /// assert_eq!(n, 29.0);
+    /// ```
+    #[inline]
+    pub fn trace_sum_squares(self) -> T
+    where
+        T: Copy + Add<Output = T> + Mul<Output = T>,
+    {
+        self.a[0] * self.a[0] + self.a[2] * self.a[2]
+    }
+
+    /// Return norm squared of the upper triangle, that is the sum of the squares of all the elements.
+    /// ```
+    /// # use vqm::M2x2UpperTrianglef32;
+    /// let ut = M2x2UpperTrianglef32::new([
+    ///     2.0, 3.0,
+    ///          5.0,
+    /// ]);
+    /// let n = ut.norm_squared();
+    ///
+    /// assert_eq!(n, 38.0);
+    /// ```
+    #[inline]
+    pub fn norm_squared(self) -> T
+    where
+        T: Copy + Add<Output = T> + Mul<Output = T>,
+    {
+        self.a[0] * self.a[0] + self.a[1] * self.a[1] + self.a[2] * self.a[2]
+    }
+
+    /// Return norm of the upper triangle, that is the square root of the sum of the squares of all the elements.
+    /// ```
+    /// # use vqm::M2x2UpperTrianglef32;
+    /// let ut = M2x2UpperTrianglef32::new([
+    ///     2.0, 3.0,
+    ///          5.0,
+    /// ]);
+    /// let n = ut.norm();
+    ///
+    /// assert!((n - 6.164414003).abs() < 1e-6);
+    /// ```
+    #[inline]
+    pub fn norm(self) -> T
+    where
+        T: Copy + Add<Output = T> + Mul<Output = T> + MathMethods,
+    {
+        self.norm_squared().sqrt()
+    }
+
+    /// Return norm squared of the matrix represented by this upper triangle.
+    /// ```
+    /// # use vqm::M2x2UpperTrianglef32;
+    /// let ut = M2x2UpperTrianglef32::new([
+    ///     2.0, 3.0,
+    ///          5.0,
+    /// ]);
+    /// let n = ut.matrix_norm_squared();
+    ///
+    /// assert_eq!(n, 47.0);
+    /// ```
+    #[inline]
+    pub fn matrix_norm_squared(self) -> T
+    where
+        T: Copy + Add<Output = T> + Mul<Output = T>,
+    {
+        self.norm_squared() + self.a[1] * self.a[1]
+    }
+
+    /// Return norm of the matrix represented by this upper triangle.
+    /// ```
+    /// # use vqm::M2x2UpperTrianglef32;
+    /// let ut = M2x2UpperTrianglef32::new([
+    ///     2.0, 3.0,
+    ///          5.0,
+    /// ]);
+    /// let n = ut.matrix_norm();
+    ///
+    /// assert!((n - 6.8556546).abs() < 1e-6);
+    /// ```
+    #[inline]
+    pub fn matrix_norm(self) -> T
+    where
+        T: Copy + Add<Output = T> + Mul<Output = T> + MathMethods,
+    {
+        self.matrix_norm_squared().sqrt()
+    }
+}
+
+// **** Scalar ****
+
+impl<T> Mul<T> for M2x2UpperTriangle<T>
+where
+    T: Copy + Mul<Output = T>,
+{
+    type Output = Self;
+
+    /// Post-multiply upper triangle by a scalar.
+    /// ```
+    /// # use vqm::M2x2UpperTrianglef32;
+    /// let ut = M2x2UpperTrianglef32::new([
+    ///     2.0, 3.0,
+    ///          5.0,
+    /// ]);
+    /// let r = ut * 2.0;
+    /// assert_eq!(r, M2x2UpperTrianglef32::new([4.0, 6.0,
+    ///                                              10.0]));
+    /// ```
+    #[inline]
+    fn mul(self, k: T) -> Self {
+        Self { a: [self.a[0] * k, self.a[1] * k, self.a[2] * k] }
     }
 }
 
