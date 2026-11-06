@@ -1,7 +1,7 @@
-use core::ops::{Add, Index, Mul, Neg, Sub};
-use num_traits::{ConstOne, Signed};
+use core::ops::{Add, Index, Mul};
+use num_traits::{Signed, float::FloatCore};
 
-use crate::{MathConstants, MathMethods, Matrix2x2, Vector2};
+use crate::{MathMethods, Matrix2x2, Vector2};
 
 /// Upper triangular array representing a 2x2 matrix of `f32` values<br>
 pub type M2x2UpperTrianglef32 = M2x2UpperTriangle<f32>;
@@ -128,7 +128,7 @@ impl<T> M2x2UpperTriangle<T> {
     #[inline]
     pub fn try_inverse_from_matrix(m: Matrix2x2<T>, epsilon: T) -> Option<Self>
     where
-        T: Copy + ConstOne + Signed + Sub<Output = T> + PartialOrd + MathConstants,
+        T: Copy + FloatCore + Signed + PartialOrd,
     {
         if !m.is_symmetric(epsilon) {
             return None;
@@ -140,31 +140,57 @@ impl<T> M2x2UpperTriangle<T> {
         .try_inverse(epsilon)
     }
 
-    /// Try and invert Upper Triangle.
-    /// Returns `None` if the matrix determinant is zero within a tolerance of `epsilon`.
+    /// Return the adjugate, determinant, and reciprocal of the 1-norm conditioning number of this matrix.
+    /// The adjugate is the transpose of the cofactor matrix, ie the inverse but without dividing by the determinant of the matrix.
+    ///
+    /// Reciprocal  Interpretation
+    /// Condition
+    ///   1.0       Perfectly conditioned
+    ///   0.1       Well-conditioned
+    ///   0.001     Increasingly ill-conditioned
+    ///   0.000001  Very poorly conditioned
+    ///   0.0       Singular
     /// ```
     /// # use vqm::M2x2UpperTrianglef32;
     /// let ut = M2x2UpperTrianglef32::new([
     ///     2.0, 3.0,
     ///          5.0,
     /// ]);
-    /// let (adjugate, determinant) = ut.adjugate();
+    /// let (adjugate, determinant, reciprocal_condition) = ut.adjugate();
     /// assert_eq!(determinant, 1.0);
+    /// assert_eq!(reciprocal_condition, 0.015625);
     /// assert_eq!(adjugate, M2x2UpperTrianglef32::new([5.0, -3.0,
     ///                                                       2.0]));
     /// ```
     #[inline]
-    pub fn adjugate(self) -> (Self, T)
+    pub fn adjugate(self) -> (Self, T, T)
     where
-        T: Copy + Neg<Output = T> + Sub<Output = T> + Mul<Output = T>,
-        // Calculate the cofactors needed for the determinant.
-        // Calculate determinant using the first row cofactors
+        T: Copy + FloatCore,
     {
+        // Calculate determinant using the first row cofactors
         let determinant = self.a[Self::M11] * self.a[Self::M22] - self.a[Self::M12] * self.a[Self::M12];
 
-        // Guard against singular matrix.
+        let a = [self.a[Self::M22], -self.a[Self::M12], self.a[Self::M11]];
 
-        (Self { a: [self.a[Self::M22], -self.a[Self::M12], self.a[Self::M11]] }, determinant)
+        // 1-norm of the original matrix.
+        let norm =
+            (self.a[Self::M11].abs() + self.a[Self::M12].abs()).max(self.a[Self::M12].abs() + self.a[Self::M22].abs());
+        // 1-norm of the adjugate.
+        let norm_adjugate = (a[Self::M11].abs() + a[Self::M12].abs()).max(a[Self::M12].abs() + a[Self::M22].abs());
+
+        // Check if any of the matrix elements are infinity or NaN.
+        let this_is_finite = self.a.iter().all(|element| element.is_finite());
+
+        // Reciprocal 1-norm condition number.
+        let reciprocal_condition = if this_is_finite {
+            let r = determinant.abs() / norm / norm_adjugate;
+            // r.is_finite also handles any infinities, NaNs or zeros in the value of norm or norm_adjugate.
+            if r.is_finite() { r.min(T::one()) } else { T::zero() }
+        } else {
+            T::zero()
+        };
+
+        (Self { a }, determinant, reciprocal_condition)
     }
 
     /// Try and invert Upper Triangle.
@@ -183,16 +209,16 @@ impl<T> M2x2UpperTriangle<T> {
     /// }
     /// ```
     #[inline]
-    pub fn try_inverse(self, epsilon: T) -> Option<Self>
+    pub fn try_inverse(self, min_reciprocal_condition: T) -> Option<Self>
     where
-        T: Copy + ConstOne + Signed + PartialOrd,
+        T: Copy + FloatCore,
     {
-        let (adjugate, determinant) = self.adjugate();
-        // Guard against singular matrix.
-        if determinant.abs() < epsilon {
+        let (adjugate, determinant, reciprocal_condition) = self.adjugate();
+        // Guard against ill-conditioned or singular matrix.
+        if reciprocal_condition <= min_reciprocal_condition {
             return None;
         }
-        let determinant_reciprocal = T::ONE / determinant;
+        let determinant_reciprocal = T::one() / determinant;
         Some(adjugate * determinant_reciprocal)
     }
 

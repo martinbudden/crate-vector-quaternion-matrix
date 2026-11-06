@@ -1,7 +1,7 @@
-use core::ops::{Add, Index, Mul, Neg, Sub};
-use num_traits::{ConstOne, Signed};
+use core::ops::{Add, Index, Mul};
+use num_traits::{Signed, float::FloatCore};
 
-use crate::{MathConstants, MathMethods, Matrix4x4, Vector4};
+use crate::{MathMethods, Matrix4x4, Vector4};
 
 /// Upper triangular array representing a 4x4 matrix of `f32` values<br>
 pub type M4x4UpperTrianglef32 = M4x4UpperTriangle<f32>;
@@ -157,7 +157,7 @@ impl<T> M4x4UpperTriangle<T> {
     #[inline]
     pub fn try_inverse_from_matrix(m: Matrix4x4<T>, epsilon: T) -> Option<Self>
     where
-        T: Copy + ConstOne + Signed + Sub<Output = T> + PartialOrd + MathConstants,
+        T: Copy + FloatCore + Signed + PartialOrd,
     {
         if !m.is_symmetric(epsilon) {
             return None;
@@ -171,8 +171,16 @@ impl<T> M4x4UpperTriangle<T> {
         .try_inverse(epsilon)
     }
 
-    /// Try and invert Upper Triangular Array.
-    /// Returns `None` if the matrix determinant is zero within a tolerance of `epsilon`.
+    /// Return the adjugate, determinant, and reciprocal of the 1-norm conditioning number of this matrix.
+    /// The adjugate is the transpose of the cofactor matrix, ie the inverse but without dividing by the determinant of the matrix.
+    ///
+    /// Reciprocal  Interpretation
+    /// Condition
+    ///   1.0       Perfectly conditioned
+    ///   0.1       Well-conditioned
+    ///   0.001     Increasingly ill-conditioned
+    ///   0.000001  Very poorly conditioned
+    ///   0.0       Singular
     /// ```
     /// # use vqm::M4x4UpperTrianglef32;
     /// let ut = M4x4UpperTrianglef32::new([
@@ -181,8 +189,9 @@ impl<T> M4x4UpperTriangle<T> {
     ///                 29.0, 41.0,
     ///                       97.0,
     /// ]);
-    /// let (adjugate, determinant) = ut.adjugate();
+    /// let (adjugate, determinant, reciprocal_condition) = ut.adjugate();
     /// assert_eq!(determinant, 32.0);
+    /// assert!((reciprocal_condition - 0.00024509805).abs() < 1e-6);
     /// let expected = M4x4UpperTrianglef32::new([592.0, -80.0, -56.0, -40.0,
     ///                                                   72.0,  -8.0,   0.0,
     ///                                                          12.0,   4.0,
@@ -190,9 +199,9 @@ impl<T> M4x4UpperTriangle<T> {
     /// assert_eq!(adjugate, expected);
     /// ```
     #[inline]
-    pub fn adjugate(self) -> (Self, T)
+    pub fn adjugate(self) -> (Self, T, T)
     where
-        T: Copy + ConstOne + Neg<Output = T> + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
+        T: Copy + FloatCore,
     {
         let m11 = self.a[0];
         let m12 = self.a[1];
@@ -213,7 +222,7 @@ impl<T> M4x4UpperTriangle<T> {
         let m24_sq = m24 * m24;
         let m34_sq = m34 * m34;
 
-        let two = T::ONE + T::ONE;
+        let two = T::one() + T::one();
         // Calculate the 3x3 cofactors
         let c11 = m22 * m33 * m44 - m22 * m34_sq - m23_sq * m44 + two * m23 * m24 * m34 - m24_sq * m33;
         let c12 =
@@ -236,8 +245,35 @@ impl<T> M4x4UpperTriangle<T> {
 
         // Calculate determinant via Laplace expansion of the first row
         let determinant = m11 * c11 + m12 * c12 + m13 * c13 + m14 * c14;
+        let a = [c11, c12, c13, c14, c22, c23, c24, c33, c34, c44];
 
-        (Self { a: [c11, c12, c13, c14, c22, c23, c24, c33, c34, c44] }, determinant)
+        // 1-norm of the original matrix.
+        let norm = (self.a[Self::M11].abs()
+            + self.a[Self::M12].abs()
+            + self.a[Self::M13].abs()
+            + self.a[Self::M14].abs())
+        .max(self.a[Self::M12].abs() + self.a[Self::M22].abs() + self.a[Self::M23].abs() + self.a[Self::M24].abs())
+        .max(self.a[Self::M13].abs() + self.a[Self::M23].abs() + self.a[Self::M33].abs() + self.a[Self::M34].abs())
+        .max(self.a[Self::M14].abs() + self.a[Self::M24].abs() + self.a[Self::M34].abs() + self.a[Self::M44].abs());
+        // 1-norm of the adjugate.
+        let norm_adjugate = (a[Self::M11].abs() + a[Self::M12].abs() + a[Self::M13].abs() + a[Self::M14].abs())
+            .max(a[Self::M12].abs() + a[Self::M22].abs() + a[Self::M23].abs() + a[Self::M24].abs())
+            .max(a[Self::M13].abs() + a[Self::M23].abs() + a[Self::M33].abs() + a[Self::M34].abs())
+            .max(a[Self::M14].abs() + a[Self::M24].abs() + a[Self::M34].abs() + a[Self::M44].abs());
+
+        // Check if any of the matrix elements are infinity or NaN.
+        let this_is_finite = self.a.iter().all(|element| element.is_finite());
+
+        // Reciprocal 1-norm condition number.
+        let reciprocal_condition = if this_is_finite {
+            let r = determinant.abs() / norm / norm_adjugate;
+            // r.is_finite also handles any infinities, NaNs or zeros in the value of norm or norm_adjugate.
+            if r.is_finite() { r.min(T::one()) } else { T::zero() }
+        } else {
+            T::zero()
+        };
+
+        (Self { a }, determinant, reciprocal_condition)
     }
 
     /// Try and invert Upper Triangular Array.
@@ -260,25 +296,19 @@ impl<T> M4x4UpperTriangle<T> {
     /// }
     /// ```
     #[inline]
-    pub fn try_inverse(self, epsilon: T) -> Option<Self>
+    pub fn try_inverse(self, min_reciprocal_condition: T) -> Option<Self>
     where
-        T: Copy + ConstOne + Signed + PartialOrd + MathConstants,
+        T: Copy + FloatCore,
     {
-        let (adjugate, determinant) = self.adjugate();
-        // Guard against singular matrix.
-        let mut largest = self.a[0].abs();
-        for i in 1..Self::SIZE {
-            if self.a[i].abs() > largest {
-                largest = self.a[i].abs();
-            }
-        }
-        let safety_threshold = largest * T::EPSILON * T::EIGHT + epsilon;
-        if determinant.abs() < safety_threshold {
+        let (adjugate, determinant, reciprocal_condition) = self.adjugate();
+        // Guard against ill-conditioned or singular matrix.
+        if reciprocal_condition <= min_reciprocal_condition {
             return None;
         }
-        let determinant_reciprocal = T::ONE / determinant;
+        let determinant_reciprocal = T::one() / determinant;
         Some(adjugate * determinant_reciprocal)
     }
+
     /// Return the sum of all the elements on the diagonal.
     /// ```
     /// # use vqm::M4x4UpperTrianglef32;

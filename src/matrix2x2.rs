@@ -1809,22 +1809,32 @@ impl<T> Matrix2x2<T>
 where
     T: Copy + Matrix2x2Math,
 {
-    /// Return the adjugate of this matrix, ie the transpose of the cofactor matrix.
-    /// Equivalent to the inverse but without dividing by the determinant of the matrix.
+    /// Return the adjugate, determinant, and reciprocal of the 1-norm conditioning number of this matrix.
+    /// The adjugate is the transpose of the cofactor matrix, ie the inverse but without dividing by the determinant of the matrix.
+    ///
+    /// Reciprocal  Interpretation
+    /// Condition
+    ///   1.0       Perfectly conditioned
+    ///   0.1       Well-conditioned
+    ///   0.001     Increasingly ill-conditioned
+    ///   0.000001  Very poorly conditioned
+    ///   0.0       Singular
     /// ```
     /// # use vqm::Matrix2x2f32;
     /// let m = Matrix2x2f32::new([  2.0, 17.0,
     ///                              5.0, 11.0]);
-    /// let (n,d) = m.adjugate();
+    /// let (n,d,r) = m.adjugate();
     ///
+    /// assert_eq!(d, -63.0);
+    /// assert!((r - 0.118421055).abs() < 1e-6);
     /// assert_eq!(n, Matrix2x2f32::new([ 11.0, -17.0,
     ///                                   -5.0,   2.0]));
     /// assert!((n*m/d).is_near_identity(1e-5));
     /// ```
     #[inline]
-    pub fn adjugate(self) -> (Self, T) {
-        let (adjugate, determinant) = T::m2x2_adjugate(self);
-        (adjugate, determinant)
+    pub fn adjugate(self) -> (Self, T, T) {
+        let (adjugate, determinant, reciprocal_condition) = T::m2x2_adjugate(self);
+        (adjugate, determinant, reciprocal_condition)
     }
 
     /// Adjugate matrix, in-place.
@@ -1877,7 +1887,7 @@ impl<T> Matrix2x2<T>
 where
     T: Matrix2x2Math + MathConstants + Copy + Signed + PartialOrd,
 {
-    /// Return the inverse of this matrix. Returns self if the determinant is zero.
+    /// Return the inverse of this matrix.. Does not check for a non-zero determinant
     /// ```
     /// # use vqm::Matrix2x2f32;
     /// let m = Matrix2x2f32::new([  2.0, 17.0,
@@ -1888,10 +1898,8 @@ where
     #[inline]
     #[must_use]
     pub fn inverse(self) -> Self {
-        let (adjugate, determinant) = T::m2x2_adjugate(self);
-        if determinant.abs() < T::EPSILON {
-            return self;
-        }
+        let (adjugate, determinant, reciprocal_condition) = T::m2x2_adjugate(self);
+        debug_assert!(reciprocal_condition >= T::EPSILON, "Matrix is not invertible");
         adjugate / determinant
     }
 
@@ -1904,57 +1912,56 @@ where
     /// ```
     #[inline]
     pub fn invert_in_place(&mut self) -> &mut Self {
-        let (adjugate, determinant) = T::m2x2_adjugate(*self);
-        if determinant.abs() < T::EPSILON {
-            return self;
-        }
+        let (adjugate, determinant, reciprocal_condition) = T::m2x2_adjugate(*self);
+        debug_assert!(reciprocal_condition >= T::EPSILON, "Matrix is not invertible");
         *self = adjugate / determinant;
         self
     }
 }
 
-impl<T> Matrix2x2<T>
-where
-    T: Matrix2x2Math + MathConstants + Copy + Signed + PartialOrd,
-{
-    /// Return inverse of matrix or `T::zero()` if not invertible.
-    /// ```
-    /// # use vqm::Matrix2x2f32;
-    /// # use num_traits::Zero;
-    /// let m = Matrix2x2f32::new([  2.0,  3.0,
-    ///                              7.0, 10.5]);
-    /// let n = m.inverse_or_zero();
-    ///
-    /// assert_eq!(0.0, m.determinant());
-    /// assert_eq!(Matrix2x2f32::zero(), n);
-    ///
-    /// ```
-    #[must_use]
-    pub fn inverse_or_zero(self) -> Self {
-        let (adjugate, determinant) = self.adjugate();
-        if determinant.abs() < T::EPSILON {
-            return Self::zero();
-        }
-        adjugate / determinant
-    }
-
+impl<T> Matrix2x2<T> {
     /// Return inverse of matrix or `None` if not invertible.
     /// ```
     /// # use vqm::{Matrix2x2f32};
     /// let m = Matrix2x2f32::new([  2.0,  3.0,
     ///                              7.0, 10.5]);
-    /// let n = m.try_inverse();
+    /// let n = m.try_inverse(1e-5);
     ///
     /// assert_eq!(0.0, m.determinant());
     /// assert_eq!(None, n);
     ///
     /// ```
-    pub fn try_inverse(self) -> Option<Self> {
-        let (adjugate, determinant) = self.adjugate();
-        if determinant.abs() < T::EPSILON {
+    pub fn try_inverse(self, min_reciprocal_condition: T) -> Option<Self>
+    where
+        T: Matrix2x2Math + MathConstants + Copy + Signed + PartialOrd,
+    {
+        let (adjugate, determinant, reciprocal_condition) = self.adjugate();
+        if reciprocal_condition <= min_reciprocal_condition {
             return None;
         }
         Some(adjugate / determinant)
+    }
+
+    /// Solves the linear equation `Ax = b` for vector `x`.
+    ///
+    /// Returns `None` if the matrix is singular, insufficiently well-conditioned,
+    /// or the solution contains non-finite values.
+    ///
+    /// `min_reciprocal_condition` is the minimum acceptable reciprocal 1-norm condition number.
+    pub fn solve_vector(self, b: Vector2<T>, min_reciprocal_condition: T) -> Option<Vector2<T>>
+    where
+        T: Copy + Zero + One + PartialOrd + Mul<Output = T> + Div<Output = T> + Matrix2x2Math,
+    {
+        let (adjugate, determinant, reciprocal_condition) = self.adjugate();
+        if reciprocal_condition <= min_reciprocal_condition {
+            return None;
+        }
+        // Calculate adjugate * b / determinant.
+        let r = T::one() / determinant;
+        Some(Vector2 {
+            x: (adjugate[Self::M11] * b.x + adjugate[Self::M12] * b.y) * r,
+            y: (adjugate[Self::M21] * b.x + adjugate[Self::M22] * b.y) * r,
+        })
     }
 }
 

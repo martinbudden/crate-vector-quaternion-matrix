@@ -37,17 +37,21 @@ At some point [0.1.0] to [0.1.11] will be [YANKED]
 - `enforce_diagonal_lower_bound` for matrices.
 - `component_mul` and `component_mul_assign` for matrices.
 - `enforce_components_diagonal_lower_bound` for `Matrix3x3xM2x2` and `Matrix3x3xM3x3`.
+- `solve_vector` for matrices.
 
 ### Changed
 
-- Improved handling of matrix `SIZE`.
+- improved handling of matrix `SIZE`.
 - reduced dependency of Matrix on `FloatCore`.
+- matrix `adjugate` now returns reciprocal of the 1-norm conditioning number of the matrix.
+- matrix `try_inverse` now takes a `min_reciprocal_condition` parameter, which is used to determine if the matrix is invertable.
 
 ### Removed
 
 - `Vector2Math`, `Vector3Math`, and `Vector4Math` traits since they impend `uom`, `simd`,
   and downstream vectorization of structs (eg `PtFilter`s and `PidController`s).
 - removed unnecessary dependencies on `FloatCore` trait.
+- matrix `inverse_or_zero` function.
 
 ## [0.1.19] - 2026-10-28
 

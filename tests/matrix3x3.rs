@@ -9,6 +9,35 @@ const _: () = assert!(size_of::<Matrix3x3<f32>>() == 64 && align_of::<Matrix3x3<
 #[cfg(not(any(feature = "align", feature = "simd")))]
 const _: () = assert!(size_of::<Matrix3x3<f32>>() == 36 && align_of::<Matrix3x3<f32>>() == 4);
 
+/*
+TODO: adjugate tests to add:
+Input                               Expected reciprocal condition
+Identity                            1.0
+0.001 × Identity                    1.0
+1000 × Identity                     1.0
+Zero matrix                         0.0
+Singular matrix                     0.0
+Matrix containing NaN               0.0
+Matrix containing +Infinity         0.0
+Matrix containing -Infinity         0.0
+Matrix causing determinant overflow 0.0
+Matrix causing norm overflow        0.0
+diag(1, 1, 0.001)                   0.001
+diag(1, 1, 0.000001)                0.000001
+
+Other tests:
+Test                                Expected result
+Identity matrix                     Successful inversion
+Ordinary non-singular matrix        Successful inversion
+Singular matrix (duplicate rows)    None
+Zero matrix                         None
+0.001 × Identity                    Successful inversion
+1000 × Identity                     Successful inversion
+Nearly singular diagonal matrix     Rejected according to tolerance
+Matrix containing NaN               None
+Matrix containing infinity          None
+*/
+
 #[cfg(test)]
 mod test_traits {
     use super::*;
@@ -149,7 +178,7 @@ mod tests {
     #[test]
     fn m3x3_adjugate() {
         let a: Matrix3x3<f32> = Matrix3x3::new([2.0, 3.0, 5.0, 7.0, 11.0, 13.0, 17.0, 19.0, 23.0]);
-        let (b, determinant) = a.adjugate();
+        let (b, determinant, _reciprocal_condition) = a.adjugate();
         assert_eq!(b, Matrix3x3f32::new([6.0, 26.0, -16.0, 60.0, -39.0, 9.0, -54.0, 13.0, 1.0]));
         let c = a * b;
         assert!((c / determinant).is_near_identity(1e-5));

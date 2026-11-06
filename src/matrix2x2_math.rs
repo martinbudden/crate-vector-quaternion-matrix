@@ -98,7 +98,8 @@ pub trait Matrix2x2Math: Sized {
     /// Returns a tuple containing:
     /// 1. `Matrix2x2` adjugate matrix.
     /// 2. The scalar determinant value of the original matrix.
-    fn m2x2_adjugate(this: Matrix2x2<Self>) -> (Matrix2x2<Self>, Self);
+    /// 3. The reciprocal of the 1-norm condition number.
+    fn m2x2_adjugate(this: Matrix2x2<Self>) -> (Matrix2x2<Self>, Self, Self);
 }
 
 impl Matrix2x2Math for f32 {
@@ -271,17 +272,32 @@ impl Matrix2x2Math for f32 {
         - this.a[M12] * this.a[M21]
     }
 
-    /// Returns the adjugate and determinant of a matrix.
-    #[rustfmt::skip]
-    #[rustfmt::skip]
+    /// Returns the adjugate, determinant, and reciprocal condition of a matrix.
     #[inline(always)]
-    fn m2x2_adjugate(this: Matrix2x2<Self>) -> (Matrix2x2<Self>, Self) {
+    fn m2x2_adjugate(this: Matrix2x2<Self>) -> (Matrix2x2<Self>, Self, Self) {
         let determinant = this.a[M11] * this.a[M22] - this.a[M12] * this.a[M21];
-        let a = [
-            this.a[M22], -this.a[M21],
-            -this.a[M12], this.a[M11]
-        ];
-        (Matrix2x2 { a }, determinant)
+        #[rustfmt::skip]
+        let a = [this.a[M22], -this.a[M21],
+                          -this.a[M12],  this.a[M11]];
+
+        // 1-norm of the original matrix.
+        let norm = (this.a[M11].abs() + this.a[M21].abs()).max(this.a[M12].abs() + this.a[M22].abs());
+        // 1-norm of the adjugate.
+        let norm_adjugate = (a[M11].abs() + a[M21].abs()).max(a[M12].abs() + a[M22].abs());
+
+        // Check if any of the matrix elements are infinity or NaN.
+        let this_is_finite = this.a.iter().all(|element| element.is_finite());
+
+        // Reciprocal 1-norm condition number.
+        let reciprocal_condition = if this_is_finite {
+            let r = determinant.abs() / norm / norm_adjugate;
+            // r.is_finite also handles any infinities, NaNs or zeros in the value of norm or norm_adjugate.
+            if r.is_finite() { r.min(1.0) } else { 0.0 }
+        } else {
+            0.0
+        };
+
+        (Matrix2x2 { a }, determinant, reciprocal_condition)
     }
 }
 
@@ -415,16 +431,31 @@ impl Matrix2x2Math for f64 {
         - this.a[M12] * this.a[M21]
     }
 
-    /// Returns the adjugate and determinant of a matrix.
-    #[rustfmt::skip]
+    /// Returns the adjugate, determinant, and reciprocal condition of a matrix.
     #[inline(always)]
-    fn m2x2_adjugate(this: Matrix2x2<Self>) -> (Matrix2x2<Self>, Self) {
+    fn m2x2_adjugate(this: Matrix2x2<Self>) -> (Matrix2x2<Self>, Self, Self) {
         let determinant = this.a[M11] * this.a[M22] - this.a[M12] * this.a[M21];
-        let a = [
-            this.a[M22], -this.a[M21],
-            -this.a[M12], this.a[M11]
-        ];
+        #[rustfmt::skip]
+        let a = [this.a[M22], -this.a[M21],
+                          -this.a[M12], this.a[M11]];
 
-        (Matrix2x2 { a }, determinant)
+        // 1-norm of the original matrix.
+        let norm = (this.a[M11].abs() + this.a[M21].abs()).max(this.a[M12].abs() + this.a[M22].abs());
+        // 1-norm of the adjugate.
+        let norm_adjugate = (a[M11].abs() + a[M21].abs()).max(a[M12].abs() + a[M22].abs());
+
+        // Check if any of the matrix elements are infinity or NaN.
+        let this_is_finite = this.a.iter().all(|element| element.is_finite());
+
+        // Reciprocal 1-norm condition number.
+        let reciprocal_condition = if this_is_finite {
+            let r = determinant.abs() / norm / norm_adjugate;
+            // r.is_finite also handles any infinities, NaNs or zeros in the value of norm or norm_adjugate.
+            if r.is_finite() { r.min(1.0) } else { 0.0 }
+        } else {
+            0.0
+        };
+
+        (Matrix2x2 { a }, determinant, reciprocal_condition)
     }
 }

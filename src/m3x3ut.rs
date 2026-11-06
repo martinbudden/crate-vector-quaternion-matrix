@@ -1,7 +1,7 @@
-use core::ops::{Add, Index, Mul, Sub};
-use num_traits::{ConstOne, Signed};
+use core::ops::{Add, Index, Mul};
+use num_traits::{Signed, float::FloatCore};
 
-use crate::{MathConstants, MathMethods, Matrix3x3, Vector3};
+use crate::{MathMethods, Matrix3x3, Vector3};
 
 /// Upper triangular array representing a 3x3 matrix of `f32` values<br>
 pub type M3x3UpperTrianglef32 = M3x3UpperTriangle<f32>;
@@ -141,7 +141,7 @@ impl<T> M3x3UpperTriangle<T> {
     #[inline]
     pub fn try_inverse_from_matrix(m: Matrix3x3<T>, epsilon: T) -> Option<Self>
     where
-        T: Copy + ConstOne + Signed + Sub<Output = T> + PartialOrd + MathConstants,
+        T: Copy + FloatCore + Signed + PartialOrd,
     {
         if !m.is_symmetric(epsilon) {
             return None;
@@ -154,7 +154,16 @@ impl<T> M3x3UpperTriangle<T> {
         .try_inverse(epsilon)
     }
 
-    /// Return the adjugate of the matrix represented by the upper triangle, ie the transpose of the cofactor matrix.
+    /// Return the adjugate, determinant, and reciprocal of the 1-norm conditioning number of this matrix.
+    /// The adjugate is the transpose of the cofactor matrix, ie the inverse but without dividing by the determinant of the matrix.
+    ///
+    /// Reciprocal  Interpretation
+    /// Condition
+    ///   1.0       Perfectly conditioned
+    ///   0.1       Well-conditioned
+    ///   0.001     Increasingly ill-conditioned
+    ///   0.000001  Very poorly conditioned
+    ///   0.0       Singular
     /// ```
     /// # use vqm::M3x3UpperTrianglef32;
     /// let ut = M3x3UpperTrianglef32::new([
@@ -162,16 +171,17 @@ impl<T> M3x3UpperTriangle<T> {
     ///          5.0, 11.0,
     ///               29.0
     /// ]);
-    /// let (adjugate, determinant) = ut.adjugate();
+    /// let (adjugate, determinant, reciprocal_condition) = ut.adjugate();
     /// assert_eq!(determinant, 4.0);
+    /// assert!((reciprocal_condition - 0.0023640662).abs() < 1e-6);
     /// assert_eq!(adjugate, M3x3UpperTrianglef32::new([24.0, -10.0, -2.0,
     ///                                                         9.0, -1.0,
     ///                                                               1.0]));
     /// ```
     #[inline]
-    pub fn adjugate(self) -> (Self, T)
+    pub fn adjugate(self) -> (Self, T, T)
     where
-        T: Copy + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
+        T: Copy + FloatCore,
     {
         // Calculate the cofactors needed for the determinant.
         let c11 = self.a[Self::M22] * self.a[Self::M33] - self.a[Self::M23] * self.a[Self::M23];
@@ -185,8 +195,30 @@ impl<T> M3x3UpperTriangle<T> {
         let c22 = self.a[Self::M11] * self.a[Self::M33] - self.a[Self::M13] * self.a[Self::M13];
         let c23 = self.a[Self::M13] * self.a[Self::M12] - self.a[Self::M11] * self.a[Self::M23];
         let c33 = self.a[Self::M11] * self.a[Self::M22] - self.a[Self::M12] * self.a[Self::M12];
+        let a = [c11, c12, c13, c22, c23, c33];
 
-        (Self { a: [c11, c12, c13, c22, c23, c33] }, determinant)
+        // 1-norm of the original matrix.
+        let norm = (self.a[Self::M11].abs() + self.a[Self::M12].abs() + self.a[Self::M13].abs())
+            .max(self.a[Self::M12].abs() + self.a[Self::M22].abs() + self.a[Self::M23].abs())
+            .max(self.a[Self::M13].abs() + self.a[Self::M23].abs() + self.a[Self::M33].abs());
+        // 1-norm of the adjugate.
+        let norm_adjugate = (a[Self::M11].abs() + a[Self::M12].abs() + a[Self::M13].abs())
+            .max(a[Self::M12].abs() + a[Self::M22].abs() + a[Self::M23].abs())
+            .max(a[Self::M13].abs() + a[Self::M23].abs() + a[Self::M33].abs());
+
+        // Check if any of the matrix elements are infinity or NaN.
+        let this_is_finite = self.a.iter().all(|element| element.is_finite());
+
+        // Reciprocal 1-norm condition number.
+        let reciprocal_condition = if this_is_finite {
+            let r = determinant.abs() / norm / norm_adjugate;
+            // r.is_finite also handles any infinities, NaNs or zeros in the value of norm or norm_adjugate.
+            if r.is_finite() { r.min(T::one()) } else { T::zero() }
+        } else {
+            T::zero()
+        };
+
+        (Self { a }, determinant, reciprocal_condition)
     }
 
     /// Try and invert Upper Triangular Array.
@@ -198,7 +230,7 @@ impl<T> M3x3UpperTriangle<T> {
     ///          5.0, 11.0,
     ///               29.0
     /// ]);
-    /// let option = ut.try_inverse(1e-6);
+    /// let option = ut.try_inverse(1e-4);
     /// assert!(option.is_some());
     /// if let Some(ut) = option {
     ///     assert_eq!(ut, M3x3UpperTrianglef32::new([6.0, -2.5,  -0.5,
@@ -207,16 +239,16 @@ impl<T> M3x3UpperTriangle<T> {
     /// }
     /// ```
     #[inline]
-    pub fn try_inverse(self, epsilon: T) -> Option<Self>
+    pub fn try_inverse(self, min_reciprocal_condition: T) -> Option<Self>
     where
-        T: Copy + ConstOne + Signed + PartialOrd,
+        T: Copy + FloatCore,
     {
-        let (adjugate, determinant) = self.adjugate();
-        // Guard against singular matrix.
-        if determinant.abs() < epsilon {
+        let (adjugate, determinant, reciprocal_condition) = self.adjugate();
+        // Guard against ill-conditioned or singular matrix.
+        if reciprocal_condition <= min_reciprocal_condition {
             return None;
         }
-        let determinant_reciprocal = T::ONE / determinant;
+        let determinant_reciprocal = T::one() / determinant;
         Some(adjugate * determinant_reciprocal)
     }
 

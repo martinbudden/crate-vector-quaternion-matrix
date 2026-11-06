@@ -105,7 +105,7 @@ let mut p = m * n;
 p += m;
 p *= 2.0;
 let h = p + n * m;
-let j = h.try_inverse();
+let j = h.try_inverse(1e-5);
 
 // multiplication of a vector by a matrix
 let v = Vector3f32 { x: 1.0, y: 2.0, z: 3.0 };
