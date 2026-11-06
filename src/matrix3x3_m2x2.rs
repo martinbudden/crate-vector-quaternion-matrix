@@ -1007,15 +1007,15 @@ where
 
 // **** Symmetry ****
 
-impl<T> Matrix3x3xM2x2<T>
-where
-    T: Copy + One + Add<Output = T> + Div<Output = T> + Matrix2x2Math,
-    Matrix2x2<T>: Add<Output = Matrix2x2<T>>,
-{
+impl<T> Matrix3x3xM2x2<T> {
     /// Enforces strict mathematical symmetry on the matrix in-place.
     /// Used so that rounding errors do not erode the symmetry of the matrix.
     /// Formula: `M = (M + Mᵀ) / 2`.
-    pub fn enforce_symmetry(&mut self) {
+    pub fn enforce_symmetry(&mut self)
+    where
+        T: Copy + One + Add<Output = T> + Div<Output = T> + Matrix2x2Math,
+        Matrix2x2<T>: Add<Output = Matrix2x2<T>>,
+    {
         let half = T::one() / (T::one() + T::one());
 
         // Enforce internal 3x3 symmetry on the main diagonal blocks
@@ -1035,6 +1035,17 @@ where
         let m23_symmetric = (self.a[Self::M23] + self.a[Self::M32].transpose()) * half;
         self.a[Self::M23] = m23_symmetric;
         self.a[Self::M32] = m23_symmetric.transpose();
+    }
+
+    /// Ensure the diagonal elements of all the component matrices are at least the specified value.
+    #[inline]
+    pub fn enforce_components_diagonal_lower_bound(&mut self, min: T)
+    where
+        T: Copy + PartialOrd,
+    {
+        for item in &mut self.a {
+            _ = item.enforce_diagonal_lower_bound(min);
+        }
     }
 }
 
