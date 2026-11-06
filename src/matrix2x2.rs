@@ -1077,13 +1077,13 @@ where
     /// # use vqm::Matrix2x2f32;
     /// let m = Matrix2x2f32::new([  2.0, 17.0,
     ///                              5.0, 11.0]);
-    /// let n = Matrix2x2f32::new([  3.0, 13.0,
-    ///                              7.0, 19.0]);
+    /// let n = Matrix2x2f32::new([  3.0, 19.0,
+    ///                              7.0, 13.0]);
     /// let r = m * n;
     ///
     /// assert_eq!(r, Matrix2x2f32::new([
-    ///    2.0 * 3.0 + 17.0 * 7.0,  2.0 * 13.0 + 17.0 * 19.0,
-    ///    5.0 * 3.0 + 11.0 * 7.0,  5.0 * 13.0 + 11.0 * 19.0,
+    ///    2.0 * 3.0 + 17.0 * 7.0,  2.0 * 19.0 + 17.0 * 13.0,
+    ///    5.0 * 3.0 + 11.0 * 7.0,  5.0 * 19.0 + 11.0 * 13.0,
     /// ]));
     ///
     /// # use num_traits::One;
@@ -1195,19 +1195,64 @@ where
     /// # use vqm::Matrix2x2f32;
     /// let mut m = Matrix2x2f32::new([  2.0, 17.0,
     ///                                  5.0, 11.0]);
-    /// let n = Matrix2x2f32::new([  3.0, 13.0,
-    ///                              7.0, 19.0]);
+    /// let n = Matrix2x2f32::new([  3.0, 19.0,
+    ///                              7.0, 13.0]);
     /// m *= n;
     ///
     /// assert_eq!(m, Matrix2x2f32::new([
-    ///    2.0 * 3.0 + 17.0 * 7.0,  2.0 * 13.0 + 17.0 * 19.0,
-    ///    5.0 * 3.0 + 11.0 * 7.0,  5.0 * 13.0 + 11.0 * 19.0,
+    ///    2.0 * 3.0 + 17.0 * 7.0,  2.0 * 19.0 + 17.0 * 13.0,
+    ///    5.0 * 3.0 + 11.0 * 7.0,  5.0 * 19.0 + 11.0 * 13.0,
     /// ]));
     ///
     /// ```
     #[inline]
     fn mul_assign(&mut self, other: Matrix2x2<T>) {
         *self = *self * other;
+    }
+}
+
+impl<T> Matrix2x2<T>
+where
+    T: Copy + Mul<Output = T>,
+{
+    /// Componentwise multiply one matrix by another.
+    /// ```
+    /// # use vqm::Matrix2x2f32;
+    /// let m = Matrix2x2f32::new([  2.0, 17.0,
+    ///                              5.0, 11.0]);
+    /// let n = Matrix2x2f32::new([  3.0, 19.0,
+    ///                              7.0, 13.0]);
+    /// let r = m.component_mul(n);
+    ///
+    /// assert_eq!(r, Matrix2x2f32::new([
+    ///     6.0, 323.0,
+    ///    35.0, 143.0,
+    /// ]));
+    ///
+    /// ```
+    #[must_use]
+    #[inline]
+    pub fn component_mul(self, other: Matrix2x2<T>) -> Self {
+        Self { a: core::array::from_fn(|i| self.a[i] * other.a[i]) }
+    }
+
+    /// Componentwise multiply one matrix by another, in-place.
+    /// ```
+    /// # use vqm::Matrix2x2f32;
+    /// let mut m = Matrix2x2f32::new([  2.0, 17.0,
+    ///                                  5.0, 11.0]);
+    /// let n = Matrix2x2f32::new([  3.0, 19.0,
+    ///                              7.0, 13.0]);
+    /// m.component_mul_assign(n);
+    ///
+    /// assert_eq!(m, Matrix2x2f32::new([
+    ///     6.0, 323.0,
+    ///    35.0, 143.0,
+    /// ]));
+    /// ```
+    #[inline]
+    pub fn component_mul_assign(&mut self, other: Matrix2x2<T>) {
+        *self = self.component_mul(other);
     }
 }
 

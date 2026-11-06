@@ -1415,6 +1415,54 @@ where
     }
 }
 
+impl<T> Matrix3x3<T>
+where
+    T: Copy + Mul<Output = T>,
+{
+    /// Componentwise multiply one matrix by another.
+    /// ```
+    /// # use vqm::Matrix3x3f32;
+    /// let m = Matrix3x3f32::new([  2.0, 17.0, 59.0,
+    ///                              5.0, 11.0, 47.0,
+    ///                             23.0, 31.0, 41.0]);
+    /// let n = Matrix3x3f32::new([  3.0, 19.0, 61.0,
+    ///                              7.0, 13.0, 53.0,
+    ///                             29.0, 37.0, 43.0]);
+    /// let r = m.component_mul(n);
+    /// assert_eq!(r, Matrix3x3f32::new([
+    ///     6.0,  323.0, 3599.0,
+    ///    35.0,  143.0, 2491.0,
+    ///   667.0, 1147.0, 1763.0,
+    /// ]));
+    /// ```
+    #[must_use]
+    #[inline]
+    pub fn component_mul(self, other: Matrix3x3<T>) -> Self {
+        Self { a: core::array::from_fn(|i| self.a[i] * other.a[i]) }
+    }
+
+    /// Componentwise multiply one matrix by another, in-place.
+    /// ```
+    /// # use vqm::Matrix3x3f32;
+    /// let mut m = Matrix3x3f32::new([  2.0, 17.0, 59.0,
+    ///                                  5.0, 11.0, 47.0,
+    ///                                 23.0, 31.0, 41.0]);
+    /// let n = Matrix3x3f32::new([  3.0, 19.0, 61.0,
+    ///                              7.0, 13.0, 53.0,
+    ///                             29.0, 37.0, 43.0]);
+    /// m.component_mul_assign(n);
+    /// assert_eq!(m, Matrix3x3f32::new([
+    ///     6.0,  323.0, 3599.0,
+    ///    35.0,  143.0, 2491.0,
+    ///   667.0, 1147.0, 1763.0,
+    /// ]));
+    /// ```
+    #[inline]
+    pub fn component_mul_assign(&mut self, other: Matrix3x3<T>) {
+        *self = self.component_mul(other);
+    }
+}
+
 // **** Outer Product ****
 
 impl<T> Matrix3x3<T>

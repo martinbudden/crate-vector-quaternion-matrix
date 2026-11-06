@@ -35,6 +35,7 @@ At some point [0.1.0] to [0.1.11] will be [YANKED]
 - `is_orthogonal` and `is_rotation_matrix` for matrices.
 - `from_skew_symmetric` for `Matrix2x2` and `Matrix3x3`.
 - `enforce_diagonal_lower_bound` for matrices.
+- `component_mul` and `component_mul_assign` for matrices.
 
 ### Changed
 
