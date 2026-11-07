@@ -38,6 +38,7 @@ At some point [0.1.0] to [0.1.11] will be [YANKED]
 - `component_mul` and `component_mul_assign` for matrices.
 - `enforce_components_diagonal_lower_bound` for `Matrix3x3xM2x2` and `Matrix3x3xM3x3`.
 - `solve_vector` for matrices.
+- `is_finite` for vectors and quaternions.
 
 ### Changed
 

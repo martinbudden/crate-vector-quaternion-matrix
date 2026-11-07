@@ -134,6 +134,27 @@ where
     }
 }
 
+impl<T> Vector2<T>
+where
+    T: FloatCore,
+{
+    /// Return true if all the vector's components are finite.
+    /// ```
+    /// # use vqm::Vector2f32;
+    /// let u = Vector2f32::new(2.0, 3.0);
+    /// let v = Vector2f32::new(2.0, 1.0 / 0.0);
+    /// let w = Vector2f32::new(f32::NAN, 3.0);
+    /// assert!(u.is_finite());
+    /// assert!(!v.is_finite());
+    /// assert!(!w.is_finite());
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn is_finite(self) -> bool {
+        self.x.is_finite() && self.y.is_finite()
+    }
+}
+
 // **** One ****
 
 impl<T> One for Vector2<T>
