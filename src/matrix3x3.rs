@@ -519,6 +519,25 @@ where
     }
 }
 
+impl<T> Matrix3x3<T>
+where
+    T: num_traits::float::FloatCore,
+{
+    /// Return true if all the vector's components are finite.
+    /// ```
+    /// # use vqm::Matrix3x3f32;
+    /// let m = Matrix3x3f32::new([  2.0, 17.0, 59.0,
+    ///                              5.0, 11.0, 47.0,
+    ///                             23.0, 31.0, 41.0]);
+    /// assert!(m.is_finite());
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn is_finite(self) -> bool {
+        self.a.iter().all(|element| element.is_finite())
+    }
+}
+
 // **** One ****
 
 impl<T> One for Matrix3x3<T>

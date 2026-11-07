@@ -425,6 +425,24 @@ where
     }
 }
 
+impl<T> Matrix2x2<T>
+where
+    T: num_traits::float::FloatCore,
+{
+    /// Return true if all the vector's components are finite.
+    /// ```
+    /// # use vqm::Matrix2x2f32;
+    /// let m = Matrix2x2f32::new([  2.0, 17.0,
+    ///                              5.0, 11.0]);
+    /// assert!(m.is_finite());
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn is_finite(self) -> bool {
+        self.a.iter().all(|element| element.is_finite())
+    }
+}
+
 // **** One ****
 
 impl<T> One for Matrix2x2<T>
