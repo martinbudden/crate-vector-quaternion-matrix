@@ -1898,7 +1898,7 @@ where
     ///                             23.0, 31.0, 41.0]);
     /// let a = m.diagonal_as_array();
     ///
-    /// assert_eq!(a, [ 2.0, 11.0, 41.0]);
+    /// assert_eq!(a, [2.0, 11.0, 41.0]);
     /// ```
     pub fn diagonal_as_array(self) -> [T; 3] {
         [self.a[Self::M11], self.a[Self::M22], self.a[Self::M33]]
@@ -1917,6 +1917,39 @@ where
     /// ```
     pub fn diagonal_as_vector(self) -> Vector3<T> {
         Vector3 { x: self.a[Self::M11], y: self.a[Self::M22], z: self.a[Self::M33] }
+    }
+
+    /// Set matrix diagonal from an array.
+    /// ```
+    /// # use vqm::Matrix3x3f32;
+    ///
+    /// let mut m = Matrix3x3f32::new([  2.0, 17.0, 59.0,
+    ///                                  5.0, 11.0, 47.0,
+    ///                                 23.0, 31.0, 41.0]);
+    /// m.set_diagonal_from_array([3.0, 7.0, 13.0]);
+    /// assert_eq!(m.diagonal_as_array(), [3.0, 7.0, 13.0]);
+    /// ```
+    pub fn set_diagonal_from_array(&mut self, a: [T; 3]) {
+        self.a[Self::M11] = a[0];
+        self.a[Self::M22] = a[1];
+        self.a[Self::M33] = a[2];
+    }
+
+    /// Set matrix diagonal from a vector.
+    /// ```
+    /// # use vqm::{Matrix3x3f32, Vector3f32};
+    ///
+    /// let mut m = Matrix3x3f32::new([  2.0, 17.0, 59.0,
+    ///                                  5.0, 11.0, 47.0,
+    ///                                 23.0, 31.0, 41.0]);
+    /// let v = Vector3f32{ x: 3.0, y: 7.0, z: 13.0 };
+    /// m.set_diagonal_from_vector(v);
+    /// assert_eq!(m.diagonal_as_vector(), v);
+    /// ```
+    pub fn set_diagonal_from_vector(&mut self, v: Vector3<T>) {
+        self.a[Self::M11] = v.x;
+        self.a[Self::M22] = v.y;
+        self.a[Self::M33] = v.z;
     }
 }
 

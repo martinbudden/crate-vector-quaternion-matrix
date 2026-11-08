@@ -2101,7 +2101,7 @@ where
     ///                             67.0, 73.0, 83.0,  97.0]);
     /// let a = m.diagonal_as_array();
     ///
-    /// assert_eq!(a, [ 2.0, 11.0, 41.0, 97.0]);
+    /// assert_eq!(a, [2.0, 11.0, 41.0, 97.0]);
     /// ```
     pub fn diagonal_as_array(self) -> [T; 4] {
         [self.a[Self::M11], self.a[Self::M22], self.a[Self::M33], self.a[Self::M44]]
@@ -2121,6 +2121,42 @@ where
     /// ```
     pub fn diagonal_as_vector(self) -> Vector4<T> {
         Vector4 { x: self.a[Self::M11], y: self.a[Self::M22], z: self.a[Self::M33], t: self.a[Self::M44] }
+    }
+    /// Set matrix diagonal from an array.
+    /// ```
+    /// # use vqm::Matrix4x4f32;
+    ///
+    /// let mut m = Matrix4x4f32::new([  2.0, 17.0, 59.0, 127.0,
+    ///                                  5.0, 11.0, 47.0, 109.0,
+    ///                                 23.0, 31.0, 41.0, 103.0,
+    ///                                 67.0, 73.0, 83.0,  97.0]);
+    /// m.set_diagonal_from_array([3.0, 7.0, 13.0, 19.0]);
+    /// assert_eq!(m.diagonal_as_array(), [3.0, 7.0, 13.0, 19.0]);
+    /// ```
+    pub fn set_diagonal_from_array(&mut self, a: [T; 4]) {
+        self.a[Self::M11] = a[0];
+        self.a[Self::M22] = a[1];
+        self.a[Self::M33] = a[2];
+        self.a[Self::M44] = a[3];
+    }
+
+    /// Set matrix diagonal from a vector.
+    /// ```
+    /// # use vqm::{Matrix4x4f32, Vector4f32};
+    ///
+    /// let mut m = Matrix4x4f32::new([  2.0, 17.0, 59.0, 127.0,
+    ///                                  5.0, 11.0, 47.0, 109.0,
+    ///                                 23.0, 31.0, 41.0, 103.0,
+    ///                                 67.0, 73.0, 83.0,  97.0]);
+    /// let v = Vector4f32{ x: 3.0, y: 7.0, z: 13.0, t: 19.0 };
+    /// m.set_diagonal_from_vector(v);
+    /// assert_eq!(m.diagonal_as_vector(), v);
+    /// ```
+    pub fn set_diagonal_from_vector(&mut self, v: Vector4<T>) {
+        self.a[Self::M11] = v.x;
+        self.a[Self::M22] = v.y;
+        self.a[Self::M33] = v.z;
+        self.a[Self::M44] = v.t;
     }
 }
 

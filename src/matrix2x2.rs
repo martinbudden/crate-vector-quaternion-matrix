@@ -1651,7 +1651,7 @@ where
     ///                              5.0, 11.0]);
     /// let a = m.diagonal_as_array();
     ///
-    /// assert_eq!(a, [ 2.0, 11.0]);
+    /// assert_eq!(a, [2.0, 11.0]);
     /// ```
     pub fn diagonal_as_array(self) -> [T; 2] {
         [self.a[Self::M11], self.a[Self::M22]]
@@ -1668,6 +1668,34 @@ where
     /// ```
     pub fn diagonal_as_vector(self) -> Vector2<T> {
         Vector2 { x: self.a[Self::M11], y: self.a[Self::M22] }
+    }
+    /// Set matrix diagonal from an array.
+    /// ```
+    /// # use vqm::Matrix2x2f32;
+    ///
+    /// let mut m = Matrix2x2f32::new([  2.0, 17.0,
+    ///                                  5.0, 11.0]);
+    /// m.set_diagonal_from_array([3.0, 7.0]);
+    /// assert_eq!(m.diagonal_as_array(), [3.0, 7.0]);
+    /// ```
+    pub fn set_diagonal_from_array(&mut self, a: [T; 2]) {
+        self.a[Self::M11] = a[0];
+        self.a[Self::M22] = a[1];
+    }
+
+    /// Set matrix diagonal from a vector.
+    /// ```
+    /// # use vqm::{Matrix2x2f32, Vector2f32};
+    ///
+    /// let mut m = Matrix2x2f32::new([  2.0, 17.0,
+    ///                                  5.0, 11.0]);
+    /// let v = Vector2f32{ x: 3.0, y: 7.0 };
+    /// m.set_diagonal_from_vector(v);
+    /// assert_eq!(m.diagonal_as_vector(), v);
+    /// ```
+    pub fn set_diagonal_from_vector(&mut self, v: Vector2<T>) {
+        self.a[Self::M11] = v.x;
+        self.a[Self::M22] = v.y;
     }
 }
 

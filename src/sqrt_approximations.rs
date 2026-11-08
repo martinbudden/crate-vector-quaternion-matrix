@@ -94,11 +94,12 @@ pub fn sqrt_reciprocal_f64(x: f64) -> f64 {
 fn sqrt_reciprocal_approx_f32(x: f32) -> f32 {
     let i = 0x_5F1F_1412 - (x.to_bits().cast_signed() >> 1);
     // Initial estimate for Newton's method.
-    let y = f32::from_bits(i.cast_unsigned());
+    let mut y = f32::from_bits(i.cast_unsigned());
     // First iteration of Newton's method.
-    y * (1.690_002_31 - 0.714_158_168 * x * y * y)
+    y *= (1.690_002_31 - 0.714_158_168 * x * y * y);
     // Second iteration
-    //y *(1.5 - 0.5 * x * y * y)
+    // y *= (1.5 - 0.5 * x * y * y);
+    y
 }
 
 #[allow(unused)]
