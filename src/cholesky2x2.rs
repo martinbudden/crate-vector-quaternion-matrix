@@ -1,4 +1,4 @@
-use num_traits::{ConstOne, ConstZero, Signed, float::FloatCore};
+use num_traits::{Signed, float::FloatCore};
 
 use crate::{MathMethods, Matrix2x2, Vector2};
 
@@ -18,7 +18,7 @@ const CHOLESKY_2X2_SIZE: usize = 3;
 
 impl<T> Cholesky2x2<T>
 where
-    T: Copy + FloatCore + MathMethods + ConstZero,
+    T: Copy + FloatCore + MathMethods,
 {
     /// Size of lower triangular array representing Cholesky solver (3).
     pub const SIZE: usize = CHOLESKY_2X2_SIZE;
@@ -55,10 +55,10 @@ where
     #[must_use]
     pub fn new(m: Matrix2x2<T>) -> Option<Self> {
         // 5 arithmetic operations: 2 sqrt_reciprocal, 2 multiplications, 1 subtractions
-        let mut ret = [T::ZERO; CHOLESKY_2X2_SIZE];
+        let mut ret = [T::zero(); CHOLESKY_2X2_SIZE];
 
         let a2 = m[Matrix2x2::<T>::M11];
-        if a2 <= T::ZERO {
+        if a2 <= T::zero() {
             return None;
         }
         let a_reciprocal = a2.sqrt_reciprocal();
@@ -68,7 +68,7 @@ where
         ret[Self::M21] = b;
 
         let c2 = m[Matrix2x2::<T>::M22] - b * b;
-        if c2 <= T::ZERO {
+        if c2 <= T::zero() {
             return None;
         }
         let c_reciprocal = c2.sqrt_reciprocal();
@@ -83,10 +83,10 @@ where
     #[must_use]
     pub fn from_lower_triangle_array(a: [T; 3]) -> Option<Self> {
         // 5 arithmetic operations: 2 sqrt_reciprocal, 2 multiplications, 1 subtractions
-        let mut ret = [T::ZERO; CHOLESKY_2X2_SIZE];
+        let mut ret = [T::zero(); CHOLESKY_2X2_SIZE];
 
         let a2 = a[Self::M11];
-        if a2 <= T::ZERO {
+        if a2 <= T::zero() {
             return None;
         }
         let a_reciprocal = a2.sqrt_reciprocal();
@@ -96,7 +96,7 @@ where
         ret[Self::M21] = b;
 
         let c2 = a[Self::M22] - b * b;
-        if c2 <= T::ZERO {
+        if c2 <= T::zero() {
             return None;
         }
         let c_reciprocal = c2.sqrt_reciprocal();
@@ -108,7 +108,7 @@ where
 
 impl<T> Cholesky2x2<T>
 where
-    T: Copy + ConstOne + ConstZero + FloatCore + MathMethods,
+    T: Copy + FloatCore + MathMethods,
 {
     /// Returns the lower triangular matrix represented by the Cholesky.
     /// Note: the diagonals are converted from their internal reciprocal form.
@@ -117,8 +117,8 @@ where
     #[rustfmt::skip]
     pub fn l(self) -> Matrix2x2<T> {
         Matrix2x2::from_column_array([
-            T::ONE / self.a[Self::M11], self.a[Self::M21],
-            T::ZERO,                    T::ONE / self.a[Self::M22],
+            T::one() / self.a[Self::M11], self.a[Self::M21],
+            T::zero(),                    T::one() / self.a[Self::M22],
         ])
     }
 
@@ -200,7 +200,7 @@ where
     #[must_use]
     pub fn solve_matrix(self, other: Matrix2x2<T>) -> Matrix2x2<T> {
         // 16 arithmetic operations: 12 multiplies, 4 subtractions.
-        let mut a = [T::ZERO; 4];
+        let mut a = [T::zero(); 4];
 
         for offset in (0..4).step_by(2) {
             let rhs = [other[offset], other[offset + 1]];
@@ -237,7 +237,7 @@ where
     /// ```
     #[must_use]
     pub fn solve_matrix_transposed(self, other: Matrix2x2<T>) -> Matrix2x2<T> {
-        let mut a = [T::ZERO; 4];
+        let mut a = [T::zero(); 4];
 
         // Solve A * B = C, where B = L * L^T.
         // Each row of A satisfies B * a_row^T = c_row^T.
@@ -309,7 +309,7 @@ impl<T> Matrix2x2<T> {
     #[inline]
     pub fn cholesky(self) -> Option<Cholesky2x2<T>>
     where
-        T: Copy + FloatCore + MathMethods + ConstZero,
+        T: Copy + FloatCore + MathMethods,
     {
         Cholesky2x2::new(self)
     }

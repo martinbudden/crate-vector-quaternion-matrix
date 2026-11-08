@@ -591,10 +591,10 @@ where
 
 impl<T> Matrix3x3<T>
 where
-    T: Copy + ConstZero + ConstOne,
+    T: Copy + Zero + One,
 {
     /// Identity matrix.
-    /// Alias for `one()` that does not require `num_traits::One`.
+    /// Alias for `one()` that does not require `ConstZero` or `ConstOne`.
     /// ```
     /// # use vqm::Matrix3x3f32;
     /// let i = Matrix3x3f32::identity();
@@ -606,12 +606,12 @@ where
     #[rustfmt::skip]
     #[inline]
     #[must_use]
-    pub const fn identity() -> Self {
+    pub fn identity() -> Self {
         Self {
             a: [
-                T::ONE,  T::ZERO, T::ZERO,
-                T::ZERO, T::ONE,  T::ZERO,
-                T::ZERO, T::ZERO, T::ONE
+                T::one(),  T::zero(), T::zero(),
+                T::zero(), T::one(),  T::zero(),
+                T::zero(), T::zero(), T::one()
             ],
         }
     }

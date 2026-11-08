@@ -1,4 +1,4 @@
-use num_traits::{ConstOne, ConstZero, Signed, float::FloatCore};
+use num_traits::{Signed, float::FloatCore};
 
 use crate::{MathMethods, Matrix3x3, Vector3};
 
@@ -18,7 +18,7 @@ const CHOLESKY_3X3_SIZE: usize = 6;
 
 impl<T> Cholesky3x3<T>
 where
-    T: Copy + FloatCore + MathMethods + ConstZero,
+    T: Copy + FloatCore + MathMethods,
 {
     /// Size of lower triangular array representing Cholesky solver (6).
     pub const SIZE: usize = CHOLESKY_3X3_SIZE;
@@ -61,10 +61,10 @@ where
     #[must_use]
     pub fn new(m: Matrix3x3<T>) -> Option<Self> {
         // 14 arithmetic operations: 3 sqrt_reciprocal, 7 multiplications, 4 subtractions
-        let mut ret = [T::ZERO; CHOLESKY_3X3_SIZE];
+        let mut ret = [T::zero(); CHOLESKY_3X3_SIZE];
 
         let a2 = m[Matrix3x3::<T>::M11];
-        if a2 <= T::ZERO {
+        if a2 <= T::zero() {
             return None;
         }
         let a_reciprocal = a2.sqrt_reciprocal();
@@ -74,7 +74,7 @@ where
         ret[Self::M21] = b;
 
         let c2 = m[Matrix3x3::<T>::M22] - b * b;
-        if c2 <= T::ZERO {
+        if c2 <= T::zero() {
             return None;
         }
         let c_reciprocal = c2.sqrt_reciprocal();
@@ -87,7 +87,7 @@ where
         ret[Self::M32] = e;
 
         let f2 = m[Matrix3x3::<T>::M33] - d * d - e * e;
-        if f2 <= T::ZERO {
+        if f2 <= T::zero() {
             return None;
         }
         let f_reciprocal = f2.sqrt_reciprocal();
@@ -102,10 +102,10 @@ where
     #[must_use]
     pub fn from_lower_triangle_array(a: [T; 6]) -> Option<Self> {
         // 14 arithmetic operations: 3 sqrt_reciprocal, 7 multiplications, 4 subtractions
-        let mut ret = [T::ZERO; CHOLESKY_3X3_SIZE];
+        let mut ret = [T::zero(); CHOLESKY_3X3_SIZE];
 
         let a2 = a[Self::M11];
-        if a2 <= T::ZERO {
+        if a2 <= T::zero() {
             return None;
         }
         let a_reciprocal = a2.sqrt_reciprocal();
@@ -115,7 +115,7 @@ where
         ret[Self::M21] = b;
 
         let c2 = a[Self::M22] - b * b;
-        if c2 <= T::ZERO {
+        if c2 <= T::zero() {
             return None;
         }
         let c_reciprocal = c2.sqrt_reciprocal();
@@ -128,7 +128,7 @@ where
         ret[Self::M32] = e;
 
         let f2 = a[Self::M33] - d * d - e * e;
-        if f2 <= T::ZERO {
+        if f2 <= T::zero() {
             return None;
         }
         let f_reciprocal = f2.sqrt_reciprocal();
@@ -140,7 +140,7 @@ where
 
 impl<T> Cholesky3x3<T>
 where
-    T: Copy + ConstOne + ConstZero + FloatCore + MathMethods,
+    T: Copy + FloatCore + MathMethods,
 {
     /// Returns the lower triangular matrix represented by the Cholesky.
     /// Note: the diagonals are converted from their internal reciprocal form.
@@ -149,9 +149,9 @@ where
     #[rustfmt::skip]
     pub fn l(self) -> Matrix3x3<T> {
         Matrix3x3::from_column_array([
-            T::ONE / self.a[Self::M11], self.a[Self::M21],          self.a[Self::M31],
-            T::ZERO,                    T::ONE / self.a[Self::M22], self.a[Self::M32],
-            T::ZERO,                    T::ZERO,                    T::ONE / self.a[Self::M33],
+            T::one() / self.a[Self::M11], self.a[Self::M21],            self.a[Self::M31],
+            T::zero(),                    T::one() / self.a[Self::M22], self.a[Self::M32],
+            T::zero(),                    T::zero(),                    T::one() / self.a[Self::M33],
         ])
     }
 
@@ -240,7 +240,7 @@ where
     #[must_use]
     pub fn solve_matrix(self, other: Matrix3x3<T>) -> Matrix3x3<T> {
         // 60 arithmetic operations: 36 multiplies, 24 subtractions.
-        let mut a = [T::ZERO; 9];
+        let mut a = [T::zero(); 9];
 
         for offset in (0..9).step_by(3) {
             let rhs = [other[offset], other[offset + 1], other[offset + 2]];
@@ -280,7 +280,7 @@ where
     /// ```
     #[must_use]
     pub fn solve_matrix_transposed(self, other: Matrix3x3<T>) -> Matrix3x3<T> {
-        let mut a = [T::ZERO; 9];
+        let mut a = [T::zero(); 9];
 
         // Solve A * B = C, where B = L * L^T.
         // Each row of A satisfies B * a_row^T = c_row^T.
@@ -357,7 +357,7 @@ impl<T> Matrix3x3<T> {
     #[inline]
     pub fn cholesky(self) -> Option<Cholesky3x3<T>>
     where
-        T: Copy + FloatCore + MathMethods + ConstZero,
+        T: Copy + FloatCore + MathMethods,
     {
         Cholesky3x3::new(self)
     }

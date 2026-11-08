@@ -1,4 +1,4 @@
-use num_traits::{ConstOne, ConstZero, float::FloatCore};
+use num_traits::float::FloatCore;
 
 use crate::{MathMethods, Matrix4x4, Vector4};
 
@@ -18,7 +18,7 @@ const CHOLESKY_4X4_SIZE: usize = 10;
 
 impl<T> Cholesky4x4<T>
 where
-    T: Copy + FloatCore + MathMethods + ConstZero,
+    T: Copy + FloatCore + MathMethods,
 {
     /// Size of lower triangular array representing Cholesky solver (10).
     pub const SIZE: usize = CHOLESKY_4X4_SIZE;
@@ -64,10 +64,10 @@ where
     #[must_use]
     pub fn new(m: Matrix4x4<T>) -> Option<Self> {
         // 26 arithmetic operations: 4 sqrt_reciprocal, 12 multiplications, 10 subtractions
-        let mut ret = [T::ZERO; CHOLESKY_4X4_SIZE];
+        let mut ret = [T::zero(); CHOLESKY_4X4_SIZE];
 
         let a2 = m[Matrix4x4::<T>::M11];
-        if a2 <= T::ZERO {
+        if a2 <= T::zero() {
             return None;
         }
         let a_reciprocal = a2.sqrt_reciprocal();
@@ -77,7 +77,7 @@ where
         ret[Self::M21] = b;
 
         let c2 = m[Matrix4x4::<T>::M22] - b * b;
-        if c2 <= T::ZERO {
+        if c2 <= T::zero() {
             return None;
         }
         let c_reciprocal = c2.sqrt_reciprocal();
@@ -90,7 +90,7 @@ where
         ret[Self::M32] = e;
 
         let f2 = m[Matrix4x4::<T>::M33] - d * d - e * e;
-        if f2 <= T::ZERO {
+        if f2 <= T::zero() {
             return None;
         }
         let f_reciprocal = f2.sqrt_reciprocal();
@@ -106,7 +106,7 @@ where
         ret[Self::M43] = i;
 
         let j2 = m[Matrix4x4::<T>::M44] - g * g - h * h - i * i;
-        if j2 <= T::ZERO {
+        if j2 <= T::zero() {
             return None;
         }
         let j_reciprocal = j2.sqrt_reciprocal();
@@ -121,10 +121,10 @@ where
     #[must_use]
     pub fn from_lower_triangle_array(a: [T; 10]) -> Option<Self> {
         // 26 arithmetic operations: 4 sqrt_reciprocal, 12 multiplications, 10 subtractions
-        let mut ret = [T::ZERO; CHOLESKY_4X4_SIZE];
+        let mut ret = [T::zero(); CHOLESKY_4X4_SIZE];
 
         let a2 = a[Self::M11];
-        if a2 <= T::ZERO {
+        if a2 <= T::zero() {
             return None;
         }
         let a_reciprocal = a2.sqrt_reciprocal();
@@ -134,7 +134,7 @@ where
         ret[Self::M21] = b;
 
         let c2 = a[Self::M22] - b * b;
-        if c2 <= T::ZERO {
+        if c2 <= T::zero() {
             return None;
         }
         let c_reciprocal = c2.sqrt_reciprocal();
@@ -147,7 +147,7 @@ where
         ret[Self::M32] = e;
 
         let f2 = a[Self::M33] - d * d - e * e;
-        if f2 <= T::ZERO {
+        if f2 <= T::zero() {
             return None;
         }
         let f_reciprocal = f2.sqrt_reciprocal();
@@ -163,7 +163,7 @@ where
         ret[Self::M43] = i;
 
         let j2 = a[Self::M44] - g * g - h * h - i * i;
-        if j2 <= T::ZERO {
+        if j2 <= T::zero() {
             return None;
         }
         let j_reciprocal = j2.sqrt_reciprocal();
@@ -175,7 +175,7 @@ where
 
 impl<T> Cholesky4x4<T>
 where
-    T: Copy + ConstOne + ConstZero + FloatCore + MathMethods,
+    T: Copy + FloatCore + MathMethods,
 {
     /// Returns the lower triangular matrix represented by the Cholesky.
     /// Note: the diagonals are converted from their internal reciprocal form.
@@ -184,10 +184,10 @@ where
     #[rustfmt::skip]
     pub fn l(self) -> Matrix4x4<T> {
         Matrix4x4::from_column_array([
-            T::ONE / self.a[Self::M11], self.a[Self::M21],            self.a[Self::M31],            self.a[Self::M41],
-            T::ZERO,                    T::ONE / self.a[Self::M22], self.a[Self::M32],            self.a[Self::M42],
-            T::ZERO,                    T::ZERO,                    T::ONE / self.a[Self::M33], self.a[Self::M43],
-            T::ZERO,                    T::ZERO,                    T::ZERO,                    T::ONE / self.a[Self::M44],
+            T::one() / self.a[Self::M11], self.a[Self::M21],            self.a[Self::M31],            self.a[Self::M41],
+            T::zero(),                    T::one() / self.a[Self::M22], self.a[Self::M32],            self.a[Self::M42],
+            T::zero(),                    T::zero(),                    T::one() / self.a[Self::M33], self.a[Self::M43],
+            T::zero(),                    T::zero(),                    T::zero(),                    T::one() / self.a[Self::M44],
         ])
     }
 
@@ -277,7 +277,7 @@ where
     #[must_use]
     pub fn solve_matrix(self, other: Matrix4x4<T>) -> Matrix4x4<T> {
         // 104 arithmetic operations: 48 multiplies, 56 subtractions.
-        let mut a = [T::ZERO; 16];
+        let mut a = [T::zero(); 16];
 
         for offset in (0..16).step_by(4) {
             let rhs = [other[offset], other[offset + 1], other[offset + 2], other[offset + 3]];
@@ -296,7 +296,7 @@ where
     /// Equivalent to `solve_matrix(B.transpose()).transpose()`.
     #[must_use]
     pub fn solve_matrix_transposed(self, other: Matrix4x4<T>) -> Matrix4x4<T> {
-        let mut a = [T::ZERO; 16];
+        let mut a = [T::zero(); 16];
 
         // Solve A * B = C, where B = L * L^T.
         // Each row of A satisfies B * a_row^T = c_row^T.
@@ -350,7 +350,7 @@ where
 
 impl<T> Matrix4x4<T>
 where
-    T: Copy + FloatCore + MathMethods + ConstZero,
+    T: Copy + FloatCore + MathMethods,
 {
     /// Returns a wrapped Cholesky lower decomposition of a matrix if the matrix is positive definite, otherwise `None`.
     /// The input matrix is assumed to be symmetric and only the lower-triangular part is read.
