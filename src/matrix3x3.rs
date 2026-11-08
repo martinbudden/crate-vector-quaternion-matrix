@@ -2242,8 +2242,8 @@ where
 }
 
 impl<T> Matrix3x3<T> {
-    /// Return inverse of matrix or `None` if not invertible.
-    /// `min_reciprocal_condition` is the minimum acceptable reciprocal 1-norm condition.
+    /// Return inverse of matrix or `None` if the matrix is ill-conditioned,
+    /// ie its reciprocal 1-norm condition number is less than `min_reciprocal_condition`.
     ///
     /// Reciprocal  Interpretation
     /// Condition

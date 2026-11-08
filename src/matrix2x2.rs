@@ -1938,7 +1938,8 @@ where
 }
 
 impl<T> Matrix2x2<T> {
-    /// Return inverse of matrix or `None` if not invertible.
+    /// Return inverse of matrix or `None` if the matrix is ill-conditioned,
+    /// ie its reciprocal 1-norm condition number is less than `min_reciprocal_condition`.
     /// ```
     /// # use vqm::{Matrix2x2f32};
     /// let m = Matrix2x2f32::new([  2.0,  3.0,

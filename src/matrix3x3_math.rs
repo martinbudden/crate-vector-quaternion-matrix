@@ -323,6 +323,9 @@ impl Matrix3x3Math for f32 {
         }
         #[cfg(not(feature = "simd"))]*/
 
+        // Don't need to check if any of the matrix elements are infinity or NaN,
+        // since this is picked up by the determinant calculation.
+
         // Calculate the cofactors.
         let ei_fh = this.a[M22] * this.a[M33] - this.a[M23] * this.a[M32];
         let di_fg = this.a[M21] * this.a[M33] - this.a[M23] * this.a[M31];
@@ -354,16 +357,11 @@ impl Matrix3x3Math for f32 {
             .max(a[M12].abs() + a[M22].abs() + a[M32].abs())
             .max(a[M13].abs() + a[M23].abs() + a[M33].abs());
 
-        // Check if any of the matrix elements are infinity or NaN.
-        let this_is_finite = this.a.iter().all(|element| element.is_finite());
-
         // Reciprocal 1-norm condition number.
-        let reciprocal_condition = if this_is_finite {
+        let reciprocal_condition = {
             let r = determinant.abs() / norm / norm_adjugate;
             // r.is_finite also handles any infinities, NaNs or zeros in the value of norm or norm_adjugate.
             if r.is_finite() { r.min(1.0) } else { 0.0 }
-        } else {
-            0.0
         };
 
         (Matrix3x3 { a }, determinant, reciprocal_condition)
@@ -373,18 +371,21 @@ impl Matrix3x3Math for f32 {
     #[rustfmt::skip]
     #[inline(always)]
     fn m3x3_adjugate_symmetric(this: Matrix3x3<Self>) -> (Matrix3x3<Self>, Self, Self) {
+        // Don't need to check if any of the matrix elements are infinity or NaN,
+        // since this is picked up by the determinant calculation.
+
         // Cache repetitive terms to minimize multiplications
         let b_sq = this.a[M12] * this.a[M12];
         let c_sq = this.a[M13] * this.a[M13];
         let f_sq = this.a[M23] * this.a[M23];
 
         // Calculate the unique elements of the adjugate matrix
-        let adj_0 = this.a[M22] * this.a[M33] - f_sq;                          // Row 0, Col 0
-        let adj_1 = this.a[M13] * this.a[M23] - this.a[M12] * this.a[M33];         // Row 0, Col 1 (and Row 1, Col 0)
-        let adj_2 = this.a[M12] * this.a[M23] - this.a[M13] * this.a[M22];         // Row 0, Col 2 (and Row 2, Col 0)
-        let adj_4 = this.a[M11] * this.a[M33] - c_sq;                          // Row 1, Col 1
-        let adj_5 = this.a[M12] * this.a[M13] - this.a[M11] * this.a[M23];         // Row 1, Col 2 (and Row 2, Col 1)
-        let adj_8 = this.a[M11] * this.a[M22] - b_sq;                          // Row 2, Col 2
+        let adj_0 = this.a[M22] * this.a[M33] - f_sq;                          // Row 1, Col 1
+        let adj_1 = this.a[M13] * this.a[M23] - this.a[M12] * this.a[M33];     // Row 1, Col 2 (and Row 2, Col 1)
+        let adj_2 = this.a[M12] * this.a[M23] - this.a[M13] * this.a[M22];     // Row 1, Col 3 (and Row 3, Col 1)
+        let adj_4 = this.a[M11] * this.a[M33] - c_sq;                          // Row 2, Col 2
+        let adj_5 = this.a[M12] * this.a[M13] - this.a[M11] * this.a[M23];     // Row 2, Col 3 (and Row 3, Col 2)
+        let adj_8 = this.a[M11] * this.a[M22] - b_sq;                          // Row 3, Col 4
 
         // Determinant computed via dot product of Row 0 and Adjugate Row 0
         let determinant = this.a[M11] * adj_0 + this.a[M12] * adj_1 + this.a[M13] * adj_2;
@@ -404,16 +405,11 @@ impl Matrix3x3Math for f32 {
             .max(a[M12].abs() + a[M22].abs() + a[M32].abs())
             .max(a[M13].abs() + a[M23].abs() + a[M33].abs());
 
-        // Check if any of the matrix elements are infinity or NaN.
-        let this_is_finite = this.a.iter().all(|element| element.is_finite());
-
         // Reciprocal 1-norm condition number.
-        let reciprocal_condition = if this_is_finite {
+        let reciprocal_condition =  {
             let r = determinant.abs() / norm / norm_adjugate;
             // r.is_finite also handles any infinities, NaNs or zeros in the value of norm or norm_adjugate.
             if r.is_finite() { r.min(1.0) } else { 0.0 }
-        } else {
-            0.0
         };
 
         (Matrix3x3 { a }, determinant, reciprocal_condition)
@@ -591,16 +587,11 @@ impl Matrix3x3Math for f64 {
             .max(a[M12].abs() + a[M22].abs() + a[M32].abs())
             .max(a[M13].abs() + a[M23].abs() + a[M33].abs());
 
-        // Check if any of the matrix elements are infinity or NaN.
-        let this_is_finite = this.a.iter().all(|element| element.is_finite());
-
         // Reciprocal 1-norm condition number.
-        let reciprocal_condition = if this_is_finite {
+        let reciprocal_condition = {
             let r = determinant.abs() / norm / norm_adjugate;
             // r.is_finite also handles any infinities, NaNs or zeros in the value of norm or norm_adjugate.
             if r.is_finite() { r.min(1.0) } else { 0.0 }
-        } else {
-            0.0
         };
 
         (Matrix3x3 { a }, determinant, reciprocal_condition)
@@ -610,18 +601,21 @@ impl Matrix3x3Math for f64 {
     #[rustfmt::skip]
     #[inline(always)]
     fn m3x3_adjugate_symmetric(this: Matrix3x3<Self>) -> (Matrix3x3<Self>, Self, Self) {
+        // Don't need to check if any of the matrix elements are infinity or NaN,
+        // since this is picked up by the determinant calculation.
+
         // Cache repetitive terms to minimize multiplications
         let b_sq = this.a[M12] * this.a[M12];
         let c_sq = this.a[M13] * this.a[M13];
         let f_sq = this.a[M23] * this.a[M23];
 
         // Calculate the unique elements of the adjugate matrix
-        let adj_0 = this.a[M22] * this.a[M33] - f_sq;                          // Row 0, Col 0
-        let adj_1 = this.a[M13] * this.a[M23] - this.a[M12] * this.a[M33];     // Row 0, Col 1 (and Row 1, Col 0)
-        let adj_2 = this.a[M12] * this.a[M23] - this.a[M13] * this.a[M22];     // Row 0, Col 2 (and Row 2, Col 0)
-        let adj_4 = this.a[M11] * this.a[M33] - c_sq;                          // Row 1, Col 1
-        let adj_5 = this.a[M12] * this.a[M13] - this.a[M11] * this.a[M23];     // Row 1, Col 2 (and Row 2, Col 1)
-        let adj_8 = this.a[M11] * this.a[M22] - b_sq;                          // Row 2, Col 2
+        let adj_0 = this.a[M22] * this.a[M33] - f_sq;                          // Row 1, Col 1
+        let adj_1 = this.a[M13] * this.a[M23] - this.a[M12] * this.a[M33];     // Row 1, Col 2 (and Row 2, Col 1)
+        let adj_2 = this.a[M12] * this.a[M23] - this.a[M13] * this.a[M22];     // Row 1, Col 3 (and Row 3, Col 1)
+        let adj_4 = this.a[M11] * this.a[M33] - c_sq;                          // Row 2, Col 2
+        let adj_5 = this.a[M12] * this.a[M13] - this.a[M11] * this.a[M23];     // Row 2, Col 3 (and Row 3, Col 2)
+        let adj_8 = this.a[M11] * this.a[M22] - b_sq;                          // Row 3, Col 3
 
         // Determinant computed via dot product of Row 0 and Adjugate Row 0
         let determinant = this.a[M11] * adj_0 + this.a[M12] * adj_1 + this.a[M13] * adj_2;
@@ -641,16 +635,11 @@ impl Matrix3x3Math for f64 {
             .max(a[M12].abs() + a[M22].abs() + a[M32].abs())
             .max(a[M13].abs() + a[M23].abs() + a[M33].abs());
 
-        // Check if any of the matrix elements are infinity or NaN.
-        let this_is_finite = this.a.iter().all(|element| element.is_finite());
-
         // Reciprocal 1-norm condition number.
-        let reciprocal_condition = if this_is_finite {
+        let reciprocal_condition =  {
             let r = determinant.abs() / norm / norm_adjugate;
             // r.is_finite also handles any infinities, NaNs or zeros in the value of norm or norm_adjugate.
             if r.is_finite() { r.min(1.0) } else { 0.0 }
-        } else {
-            0.0
         };
 
         (Matrix3x3 { a }, determinant, reciprocal_condition)

@@ -385,7 +385,8 @@ impl<T> Matrix3x3<T> {
 
         let c_sq_reciprocal = T::one() / c_sq;
         let e = self.a[Self::M32] - self.a[Self::M21] * self.a[Self::M31] * a_sq_reciprocal;
-        let f_sq = self.a[Self::M33] - self.a[Self::M31] * self.a[Self::M31] * a_sq_reciprocal - e * e * c_sq_reciprocal;
+        let f_sq =
+            self.a[Self::M33] - self.a[Self::M31] * self.a[Self::M31] * a_sq_reciprocal - e * e * c_sq_reciprocal;
         f_sq > T::zero()
     }
 }

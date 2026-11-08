@@ -330,6 +330,9 @@ impl Matrix4x4Math for f32 {
     #[rustfmt::skip]
     #[inline(always)]
     fn m4x4_adjugate(s: Matrix4x4<Self>) -> (Matrix4x4<Self>, Self, Self) {
+        // Don't need to check if any of the matrix elements are infinity or NaN,
+        // since this is picked up by the determinant calculation.
+
         // Unpack rows using column-major index constants
         // Row 1
         let s0  = s.a[M11]; let s1  = s.a[M12]; let s2  = s.a[M13]; let s3  = s.a[M14];
@@ -397,16 +400,11 @@ impl Matrix4x4Math for f32 {
             .max(a[M13].abs() + a[M23].abs() + a[M33].abs() + a[M43].abs())
             .max(a[M14].abs() + a[M24].abs() + a[M34].abs() + a[M44].abs());
 
-        // Check if any of the matrix elements are infinity or NaN.
-        let this_is_finite = s.a.iter().all(|element| element.is_finite());
-
         // Reciprocal 1-norm condition number.
-        let reciprocal_condition = if this_is_finite {
+        let reciprocal_condition =  {
             let r = determinant.abs() / norm / norm_adjugate;
             // r.is_finite also handles any infinities, NaNs or zeros in the value of norm or norm_adjugate.
             if r.is_finite() { r.min(1.0) } else { 0.0 }
-        } else {
-            0.0
         };
 
         (Matrix4x4 { a }, determinant, reciprocal_condition)
@@ -630,6 +628,9 @@ impl Matrix4x4Math for f64 {
     #[rustfmt::skip]
     #[inline(always)]
     fn m4x4_adjugate(s: Matrix4x4<Self>) -> (Matrix4x4<Self>, Self, Self) {
+        // Don't need to check if any of the matrix elements are infinity or NaN,
+        // since this is picked up by the determinant calculation.
+
         let s0  = s.a[M11]; let s1  = s.a[M12]; let s2  = s.a[M13]; let s3  = s.a[M14];
         let s4  = s.a[M21]; let s5  = s.a[M22]; let s6  = s.a[M23]; let s7  = s.a[M24];
         let s8  = s.a[M31]; let s9  = s.a[M32]; let s10 = s.a[M33]; let s11 = s.a[M34];
@@ -692,16 +693,11 @@ impl Matrix4x4Math for f64 {
             .max(a[M13].abs() + a[M23].abs() + a[M33].abs() + a[M43].abs())
             .max(a[M14].abs() + a[M24].abs() + a[M34].abs() + a[M44].abs());
 
-        // Check if any of the matrix elements are infinity or NaN.
-        let this_is_finite = s.a.iter().all(|element| element.is_finite());
-
         // Reciprocal 1-norm condition number.
-        let reciprocal_condition = if this_is_finite {
+        let reciprocal_condition =  {
             let r = determinant.abs() / norm / norm_adjugate;
             // r.is_finite also handles any infinities, NaNs or zeros in the value of norm or norm_adjugate.
             if r.is_finite() { r.min(1.0) } else { 0.0 }
-        } else {
-            0.0
         };
 
         (Matrix4x4 { a }, determinant, reciprocal_condition)

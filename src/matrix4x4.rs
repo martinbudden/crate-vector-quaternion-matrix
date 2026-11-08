@@ -2452,7 +2452,8 @@ where
 }
 
 impl<T> Matrix4x4<T> {
-    /// Return inverse of matrix or `None` if not invertible.
+    /// Return inverse of matrix or `None` if the matrix is ill-conditioned,
+    /// ie its reciprocal 1-norm condition number is less than `min_reciprocal_condition`.
     /// ```
     /// # use vqm::{Matrix4x4f32};
     /// let m = Matrix4x4f32::new([  2.0, 17.0, 59.0, 127.0,

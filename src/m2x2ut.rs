@@ -92,7 +92,7 @@ impl<T> M2x2UpperTriangle<T> {
     /// assert!(option.is_some());
     /// if let Some(ut) = option {
     ///     assert_eq!(ut, M2x2UpperTrianglef32::new([2.0, 3.0,
-    ///                                                     5.0]));
+    ///                                                    5.0]));
     /// }
     /// ```
     #[inline]
@@ -107,7 +107,9 @@ impl<T> M2x2UpperTriangle<T> {
     }
 
     /// Tries to create an `M2x2UpperTriangle` from the inverse of a symmetric Matrix2x2.
-    /// Returns `None` if the input matrix is not symmetric, or not invertible because the determinant is zero within floating-point tolerance `epsilon`.
+    /// Returns `None` if the input matrix is not symmetric, or if it is ill-conditioned,
+    /// ie its reciprocal 1-norm condition number is less than `min_reciprocal_condition`.
+    /// Assumes the matrix is symmetric.
     /// ```
     /// # use vqm::{M2x2UpperTrianglef32, Matrix2x2f32};
     /// let m = Matrix2x2f32::new([
@@ -118,7 +120,7 @@ impl<T> M2x2UpperTriangle<T> {
     /// assert!(option.is_some());
     /// if let Some(ut) = option {
     ///     assert_eq!(ut, M2x2UpperTrianglef32::new([5.0, -3.0,
-    ///                                                      2.0]));
+    ///                                                     2.0]));
     ///     let n = Matrix2x2f32::from(ut);
     ///     let i = m * n;
     ///     assert_eq!(i, Matrix2x2f32::identity());
@@ -126,18 +128,15 @@ impl<T> M2x2UpperTriangle<T> {
     /// ```
     #[rustfmt::skip]
     #[inline]
-    pub fn try_inverse_from_matrix(m: Matrix2x2<T>, epsilon: T) -> Option<Self>
+    pub fn try_inverse_from_matrix(m: Matrix2x2<T>, min_reciprocal_condition: T) -> Option<Self>
     where
         T: Copy + FloatCore + Signed + PartialOrd,
     {
-        if !m.is_symmetric(epsilon) {
-            return None;
-        }
         Self { a: [
             m[Matrix2x2::<T >::M11], m[Matrix2x2::<T >::M12],
                                      m[Matrix2x2::<T >::M22]
         ] }
-        .try_inverse(epsilon)
+        .try_inverse(min_reciprocal_condition)
     }
 
     /// Return the adjugate, determinant, and reciprocal of the 1-norm conditioning number of this matrix.
@@ -167,6 +166,9 @@ impl<T> M2x2UpperTriangle<T> {
     where
         T: Copy + FloatCore,
     {
+        // Don't need to check if any of the matrix elements are infinity or NaN,
+        // since this is picked up by the determinant calculation.
+
         // Calculate determinant using the first row cofactors
         let determinant = self.a[Self::M11] * self.a[Self::M22] - self.a[Self::M12] * self.a[Self::M12];
 
@@ -178,23 +180,19 @@ impl<T> M2x2UpperTriangle<T> {
         // 1-norm of the adjugate.
         let norm_adjugate = (a[Self::M11].abs() + a[Self::M12].abs()).max(a[Self::M12].abs() + a[Self::M22].abs());
 
-        // Check if any of the matrix elements are infinity or NaN.
-        let this_is_finite = self.a.iter().all(|element| element.is_finite());
-
         // Reciprocal 1-norm condition number.
-        let reciprocal_condition = if this_is_finite {
+        let reciprocal_condition = {
             let r = determinant.abs() / norm / norm_adjugate;
             // r.is_finite also handles any infinities, NaNs or zeros in the value of norm or norm_adjugate.
             if r.is_finite() { r.min(T::one()) } else { T::zero() }
-        } else {
-            T::zero()
         };
 
         (Self { a }, determinant, reciprocal_condition)
     }
 
     /// Try and invert Upper Triangle.
-    /// Returns `None` if the matrix determinant is zero within a tolerance of `epsilon`.
+    /// Returns `None` if the underlying matrix is ill-conditioned,
+    /// ie its reciprocal 1-norm condition number is less than `min_reciprocal_condition`.
     /// ```
     /// # use vqm::M2x2UpperTrianglef32;
     /// let ut = M2x2UpperTrianglef32::new([
