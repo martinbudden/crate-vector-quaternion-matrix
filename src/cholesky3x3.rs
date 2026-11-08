@@ -1,4 +1,4 @@
-use num_traits::{ConstOne, ConstZero, float::FloatCore};
+use num_traits::{ConstOne, ConstZero, Signed, float::FloatCore};
 
 use crate::{MathMethods, Matrix3x3, Vector3};
 
@@ -20,7 +20,7 @@ impl<T> Cholesky3x3<T>
 where
     T: Copy + FloatCore + MathMethods + ConstZero,
 {
-    /// Size of lower triangular array representing Cholesky solver.
+    /// Size of lower triangular array representing Cholesky solver (6).
     pub const SIZE: usize = CHOLESKY_3X3_SIZE;
 
     // Column 1
@@ -329,10 +329,7 @@ where
 
 // **** MATRIX ****
 
-impl<T> Matrix3x3<T>
-where
-    T: Copy + FloatCore + MathMethods + ConstZero,
-{
+impl<T> Matrix3x3<T> {
     /// Returns a wrapped Cholesky lower decomposition of a matrix if the matrix is positive definite, otherwise `None`.
     /// The input matrix is assumed to be symmetric and only the lower-triangular part is read.
     /// ```
@@ -358,8 +355,38 @@ where
     /// ```
     #[must_use]
     #[inline]
-    pub fn cholesky(self) -> Option<Cholesky3x3<T>> {
+    pub fn cholesky(self) -> Option<Cholesky3x3<T>>
+    where
+        T: Copy + FloatCore + MathMethods + ConstZero,
+    {
         Cholesky3x3::new(self)
+    }
+
+    /// Returns true if a matrix is positive definite.
+    #[must_use]
+    pub fn is_positive_definite(self, epsilon: T) -> bool
+    where
+        T: Signed + FloatCore + MathMethods,
+    {
+        if !self.is_symmetric(epsilon) {
+            return false;
+        }
+
+        let a_sq = self.a[Self::M11];
+        if a_sq <= T::zero() {
+            return false;
+        }
+        let a_sq_reciprocal = T::one() / a_sq;
+
+        let c_sq = self.a[Self::M22] - self.a[Self::M21] * self.a[Self::M21] * a_sq_reciprocal;
+        if c_sq <= T::zero() {
+            return false;
+        }
+
+        let c_sq_reciprocal = T::one() / c_sq;
+        let e = self.a[Self::M32] - self.a[Self::M21] * self.a[Self::M31] * a_sq_reciprocal;
+        let f_sq = self.a[Self::M33] - self.a[Self::M31] * self.a[Self::M31] * a_sq_reciprocal - e * e * c_sq_reciprocal;
+        f_sq > T::zero()
     }
 }
 

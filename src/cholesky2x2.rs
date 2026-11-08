@@ -1,4 +1,4 @@
-use num_traits::{ConstOne, ConstZero, float::FloatCore};
+use num_traits::{ConstOne, ConstZero, Signed, float::FloatCore};
 
 use crate::{MathMethods, Matrix2x2, Vector2};
 
@@ -20,7 +20,7 @@ impl<T> Cholesky2x2<T>
 where
     T: Copy + FloatCore + MathMethods + ConstZero,
 {
-    /// Size of lower triangular array representing Cholesky solver.
+    /// Size of lower triangular array representing Cholesky solver (3).
     pub const SIZE: usize = CHOLESKY_2X2_SIZE;
 
     // Column 1
@@ -283,10 +283,7 @@ where
 
 // **** MATRIX ****
 
-impl<T> Matrix2x2<T>
-where
-    T: Copy + FloatCore + MathMethods + ConstZero,
-{
+impl<T> Matrix2x2<T> {
     /// Returns a wrapped Cholesky lower decomposition of a matrix if the matrix is positive definite, otherwise `None`.
     /// The input matrix is assumed to be symmetric and only the lower-triangular part is read.
     /// ```
@@ -310,8 +307,28 @@ where
     /// ```
     #[must_use]
     #[inline]
-    pub fn cholesky(self) -> Option<Cholesky2x2<T>> {
+    pub fn cholesky(self) -> Option<Cholesky2x2<T>>
+    where
+        T: Copy + FloatCore + MathMethods + ConstZero,
+    {
         Cholesky2x2::new(self)
+    }
+
+    /// Returns true if a matrix is positive definite.
+    #[must_use]
+    pub fn is_positive_definite(self, epsilon: T) -> bool
+    where
+        T: Signed + FloatCore,
+    {
+        if !self.is_symmetric(epsilon) {
+            return false;
+        }
+        if self.a[Self::M11] <= T::zero() {
+            return false;
+        }
+        let a_sq_reciprocal = T::one() / self.a[Self::M11];
+        let c_sq = self.a[Self::M22] - self.a[Self::M21] * self.a[Self::M21] * a_sq_reciprocal;
+        c_sq > T::zero()
     }
 }
 

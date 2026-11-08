@@ -20,7 +20,7 @@ impl<T> Cholesky4x4<T>
 where
     T: Copy + FloatCore + MathMethods + ConstZero,
 {
-    /// Size of lower triangular array representing Cholesky solver.
+    /// Size of lower triangular array representing Cholesky solver (10).
     pub const SIZE: usize = CHOLESKY_4X4_SIZE;
 
     // Column 1
