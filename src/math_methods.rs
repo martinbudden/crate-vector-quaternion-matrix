@@ -129,11 +129,11 @@ impl MathMethods for f32 {
         self.atan()
     }
     #[inline(always)]
-    fn sqrt(self) -> f32 {
+    fn sqrt(self) -> Self {
         self.sqrt()
     }
     #[inline(always)]
-    fn sqrt_reciprocal(self) -> f32 {
+    fn sqrt_reciprocal(self) -> Self {
         1.0 / self.sqrt()
     }
     #[inline(always)]
@@ -201,11 +201,11 @@ impl MathMethods for f64 {
         self.atan()
     }
     #[inline(always)]
-    fn sqrt(self) -> f64 {
+    fn sqrt(self) -> Self {
         self.sqrt()
     }
     #[inline(always)]
-    fn sqrt_reciprocal(self) -> f64 {
+    fn sqrt_reciprocal(self) -> Self {
         1.0 / self.sqrt()
     }
     #[inline(always)]
@@ -274,7 +274,7 @@ impl MathMethods for f32 {
         libm::atanf(self)
     }
     #[inline(always)]
-    fn sqrt(self) -> f32 {
+    fn sqrt(self) -> Self {
         // Use hardware ASM for ARM chips with an FPU
         #[cfg(all(target_arch = "arm", target_feature = "vfp2"))]
         {
@@ -287,7 +287,7 @@ impl MathMethods for f32 {
         }
     }
     #[inline(always)]
-    fn sqrt_reciprocal(self) -> f32 {
+    fn sqrt_reciprocal(self) -> Self {
         // Use hardware ASM for ARM chips with an FPU
         #[cfg(all(target_arch = "arm", target_feature = "vfp2"))]
         {
@@ -366,11 +366,11 @@ impl MathMethods for f64 {
         libm::atan(self)
     }
     #[inline(always)]
-    fn sqrt(self) -> f64 {
+    fn sqrt(self) -> Self {
         libm::sqrt(self)
     }
     #[inline(always)]
-    fn sqrt_reciprocal(self) -> f64 {
+    fn sqrt_reciprocal(self) -> Self {
         1.0 / libm::sqrt(self)
     }
     #[inline(always)]

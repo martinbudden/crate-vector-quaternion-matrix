@@ -220,7 +220,7 @@ impl QuaternionMath for f32 {
             let this_simd = f32x4::from(this);
             let other_simd = f32x4::from(other);
 
-            this_simd * other_simd
+            (this_simd * other_simd).into()
         }
         #[cfg(not(feature = "simd"))]
         Quaternion { w: this.w * other.w, x: this.x * other.x, y: this.y * other.y, z: this.z * other.z }

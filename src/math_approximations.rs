@@ -36,10 +36,10 @@ impl super::MathMethods for f32 {
     fn atan(self) -> Self {
         atan2_approx_f32(self, 1.0)
     }
-    fn sqrt(self) -> f32 {
+    fn sqrt(self) -> Self {
         super::sqrt_approximations::sqrt_f32(self)
     }
-    fn sqrt_reciprocal(self) -> f32 {
+    fn sqrt_reciprocal(self) -> Self {
         super::sqrt_approximations::sqrt_reciprocal_f32(self)
     }
     #[inline(always)]
@@ -99,10 +99,10 @@ impl super::MathMethods for f64 {
     fn atan(self) -> Self {
         atan2_approx_f64(self, 1.0)
     }
-    fn sqrt(self) -> f64 {
+    fn sqrt(self) -> Self {
         super::sqrt_approximations::sqrt_f64(self)
     }
-    fn sqrt_reciprocal(self) -> f64 {
+    fn sqrt_reciprocal(self) -> Self {
         super::sqrt_approximations::sqrt_reciprocal_f64(self)
     }
     #[inline(always)]
