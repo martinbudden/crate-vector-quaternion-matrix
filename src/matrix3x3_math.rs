@@ -1,6 +1,6 @@
 #![allow(clippy::inline_always)]
 
-use crate::{Matrix3x3, Vector3};
+use super::{Matrix3x3, Vector3};
 
 #[cfg(feature = "simd")]
 use core::simd::{f32x4, num::SimdFloat};

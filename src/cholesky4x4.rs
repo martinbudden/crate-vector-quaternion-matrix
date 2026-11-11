@@ -1,6 +1,6 @@
 use num_traits::float::FloatCore;
 
-use crate::{MathMethods, Matrix4x4, Vector4};
+use super::{MathMethods, Matrix4x4, Vector4};
 
 /// Cholesky4x4 matrix of `f32` values<br>
 pub type Cholesky4x4f32 = Cholesky4x4<f32>;
@@ -395,13 +395,12 @@ mod test_traits {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::Matrix4x4f32;
+    use crate::{Matrix4x4f32, Vector4f32};
 
     #[cfg(feature = "libm")]
     #[allow(non_snake_case)]
     #[test]
     fn cholesky_tests() {
-        use crate::Vector4f32;
         let A = Matrix4x4f32::new([
             2.0, 3.0, 7.0, 13.0, //
             3.0, 5.0, 11.0, 19.0, //

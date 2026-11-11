@@ -5,7 +5,7 @@ use core::ops::{
 };
 use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Signed, Zero, float::FloatCore};
 
-use crate::{MathConstants, Matrix2x2, Matrix4x4, matrix2x2_math::Matrix2x2Math};
+use super::{MathConstants, Matrix2x2, Matrix4x4, matrix2x2_math::Matrix2x2Math};
 
 /// 3x3 matrix of `Matrix2x2f32` values<br>
 pub type Matrix3x3xM2x2f32 = Matrix3x3xM2x2<f32>;

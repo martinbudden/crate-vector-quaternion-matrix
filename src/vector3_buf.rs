@@ -1,6 +1,6 @@
 use core::{error::Error, fmt};
 
-use crate::Vector3f32;
+use super::Vector3f32;
 
 /// The error type returned when a slice is too short to parse to a `Vector3f32`.<br><br>
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

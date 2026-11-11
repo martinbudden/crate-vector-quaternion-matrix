@@ -8,7 +8,7 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use crate::{MathConstants, MathMethods, Quaternion, Vector2, Vector3};
+use super::{MathConstants, MathMethods, Quaternion, Vector2, Vector3};
 
 /// `RollPitchYaw` struct `{ roll: f32, pitch: f32, yaw: f32 }`<br>
 pub type RollPitchYawf32 = RollPitchYaw<f32>;

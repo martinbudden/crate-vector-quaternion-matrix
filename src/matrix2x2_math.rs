@@ -1,6 +1,6 @@
 #![allow(clippy::inline_always)]
 
-use crate::{Matrix2x2, Vector2};
+use super::{Matrix2x2, Vector2};
 
 #[cfg(feature = "simd")]
 use core::{

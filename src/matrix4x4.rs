@@ -13,8 +13,7 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use crate::MathMethods;
-use crate::{MathConstants, Matrix2x2, Matrix3x3, Quaternion, Vector4, matrix4x4_math::Matrix4x4Math};
+use super::{MathConstants, MathMethods, Matrix2x2, Matrix3x3, Quaternion, Vector4, matrix4x4_math::Matrix4x4Math};
 
 /// 4x4 matrix of `f32` values<br>
 pub type Matrix4x4f32 = Matrix4x4<f32>;

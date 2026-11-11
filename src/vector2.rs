@@ -10,7 +10,7 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use crate::{IsScalar, MathConstants, MathMethods};
+use super::{IsScalar, MathConstants, MathMethods};
 
 /// 2-dimensional `{x, y}` vector of `f32` values<br>
 pub type Vector2f32 = Vector2<f32>;

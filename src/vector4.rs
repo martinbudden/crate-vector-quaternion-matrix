@@ -10,7 +10,7 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use crate::{IsScalar, MathConstants, MathMethods, Vector2, Vector3};
+use super::{IsScalar, MathConstants, MathMethods, Vector2, Vector3};
 
 /// 4-dimensional `{x, y, z, t}` vector of `f32` values<br>
 pub type Vector4f32 = Vector4<f32>;

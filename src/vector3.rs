@@ -10,7 +10,7 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use crate::{IsScalar, MathConstants, MathMethods, Quaternion, Vector2, quaternion_math::QuaternionMath};
+use super::{IsScalar, MathConstants, MathMethods, Quaternion, Vector2, quaternion_math::QuaternionMath};
 
 /// 3-dimensional `{x, y, z}` vector of `f32` values<br>
 pub type Vector3f32 = Vector3<f32>;

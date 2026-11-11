@@ -12,7 +12,7 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use crate::{
+use super::{
     MathConstants, MathMethods, Matrix2x2, Quaternion, Vector3, matrix3x3_math::Matrix3x3Math,
     quaternion_math::QuaternionMath,
 };

@@ -11,7 +11,7 @@ const _: () = assert!(size_of::<Quaternion<f32>>() == 16);
 const _: () = assert!(align_of::<Quaternion<f32>>() == 16);
 
 #[allow(unused)]
-use crate::{Quaternion, math_methods::MathMethods}; // for acos
+use super::{Quaternion, math_methods::MathMethods}; // for acos
 
 // **** From ****
 

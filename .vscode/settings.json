@@ -82,6 +82,7 @@
         "msvc",
         "nalgebra",
         "newtypes",
+        "nlerp",
         "nomem",
         "nostack",
         "oorandom",

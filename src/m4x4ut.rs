@@ -1,7 +1,7 @@
 use core::ops::{Add, Index, Mul};
 use num_traits::{Signed, float::FloatCore};
 
-use crate::{MathMethods, Matrix4x4, Vector4};
+use super::{MathMethods, Matrix4x4, Vector4};
 
 /// Upper triangular array representing a 4x4 matrix of `f32` values<br>
 pub type M4x4UpperTrianglef32 = M4x4UpperTriangle<f32>;

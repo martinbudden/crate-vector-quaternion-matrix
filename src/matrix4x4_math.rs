@@ -1,6 +1,6 @@
 #![allow(clippy::inline_always)]
 
-use crate::{Matrix4x4, Quaternion, Vector4};
+use super::{Matrix4x4, Quaternion, Vector4};
 
 // Column 1
 const M11: usize = 0;
