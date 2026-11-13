@@ -1,7 +1,6 @@
 use core::convert::From;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
-use num_traits::{ConstOne, ConstZero};
-use num_traits::{MulAdd, MulAddAssign, One, Signed, Zero, float::FloatCore};
+use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Signed, Zero, float::FloatCore};
 #[cfg(feature = "storage")]
 use sequential_storage::map::PostcardValue;
 #[cfg(feature = "serde")]
@@ -10,12 +9,11 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use crate::math_methods::MathMethods;
-use crate::{Vector3, quaternion_math::QuaternionMath};
+use super::{IsScalar, UnitQuaternion, Vector3, math_methods::MathMethods, quaternion_math::QuaternionMath};
 
-/// Quaternion of `f32` values<br>
+/// `Quaternion` of `f32` values<br>
 pub type Quaternionf32 = Quaternion<f32>;
-/// Quaternion of `f64` values<br><br>
+/// `Quaternion` of `f64` values<br><br>
 pub type Quaternionf64 = Quaternion<f64>;
 
 // **** Define ****
@@ -55,7 +53,7 @@ impl<T> PostcardValue<'_> for Quaternion<T> where T: Serialize + for<'de> Deseri
 /// ```
 impl<T> Default for Quaternion<T>
 where
-    T: Copy + Zero + One,
+    T: Zero + One,
 {
     #[inline]
     fn default() -> Self {
@@ -65,10 +63,7 @@ where
 
 // **** New ****
 
-impl<T> Quaternion<T>
-where
-    T: Copy,
-{
+impl<T> Quaternion<T> {
     /// Create a quaternion.
     /// ```
     /// # use vqm::Quaternionf32;
@@ -225,7 +220,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: ConstZero + ConstOne,
+    T: Zero + One,
 {
     /// Unit quaternion.
     /// Alias for `one()` that does not require `num_traits::One`.
@@ -237,8 +232,8 @@ where
     /// ```
     #[inline]
     #[must_use]
-    pub const fn identity() -> Self {
-        Self { w: T::ONE, x: T::ZERO, y: T::ZERO, z: T::ZERO }
+    pub fn identity() -> Self {
+        Self { w: T::one(), x: T::zero(), y: T::zero(), z: T::zero() }
     }
 }
 
@@ -338,7 +333,7 @@ where
 
 impl<T> MulAdd<T> for Quaternion<T>
 where
-    T: Copy + QuaternionMath,
+    T: QuaternionMath,
 {
     type Output = Self;
 
@@ -500,7 +495,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Copy + QuaternionMath,
+    T: QuaternionMath,
 {
     /// Elementwise multiply a quaternion by another quaternion (Hadamard product).
     /// ```
@@ -638,11 +633,7 @@ impl<T> IndexMut<usize> for Quaternion<T> {
 
 // **** lerp ****
 
-impl<T> Quaternion<T>
-where
-    T: Copy,
-    Quaternion<T>: Mul<T, Output = Quaternion<T>> + Add<Output = Quaternion<T>> + Sub<Output = Quaternion<T>>,
-{
+impl<T> Quaternion<T> {
     /// Linear interpolation between two quaternions.
     /// Calculates `self * (1 - t) + other * t`.
     /// ```
@@ -655,8 +646,35 @@ where
     /// ```
     #[inline]
     #[must_use]
-    pub fn lerp(self, other: Self, t: T) -> Self {
+    pub fn lerp(self, other: Self, t: T) -> Self
+    where
+        T: Copy,
+        Quaternion<T>: Mul<T, Output = Quaternion<T>> + Add<Output = Quaternion<T>> + Sub<Output = Quaternion<T>>,
+    {
         self + (other - self) * t
+    }
+
+    /// Performs normalized linear interpolation between two quaternions.
+    ///
+    /// Applies shortest-path sign correction before interpolation and normalizes the result.
+    #[must_use]
+    pub fn nlerp(self, other: Self, t: T) -> Self
+    where
+        T: Copy + Zero + PartialOrd + QuaternionMath + MathMethods,
+        Quaternion<T>: Mul<T, Output = Quaternion<T>>
+            + Neg<Output = Quaternion<T>>
+            + Add<Output = Quaternion<T>>
+            + Sub<Output = Quaternion<T>>,
+    {
+        {
+            let mut other = other;
+
+            if self.dot(other) < T::zero() {
+                other = -other;
+            }
+
+            self.lerp(other, t).normalize()
+        }
     }
 }
 
@@ -688,7 +706,7 @@ where
 {
     /// Compare two quaternions with a tolerance.
     #[inline]
-    pub fn approx_eq(&self, other: &Self, epsilon: T) -> bool {
+    pub fn approx_eq(&self, other: Self, epsilon: T) -> bool {
         (self.w - other.w).abs() <= epsilon
             && (self.x - other.x).abs() <= epsilon
             && (self.y - other.y).abs() <= epsilon
@@ -698,10 +716,7 @@ where
 
 // **** abs ****
 
-impl<T> Quaternion<T>
-where
-    T: Copy + Signed,
-{
+impl<T> Quaternion<T> {
     /// Return a copy of the quaternion with all components set to their absolute values.
     /// ```
     /// # use vqm::Quaternionf32;
@@ -712,7 +727,10 @@ where
     /// ```
     #[inline]
     #[must_use]
-    pub fn abs(self) -> Self {
+    pub fn abs(self) -> Self
+    where
+        T: Signed,
+    {
         Self { w: self.w.abs(), x: self.x.abs(), y: self.y.abs(), z: self.z.abs() }
     }
 
@@ -725,7 +743,10 @@ where
     /// assert_eq!(q, Quaternionf32::new(2.0, 3.0, 5.0, 7.0));
     /// ```
     #[inline]
-    pub fn abs_in_place(&mut self) -> &mut Self {
+    pub fn abs_in_place(&mut self) -> &mut Self
+    where
+        T: Copy + Signed,
+    {
         *self = self.abs();
         self
     }
@@ -797,7 +818,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Copy + QuaternionMath,
+    T: QuaternionMath,
 {
     /// Return square of Euclidean norm.
     #[inline]
@@ -810,7 +831,7 @@ where
 
 impl<T> Quaternion<T>
 where
-    T: Copy + MathMethods + QuaternionMath,
+    T: MathMethods + QuaternionMath,
 {
     /// Return Euclidean norm.
     #[inline]
@@ -886,7 +907,7 @@ impl<T> Quaternion<T>
 where
     T: Copy + QuaternionMath,
 {
-    // Return true if the quaternion is normalized.
+    /// Return true if the quaternion is normalized.
     /// ```
     /// # use vqm::Quaternionf32;
     /// let q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
@@ -901,11 +922,8 @@ where
     }
 }
 
-impl<T> Quaternion<T>
-where
-    T: Copy + One + Zero + QuaternionMath + Div<T, Output = T> + Neg<Output = T>,
-{
-    // Return the inverse of the quaternion.
+impl<T> Quaternion<T> {
+    /// Return the inverse of the quaternion.
     /// ```
     /// # use vqm::Quaternionf32;
     /// let q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
@@ -918,15 +936,19 @@ where
     /// ```
     #[inline]
     #[must_use]
-    pub fn inverse(self) -> Self {
+    pub fn inverse(self) -> Self
+    where
+        T: FloatCore + QuaternionMath,
+    {
         let n = self.norm_squared();
         if n.is_zero() {
-            Self { w: T::one(), x: T::zero(), y: T::zero(), z: T::zero() }
+            Self { w: T::nan(), x: T::nan(), y: T::nan(), z: T::nan() }
         } else {
             let r = T::one() / n;
             Self { w: self.w * r, x: -self.x * r, y: -self.y * r, z: -self.z * r }
         }
     }
+
     /// Inverts this quaternion if it is not zero.
     /// # Example
     /// ```
@@ -947,7 +969,10 @@ where
     /// ```
     #[inline]
     #[must_use]
-    pub fn try_inverse(&self) -> Option<Self> {
+    pub fn try_inverse(&self) -> Option<Self>
+    where
+        T: Copy + One + Zero + QuaternionMath + Div<T, Output = T> + Neg<Output = T>,
+    {
         let n = self.norm_squared();
         if n.is_zero() {
             None
@@ -955,6 +980,42 @@ where
             let r = T::one() / n;
             Some(Self { w: self.w * r, x: -self.x * r, y: -self.y * r, z: -self.z * r })
         }
+    }
+}
+
+impl<T> Quaternion<T> {
+    /// Return the conjugate of the quaternion.
+    #[inline]
+    #[must_use]
+    pub fn conjugate(self) -> Self
+    where
+        T: QuaternionMath,
+    {
+        T::q_conjugate(self)
+    }
+
+    /// Set quaternion to its conjugate.
+    #[inline]
+    pub fn conjugate_in_place(&mut self) -> &mut Self
+    where
+        T: Copy + QuaternionMath,
+    {
+        *self = self.conjugate();
+        self
+    }
+}
+
+impl<T> Quaternion<T> {
+    /// Return the scalar part of the quaternion.
+    #[inline]
+    pub fn scalar(self) -> T {
+        self.w
+    }
+
+    /// Return the imaginary part of the quaternion.
+    #[inline]
+    pub fn imaginary(self) -> Vector3<T> {
+        Vector3::<T> { x: self.x, y: self.y, z: self.z }
     }
 }
 
@@ -1033,28 +1094,11 @@ where
     ///
     /// The quaternion must be normalized (have unit magnitude).
     ///
-    pub fn rotate(self, v: Vector3<T>) -> Vector3<T> {
-        let two: T = T::one() + T::one();
-        let half = T::one() / two;
-
-        let x2: T = self.x * self.x;
-        let y2: T = self.y * self.y;
-        let z2: T = self.z * self.z;
-
-        Vector3::<T> {
-            x: (v.x * (half - y2 - z2)
-                + v.y * (self.x * self.y - self.w * self.z)
-                + v.z * (self.w * self.y + self.x * self.z))
-                * two,
-            y: (v.x * (self.w * self.z + self.x * self.y)
-                + v.y * (half - x2 - z2)
-                + v.z * (self.y * self.z - self.w * self.x))
-                * two,
-            z: (v.x * (self.x * self.z - self.w * self.y)
-                + v.y * (self.w * self.x + self.y * self.z)
-                + v.z * (half - x2 - y2))
-                * two,
-        }
+    pub fn rotate(self, v: Vector3<T>) -> Option<Vector3<T>>
+    where
+        T: FloatCore + MathMethods + QuaternionMath,
+    {
+        UnitQuaternion::try_from_quaternion(self).map(|q| q.rotate(v))
     }
 
     /// Rotate about the x-axis,
@@ -1109,376 +1153,98 @@ where
     }
 }
 
-impl<T> Quaternion<T>
-where
-    T: Copy + Zero + One + Add<Output = T> + Sub<Output = T> + Div<Output = T> + MathMethods + PartialEq + PartialOrd,
-{
-    /// Returns the cosine of the Euler roll angle.
-    ///
-    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
-    pub fn cos_roll(self) -> T {
-        let half = T::one() / (T::one() + T::one());
-        let a: T = self.w * self.x + self.y * self.z;
-        let b: T = half - self.x * self.x - self.y * self.y;
-
-        let sq = a * a + b * b;
-        if sq == T::zero() { T::zero() } else { b * sq.sqrt_reciprocal() }
-    }
-
-    /// Returns the sine of the Euler pitch angle.
-    ///
-    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
-    pub fn sin_pitch(self) -> T {
-        let two: T = T::one() + T::one();
-        (self.w * self.y - self.x * self.z) * two
-    }
-
-    /// Returns the non-negative cosine of the Euler pitch angle.
-    ///
-    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
-    pub fn cos_pitch(self) -> T {
-        let s: T = self.sin_pitch();
-        let sq = T::one() - s * s;
-
-        if sq <= T::zero() { T::zero() } else { sq.sqrt() }
-    }
-
-    /// Returns the tan of the Euler pitch angle.
-    ///
-    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
-    /// `tan_pitch` is undefined at ±90° pitch.
-    pub fn tan_pitch(self) -> T {
-        let s: T = self.sin_pitch();
-        let sq = T::one() - s * s;
-
-        if sq <= T::zero() { T::zero() } else { s * sq.sqrt_reciprocal() }
-    }
-
-    /// Returns the cosine of the Euler pitch angle.
-    ///
-    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
-    pub fn cos_yaw(self) -> T {
-        let half = T::one() / (T::one() + T::one());
-        let a: T = self.w * self.z + self.x * self.y;
-        let b: T = half - self.y * self.y - self.z * self.z;
-
-        let sq = a * a + b * b;
-        if sq == T::zero() { T::zero() } else { b * sq.sqrt_reciprocal() }
-    }
-
-    /// Returns the sin of the Euler yaw angle.
-    ///
-    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
-    pub fn sin_yaw(self) -> T {
-        let half = T::one() / (T::one() + T::one());
-        let a: T = self.w * self.z + self.x * self.y;
-        let b: T = half - self.y * self.y - self.z * self.z;
-
-        let sq = a * a + b * b;
-        if sq == T::zero() { T::zero() } else { a * sq.sqrt_reciprocal() }
-    }
-
-    /// Returns the sin of the Euler roll angle.
-    ///
-    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
-    pub fn sin_roll(self) -> T {
-        let half = T::one() / (T::one() + T::one());
-        let a: T = self.w * self.x + self.y * self.z;
-        let b: T = half - self.x * self.x - self.y * self.y;
-
-        let sq = a * a + b * b;
-        if sq == T::zero() { T::zero() } else { a * sq.sqrt_reciprocal() }
-    }
-
-    /// cos of the total tilt angle (direct Z-axis projection from the rotation matrix).
-    ///
-    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
-    pub fn cos_tilt(self) -> T {
-        T::one() - (T::one() + T::one()) * (self.x * self.x + self.y * self.y)
-    }
-
-    /// sin of the total tilt angle (direct Z-axis projection from the rotation matrix).
-    ///
-    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
-    pub fn sin_tilt(self) -> T {
-        let c: T = self.cos_tilt();
-        let sq = T::one() - c * c;
-        if sq <= T::zero() { T::zero() } else { sq.sqrt() }
-    }
-}
-
-impl<T> Quaternion<T>
-where
-    T: FloatCore + MathMethods,
-{
-    /// clip `sin(roll_angle)` to +/-1.0 when roll angle outside range [-90 degrees, 90 degrees].
-    ///
-    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
-    pub fn sin_roll_clipped(self) -> T {
-        let half = T::one() / (T::one() + T::one());
-        let a: T = self.w * self.x + self.y * self.z;
-        let b: T = half - self.x * self.x - self.y * self.y;
-        if b < T::zero() {
-            if a < T::zero() {
-                return -T::one();
-            }
-            return T::one();
-        }
-        let sq = a * a + b * b;
-        if sq == T::zero() { T::zero() } else { a * sq.sqrt_reciprocal() }
-    }
-
-    /// clip `sin(pitch_angle)` to +/-1.0 when roll angle outside range [-90 degrees, 90 degrees].
-    ///
-    /// Assumes this quaternion is normalized and uses the aerospace roll-pitch-yaw convention.
-    pub fn sin_pitch_clipped(self) -> T {
-        let two: T = T::one() + T::one();
-        let sin_pitch = two * (self.w * self.y - self.x * self.z);
-        let d = self.w * self.w - self.y * self.y;
-
-        // if d < 0.0, then self is outside the range [-90, 90] degrees, so we return 1.0 or 1.0 according to the sign of sin_pitch
-        if d < T::zero() {
-            if sin_pitch < T::zero() {
-                return -T::one();
-            }
-            return T::one();
-        }
-        // self is in the range [-90, 90] degrees, so we can just return sin(self)
-        sin_pitch
-    }
-}
-
-impl<T> Quaternion<T>
-where
-    T: FloatCore + MathMethods,
-{
-    /// Calculate roll angle of quaternion, in radians.
-    #[inline]
-    pub fn calculate_roll_radians(self) -> T {
-        let half = T::one() / (T::one() + T::one());
-        (self.w * self.x + self.y * self.z).atan2(half - self.x * self.x - self.y * self.y)
-    }
-
-    /// Calculate pitch angle of quaternion, in radians.
-    #[inline]
-    pub fn calculate_pitch_radians(self) -> T {
-        let two = T::one() + T::one();
-        (two * (self.w * self.y - self.x * self.z)).asin()
-    }
-
-    /// Calculate yaw angle of quaternion, in radians.
-    #[inline]
-    pub fn calculate_yaw_radians(self) -> T {
-        let half = T::one() / (T::one() + T::one());
-        (self.w * self.z + self.x * self.y).atan2(half - self.y * self.y - self.z * self.z)
-    }
-
-    /// Calculate a quaternion's Euler angles in radians.
-    /// ```
-    /// # use vqm::Quaternionf32;
-    /// let orientation = Quaternionf32::default();
-    /// let (roll, pitch, yaw) = orientation.calculate_euler_angles_radians();
-    /// ```
-    #[inline]
-    pub fn calculate_euler_angles_radians(self) -> (T, T, T) {
-        (self.calculate_roll_radians(), self.calculate_pitch_radians(), self.calculate_yaw_radians())
-    }
-
-    /// Create a Quaternion from roll, pitch, and yaw Euler angles (in radians).
-    /// See: <https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Euler_angles_(in_3-2-1_sequence)_to_quaternion_conversion>.
-    pub fn from_roll_pitch_yaw_radians(roll_radians: T, pitch_radians: T, yaw_radians: T) -> Self {
-        let half: T = T::one() / (T::one() + T::one());
-        let (sin_half_roll, cos_half_roll) = (roll_radians * half).sin_cos();
-        let (sin_half_pitch, cos_half_pitch) = (pitch_radians * half).sin_cos();
-        let (sin_half_yaw, cos_half_yaw) = (yaw_radians * half).sin_cos();
-        Self {
-            w: cos_half_roll * cos_half_pitch * cos_half_yaw + sin_half_roll * sin_half_pitch * sin_half_yaw,
-            x: sin_half_roll * cos_half_pitch * cos_half_yaw - cos_half_roll * sin_half_pitch * sin_half_yaw,
-            y: cos_half_roll * sin_half_pitch * cos_half_yaw + sin_half_roll * cos_half_pitch * sin_half_yaw,
-            z: cos_half_roll * cos_half_pitch * sin_half_yaw - sin_half_roll * sin_half_pitch * cos_half_yaw,
-        }
-    }
-
-    /// Create a Quaternion from roll, pitch, and yaw Euler angles (in radians).
-    /// See: <https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles#Euler_angles_(in_3-2-1_sequence)_to_quaternion_conversion>.
-    pub fn from_roll_pitch_yaw_degrees(roll_degrees: T, pitch_degrees: T, yaw_degrees: T) -> Self {
-        Self::from_roll_pitch_yaw_radians(
-            roll_degrees.to_radians(),
-            pitch_degrees.to_radians(),
-            yaw_degrees.to_radians(),
-        )
-    }
-
-    /// Create a Quaternion from roll and pitch Euler angles (in radians), assumes yaw angle is zero.
-    pub fn from_roll_pitch_radians(roll_radians: T, pitch_radians: T) -> Self {
-        let half: T = T::one() / (T::one() + T::one());
-        let (sin_half_roll, cos_half_roll) = (roll_radians * half).sin_cos();
-        let (sin_half_pitch, cos_half_pitch) = (pitch_radians * half).sin_cos();
-
-        Self {
-            w: cos_half_roll * cos_half_pitch,
-            x: sin_half_roll * cos_half_pitch,
-            y: cos_half_roll * sin_half_pitch,
-            z: -sin_half_roll * sin_half_pitch,
-        }
-    }
-
-    /// Create a Quaternion from roll and pitch Euler angles (in degrees), assumes yaw angle is zero.
-    pub fn from_roll_pitch_degrees(roll_degrees: T, pitch_degrees: T) -> Self {
-        Self::from_roll_pitch_radians(roll_degrees.to_radians(), pitch_degrees.to_radians())
-    }
-
-    /// Create a Quaternion from roll Euler angle (in radians), assumes pitch and roll angles are zero.
-    pub fn from_roll_radians(roll_radians: T) -> Self {
-        let half: T = T::one() / (T::one() + T::one());
-        let (sin_half_roll, cos_half_roll) = (roll_radians * half).sin_cos();
-
-        Self { w: cos_half_roll, x: sin_half_roll, y: T::zero(), z: T::zero() }
-    }
-
-    /// Create a Quaternion from roll Euler angle (in degrees), assumes pitch and roll angles are zero.
-    pub fn from_roll_degrees(roll_degrees: T) -> Self {
-        Self::from_roll_radians(roll_degrees.to_radians())
-    }
-
-    /// Create a Quaternion from pitch Euler angle (in radians), assumes roll and yaw angles are zero.
-    pub fn from_pitch_radians(pitch_radians: T) -> Self {
-        let half: T = T::one() / (T::one() + T::one());
-        let (sin_half_pitch, cos_half_pitch) = (pitch_radians * half).sin_cos();
-
-        Self { w: cos_half_pitch, x: T::zero(), y: sin_half_pitch, z: T::zero() }
-    }
-
-    /// Create a Quaternion from pitch Euler angle (in degrees), assumes roll and yaw angles are zero.
-    pub fn from_pitch_degrees(pitch_degrees: T) -> Self {
-        Self::from_pitch_radians(pitch_degrees.to_radians())
-    }
-
-    /// Create a Quaternion from yaw Euler angle (in radians), assumes roll and pitch angles are zero.
-    pub fn from_yaw_radians(yaw_radians: T) -> Self {
-        let half: T = T::one() / (T::one() + T::one());
-        let (sin_half_yaw, cos_half_yaw) = (yaw_radians * half).sin_cos();
-
-        Self { w: cos_half_yaw, x: T::zero(), y: T::zero(), z: sin_half_yaw }
-    }
-
-    /// Create a Quaternion from yaw Euler angle (in degrees), assumes roll and pitch angles are zero.
-    pub fn from_yaw_degrees(yaw_degrees: T) -> Self {
-        Self::from_yaw_radians(yaw_degrees.to_radians())
-    }
-}
-
-impl<T> Quaternion<T>
-where
-    T: Copy + QuaternionMath,
-{
-    /// Return the conjugate of the quaternion.
-    #[inline]
-    #[must_use]
-    pub fn conjugate(self) -> Self {
-        T::q_conjugate(self)
-    }
-}
-
 impl<T> Quaternion<T> {
-    /// Return the scalar part of the quaternion.
-    #[inline]
-    pub fn scalar(self) -> T {
-        self.w
-    }
-
-    /// Return the imaginary part of the quaternion.
-    #[inline]
-    pub fn imaginary(self) -> Vector3<T> {
-        Vector3::<T> { x: self.x, y: self.y, z: self.z }
-    }
-}
-
-impl<T> Quaternion<T>
-where
-    T: Copy + One + Neg<Output = T> + Add<Output = T> + Sub<Output = T> + Mul<Output = T> + Div<Output = T>,
-{
-    /// Return the last column of the equivalent rotation matrix, but calculated more efficiently than a full conversion.
-    #[inline]
-    pub fn direction_cosine_matrix_z(self) -> Vector3<T> {
-        let two = T::one() + T::one();
-        Vector3::<T> {
-            x: (self.w * self.y + self.x * self.z) * two,
-            y: (self.y * self.z - self.w * self.x) * two,
-            z: self.w * self.w,
-        }
-    }
-
-    /// Convenience function to return gravity vector of quaternion.
-    #[inline]
-    pub fn gravity(self) -> Vector3<T> {
-        let two = T::one() + T::one();
-        Vector3::<T> {
-            x: (self.x * self.z - self.w * self.y) * two,
-            y: (self.w * self.x + self.y * self.z) * two,
-            z: (self.w * self.w + self.z * self.z) * two - T::one(),
-        }
-    }
-
-    /// Convenience function to return half of gravity vector of quaternion.
-    #[inline]
-    pub fn half_gravity(self) -> Vector3<T> {
+    /// Create a Quaternion from a rotation axis and an angle in radians.
+    /// Rotation axis must be normalized.
+    pub fn from_axis_angle_radians(axis: Vector3<T>, angle_radians: T) -> Self
+    where
+        T: FloatCore + MathMethods,
+    {
         let half: T = T::one() / (T::one() + T::one());
-        Vector3::<T> {
-            x: self.x * self.z - self.w * self.y,
-            y: self.w * self.x + self.y * self.z,
-            z: self.w * self.w + self.z * self.z - half,
+        let (sin_half_angle, cos_half_angle) = (angle_radians * half).sin_cos();
+        Self { w: cos_half_angle, x: axis.x * sin_half_angle, y: axis.y * sin_half_angle, z: axis.z * sin_half_angle }
+    }
+
+    /// Create a Quaternion from a rotation axis and an angle in degrees.
+    /// Rotation axis must be normalized.
+    pub fn from_axis_angle_degrees(axis: Vector3<T>, angle_degrees: T) -> Self
+    where
+        T: FloatCore + MathMethods,
+    {
+        let half: T = T::one() / (T::one() + T::one());
+        let (sin_half_angle, cos_half_angle) = (angle_degrees.to_radians() * half).sin_cos();
+        Self { w: cos_half_angle, x: axis.x * sin_half_angle, y: axis.y * sin_half_angle, z: axis.z * sin_half_angle }
+    }
+
+    /// Converts the quaternion into an axis-angle representation.
+    ///
+    /// Returns a tuple containing the normalized rotation axis and the rotation angle in radians.
+    ///  The quaternion is normalized before conversion, and the angle is returned in the range [0, π].
+    ///
+    /// For an identity quaternion (zero rotation), an arbitrary unit axis is returned (1, 0, 0).
+    ///
+    /// # Returns
+    /// * `(axis, angle)` - The unit rotation axis and rotation angle in radians.
+    pub fn to_axis_angle(&self) -> (Vector3<T>, T)
+    where
+        T: FloatCore + MathMethods + QuaternionMath,
+    {
+        if let Some(q) = UnitQuaternion::try_from_quaternion(*self) {
+            q.to_axis_angle()
+        } else {
+            (Vector3 { x: T::one(), y: T::zero(), z: T::zero() }, T::zero())
         }
     }
-}
 
-impl<T> Quaternion<T>
-where
-    T: Copy + MathMethods + FloatCore,
-{
-    /// Calculate roll angle of quaternion, in degrees.
-    #[inline]
-    pub fn calculate_roll_degrees(self) -> T {
-        self.calculate_roll_radians().to_degrees()
+    /// Calculate the quaternion representing the shortest rotation that transforms vector `a` into vector `b`.
+    pub fn from_rotation_between(a: Vector3<T>, b: Vector3<T>) -> Option<Self>
+    where
+        T: FloatCore + MathMethods + QuaternionMath + IsScalar,
+    {
+        UnitQuaternion::from_rotation_between(a, b).map(Into::into)
     }
 
-    /// Calculate pitch angle of quaternion, in degrees.
-    #[inline]
-    pub fn calculate_pitch_degrees(self) -> T {
-        self.calculate_pitch_radians().to_degrees()
+    /// Calculates the shortest angular distance between two quaternions.
+    ///
+    /// Returns the smallest rotation angle required to transform the
+    /// orientation represented by this quaternion into the orientation
+    /// represented by `other`.
+    ///
+    /// Both quaternions are normalized before calculation.
+    /// The absolute value of the dot product ensures that equivalent quaternion
+    /// representations (q and -q) produce an angle of zero.
+    ///
+    /// The returned angle is in radians and is in the range [0, π].
+    ///
+    /// # Returns
+    /// The angular distance between the two orientations in radians.
+    pub fn angle_to(&self, other: Self) -> T
+    where
+        T: FloatCore + MathMethods + QuaternionMath,
+    {
+        let a = self.normalize();
+        let b = other.normalize();
+
+        let dot = a.dot(b).abs().clamp(T::zero(), T::one());
+
+        let two = T::one() + T::one();
+        two * dot.acos()
     }
 
-    /// Calculate yaw angle of quaternion, in degrees.
-    #[inline]
-    pub fn calculate_yaw_degrees(self) -> T {
-        self.calculate_yaw_radians().to_degrees()
-    }
-
-    /// Calculate a quaternion's Euler angles in degrees.
-    /// ```
-    /// # use vqm::Quaternionf32;
-    /// let orientation = Quaternionf32::default();
-    /// let (roll, pitch, yaw) = orientation.calculate_euler_angles_degrees();
-    /// ```
-    #[inline]
-    pub fn calculate_euler_angles_degrees(self) -> (T, T, T) {
-        (self.calculate_roll_degrees(), self.calculate_pitch_degrees(), self.calculate_yaw_degrees())
-    }
-
-    /// Create a quaternion from roll, pitch, and yaw Euler angles (in degrees).
-    #[inline]
-    pub fn from_roll_pitch_yaw_angles_degrees(roll_degrees: T, pitch_degrees: T, yaw_degrees: T) -> Self {
-        Self::from_roll_pitch_yaw_radians(
-            roll_degrees.to_radians(),
-            pitch_degrees.to_radians(),
-            yaw_degrees.to_radians(),
-        )
-    }
-
-    /// Create a Quaternion from roll and pitch Euler angles (in degrees), assumes yaw angle is zero.
-    #[inline]
-    pub fn from_roll_pitch_angles_degrees(roll_degrees: T, pitch_degrees: T) -> Self {
-        Self::from_roll_pitch_radians(roll_degrees.to_radians(), pitch_degrees.to_radians())
+    /// Calculate quaternion derivative (`dq/dt` aka `q_dot)` from angular rate `omega_rps` in radians per second.
+    /// The resulting quaternion components have units of 1/second.
+    #[must_use]
+    pub fn derivative(self, omega_rps: Vector3<T>) -> Self
+    where
+        T: FloatCore,
+    {
+        let half = T::one() / (T::one() + T::one());
+        Self {
+            w: (-self.x * omega_rps.x - self.y * omega_rps.y - self.z * omega_rps.z) * half,
+            x: (self.w * omega_rps.x - self.z * omega_rps.y + self.y * omega_rps.z) * half,
+            y: (self.z * omega_rps.x + self.w * omega_rps.y - self.x * omega_rps.z) * half,
+            z: (-self.y * omega_rps.x + self.x * omega_rps.y + self.w * omega_rps.z) * half,
+        }
     }
 }
 
@@ -1536,46 +1302,5 @@ impl<T> From<Quaternion<T>> for [T; 4] {
     #[inline]
     fn from(q: Quaternion<T>) -> Self {
         [q.w, q.x, q.y, q.z]
-    }
-}
-
-impl<T> From<(T, T)> for Quaternion<T>
-where
-    T: MathMethods + FloatCore,
-{
-    #[inline]
-    fn from((roll_radians, pitch_radians): (T, T)) -> Self {
-        Quaternion::from_roll_pitch_radians(roll_radians, pitch_radians)
-    }
-}
-
-impl<T> From<(T, T, T)> for Quaternion<T>
-where
-    T: MathMethods + FloatCore,
-{
-    #[inline]
-    fn from((roll_radians, pitch_radians, yaw_radians): (T, T, T)) -> Self {
-        Quaternion::from_roll_pitch_yaw_radians(roll_radians, pitch_radians, yaw_radians)
-    }
-}
-
-impl<T> From<Vector3<T>> for Quaternion<T>
-where
-    T: Copy + Zero + One + PartialEq + MathMethods + QuaternionMath,
-{
-    /// Quaternion from Vector3.
-    /// The vector forms the imaginary part of the quaternion, which is then normalized.
-    /// ```
-    /// # use vqm::{Quaternionf32, Vector3f32};
-    /// let v = Vector3f32 { x: 2.0, y: 3.0, z: 6.0 };
-    /// let q = Quaternionf32::from(v);
-    ///
-    /// assert_eq!(q, Quaternionf32 { w: 0.14142136, x: 0.28284273, y: 0.42426407, z: 0.84852815 });
-    /// assert!(q.is_near(Quaternionf32 { w: 0.14142136, x: 0.28284273, y: 0.42426407, z: 0.84852815 }, 1e-3));
-    /// ```
-    #[inline]
-    fn from(v: Vector3<T>) -> Self {
-        let q = Quaternion { w: T::one(), x: v.x, y: v.y, z: v.z };
-        q.normalize()
     }
 }

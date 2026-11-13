@@ -76,7 +76,7 @@ of the famous [Quake inverse square root](https://en.wikipedia.org/wiki/Fast_inv
 A small selection from what is available:
 
 ```rust
-use vqm::{Matrix3x3f32, Quaternionf32, Vector3f32};
+use vqm::{Matrix3x3f32, Quaternionf32, UnitQuaternionf32, Vector3f32};
 
 // vectors
 let a = Vector3f32 { x: 1.0, y: 2.0, z: 3.0 };
@@ -124,7 +124,7 @@ let q = s * t;
 let c = q.conjugate();
 
 // Euler angles
-let orientation = Quaternionf32::from_roll_pitch_yaw_degrees(15.0, 60.0, 120.0);
+let orientation = UnitQuaternionf32::from_roll_pitch_yaw_degrees(15.0, 60.0, 120.0);
 let pitch = orientation.calculate_pitch_degrees();
 ```
 

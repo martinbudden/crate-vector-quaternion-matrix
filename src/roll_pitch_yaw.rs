@@ -8,7 +8,7 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use super::{MathConstants, MathMethods, Quaternion, Vector2, Vector3};
+use super::{MathConstants, MathMethods, UnitQuaternion, Vector2, Vector3};
 
 /// `RollPitchYaw` struct `{ roll: f32, pitch: f32, yaw: f32 }`<br>
 pub type RollPitchYawf32 = RollPitchYaw<f32>;
@@ -90,13 +90,13 @@ where
     }
 }
 
-impl<T> From<RollPitch<T>> for Quaternion<T>
+impl<T> From<RollPitch<T>> for UnitQuaternion<T>
 where
     T: Copy + MathMethods + FloatCore,
 {
     #[inline]
     fn from(angles: RollPitch<T>) -> Self {
-        Quaternion::from_roll_pitch_radians(angles.roll, angles.pitch)
+        UnitQuaternion::from_roll_pitch_radians(angles.roll, angles.pitch)
     }
 }
 
@@ -180,13 +180,13 @@ where
     }
 }
 
-impl<T> From<RollPitchYaw<T>> for Quaternion<T>
+impl<T> From<RollPitchYaw<T>> for UnitQuaternion<T>
 where
     T: Copy + MathMethods + FloatCore,
 {
     #[inline]
     fn from(angles: RollPitchYaw<T>) -> Self {
-        Quaternion::from_roll_pitch_yaw_radians(angles.roll, angles.pitch, angles.yaw)
+        UnitQuaternion::from_roll_pitch_yaw_radians(angles.roll, angles.pitch, angles.yaw)
     }
 }
 

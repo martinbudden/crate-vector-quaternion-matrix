@@ -12,10 +12,7 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use super::{
-    MathConstants, MathMethods, Matrix2x2, Quaternion, Vector3, matrix3x3_math::Matrix3x3Math,
-    quaternion_math::QuaternionMath,
-};
+use super::{MathConstants, MathMethods, Matrix2x2, Vector3, matrix3x3_math::Matrix3x3Math};
 
 /// 3x3 matrix of `f32` values<br>
 pub type Matrix3x3f32 = Matrix3x3<f32>;
@@ -35,9 +32,9 @@ pub type Matrix3x3f64 = Matrix3x3<f64>;
 #[cfg_attr(not(feature = "align"), repr(C))]
 pub struct Matrix3x3<T> {
     // Flattened 3x3 matrix: 9 elements in column-major order
-    pub(crate) a: [T; MATRIX_3X3_SIZE],
+    pub(crate) a: [T; SELF_SIZE],
 }
-const MATRIX_3X3_SIZE: usize = 9;
+const SELF_SIZE: usize = 9;
 
 #[cfg(feature = "storage")]
 impl<T> PostcardValue<'_> for Matrix3x3<T> where T: Serialize + for<'de> Deserialize<'de> {}
@@ -45,7 +42,7 @@ impl<T> PostcardValue<'_> for Matrix3x3<T> where T: Serialize + for<'de> Deseria
 /// Constants to index matrix elements.
 impl<T> Matrix3x3<T> {
     /// Size of array representing matrix.
-    pub const SIZE: usize = MATRIX_3X3_SIZE;
+    pub const SIZE: usize = SELF_SIZE;
     /// Number of rows in matrix.
     pub const ROW_COUNT: usize = 3;
     /// Number of columns in matrix.
@@ -93,7 +90,7 @@ where
     ///                                   23.0, 31.0, 41.0]));
     /// ```
     #[inline]
-    pub const fn new(a: [T; MATRIX_3X3_SIZE]) -> Self {
+    pub const fn new(a: [T; SELF_SIZE]) -> Self {
         Self::from_row_array(a)
     }
 }
@@ -114,7 +111,7 @@ where
     /// ```
     #[inline]
     pub const fn from_element(value: T) -> Self {
-        Self { a: [value; MATRIX_3X3_SIZE] }
+        Self { a: [value; SELF_SIZE] }
     }
 
     /// Matrix from array of row vectors.
@@ -170,7 +167,7 @@ where
     ///                                   23.0, 31.0, 41.0]));
     /// ```
     #[inline]
-    pub const fn from_row_array(a: [T; MATRIX_3X3_SIZE]) -> Self {
+    pub const fn from_row_array(a: [T; SELF_SIZE]) -> Self {
         Self {
             a: [
                 a[0], a[3], a[6], //
@@ -191,7 +188,7 @@ where
     ///                                   59.0,  47.0,  41.0]));
     /// ```
     #[inline]
-    pub const fn from_column_array(a: [T; MATRIX_3X3_SIZE]) -> Self {
+    pub const fn from_column_array(a: [T; SELF_SIZE]) -> Self {
         Self { a }
     }
 
@@ -326,7 +323,7 @@ where
         if slice.len() != 9 {
             return None;
         }
-        let mut a = [slice[0]; MATRIX_3X3_SIZE];
+        let mut a = [slice[0]; SELF_SIZE];
         a.copy_from_slice(&slice[0..9]);
         Some(Self { a })
     }
@@ -442,7 +439,7 @@ where
     /// ```
     #[inline]
     fn zero() -> Self {
-        Self { a: [T::zero(); MATRIX_3X3_SIZE] }
+        Self { a: [T::zero(); SELF_SIZE] }
     }
 
     /// Tests if matrix is zero.
@@ -469,7 +466,7 @@ where
     /// let m = Matrix3x3f32::ZERO;
     /// assert!(m.is_zero());
     /// ```
-    const ZERO: Self = Self { a: [T::ZERO; MATRIX_3X3_SIZE] };
+    const ZERO: Self = Self { a: [T::ZERO; SELF_SIZE] };
 }
 
 impl<T> Matrix3x3<T>
@@ -1578,7 +1575,7 @@ where
 
 // **** AsRef ****
 
-impl<T> AsRef<[T; MATRIX_3X3_SIZE]> for Matrix3x3<T> {
+impl<T> AsRef<[T; SELF_SIZE]> for Matrix3x3<T> {
     /// Immutable reference to the raw array
     /// ```
     /// # use vqm::Matrix3x3f32;
@@ -1589,12 +1586,12 @@ impl<T> AsRef<[T; MATRIX_3X3_SIZE]> for Matrix3x3<T> {
     /// assert_eq!(5.0, a[Matrix3x3f32::M21]);
     /// ```
     #[inline]
-    fn as_ref(&self) -> &[T; MATRIX_3X3_SIZE] {
+    fn as_ref(&self) -> &[T; SELF_SIZE] {
         &self.a
     }
 }
 
-impl<T> AsMut<[T; MATRIX_3X3_SIZE]> for Matrix3x3<T> {
+impl<T> AsMut<[T; SELF_SIZE]> for Matrix3x3<T> {
     /// Mutable reference to the raw array
     /// ```
     /// # use vqm::Matrix3x3f32;
@@ -1606,7 +1603,7 @@ impl<T> AsMut<[T; MATRIX_3X3_SIZE]> for Matrix3x3<T> {
     /// assert_eq!(7.0, m[Matrix3x3f32::M12]);
     /// ```
     #[inline]
-    fn as_mut(&mut self) -> &mut [T; MATRIX_3X3_SIZE] {
+    fn as_mut(&mut self) -> &mut [T; SELF_SIZE] {
         &mut self.a
     }
 }
@@ -2672,10 +2669,10 @@ impl<T> DoubleEndedIterator for Matrix3x3ColumnsMut<'_, T> {
 
 // **** From Array ****
 
-impl<T> From<[T; MATRIX_3X3_SIZE]> for Matrix3x3<T> {
+impl<T> From<[T; SELF_SIZE]> for Matrix3x3<T> {
     /// Matrix from 1D array.
     #[inline]
-    fn from(input: [T; MATRIX_3X3_SIZE]) -> Self {
+    fn from(input: [T; SELF_SIZE]) -> Self {
         Self { a: input }
     }
 }
@@ -2726,84 +2723,5 @@ impl<T: Copy> From<Matrix3x3<T>> for Matrix2x2<T> {
             m.a[0], m.a[1],
             m.a[3], m.a[4]
         ] }
-    }
-}
-
-// **** From Quaternion ****
-
-impl<T> From<Quaternion<T>> for Matrix3x3<T>
-where
-    T: Copy + Zero + One + Add<Output = T> + Sub<Output = T> + Mul<Output = T>,
-{
-    /// Create rotation matrix from quaternion.
-    ///
-    /// see [Quaternion-derived rotation matrix](https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation#Quaternion-derived_rotation_matrix),
-    /// uses Hamilton convention.
-    #[inline]
-    fn from(q: Quaternion<T>) -> Self {
-        let two = T::one() + T::one();
-        Self {
-            a: [
-                T::one() - (q.y * q.y + q.z * q.z) * two,
-                (q.x * q.y - q.w * q.z) * two,
-                (q.w * q.y + q.x * q.z) * two,
-                (q.w * q.z + q.x * q.y) * two,
-                T::one() - (q.x * q.x + q.z * q.z) * two,
-                (q.y * q.z - q.w * q.x) * two,
-                (q.x * q.z - q.w * q.y) * two,
-                (q.w * q.x + q.y * q.z) * two,
-                T::one() - (q.x * q.x + q.y * q.y) * two,
-            ],
-        }
-    }
-}
-
-impl<T> From<Matrix3x3<T>> for Quaternion<T>
-where
-    T: Copy
-        + ConstZero
-        + ConstOne
-        + PartialOrd
-        + Neg<Output = T>
-        + Sub<Output = T>
-        + Div<Output = T>
-        + MathMethods
-        + QuaternionMath,
-{
-    /// Create quaternion from a rotation matrix.
-    ///
-    /// Adapted from [Converting a Rotation Matrix to a Quaternion](https://d3cw3dd2w33x3b.cloudfront.net/wp-content/uploads/2015/01/matrix-to-quat.pdf) by Mike Day.
-    /// Note that Day's paper uses the [Shuster multiplication convention](https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation#Alternative_conventions),
-    /// rather than the Hamilton multiplication convention used by the Quaternion class.
-    fn from(m: Matrix3x3<T>) -> Self {
-        let half = T::ONE / (T::ONE + T::ONE);
-        // Choose largest scale factor from 4w, 4x, 4y, and 4z, to avoid a scale factor of zero, or numerical instabilities caused by division of a small scale factor.
-        if m.a[8] < T::ZERO {
-            // |(x,y)| is bigger than |(z,w)|?
-            if m.a[0] > m.a[4] {
-                // |x| bigger than |y|, so use x-form
-                let t = T::ONE + (m.a[0] - m.a[4]) - m.a[8]; // 1 + 2(xx - yy) - 1 + 2(xx + yy) = 4xx
-                let q = Self { w: m.a[7] - m.a[5], x: t, y: m.a[1] + m.a[3], z: m.a[6] + m.a[2] };
-                return q * t.sqrt_reciprocal() * half;
-            }
-            // |y| bigger than |x|, so use y-form
-            let t = T::ONE - (m.a[0] - m.a[4]) - m.a[8]; // 1 - 2(xx - yy) - 1 + 2(xx + yy) = 4yy
-            let q = Self { w: m.a[2] - m.a[6], x: m.a[1] + m.a[3], y: t, z: m.a[5] + m.a[7] };
-            return q * t.sqrt_reciprocal() * half;
-        }
-
-        // |(z,w)| bigger than |(x,y)|
-        if m.a[0] < -m.a[4] {
-            // |z| bigger than |w|, so use z-form
-            let t = T::one() - m.a[0] - (m.a[4] - m.a[8]); // 1 - (1 - 2*(yy + zz)) - (2(yy - zz)) = 4zz
-            let q = Self { w: m.a[3] - m.a[1], x: m.a[2] + m.a[6], y: m.a[5] + m.a[7], z: t };
-            return q * t.sqrt_reciprocal() * half;
-        }
-
-        // |w| bigger than |z|, so use w-form
-        // ww + xx + yy + zz = 1, since unit quaternion, so xx + yy + zz =  1 - ww
-        let t = T::one() + m.a[0] + m.a[4] + m.a[8]; // 1 + 1 - 2*(yy + zz) + 1 - 2(xx + zz) + 1 - 2(xx + yy) =  4 - 4(xx + yy + zz) = 4 - 4(1 - ww) = 4ww
-        let q = Self { w: t, x: m.a[7] - m.a[5], y: m.a[2] - m.a[6], z: m.a[3] - m.a[1] };
-        q * t.sqrt_reciprocal() * half
     }
 }

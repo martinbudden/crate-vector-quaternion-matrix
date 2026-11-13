@@ -54,6 +54,7 @@ mod matrix4x4_math;
 mod quaternion;
 mod quaternion_math;
 mod roll_pitch_yaw;
+mod unit_quaternion;
 
 pub use math_constants::MathConstants;
 pub use math_methods::MathMethods;
@@ -74,6 +75,7 @@ pub use vector4::{Vector4, Vector4f32, Vector4f64};
 
 pub use quaternion::{Quaternion, Quaternionf32, Quaternionf64};
 pub use roll_pitch_yaw::{RollPitch, RollPitchYaw, RollPitchYawf32, RollPitchYawf64, RollPitchf32, RollPitchf64};
+pub use unit_quaternion::{UnitQuaternion, UnitQuaternionf32, UnitQuaternionf64};
 
 pub use cholesky2x2::{Cholesky2x2, Cholesky2x2f32, Cholesky2x2f64};
 pub use m2x2ut::{M2x2UpperTriangle, M2x2UpperTrianglef32, M2x2UpperTrianglef64};
