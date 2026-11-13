@@ -11,17 +11,16 @@ pub type Cholesky3x3f64 = Cholesky3x3<f64>;
 /// Note: the diagonals are stored as reciprocals.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct Cholesky3x3<T> {
-    a: [T; CHOLESKY_3X3_SIZE],
+    a: [T; SELF_SIZE],
 }
-
-const CHOLESKY_3X3_SIZE: usize = 6;
+const SELF_SIZE: usize = 6;
 
 impl<T> Cholesky3x3<T>
 where
     T: Copy + FloatCore + MathMethods,
 {
     /// Size of lower triangular array representing Cholesky solver (6).
-    pub const SIZE: usize = CHOLESKY_3X3_SIZE;
+    pub const SIZE: usize = SELF_SIZE;
 
     // Column 1
     const M11: usize = 0;
@@ -61,7 +60,7 @@ where
     #[must_use]
     pub fn new(m: Matrix3x3<T>) -> Option<Self> {
         // 14 arithmetic operations: 3 sqrt_reciprocal, 7 multiplications, 4 subtractions
-        let mut ret = [T::zero(); CHOLESKY_3X3_SIZE];
+        let mut ret = [T::zero(); SELF_SIZE];
 
         let a2 = m[Matrix3x3::<T>::M11];
         if a2 <= T::zero() {
@@ -102,7 +101,7 @@ where
     #[must_use]
     pub fn from_lower_triangle_array(a: [T; 6]) -> Option<Self> {
         // 14 arithmetic operations: 3 sqrt_reciprocal, 7 multiplications, 4 subtractions
-        let mut ret = [T::zero(); CHOLESKY_3X3_SIZE];
+        let mut ret = [T::zero(); SELF_SIZE];
 
         let a2 = a[Self::M11];
         if a2 <= T::zero() {

@@ -33,9 +33,9 @@ pub type Matrix4x4f64 = Matrix4x4<f64>;
 #[cfg_attr(not(feature = "align"), repr(C, align(16)))]
 pub struct Matrix4x4<T> {
     // Flattened 4x4 matrix: 16 elements in column-major order
-    pub(crate) a: [T; MATRIX_4X4_SIZE],
+    pub(crate) a: [T; SELF_SIZE],
 }
-const MATRIX_4X4_SIZE: usize = 16;
+const SELF_SIZE: usize = 16;
 
 #[cfg(feature = "storage")]
 impl<T> PostcardValue<'_> for Matrix4x4<T> where T: Serialize + for<'de> Deserialize<'de> {}
@@ -66,7 +66,7 @@ where
 /// Constants to index matrix elements.
 impl<T> Matrix4x4<T> {
     /// Size of array representing matrix.
-    pub const SIZE: usize = MATRIX_4X4_SIZE;
+    pub const SIZE: usize = SELF_SIZE;
     /// Number of rows in matrix.
     pub const ROW_COUNT: usize = 4;
     /// Number of columns in matrix.
@@ -137,7 +137,7 @@ where
     /// assert_eq!(m[Matrix4x4f32::M21], 5.0);
     /// ```
     #[inline]
-    pub const fn new(a: [T; MATRIX_4X4_SIZE]) -> Self {
+    pub const fn new(a: [T; SELF_SIZE]) -> Self {
         Self::from_row_array(a)
     }
 }
@@ -159,7 +159,7 @@ where
     /// ```
     #[inline]
     pub const fn from_element(value: T) -> Self {
-        Self { a: [value; MATRIX_4X4_SIZE] }
+        Self { a: [value; SELF_SIZE] }
     }
 
     /// Matrix from array of row vectors.
@@ -223,7 +223,7 @@ where
     ///                                   67.0, 73.0, 83.0,  97.0]));
     /// ```
     #[inline]
-    pub const fn from_row_array(a: [T; MATRIX_4X4_SIZE]) -> Self {
+    pub const fn from_row_array(a: [T; SELF_SIZE]) -> Self {
         Self {
             a: [
                 a[0], a[4], a[8], a[12], //
@@ -247,7 +247,7 @@ where
     ///                                  127.0, 109.0, 103.0,  97.0]));
     /// ```
     #[inline]
-    pub const fn from_column_array(a: [T; MATRIX_4X4_SIZE]) -> Self {
+    pub const fn from_column_array(a: [T; SELF_SIZE]) -> Self {
         Self { a }
     }
 
@@ -347,7 +347,7 @@ where
         if slice.len() != 16 {
             return None;
         }
-        let mut a = [slice[0]; MATRIX_4X4_SIZE];
+        let mut a = [slice[0]; SELF_SIZE];
         a.copy_from_slice(&slice[0..16]);
         Some(Self { a })
     }
@@ -441,7 +441,7 @@ where
     /// ```
     #[inline]
     fn zero() -> Self {
-        Self { a: [T::zero(); MATRIX_4X4_SIZE] }
+        Self { a: [T::zero(); SELF_SIZE] }
     }
 
     /// Tests if matrix is zero.
@@ -468,7 +468,7 @@ where
     /// let m = Matrix4x4f32::ZERO;
     /// assert!(m.is_zero());
     /// ```
-    const ZERO: Self = Self { a: [T::ZERO; MATRIX_4X4_SIZE] };
+    const ZERO: Self = Self { a: [T::ZERO; SELF_SIZE] };
 }
 
 impl<T> Matrix4x4<T>
@@ -1735,7 +1735,7 @@ where
 
 // **** AsRef ****
 
-impl<T> AsRef<[T; MATRIX_4X4_SIZE]> for Matrix4x4<T> {
+impl<T> AsRef<[T; SELF_SIZE]> for Matrix4x4<T> {
     /// Immutable reference to the raw array.
     /// ```
     /// # use vqm::Matrix4x4f32;
@@ -1747,12 +1747,12 @@ impl<T> AsRef<[T; MATRIX_4X4_SIZE]> for Matrix4x4<T> {
     /// assert_eq!(5.0, a[Matrix4x4f32::M21]);
     /// ```
     #[inline]
-    fn as_ref(&self) -> &[T; MATRIX_4X4_SIZE] {
+    fn as_ref(&self) -> &[T; SELF_SIZE] {
         &self.a
     }
 }
 
-impl<T> AsMut<[T; MATRIX_4X4_SIZE]> for Matrix4x4<T> {
+impl<T> AsMut<[T; SELF_SIZE]> for Matrix4x4<T> {
     /// Mutable reference to the raw array.
     /// ```
     /// # use vqm::Matrix4x4f32;
@@ -1765,7 +1765,7 @@ impl<T> AsMut<[T; MATRIX_4X4_SIZE]> for Matrix4x4<T> {
     /// assert_eq!(7.0, m[4]);
     /// ```
     #[inline]
-    fn as_mut(&mut self) -> &mut [T; MATRIX_4X4_SIZE] {
+    fn as_mut(&mut self) -> &mut [T; SELF_SIZE] {
         &mut self.a
     }
 }
@@ -2895,10 +2895,10 @@ impl<T> DoubleEndedIterator for Matrix4x4ColumnsMut<'_, T> {
 
 // **** From Array ****
 
-impl<T> From<[T; MATRIX_4X4_SIZE]> for Matrix4x4<T> {
+impl<T> From<[T; SELF_SIZE]> for Matrix4x4<T> {
     /// Matrix from 1D array.
     #[inline]
-    fn from(input: [T; MATRIX_4X4_SIZE]) -> Self {
+    fn from(input: [T; SELF_SIZE]) -> Self {
         Self { a: input }
     }
 }

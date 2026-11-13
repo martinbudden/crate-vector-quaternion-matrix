@@ -24,8 +24,9 @@ pub type Matrix3x3xM2x2f64 = Matrix3x3xM2x2<f64>;
 #[repr(C)]
 pub struct Matrix3x3xM2x2<T> {
     // Flattened array of Matrix2x2: 9 elements in column-major order
-    pub(crate) a: [Matrix2x2<T>; 9],
+    pub(crate) a: [Matrix2x2<T>; SELF_SIZE],
 }
+const SELF_SIZE: usize = 9;
 
 impl<T> Default for Matrix3x3xM2x2<T>
 where
@@ -33,7 +34,7 @@ where
     Matrix2x2<T>: Zero,
 {
     fn default() -> Self {
-        Self { a: [Matrix2x2::<T>::zero(); 9] }
+        Self { a: [Matrix2x2::<T>::zero(); SELF_SIZE] }
     }
 }
 
@@ -53,7 +54,7 @@ impl<T: fmt::Debug> fmt::Debug for Matrix3x3xM2x2<T> {
 /// Constants to index matrix elements.
 impl<T> Matrix3x3xM2x2<T> {
     /// Size of array representing matrix.
-    pub const SIZE: usize = 9;
+    pub const SIZE: usize = SELF_SIZE;
     /// Number of rows in matrix.
     pub const ROW_COUNT: usize = 3;
     /// Number of columns in matrix.
@@ -133,12 +134,12 @@ where
     /// assert_eq!(2.0, m[2][3]);
     /// ```
     pub fn from_element(value: T) -> Self {
-        Self { a: [Matrix2x2::<T>::from_element(value); 9] }
+        Self { a: [Matrix2x2::<T>::from_element(value); SELF_SIZE] }
     }
 
     /// Matrix from 1D row array.
     #[inline]
-    pub const fn from_row_array(a: [Matrix2x2<T>; 9]) -> Self {
+    pub const fn from_row_array(a: [Matrix2x2<T>; SELF_SIZE]) -> Self {
         Self {
             a: [
                 a[0], a[3], a[6], //
@@ -150,7 +151,7 @@ where
 
     /// Matrix from 1D column array.
     #[inline]
-    pub const fn from_column_array(a: [Matrix2x2<T>; 9]) -> Self {
+    pub const fn from_column_array(a: [Matrix2x2<T>; SELF_SIZE]) -> Self {
         Self { a }
     }
 
@@ -181,7 +182,7 @@ where
     #[rustfmt::skip]
     #[inline]
     pub const fn from_diagonal_element(value: T) -> Self {
-        Self { a: [Matrix2x2::<T>::from_diagonal_element(value); 9] }
+        Self { a: [Matrix2x2::<T>::from_diagonal_element(value); SELF_SIZE] }
     }
 }
 
@@ -201,7 +202,7 @@ where
     /// ```
     #[inline]
     fn zero() -> Self {
-        Self { a: [Matrix2x2::<T>::zero(); 9] }
+        Self { a: [Matrix2x2::<T>::zero(); SELF_SIZE] }
     }
 
     /// Tests if matrix is zero.

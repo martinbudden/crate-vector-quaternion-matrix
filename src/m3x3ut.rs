@@ -19,13 +19,13 @@ pub type M3x3UpperTrianglef64 = M3x3UpperTriangle<f64>;
 // This convention is used by libraries such as BLAS, LAPACK, and Intel MKL.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 pub struct M3x3UpperTriangle<T> {
-    pub(crate) a: [T; UT_3X3_SIZE],
+    pub(crate) a: [T; SELF_SIZE],
 }
-const UT_3X3_SIZE: usize = 6;
+const SELF_SIZE: usize = 6;
 
 impl<T> M3x3UpperTriangle<T> {
     /// Size of upper triangular array.
-    pub const SIZE: usize = UT_3X3_SIZE;
+    pub const SIZE: usize = SELF_SIZE;
 
     // Row 1
     const M11: usize = 0;
@@ -54,7 +54,7 @@ where
     /// ]);
     /// ```
     #[inline]
-    pub const fn new(a: [T; UT_3X3_SIZE]) -> Self {
+    pub const fn new(a: [T; SELF_SIZE]) -> Self {
         Self { a }
     }
 }

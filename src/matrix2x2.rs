@@ -31,9 +31,9 @@ pub type Matrix2x2f64 = Matrix2x2<f64>;
 #[repr(C, align(16))]
 pub struct Matrix2x2<T> {
     // Flattened 2x2 matrix: 4 elements in column-major order
-    pub(crate) a: [T; MATRIX_2X2_SIZE],
+    pub(crate) a: [T; SELF_SIZE],
 }
-const MATRIX_2X2_SIZE: usize = 4;
+const SELF_SIZE: usize = 4;
 
 #[cfg(feature = "storage")]
 impl<T> PostcardValue<'_> for Matrix2x2<T> where T: Serialize + for<'de> Deserialize<'de> {}
@@ -41,7 +41,7 @@ impl<T> PostcardValue<'_> for Matrix2x2<T> where T: Serialize + for<'de> Deseria
 /// Constants to index matrix elements.
 impl<T> Matrix2x2<T> {
     /// Size of array representing matrix.
-    pub const SIZE: usize = MATRIX_2X2_SIZE;
+    pub const SIZE: usize = SELF_SIZE;
     /// Number of rows in matrix.
     pub const ROW_COUNT: usize = 2;
     /// Number of columns in matrix.
@@ -75,7 +75,7 @@ where
     ///                                    5.0, 11.0]));
     /// ```
     #[inline]
-    pub const fn new(a: [T; MATRIX_2X2_SIZE]) -> Self {
+    pub const fn new(a: [T; SELF_SIZE]) -> Self {
         Self::from_row_array(a)
     }
 }
@@ -95,7 +95,7 @@ where
     /// ```
     #[inline]
     pub const fn from_element(value: T) -> Self {
-        Self { a: [value; MATRIX_2X2_SIZE] }
+        Self { a: [value; SELF_SIZE] }
     }
 
     /// Matrix from array of row vectors.
@@ -143,7 +143,7 @@ where
     ///                                    5.0, 11.0]));
     /// ```
     #[inline]
-    pub const fn from_row_array(a: [T; MATRIX_2X2_SIZE]) -> Self {
+    pub const fn from_row_array(a: [T; SELF_SIZE]) -> Self {
         Self {
             a: [
                 a[0], a[2], //
@@ -161,7 +161,7 @@ where
     ///                                   17.0,  11.0]));
     /// ```
     #[inline]
-    pub const fn from_column_array(a: [T; MATRIX_2X2_SIZE]) -> Self {
+    pub const fn from_column_array(a: [T; SELF_SIZE]) -> Self {
         Self { a }
     }
 
@@ -242,11 +242,11 @@ where
     /// ```
     #[inline]
     pub fn try_from_column_slice(slice: &[T]) -> Option<Self> {
-        if slice.len() != MATRIX_2X2_SIZE {
+        if slice.len() != SELF_SIZE {
             return None;
         }
-        let mut a = [slice[0]; MATRIX_2X2_SIZE];
-        a.copy_from_slice(&slice[0..MATRIX_2X2_SIZE]);
+        let mut a = [slice[0]; SELF_SIZE];
+        a.copy_from_slice(&slice[0..SELF_SIZE]);
         Some(Self { a })
     }
 }
@@ -350,7 +350,7 @@ where
     /// ```
     #[inline]
     fn zero() -> Self {
-        Self { a: [T::zero(); MATRIX_2X2_SIZE] }
+        Self { a: [T::zero(); SELF_SIZE] }
     }
 
     /// Tests if matrix is zero.
@@ -377,7 +377,7 @@ where
     /// let m = Matrix2x2f32::ZERO;
     /// assert!(m.is_zero());
     /// ```
-    const ZERO: Self = Self { a: [T::ZERO; MATRIX_2X2_SIZE] };
+    const ZERO: Self = Self { a: [T::ZERO; SELF_SIZE] };
 }
 
 impl<T> Matrix2x2<T>
@@ -1363,7 +1363,7 @@ where
 
 // **** AsRef ****
 
-impl<T> AsRef<[T; MATRIX_2X2_SIZE]> for Matrix2x2<T> {
+impl<T> AsRef<[T; SELF_SIZE]> for Matrix2x2<T> {
     /// Immutable reference to the raw array.
     /// ```
     /// # use vqm::Matrix2x2f32;
@@ -1373,12 +1373,12 @@ impl<T> AsRef<[T; MATRIX_2X2_SIZE]> for Matrix2x2<T> {
     /// assert_eq!(5.0, a[Matrix2x2f32::M21]);
     /// ```
     #[inline]
-    fn as_ref(&self) -> &[T; MATRIX_2X2_SIZE] {
+    fn as_ref(&self) -> &[T; SELF_SIZE] {
         &self.a
     }
 }
 
-impl<T> AsMut<[T; MATRIX_2X2_SIZE]> for Matrix2x2<T> {
+impl<T> AsMut<[T; SELF_SIZE]> for Matrix2x2<T> {
     /// Immutable reference to the raw array.
     /// ```
     /// # use vqm::Matrix2x2f32;
@@ -1389,7 +1389,7 @@ impl<T> AsMut<[T; MATRIX_2X2_SIZE]> for Matrix2x2<T> {
     /// assert_eq!(7.0, m[2]);
     /// ```
     #[inline]
-    fn as_mut(&mut self) -> &mut [T; MATRIX_2X2_SIZE] {
+    fn as_mut(&mut self) -> &mut [T; SELF_SIZE] {
         &mut self.a
     }
 }
@@ -2339,10 +2339,10 @@ impl<T> DoubleEndedIterator for Matrix2x2ColumnsMut<'_, T> {
 
 // **** From Array ****
 
-impl<T> From<[T; MATRIX_2X2_SIZE]> for Matrix2x2<T> {
+impl<T> From<[T; SELF_SIZE]> for Matrix2x2<T> {
     /// Matrix from 1D array.
     #[inline]
-    fn from(input: [T; MATRIX_2X2_SIZE]) -> Self {
+    fn from(input: [T; SELF_SIZE]) -> Self {
         Self { a: input }
     }
 }

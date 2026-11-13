@@ -24,8 +24,9 @@ pub type Matrix3x3xM3x3f64 = Matrix3x3xM3x3<f64>;
 #[repr(C)]
 pub struct Matrix3x3xM3x3<T> {
     // Flattened array of Matrix3x3: 9 elements in column-major order
-    pub(crate) a: [Matrix3x3<T>; 9],
+    pub(crate) a: [Matrix3x3<T>; SELF_SIZE],
 }
+const SELF_SIZE: usize = 9;
 
 impl<T> Default for Matrix3x3xM3x3<T>
 where
@@ -33,7 +34,7 @@ where
     Matrix3x3<T>: Zero,
 {
     fn default() -> Self {
-        Self { a: [Matrix3x3::<T>::zero(); 9] }
+        Self { a: [Matrix3x3::<T>::zero(); SELF_SIZE] }
     }
 }
 
@@ -53,7 +54,7 @@ impl<T: fmt::Debug> fmt::Debug for Matrix3x3xM3x3<T> {
 /// Constants to index matrix elements.
 impl<T> Matrix3x3xM3x3<T> {
     /// Size of array representing matrix.
-    pub const SIZE: usize = 9;
+    pub const SIZE: usize = SELF_SIZE;
     /// Number of rows in matrix.
     pub const ROW_COUNT: usize = 3;
     /// Number of columns in matrix.

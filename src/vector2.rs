@@ -667,6 +667,7 @@ impl<T> Index<usize> for Vector2<T> {
     /// ```
     #[inline]
     fn index(&self, index: usize) -> &T {
+        debug_assert!(index < 2);
         match index {
             0 => &self.x,
             _ => &self.y,
@@ -688,6 +689,7 @@ impl<T> IndexMut<usize> for Vector2<T> {
     /// ```
     #[inline]
     fn index_mut(&mut self, index: usize) -> &mut T {
+        debug_assert!(index < 2);
         match index {
             0 => &mut self.x,
             _ => &mut self.y,
