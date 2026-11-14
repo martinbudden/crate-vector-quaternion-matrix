@@ -4,7 +4,7 @@ use vqm::{Matrix3x3f32, Quaternionf32, UnitQuaternionf32, Vector3f32};
 mod tests {
     use super::*;
     //use approx::assert_abs_diff_eq;
-    //const EPSILON: f32 = 1e-5;
+    const EPSILON: f32 = 1e-5;
 
     #[test]
     fn from() {
@@ -121,5 +121,193 @@ mod tests {
         let q2: Quaternionf32 = m1.into();
         let m2: Matrix3x3f32 = UnitQuaternionf32::from_quaternion(q2).into();
         m1.is_approx(m2, 1e-10);
+    }
+    #[test]
+    fn sign_equivalence() {
+        let q = UnitQuaternionf32::from_axis_angle_radians(Vector3f32::new(0.0, 0.0, 1.0), 0.7);
+        assert!(q.angle_to(-q) < 1e-12);
+    }
+    #[test]
+    fn rotate_identity_leaves_vector_unchanged() {
+        let q = UnitQuaternionf32::new(1.0, 0.0, 0.0, 0.0);
+
+        let v = Vector3f32 { x: 1.0, y: 2.0, z: 3.0 };
+
+        let rotated = q.rotate(v);
+        assert!(rotated.is_approx(v, EPSILON));
+    }
+    #[test]
+    fn rotate_90_degrees_about_x() {
+        let s = core::f32::consts::FRAC_1_SQRT_2;
+
+        let q = UnitQuaternionf32::new(s, s, 0.0, 0.0);
+
+        let v = Vector3f32 { x: 0.0, y: 1.0, z: 0.0 };
+
+        let expected = Vector3f32 { x: 0.0, y: 0.0, z: 1.0 };
+        let rotated = q.rotate(v);
+        assert!(rotated.is_approx(expected, EPSILON));
+    }
+
+    #[test]
+    fn rotate_90_degrees_about_y() {
+        let s = core::f32::consts::FRAC_1_SQRT_2;
+
+        let q = UnitQuaternionf32::new(s, 0.0, s, 0.0);
+
+        let v = Vector3f32 { x: 0.0, y: 0.0, z: 1.0 };
+
+        let expected = Vector3f32 { x: 1.0, y: 0.0, z: 0.0 };
+
+        let rotated = q.rotate(v);
+        assert!(rotated.is_approx(expected, EPSILON));
+    }
+
+    #[test]
+    fn rotate_90_degrees_about_z() {
+        let s = core::f32::consts::FRAC_1_SQRT_2;
+
+        let q = UnitQuaternionf32::new(s, 0.0, 0.0, s);
+
+        let v = Vector3f32 { x: 1.0, y: 0.0, z: 0.0 };
+
+        let expected = Vector3f32 { x: 0.0, y: 1.0, z: 0.0 };
+
+        let rotated = q.rotate(v);
+        assert!(rotated.is_approx(expected, EPSILON));
+    }
+    #[test]
+    fn rotate_arbitrary_vector_about_diagonal_axis() {
+        // 120-degree rotation about the (1, 1, 1) axis.
+        // This cyclically maps (x, y, z) to (z, x, y).
+        let q = UnitQuaternionf32::new(0.5, 0.5, 0.5, 0.5);
+
+        let v = Vector3f32 { x: 1.0, y: 2.0, z: 3.0 };
+
+        let expected = Vector3f32 { x: 3.0, y: 1.0, z: 2.0 };
+
+        let rotated = q.rotate(v);
+        assert_eq!(rotated, expected);
+        assert!(rotated.is_approx(expected, EPSILON));
+    }
+
+    #[test]
+    fn rotate_180_degrees_about_arbitrary_axis() {
+        // 180-degree rotation about the normalized (1, 1, 0) axis.
+        let s = core::f32::consts::FRAC_1_SQRT_2;
+
+        let q = UnitQuaternionf32::new(0.0, s, s, 0.0);
+
+        let v = Vector3f32 { x: 1.0, y: 2.0, z: 3.0 };
+
+        let expected = Vector3f32 { x: 2.0, y: 1.0, z: -3.0 };
+
+        let rotated = q.rotate(v);
+        assert!(rotated.is_approx(expected, EPSILON));
+    }
+
+    #[test]
+    fn rotate_preserves_perpendicularity() {
+        let s = core::f32::consts::FRAC_1_SQRT_2;
+
+        let q = UnitQuaternionf32::new(s, 0.0, 0.0, s);
+
+        let a = Vector3f32 { x: 1.0, y: 0.0, z: 0.0 };
+
+        let b = Vector3f32 { x: 0.0, y: 0.0, z: 1.0 };
+
+        let a_rotated = q.rotate(a);
+        let b_rotated = q.rotate(b);
+
+        let dot = a_rotated.x * b_rotated.x + a_rotated.y * b_rotated.y + a_rotated.z * b_rotated.z;
+
+        assert!(dot.abs() < EPSILON, "Rotated vectors should remain perpendicular, dot product = {}", dot);
+    }
+
+    #[test]
+    fn rotate_same_result_for_negated_quaternion() {
+        // q and -q represent the same rotation.
+        let q = UnitQuaternionf32::new(0.5, 0.5, 0.5, 0.5);
+
+        let neg_q = UnitQuaternionf32::new(-q.q().w, -q.q().x, -q.q().y, -q.q().z);
+
+        let v = Vector3f32 { x: 1.7, y: -3.2, z: 0.8 };
+
+        let expected = neg_q.rotate(v);
+        let rotated = q.rotate(v);
+        assert!(rotated.is_approx(expected, EPSILON));
+    }
+
+    #[test]
+    fn rotate_zero_vector_remains_zero() {
+        let q = UnitQuaternionf32::new(0.5, 0.5, 0.5, 0.5);
+
+        let zero = Vector3f32 { x: 0.0, y: 0.0, z: 0.0 };
+
+        assert!(q.rotate(zero).is_approx(zero, EPSILON));
+    }
+    #[test]
+    fn rotate_preserves_vector_magnitude() {
+        let q = UnitQuaternionf32::new(0.5, 0.5, 0.5, 0.5);
+
+        let v = Vector3f32 { x: 1.3, y: -2.7, z: 4.2 };
+        let original_norm_squared = v.norm_squared();
+
+        let rotated = q.rotate(v);
+        let rotated_norm_squared = rotated.norm_squared();
+
+        assert!(
+            (original_norm_squared - rotated_norm_squared).abs() < EPSILON,
+            "Magnitude changed: original norm_squared = {}, rotated norm_squared = {}",
+            original_norm_squared,
+            rotated_norm_squared
+        );
+    }
+
+    #[test]
+    fn rotate_preserves_magnitude_for_many_inputs() {
+        // Deterministic pseudo-random generator.
+        // The same sequence is produced on every test run.
+        let mut seed: u32 = 0x1234_5678;
+
+        let mut next_f32 = || -> f32 {
+            seed = seed.wrapping_mul(1_664_525).wrapping_add(1_013_904_223);
+
+            // Map to approximately [-1, 1].
+            (seed as f64 / u32::MAX as f64 * 2.0 - 1.0) as f32
+        };
+
+        for _ in 0..1_000 {
+            // Generate a quaternion and normalize it.
+            let w = next_f32();
+            let x = next_f32();
+            let y = next_f32();
+            let z = next_f32();
+
+            let q = Quaternionf32 { w, x, y, z };
+
+            // Avoid the extremely unlikely zero quaternion.
+            if q.norm() < 1e-6 {
+                continue;
+            }
+            let q = UnitQuaternionf32::from_quaternion(q);
+
+            let v = Vector3f32 { x: next_f32() * 100.0, y: next_f32() * 100.0, z: next_f32() * 100.0 };
+            let original_norm_squared = v.norm_squared();
+
+            let rotated = q.rotate(v);
+            let rotated_norm_squared = rotated.norm_squared();
+
+            let error = (original_norm_squared - rotated_norm_squared).abs();
+            let tolerance = 1e-4 * original_norm_squared.max(1.0);
+
+            assert!(
+                error < tolerance,
+                "Magnitude changed: original norm squared = {}, rotated norm squared = {}, error = {}",
+                original_norm_squared,
+                rotated_norm_squared,
+                error
+            );
+        }
     }
 }

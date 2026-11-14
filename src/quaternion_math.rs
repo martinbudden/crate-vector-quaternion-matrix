@@ -12,6 +12,10 @@ use core::{
 
 const _: () = assert!(size_of::<Quaternion<f32>>() == 16);
 const _: () = assert!(align_of::<Quaternion<f32>>() == 16);
+#[cfg(feature = "simd")]
+const _: () = assert!(size_of::<f32x4>() == 16);
+#[cfg(feature = "simd")]
+const _: () = assert!(align_of::<f32x4>() == 16);
 
 #[allow(unused)]
 use super::{Quaternion, UnitQuaternion, math_methods::MathMethods}; // for acos
@@ -129,13 +133,22 @@ impl QuaternionMath for f32 {
             // This maps to the Vector Fused Multiply-Add instruction
             this_simd.mul_add(k_simd, other_simd)
         }
-        #[cfg(not(feature = "simd"))]
+        #[cfg(all(not(feature = "simd"), any(feature = "std", feature = "libm")))]
         {
             Quaternion {
                 w: this.w.mul_add(k, other.w),
                 x: this.x.mul_add(k, other.x),
                 y: this.y.mul_add(k, other.y),
                 z: this.z.mul_add(k, other.z),
+            }
+        }
+        #[cfg(all(not(feature = "simd"), not(any(feature = "std", feature = "libm"))))]
+        {
+            Quaternion {
+                w: this.w * k + other.w,
+                x: this.x * k + other.x,
+                y: this.y * k + other.y,
+                z: this.z * k + other.z,
             }
         }
     }
@@ -304,11 +317,23 @@ impl QuaternionMath for f64 {
 
     #[inline(always)]
     fn q_mul_add(this: Quaternion<Self>, k: Self, other: Quaternion<Self>) -> Quaternion<Self> {
-        Quaternion {
-            w: this.w.mul_add(k, other.w),
-            x: this.x.mul_add(k, other.x),
-            y: this.y.mul_add(k, other.y),
-            z: this.z.mul_add(k, other.z),
+        #[cfg(any(feature = "std", feature = "libm"))]
+        {
+            Quaternion {
+                w: this.w.mul_add(k, other.w),
+                x: this.x.mul_add(k, other.x),
+                y: this.y.mul_add(k, other.y),
+                z: this.z.mul_add(k, other.z),
+            }
+        }
+        #[cfg(not(any(feature = "std", feature = "libm")))]
+        {
+            Quaternion {
+                w: this.w * k + other.w,
+                x: this.x * k + other.x,
+                y: this.y * k + other.y,
+                z: this.z * k + other.z,
+            }
         }
     }
 

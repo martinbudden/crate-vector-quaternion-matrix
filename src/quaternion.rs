@@ -131,10 +131,7 @@ where
     /// assert!(!q.is_approx_zero(1e-4));
     /// ```
     pub fn is_approx_zero(self, epsilon: T) -> bool {
-        if self.w.abs() > epsilon || self.x.abs() > epsilon || self.y.abs() > epsilon || self.z.abs() > epsilon {
-            return false;
-        }
-        true
+        self.w.abs() <= epsilon && self.x.abs() <= epsilon && self.y.abs() <= epsilon && self.z.abs() <= epsilon
     }
 }
 
@@ -250,14 +247,10 @@ where
     /// assert!(!q.is_approx_one(1e-4));
     /// ```
     pub fn is_approx_one(self, epsilon: T) -> bool {
-        if (self.w - T::one()).abs() > epsilon
-            || self.x.abs() > epsilon
-            || self.y.abs() > epsilon
-            || self.z.abs() > epsilon
-        {
-            return false;
-        }
-        true
+        (self.w - T::one()).abs() <= epsilon
+            && self.x.abs() <= epsilon
+            && self.y.abs() <= epsilon
+            && self.z.abs() <= epsilon
     }
 }
 
@@ -598,6 +591,7 @@ impl<T> Index<usize> for Quaternion<T> {
     /// ```
     #[inline]
     fn index(&self, index: usize) -> &T {
+        debug_assert!(index < 4);
         match index {
             0 => &self.w,
             1 => &self.x,
@@ -623,6 +617,7 @@ impl<T> IndexMut<usize> for Quaternion<T> {
     /// ```
     #[inline]
     fn index_mut(&mut self, index: usize) -> &mut T {
+        debug_assert!(index < 4);
         match index {
             0 => &mut self.w,
             1 => &mut self.x,
@@ -637,6 +632,7 @@ impl<T> IndexMut<usize> for Quaternion<T> {
 impl<T> Quaternion<T> {
     /// Linear interpolation between two quaternions.
     /// Calculates `self * (1 - t) + other * t`.
+    /// Note: `t` is not clamped to [0, 1], so extrapolation can also be calculated.
     /// ```
     /// # use vqm::Quaternionf32;
     /// let q = Quaternionf32::new(2.0, 5.0, 11.0, 13.0);
@@ -658,6 +654,7 @@ impl<T> Quaternion<T> {
     /// Performs normalized linear interpolation between two quaternions.
     ///
     /// Applies shortest-path sign correction before interpolation and normalizes the result.
+    /// Note: `t` is not clamped to [0, 1], so extrapolation can also be calculated.
     #[must_use]
     pub fn nlerp(self, other: Self, t: T) -> Self
     where
@@ -905,6 +902,8 @@ where
 
 impl<T> Quaternion<T> {
     /// Return the inverse of the quaternion.
+    /// Returns a quaternion containing `NaN` for zero quaternion.
+    /// Use `try_inverse` for alternative that explicitly catches zero quaternion.
     /// ```
     /// # use vqm::Quaternionf32;
     /// let q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
@@ -1002,7 +1001,7 @@ impl<T> Quaternion<T> {
 
 impl<T> Quaternion<T>
 where
-    T: Copy + ConstOne + Add<Output = T> + Div<Output = T>,
+    T: Copy + ConstOne + Add<Output = T> + Div<Output = T> + Mul<Output = T>,
 {
     // Return the half of the quaternion.
     /// ```
@@ -1185,34 +1184,9 @@ impl<T> Quaternion<T> {
         UnitQuaternion::from_rotation_between(a, b).map(Into::into)
     }
 
-    /// Calculates the shortest angular distance between two quaternions.
+    /// Calculate quaternion derivative (`dq/dt` aka `q_dot)` from angular rate
+    /// `omega_rps` in radians per second in the quaternion's local frame.
     ///
-    /// Returns the smallest rotation angle required to transform the
-    /// orientation represented by this quaternion into the orientation
-    /// represented by `other`.
-    ///
-    /// Both quaternions are normalized before calculation.
-    /// The absolute value of the dot product ensures that equivalent quaternion
-    /// representations (q and -q) produce an angle of zero.
-    ///
-    /// The returned angle is in radians and is in the range [0, π].
-    ///
-    /// # Returns
-    /// The angular distance between the two orientations in radians.
-    pub fn angle_to(&self, other: Self) -> T
-    where
-        T: FloatCore + MathMethods + QuaternionMath,
-    {
-        let a = self.normalize();
-        let b = other.normalize();
-
-        let dot = a.dot(b).abs().clamp(T::zero(), T::one());
-
-        let two = T::one() + T::one();
-        two * dot.acos()
-    }
-
-    /// Calculate quaternion derivative (`dq/dt` aka `q_dot)` from angular rate `omega_rps` in radians per second.
     /// The resulting quaternion components have units of 1/second.
     #[must_use]
     pub fn derivative(self, omega_rps: Vector3<T>) -> Self
@@ -1225,6 +1199,24 @@ impl<T> Quaternion<T> {
             x: (self.w * omega_rps.x - self.z * omega_rps.y + self.y * omega_rps.z) * half,
             y: (self.z * omega_rps.x + self.w * omega_rps.y - self.x * omega_rps.z) * half,
             z: (-self.y * omega_rps.x + self.x * omega_rps.y + self.w * omega_rps.z) * half,
+        }
+    }
+    /// Calculate quaternion derivative (`dq/dt`) from angular rate
+    /// `omega_rps` in radians per second in the world frame.
+    ///
+    /// The resulting quaternion components have units of 1/second.
+    #[must_use]
+    pub fn derivative_world(self, omega_rps: Vector3<T>) -> Self
+    where
+        T: FloatCore,
+    {
+        let half = T::one() / (T::one() + T::one());
+
+        Self {
+            w: (-omega_rps.x * self.x - omega_rps.y * self.y - omega_rps.z * self.z) * half,
+            x: (omega_rps.x * self.w + omega_rps.y * self.z - omega_rps.z * self.y) * half,
+            y: (-omega_rps.x * self.z + omega_rps.y * self.w + omega_rps.z * self.x) * half,
+            z: (omega_rps.x * self.y - omega_rps.y * self.x + omega_rps.z * self.w) * half,
         }
     }
 }

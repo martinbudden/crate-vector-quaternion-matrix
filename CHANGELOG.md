@@ -28,6 +28,9 @@ At some point [0.1.0] to [0.1.11] will be [YANKED]
 - `is_normalized` function to vectors.
 - additional protection against floating-point rounding errors.
 - `is_approx` for `UnitQuaternion`.
+- additional SIMD assertions.
+- quaternion `derivative_world`. Returns derivative of quaternion for `omega_rps` in world frame.
+- more tests.
 
 ### Changed
 
@@ -36,12 +39,18 @@ At some point [0.1.0] to [0.1.11] will be [YANKED]
 - used `mul_add` in `QuaternionMath`.
 - changed `slerp` to use `UnitQuaternion`.
 
+### Removed
+
+- `angle_to` from `Quaternion`, now only available for `UnitQuaternion`.
+
 ### Fixed
 
 - quaternion `direction_cosine_matrix_z`.
 - `From<Matrix3x3<T>> for Quaternion<T>`, which hadn't been converted to column-major format for `0.1.14`.
 - quaternion `to_axis_angle`, which didn't consistently return shortest rotation.
 - some incorrect descriptions in documentation.
+- quaternion `is_approx` to correctly handle `Nan`s.
+- handling of `mul_add` trait in `QuaternionMath`.
 
 ## [0.1.20] - 2026-11-10
 
