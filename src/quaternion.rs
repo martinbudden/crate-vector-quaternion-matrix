@@ -679,26 +679,6 @@ impl<T> Quaternion<T> {
     }
 }
 
-impl<T> Quaternion<T>
-where
-    T: Copy + QuaternionMath,
-{
-    /// Spherical Linear Interpolation between two quaternions.
-    /// ```
-    /// # use vqm::Quaternionf32;
-    /// let q = Quaternionf32::new(2.0, 1.0, -1.0, 3.0).normalize();
-    /// let r = Quaternionf32::new(-1.0, 4.0, 2.0, 1.0).normalize();
-    /// let s = q.slerp(r, 0.5);
-    ///
-    /// assert!(s.is_approx(Quaternionf32::new(0.19861867, 0.7277963, 0.11018632, 0.64708747), 1e-5));
-    /// ```
-    #[inline]
-    #[must_use]
-    pub fn slerp(self, other: Self, t: T) -> Self {
-        T::q_slerp(self, other, t)
-    }
-}
-
 // **** approx_eq ****
 
 impl<T> Quaternion<T>

@@ -111,7 +111,7 @@ mod tests {
         let q1 = UnitQuaternionf32::from_roll_pitch_yaw_radians(0.3, 0.5, 0.7);
         let m: Matrix3x3f32 = q1.into();
         let q2: Quaternionf32 = m.into();
-        let q2 = UnitQuaternionf32::new(q2);
+        let q2 = UnitQuaternionf32::from_quaternion(q2);
         assert!(q1.angle_to(q2) < 1e-10);
     }
     #[test]
@@ -119,7 +119,7 @@ mod tests {
         let q1 = UnitQuaternionf32::from_roll_pitch_yaw_radians(0.3, 0.5, 0.7);
         let m1: Matrix3x3f32 = q1.into();
         let q2: Quaternionf32 = m1.into();
-        let m2: Matrix3x3f32 = UnitQuaternionf32::new(q2).into();
+        let m2: Matrix3x3f32 = UnitQuaternionf32::from_quaternion(q2).into();
         m1.is_approx(m2, 1e-10);
     }
 }

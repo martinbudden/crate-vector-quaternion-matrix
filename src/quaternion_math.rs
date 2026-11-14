@@ -1,6 +1,9 @@
 #![allow(clippy::inline_always)]
 use core::mem::{align_of, size_of};
 
+#[allow(unused)]
+use num_traits::MulAdd;
+
 #[cfg(feature = "simd")]
 use core::{
     mem::transmute,
@@ -11,29 +14,24 @@ const _: () = assert!(size_of::<Quaternion<f32>>() == 16);
 const _: () = assert!(align_of::<Quaternion<f32>>() == 16);
 
 #[allow(unused)]
-use super::{Quaternion, math_methods::MathMethods}; // for acos
+use super::{Quaternion, UnitQuaternion, math_methods::MathMethods}; // for acos
 
 // **** From ****
 
 #[cfg(feature = "simd")]
 impl From<Quaternion<f32>> for f32x4 {
     #[inline(always)]
-    fn from(v: Quaternion<f32>) -> Self {
-        // SAFETY: assert f32x4 and Quaternion<f32> have same size and alignment
-        const _: () = assert!(size_of::<f32x4>() == size_of::<Quaternion<f32>>());
-        const _: () = assert!(size_of::<f32x4>() == align_of::<Quaternion<f32>>());
-        unsafe { transmute(v) }
+    fn from(q: Quaternion<f32>) -> Self {
+        f32x4::from_array([q.w, q.x, q.y, q.z])
     }
 }
 
 #[cfg(feature = "simd")]
 impl From<f32x4> for Quaternion<f32> {
     #[inline(always)]
-    fn from(simd: f32x4) -> Self {
-        // SAFETY: assert f32x4 and Quaternion<f32> have same size and alignment
-        const _: () = assert!(size_of::<f32x4>() == size_of::<Quaternion<f32>>());
-        const _: () = assert!(size_of::<f32x4>() == align_of::<Quaternion<f32>>());
-        unsafe { transmute(simd) }
+    fn from(v: f32x4) -> Self {
+        let [w, x, y, z] = v.to_array();
+        Quaternion { w, x, y, z }
     }
 }
 
@@ -56,15 +54,17 @@ pub trait QuaternionMath: Sized {
     /// Returns true if the quaternion is normalized, within a tolerance of epsilon.
     fn q_is_normalized(this: Quaternion<Self>, epsilon: Self) -> bool;
     /// Calculates the product of two quaternions.
-    fn q_mul(other: Quaternion<Self>, other: Quaternion<Self>) -> Quaternion<Self>;
+    fn q_mul(this: Quaternion<Self>, other: Quaternion<Self>) -> Quaternion<Self>;
     /// Calculates the conjugate of a quaternion.
     fn q_conjugate(this: Quaternion<Self>) -> Quaternion<Self>;
     /// Calculates the dot product of two quaternions.
     fn q_dot(this: Quaternion<Self>, other: Quaternion<Self>) -> Self;
     /// Elementwise multiply a quaternion by another quaternion (Hadamard product).
-    fn q_hadamard(other: Quaternion<Self>, other: Quaternion<Self>) -> Quaternion<Self>;
-    /// Spherical Linear Interpolation between two quaternions.
-    fn q_slerp(this: Quaternion<Self>, other: Quaternion<Self>, t: Self) -> Quaternion<Self>;
+    fn q_hadamard(this: Quaternion<Self>, other: Quaternion<Self>) -> Quaternion<Self>;
+    /// Spherical Linear Interpolation (SLERP).
+    /// Interpolates between two unit quaternions using the shortest rotation path.
+    /// The interpolation parameter `t` is clamped to [0, 1].
+    fn q_slerp(this: UnitQuaternion<Self>, other: UnitQuaternion<Self>, t: Self) -> UnitQuaternion<Self>;
 }
 
 // **** SIMD-accelerated implementation for f32 ****
@@ -127,31 +127,21 @@ impl QuaternionMath for f32 {
             let k_simd = f32x4::splat(k);
 
             // This maps to the Vector Fused Multiply-Add instruction
-            ((this_simd * k_simd) + other_simd).into()
+            this_simd.mul_add(k_simd, other_simd)
         }
         #[cfg(not(feature = "simd"))]
         {
             Quaternion {
-                w: this.w * k + other.w,
-                x: this.x * k + other.x,
-                y: this.y * k + other.y,
-                z: this.z * k + other.z,
+                w: this.w.mul_add(k, other.w),
+                x: this.x.mul_add(k, other.x),
+                y: this.y.mul_add(k, other.y),
+                z: this.z.mul_add(k, other.z),
             }
         }
     }
 
     #[inline(always)]
     fn q_mul(this: Quaternion<Self>, other: Quaternion<Self>) -> Quaternion<Self> {
-        #[cfg(feature = "simd")]
-        {
-            Quaternion {
-                w: this.w * other.w - this.x * other.x - this.y * other.y - this.z * other.z,
-                x: this.w * other.x + this.x * other.w + this.y * other.z - this.z * other.y,
-                y: this.w * other.y - this.x * other.z + this.y * other.w + this.z * other.x,
-                z: this.w * other.z + this.x * other.y - this.y * other.x + this.z * other.w,
-            }
-        }
-        #[cfg(not(feature = "simd"))]
         {
             Quaternion {
                 w: this.w * other.w - this.x * other.x - this.y * other.y - this.z * other.z,
@@ -179,7 +169,7 @@ impl QuaternionMath for f32 {
     #[inline(always)]
     fn q_is_normalized(this: Quaternion<Self>, epsilon: Self) -> bool {
         let norm_squared = Self::q_norm_squared(this);
-        (norm_squared - 1.0).abs() < epsilon
+        norm_squared.is_finite() && (norm_squared - 1.0).abs() <= epsilon
     }
 
     #[inline(always)]
@@ -226,16 +216,22 @@ impl QuaternionMath for f32 {
         Quaternion { w: this.w * other.w, x: this.x * other.x, y: this.y * other.y, z: this.z * other.z }
     }
 
-    /// Spherical Linear Interpolation (SLERP) matching vqm's API conventions.
-    /// Interpolates smoothly between `q0` and `q1` by amount `t` [0.0 to 1.0].
+    /// Spherical Linear Interpolation (SLERP).
+    ///
+    /// Interpolates between two unit quaternions using the shortest rotation path.
+    ///
+    /// The interpolation parameter `t` is clamped to [0, 1].
     #[inline(always)]
-    fn q_slerp(this: Quaternion<Self>, other: Quaternion<Self>, t: Self) -> Quaternion<Self> {
+    fn q_slerp(this: UnitQuaternion<Self>, other: UnitQuaternion<Self>, t: Self) -> UnitQuaternion<Self> {
         // Clamp interpolation factor to safe boundaries
         let t = t.clamp(0.0, 1.0);
+        let this = this.q();
+        let other = other.q();
 
         // Calculate the cosine of the angle between quaternions via their dot product
         // Hamilton convention: q0.w * q1.w + q0.x * q1.x + q0.y * q1.y + q0.z * q1.z
         let mut dot = this.w * other.w + this.x * other.x + this.y * other.y + this.z * other.z;
+        dot = dot.clamp(-1.0, 1.0);
 
         // Enforce shortest-path tracking.
         // If the dot product is negative, the quaternions have opposite polarities,
@@ -255,13 +251,12 @@ impl QuaternionMath for f32 {
         if dot > 0.9995 {
             let w0 = 1.0 - t;
             let w1 = t;
-            return Quaternion::new(
+            return UnitQuaternion::from_quaternion(Quaternion::new(
                 this.w * w0 + other.w * w1,
                 this.x * w0 + other.x * w1,
                 this.y * w0 + other.y * w1,
                 this.z * w0 + other.z * w1,
-            )
-            .normalize();
+            ));
         }
 
         // Standard SLERP calculation
@@ -275,12 +270,12 @@ impl QuaternionMath for f32 {
         // Calculate Davis scale factors
         let s1 = sin_theta / sin_theta_0;
         let s0 = cos_theta - dot * s1;
-        Quaternion::new(
+        UnitQuaternion::from_quaternion(Quaternion::new(
             this.w * s0 + other.w * s1,
             this.x * s0 + other.x * s1,
             this.y * s0 + other.y * s1,
             this.z * s0 + other.z * s1,
-        )
+        ))
     }
 }
 
@@ -310,10 +305,10 @@ impl QuaternionMath for f64 {
     #[inline(always)]
     fn q_mul_add(this: Quaternion<Self>, k: Self, other: Quaternion<Self>) -> Quaternion<Self> {
         Quaternion {
-            w: this.w * k + other.w,
-            x: this.x * k + other.x,
-            y: this.y * k + other.y,
-            z: this.z * k + other.z,
+            w: this.w.mul_add(k, other.w),
+            x: this.x.mul_add(k, other.x),
+            y: this.y.mul_add(k, other.y),
+            z: this.z.mul_add(k, other.z),
         }
     }
 
@@ -335,7 +330,7 @@ impl QuaternionMath for f64 {
     #[inline(always)]
     fn q_is_normalized(this: Quaternion<Self>, epsilon: Self) -> bool {
         let norm_squared = Self::q_norm_squared(this);
-        (norm_squared - 1.0).abs() < epsilon
+        norm_squared.is_finite() && (norm_squared - 1.0).abs() <= epsilon
     }
 
     #[inline(always)]
@@ -353,17 +348,22 @@ impl QuaternionMath for f64 {
         Quaternion { w: this.w * other.w, x: this.x * other.x, y: this.y * other.y, z: this.z * other.z }
     }
 
-    /// Spherical Linear Interpolation (SLERP) matching vqm's API conventions.
-    /// Interpolates smoothly between `q0` and `q1` by amount `t` [0.0 to 1.0].
+    /// Spherical Linear Interpolation (SLERP).
+    ///
+    /// Interpolates between two unit quaternions using the shortest rotation path.
+    ///
+    /// The interpolation parameter `t` is clamped to [0, 1].
     #[inline(always)]
-    fn q_slerp(this: Quaternion<Self>, other: Quaternion<Self>, t: Self) -> Quaternion<Self> {
+    fn q_slerp(this: UnitQuaternion<Self>, other: UnitQuaternion<Self>, t: Self) -> UnitQuaternion<Self> {
         // Clamp interpolation factor to safe boundaries
         let t = t.clamp(0.0, 1.0);
+        let this = this.q();
+        let other = other.q();
 
         // Calculate the cosine of the angle between quaternions via their dot product
         // Hamilton convention: q0.w * q1.w + q0.x * q1.x + q0.y * q1.y + q0.z * q1.z
         let mut dot = this.w * other.w + this.x * other.x + this.y * other.y + this.z * other.z;
-
+        dot = dot.clamp(-1.0, 1.0);
         // Enforce shortest-path tracking.
         // If the dot product is negative, the quaternions have opposite polarities,
         // so negate one of the quaternions to loop over the short arc.
@@ -382,13 +382,12 @@ impl QuaternionMath for f64 {
         if dot > 0.9995 {
             let w0 = 1.0 - t;
             let w1 = t;
-            return Quaternion::new(
+            return UnitQuaternion::from_quaternion(Quaternion::new(
                 this.w * w0 + other.w * w1,
                 this.x * w0 + other.x * w1,
                 this.y * w0 + other.y * w1,
                 this.z * w0 + other.z * w1,
-            )
-            .normalize();
+            ));
         }
 
         // Standard SLERP calculation
@@ -402,11 +401,11 @@ impl QuaternionMath for f64 {
         // Calculate Davis scale factors
         let s1 = sin_theta / sin_theta_0;
         let s0 = cos_theta - dot * s1;
-        Quaternion::new(
+        UnitQuaternion::from_quaternion(Quaternion::new(
             this.w * s0 + other.w * s1,
             this.x * s0 + other.x * s1,
             this.y * s0 + other.y * s1,
             this.z * s0 + other.z * s1,
-        )
+        ))
     }
 }

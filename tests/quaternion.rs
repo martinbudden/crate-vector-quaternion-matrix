@@ -1,4 +1,4 @@
-use vqm::{Quaternion, Quaternionf32, Vector3f32};
+use vqm::{Quaternion, Quaternionf32, UnitQuaternionf32, Vector3f32};
 
 const _: () = assert!(size_of::<Quaternion<f32>>() == 16);
 const _: () = assert!(align_of::<Quaternion<f32>>() == 16);
@@ -493,15 +493,15 @@ mod tests {
     #[test]
     fn test_non_zero_slerp_midpoint() {
         // Raw values [2.0, 1.0, -1.0, 3.0] divided by magnitude sqrt(15)
-        let q_start = Quaternionf32::new(0.5163978, 0.2581989, -0.2581989, 0.7745967);
+        let q_start = UnitQuaternionf32::new(0.5163978, 0.2581989, -0.2581989, 0.7745967);
 
         // Raw values [-1.0, 4.0, 2.0, 1.0] divided by magnitude sqrt(22)
-        let q_end = Quaternionf32::new(-0.2132007, 0.8528029, 0.4264014, 0.2132007);
+        let q_end = UnitQuaternionf32::new(-0.2132007, 0.8528029, 0.4264014, 0.2132007);
 
         // Expected target midpoint (t = 0.5)
         let expected_mid = Quaternionf32::new(0.1986187, 0.7277963, 0.1101863, 0.6470874);
 
-        let actual_mid = q_start.slerp(q_end, 0.5);
+        let actual_mid = q_start.slerp(q_end, 0.5).q();
 
         // Check every individual element to verify perfect structural matching
         // A delta of 1e-4 is highly rigorous for single-precision float math

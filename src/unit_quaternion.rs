@@ -46,10 +46,12 @@ impl<T> UnitQuaternion<T> {
     /// Create a `UnitQuaternion` from a Quaternion `q`.
     /// # Preconditions
     /// `q` is finite and non-zero.
-    pub fn new(q: Quaternion<T>) -> Self
+    #[allow(clippy::many_single_char_names)]
+    pub fn new(w: T, x: T, y: T, z: T) -> Self
     where
         T: FloatCore + MathMethods + QuaternionMath,
     {
+        let q = Quaternion { w, x, y, z };
         let norm = q.norm();
         debug_assert!(norm.is_finite() && norm > T::epsilon());
         Self { q: q / norm }
@@ -92,6 +94,30 @@ impl<T> UnitQuaternion<T> {
 impl<T> From<UnitQuaternion<T>> for Quaternion<T> {
     fn from(q: UnitQuaternion<T>) -> Self {
         q.q
+    }
+}
+
+impl<T> UnitQuaternion<T>
+where
+    T: Copy + Signed + PartialOrd + QuaternionMath,
+{
+    /// Return true if quaternion is near other.
+    /// ```
+    /// # use vqm::{Quaternionf32, UnitQuaternionf32};
+    /// let q = UnitQuaternionf32::new(2.0,  3.0, 7.0, 11.0);
+    /// let r = UnitQuaternionf32::new(2.0,  3.0, 7.0, 11.001);
+    /// assert!(q.is_approx(r, 1.01e-3));
+    /// assert!(!q.is_approx(r, 1e-5));
+    /// ```
+    pub fn is_approx(self, other: UnitQuaternion<T>, epsilon: T) -> bool {
+        if (self.q.w - other.q.w).abs() > epsilon
+            || (self.q.x - other.q.x).abs() > epsilon
+            || (self.q.y - other.q.y).abs() > epsilon
+            || (self.q.z - other.q.z).abs() > epsilon
+        {
+            return false;
+        }
+        true
     }
 }
 
@@ -189,6 +215,31 @@ where
         let norm_squared = q.norm_squared();
         debug_assert!(norm_squared.is_finite() && norm_squared > T::epsilon());
         Self { q: q * norm_squared.sqrt_reciprocal() }
+    }
+}
+
+impl<T> UnitQuaternion<T>
+where
+    T: Copy + QuaternionMath,
+{
+    /// Spherical Linear Interpolation (SLERP).
+    ///
+    /// Interpolates between unit quaternions using the shortest rotation path.
+    ///
+    /// The interpolation parameter `t` is clamped to [0, 1].
+    ///
+    /// ```
+    /// # use vqm::{Quaternionf32, UnitQuaternionf32};
+    /// let q = UnitQuaternionf32::new(2.0, 1.0, -1.0, 3.0);
+    /// let r = UnitQuaternionf32::new(-1.0, 4.0, 2.0, 1.0);
+    /// let s = q.slerp(r, 0.5);
+    ///
+    /// assert!(s.is_approx(UnitQuaternionf32::new(0.19861867, 0.7277963, 0.11018632, 0.64708747), 1e-5));
+    /// ```
+    #[inline]
+    #[must_use]
+    pub fn slerp(self, other: Self, t: T) -> Self {
+        T::q_slerp(self, other, t)
     }
 }
 

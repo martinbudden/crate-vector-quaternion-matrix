@@ -23,6 +23,7 @@ rustc_version = "0.4.1"
 [features]
 default = ["libm"]
 #default = ["libm", "uom"]
+#default = ["libm", "align", "simd"]
 std = ["num-traits/std", "derive_more/std"]
 libm = ["dep:libm", "num-traits/libm"]
 serde = ["dep:serde", "postcard"]

@@ -27,10 +27,14 @@ At some point [0.1.0] to [0.1.11] will be [YANKED]
 
 - `is_normalized` function to vectors.
 - additional protection against floating-point rounding errors.
+- `is_approx` for `UnitQuaternion`.
 
 ### Changed
 
 - renamed all `is_near` functions and variants to `is_approx` and variants.
+- improved SIMD conversions `From<Quaternion<f32>> for f32x4` and `From<f32x4> for Quaternion<f32>`.
+- used `mul_add` in `QuaternionMath`.
+- changed `slerp` to use `UnitQuaternion`.
 
 ### Fixed
 
