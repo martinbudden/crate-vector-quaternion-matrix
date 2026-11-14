@@ -1495,6 +1495,26 @@ where
 
 impl<T> Vector3<T>
 where
+    T: FloatCore + MathMethods,
+{
+    /// Return true if the vector is normalized.
+    /// ```
+    /// # use vqm::Vector3f32;
+    /// let v = Vector3f32::new(2.0, 3.0, 5.0);
+    /// let n = v.normalize();
+    /// let s = n.norm_squared();
+    /// assert!((1.0 - s).abs() < 8.0e-4);
+    /// assert!(n.is_normalized(8.0e-4));
+    /// ```
+    #[inline]
+    pub fn is_normalized(self, epsilon: T) -> bool {
+        let norm_squared = self.norm_squared();
+        (norm_squared - T::one()).abs() < epsilon
+    }
+}
+
+impl<T> Vector3<T>
+where
     T: Copy + Zero + Neg<Output = T> + Add<Output = T> + Mul<T, Output = T> + MathMethods,
 {
     /// Return distance between two points.
