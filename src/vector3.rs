@@ -108,15 +108,15 @@ where
     /// # use vqm::Vector3f32;
     /// # use num_traits::Zero;
     /// let z = Vector3f32::zero();
-    /// assert!(z.is_near_zero(1e-5));
-    /// assert!(Vector3f32::new(1e-3, 0.0, 0.0).is_near_zero(1e-2));
-    /// assert!(Vector3f32::new(0.0, 1e-3, 0.0).is_near_zero(1e-2));
-    /// assert!(Vector3f32::new(0.0, 0.0, 1e-3).is_near_zero(1e-2));
-    /// assert!(!Vector3f32::new(1e-1, 0.0, 0.0).is_near_zero(1e-2));
-    /// assert!(!Vector3f32::new(0.0, 1e-1, 0.0).is_near_zero(1e-2));
-    /// assert!(!Vector3f32::new(0.0, 0.0, 1e-1).is_near_zero(1e-2));
+    /// assert!(z.is_approx_zero(1e-5));
+    /// assert!(Vector3f32::new(1e-3, 0.0, 0.0).is_approx_zero(1e-2));
+    /// assert!(Vector3f32::new(0.0, 1e-3, 0.0).is_approx_zero(1e-2));
+    /// assert!(Vector3f32::new(0.0, 0.0, 1e-3).is_approx_zero(1e-2));
+    /// assert!(!Vector3f32::new(1e-1, 0.0, 0.0).is_approx_zero(1e-2));
+    /// assert!(!Vector3f32::new(0.0, 1e-1, 0.0).is_approx_zero(1e-2));
+    /// assert!(!Vector3f32::new(0.0, 0.0, 1e-1).is_approx_zero(1e-2));
     /// ```
-    pub fn is_near_zero(self, epsilon: T) -> bool {
+    pub fn is_approx_zero(self, epsilon: T) -> bool {
         if self.x.abs() > epsilon || self.y.abs() > epsilon || self.z.abs() > epsilon {
             return false;
         }
@@ -133,11 +133,11 @@ where
     /// # use vqm::Vector3f32;
     /// let u = Vector3f32::new(2.0,  3.0, 7.0);
     /// let v = Vector3f32::new(2.0,  3.0, 7.001);
-    /// assert!(u.is_near(v, 1.01e-3));
-    /// assert!(!u.is_near(v, 1e-4));
+    /// assert!(u.is_approx(v, 1.01e-3));
+    /// assert!(!u.is_approx(v, 1e-4));
     /// ```
-    pub fn is_near(self, other: Vector3<T>, epsilon: T) -> bool {
-        (self - other).is_near_zero(epsilon)
+    pub fn is_approx(self, other: Vector3<T>, epsilon: T) -> bool {
+        (self - other).is_approx_zero(epsilon)
     }
 }
 
@@ -1235,7 +1235,7 @@ impl<T> Vector3<T> {
     ///     // They are perpendicular to each other.
     ///     assert!(u.dot(v).abs() < 1e-6);
     ///     // Right-handed basis.
-    ///     assert!(u.cross(v).is_near(n, 1e-6));
+    ///     assert!(u.cross(v).is_approx(n, 1e-6));
     /// }
     /// ```
     #[must_use]
@@ -1445,7 +1445,7 @@ where
     /// # use vqm::Vector3f32;
     /// let v = Vector3f32::new(1.0, 4.0, 8.0);
     /// let n = v.normalize_unchecked();
-    /// assert!((Vector3f32 { x: 0.11111111, y: 0.44444445, z: 0.8888889 } - n).is_near_zero(4.0e-4));
+    /// assert!((Vector3f32 { x: 0.11111111, y: 0.44444445, z: 0.8888889 } - n).is_approx_zero(4.0e-4));
     /// ```
     #[inline]
     #[must_use]
@@ -1460,7 +1460,7 @@ where
     /// # use vqm::Vector3f32;
     /// let mut v = Vector3f32::new(1.0, 4.0, 8.0);
     /// v.normalize_unchecked_in_place();
-    /// assert!((Vector3f32 { x: 0.11111111, y: 0.44444445, z: 0.8888889 } - v).is_near_zero(4.0e-4));
+    /// assert!((Vector3f32 { x: 0.11111111, y: 0.44444445, z: 0.8888889 } - v).is_approx_zero(4.0e-4));
     /// ```
     #[inline]
     pub fn normalize_unchecked_in_place(&mut self) -> &mut Self {

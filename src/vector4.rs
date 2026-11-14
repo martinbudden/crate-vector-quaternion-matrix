@@ -107,17 +107,17 @@ where
     /// # use vqm::Vector4f32;
     /// # use num_traits::Zero;
     /// let z = Vector4f32::zero();
-    /// assert!(z.is_near_zero(1e-5));
-    /// assert!(Vector4f32::new(1e-3, 0.0, 0.0, 0.0).is_near_zero(1e-2));
-    /// assert!(Vector4f32::new(0.0, 1e-3, 0.0, 0.0).is_near_zero(1e-2));
-    /// assert!(Vector4f32::new(0.0, 0.0, 1e-3, 0.0).is_near_zero(1e-2));
-    /// assert!(Vector4f32::new(0.0, 0.0, 0.0, 1e-3).is_near_zero(1e-2));
-    /// assert!(!Vector4f32::new(1e-1, 0.0, 0.0, 0.0).is_near_zero(1e-2));
-    /// assert!(!Vector4f32::new(0.0, 1e-1, 0.0, 0.0).is_near_zero(1e-2));
-    /// assert!(!Vector4f32::new(0.0, 0.0, 1e-1, 0.0).is_near_zero(1e-2));
-    /// assert!(!Vector4f32::new(0.0, 0.0, 0.0, 1e-1).is_near_zero(1e-2));
+    /// assert!(z.is_approx_zero(1e-5));
+    /// assert!(Vector4f32::new(1e-3, 0.0, 0.0, 0.0).is_approx_zero(1e-2));
+    /// assert!(Vector4f32::new(0.0, 1e-3, 0.0, 0.0).is_approx_zero(1e-2));
+    /// assert!(Vector4f32::new(0.0, 0.0, 1e-3, 0.0).is_approx_zero(1e-2));
+    /// assert!(Vector4f32::new(0.0, 0.0, 0.0, 1e-3).is_approx_zero(1e-2));
+    /// assert!(!Vector4f32::new(1e-1, 0.0, 0.0, 0.0).is_approx_zero(1e-2));
+    /// assert!(!Vector4f32::new(0.0, 1e-1, 0.0, 0.0).is_approx_zero(1e-2));
+    /// assert!(!Vector4f32::new(0.0, 0.0, 1e-1, 0.0).is_approx_zero(1e-2));
+    /// assert!(!Vector4f32::new(0.0, 0.0, 0.0, 1e-1).is_approx_zero(1e-2));
     /// ```
-    pub fn is_near_zero(self, epsilon: T) -> bool {
+    pub fn is_approx_zero(self, epsilon: T) -> bool {
         if self.x.abs() > epsilon || self.y.abs() > epsilon || self.z.abs() > epsilon || self.t.abs() > epsilon {
             return false;
         }
@@ -134,11 +134,11 @@ where
     /// # use vqm::Vector4f32;
     /// let u = Vector4f32::new(2.0,  3.0, 7.0, 11.0);
     /// let v = Vector4f32::new(2.0,  3.0, 7.0, 11.001);
-    /// assert!(u.is_near(v, 1.01e-3));
-    /// assert!(!u.is_near(v, 1e-4));
+    /// assert!(u.is_approx(v, 1.01e-3));
+    /// assert!(!u.is_approx(v, 1e-4));
     /// ```
-    pub fn is_near(self, other: Vector4<T>, epsilon: T) -> bool {
-        (self - other).is_near_zero(epsilon)
+    pub fn is_approx(self, other: Vector4<T>, epsilon: T) -> bool {
+        (self - other).is_approx_zero(epsilon)
     }
 }
 
@@ -1162,7 +1162,7 @@ where
     /// # use vqm::Vector4f32;
     /// let v = Vector4f32::new(2.0, 3.0, 5.0, 7.0);
     /// let n = v.normalize_unchecked();
-    /// assert!((Vector4f32 { x: 0.21442251, y: 0.32163376, z: 0.5360563, t: 0.7504788 } - n).is_near_zero(4.0e-4));
+    /// assert!((Vector4f32 { x: 0.21442251, y: 0.32163376, z: 0.5360563, t: 0.7504788 } - n).is_approx_zero(4.0e-4));
     /// ```
     #[inline]
     #[must_use]
@@ -1182,7 +1182,7 @@ where
     /// # use vqm::Vector4f32;
     /// let mut v = Vector4f32::new(2.0, 3.0, 5.0, 7.0);
     /// v.normalize_unchecked_in_place();
-    /// assert!((Vector4f32 { x: 0.21442251, y: 0.32163376, z: 0.5360563, t: 0.7504788 } - v).is_near_zero(4.0e-4));
+    /// assert!((Vector4f32 { x: 0.21442251, y: 0.32163376, z: 0.5360563, t: 0.7504788 } - v).is_approx_zero(4.0e-4));
     /// ```
     #[inline]
     pub fn normalize_unchecked_in_place(&mut self) -> &mut Self {

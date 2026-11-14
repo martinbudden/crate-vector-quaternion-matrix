@@ -139,8 +139,8 @@ where
     T: Copy + One + Signed + PartialOrd,
 {
     /// Return true if quaternion is near the unit quaternion.
-    pub fn is_near_one(self, epsilon: T) -> bool {
-        self.q.is_near_one(epsilon)
+    pub fn is_approx_one(self, epsilon: T) -> bool {
+        self.q.is_approx_one(epsilon)
     }
 
     /// Asserts quaternion is indeed a unit quaternion.
@@ -714,7 +714,7 @@ impl<T> UnitQuaternion<T> {
     /// let b = Vector3f32::new(0.0, 1.0, 0.0);
     /// let q = UnitQuaternionf32::from_rotation_between(a, b).unwrap();
     /// let rotated = q.rotate(a);
-    /// assert!(rotated.is_near(b, 1e-6));
+    /// assert!(rotated.is_approx(b, 1e-6));
     /// ```
     pub fn from_rotation_between(a: Vector3<T>, b: Vector3<T>) -> Option<Self>
     where
@@ -860,7 +860,7 @@ where
     /// let q = UnitQuaternionf32::from(v).q();
     ///
     /// assert_eq!(q, Quaternionf32 { w: 0.14142136, x: 0.28284273, y: 0.42426407, z: 0.84852815 });
-    /// assert!(q.is_near(Quaternionf32 { w: 0.14142136, x: 0.28284273, y: 0.42426407, z: 0.84852815 }, 1e-3));
+    /// assert!(q.is_approx(Quaternionf32 { w: 0.14142136, x: 0.28284273, y: 0.42426407, z: 0.84852815 }, 1e-3));
     /// ```
     #[inline]
     fn from(v: Vector3<T>) -> Self {

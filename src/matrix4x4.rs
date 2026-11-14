@@ -480,15 +480,15 @@ where
     /// # use vqm::Matrix4x4f32;
     /// # use num_traits::Zero;
     /// let z = Matrix4x4f32::zero();
-    /// assert!(z.is_near_zero(1e-5));
+    /// assert!(z.is_approx_zero(1e-5));
     /// let m = Matrix4x4f32::new([ 0.001, 0.0, 0.0, 0.0,
     ///                             0.0,   0.0, 0.0, 0.0,
     ///                             0.0,   0.0, 0.0, 0.0,
     ///                             0.0,   0.0, 0.0, 0.0]);
-    /// assert!(m.is_near_zero(1.01e-3));
-    /// assert!(!m.is_near_zero(1e-4));
+    /// assert!(m.is_approx_zero(1.01e-3));
+    /// assert!(!m.is_approx_zero(1e-4));
     /// ```
-    pub fn is_near_zero(self, epsilon: T) -> bool {
+    pub fn is_approx_zero(self, epsilon: T) -> bool {
         for a in &self.a {
             if a.abs() > epsilon {
                 return false;
@@ -513,11 +513,11 @@ where
     ///                              5.0, 11.0, 47.0, 109.0,
     ///                             23.0, 31.0, 41.0, 103.0,
     ///                             67.0, 73.0, 83.0,  97.001]);
-    /// assert!(m.is_near(n, 1.01e-3));
-    /// assert!(!m.is_near(n,1e-4));
+    /// assert!(m.is_approx(n, 1.01e-3));
+    /// assert!(!m.is_approx(n,1e-4));
     /// ```
-    pub fn is_near(self, other: Matrix4x4<T>, epsilon: T) -> bool {
-        (self - other).is_near_zero(epsilon)
+    pub fn is_approx(self, other: Matrix4x4<T>, epsilon: T) -> bool {
+        (self - other).is_approx_zero(epsilon)
     }
 }
 
@@ -635,15 +635,15 @@ where
     /// # use vqm::Matrix4x4f32;
     /// # use num_traits::One;
     /// let i = Matrix4x4f32::one();
-    /// assert!(i.is_near_identity(1e-5));
+    /// assert!(i.is_approx_identity(1e-5));
     /// let m = Matrix4x4f32::new([ 1.001, 0.0, 0.0, 0.0,
     ///                             0.0,   1.0, 0.0, 0.0,
     ///                             0.0,   0.0, 1.0, 0.0,
     ///                             0.0,   0.0, 0.0, 1.0]);
-    /// assert!(m.is_near_identity(1.01e-3));
-    /// assert!(!m.is_near_identity(1.01e-4));
+    /// assert!(m.is_approx_identity(1.01e-3));
+    /// assert!(!m.is_approx_identity(1.01e-4));
     /// ```
-    pub fn is_near_identity(self, epsilon: T) -> bool {
+    pub fn is_approx_identity(self, epsilon: T) -> bool {
         if self.a[Self::M21].abs() > epsilon
             || self.a[Self::M31].abs() > epsilon
             || self.a[Self::M41].abs() > epsilon
@@ -708,7 +708,7 @@ where
     /// `epsilon` specifies the tolerance used for floating-point comparisons.
     pub fn is_orthogonal(self, epsilon: T) -> bool {
         let product = self.transpose() * self;
-        product.is_near_identity(epsilon)
+        product.is_approx_identity(epsilon)
     }
 
     /// Returns true if matrix is a rotation matrix.
@@ -2382,7 +2382,7 @@ where
     /// assert_eq!(-945984.0, m.determinant());
     /// assert!((r - 0.006675963).abs() < 1e-6);
     ///
-    /// assert!((n * m / m.determinant()).is_near_identity(1e-5));
+    /// assert!((n * m / m.determinant()).is_approx_identity(1e-5));
     /// assert_eq!(Matrix4x4f32::one(), n*m/m.determinant());
     /// assert_eq!(n * m / d, Matrix4x4f32::new([ 1.0, 0.0, 0.0, 0.0,
     ///                                           0.0, 1.0, 0.0, 0.0,

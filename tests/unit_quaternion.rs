@@ -104,7 +104,7 @@ mod tests {
         let rotated2 = matrix * v;
 
         assert_eq!(rotated1, rotated2);
-        assert!(rotated1.is_near(rotated2, 1e-10));
+        assert!(rotated1.is_approx(rotated2, 1e-10));
     }
     #[test]
     fn matrix1() {
@@ -120,6 +120,6 @@ mod tests {
         let m1: Matrix3x3f32 = q1.into();
         let q2: Quaternionf32 = m1.into();
         let m2: Matrix3x3f32 = UnitQuaternionf32::new(q2).into();
-        m1.is_near(m2, 1e-10);
+        m1.is_approx(m2, 1e-10);
     }
 }

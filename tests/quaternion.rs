@@ -230,7 +230,7 @@ mod tests {
         let v = Vector3f32 { x: 1.0, y: 2.0, z: 3.0 };
 
         let rotated = q.rotate(v);
-        assert!(rotated.is_near(v, EPSILON));
+        assert!(rotated.is_approx(v, EPSILON));
     }
     #[test]
     fn rotate_90_degrees_about_x() {
@@ -242,7 +242,7 @@ mod tests {
 
         let expected = Vector3f32 { x: 0.0, y: 0.0, z: 1.0 };
         let rotated = q.rotate(v);
-        assert!(rotated.is_near(expected, EPSILON));
+        assert!(rotated.is_approx(expected, EPSILON));
     }
 
     #[test]
@@ -256,7 +256,7 @@ mod tests {
         let expected = Vector3f32 { x: 1.0, y: 0.0, z: 0.0 };
 
         let rotated = q.rotate(v);
-        assert!(rotated.is_near(expected, EPSILON));
+        assert!(rotated.is_approx(expected, EPSILON));
     }
 
     #[test]
@@ -270,7 +270,7 @@ mod tests {
         let expected = Vector3f32 { x: 0.0, y: 1.0, z: 0.0 };
 
         let rotated = q.rotate(v);
-        assert!(rotated.is_near(expected, EPSILON));
+        assert!(rotated.is_approx(expected, EPSILON));
     }
     #[test]
     fn rotate_arbitrary_vector_about_diagonal_axis() {
@@ -284,7 +284,7 @@ mod tests {
 
         let rotated = q.rotate(v);
         assert_eq!(rotated, expected);
-        assert!(rotated.is_near(expected, EPSILON));
+        assert!(rotated.is_approx(expected, EPSILON));
     }
 
     #[test]
@@ -299,7 +299,7 @@ mod tests {
         let expected = Vector3f32 { x: 2.0, y: 1.0, z: -3.0 };
 
         let rotated = q.rotate(v);
-        assert!(rotated.is_near(expected, EPSILON));
+        assert!(rotated.is_approx(expected, EPSILON));
     }
 
     #[test]
@@ -331,7 +331,7 @@ mod tests {
 
         let expected = neg_q.rotate(v);
         let rotated = q.rotate(v);
-        assert!(rotated.is_near(expected, EPSILON));
+        assert!(rotated.is_approx(expected, EPSILON));
     }
 
     #[test]
@@ -340,7 +340,7 @@ mod tests {
 
         let zero = Vector3f32 { x: 0.0, y: 0.0, z: 0.0 };
 
-        assert!(q.rotate(zero).is_near(zero, EPSILON));
+        assert!(q.rotate(zero).is_approx(zero, EPSILON));
     }
     #[test]
     fn rotate_preserves_vector_magnitude() {
@@ -416,7 +416,7 @@ mod tests {
 
         q.rotate_x(core::f32::consts::FRAC_PI_2);
 
-        assert!((Vector3f32 { x: q.x, y: q.y, z: q.z }).is_near(Vector3f32 { x: s, y: 0.0, z: 0.0 }, EPSILON));
+        assert!((Vector3f32 { x: q.x, y: q.y, z: q.z }).is_approx(Vector3f32 { x: s, y: 0.0, z: 0.0 }, EPSILON));
         assert!((q.w - s).abs() < EPSILON);
     }
 
@@ -428,7 +428,7 @@ mod tests {
 
         q.rotate_y(core::f32::consts::FRAC_PI_2);
 
-        assert!((Vector3f32 { x: q.x, y: q.y, z: q.z }).is_near(Vector3f32 { x: 0.0, y: s, z: 0.0 }, EPSILON));
+        assert!((Vector3f32 { x: q.x, y: q.y, z: q.z }).is_approx(Vector3f32 { x: 0.0, y: s, z: 0.0 }, EPSILON));
         assert!((q.w - s).abs() < EPSILON);
     }
 
@@ -440,7 +440,7 @@ mod tests {
 
         q.rotate_z(core::f32::consts::FRAC_PI_2);
 
-        assert!((Vector3f32 { x: q.x, y: q.y, z: q.z }).is_near(Vector3f32 { x: 0.0, y: 0.0, z: s }, EPSILON));
+        assert!((Vector3f32 { x: q.x, y: q.y, z: q.z }).is_approx(Vector3f32 { x: 0.0, y: 0.0, z: s }, EPSILON));
         assert!((q.w - s).abs() < EPSILON);
     }
     #[test]
@@ -456,7 +456,7 @@ mod tests {
         let mut actual = q;
         actual.rotate_x(theta);
 
-        assert!(actual.is_near(expected, EPSILON));
+        assert!(actual.is_approx(expected, EPSILON));
     }
 
     #[test]
@@ -472,7 +472,7 @@ mod tests {
         let mut actual = q;
         actual.rotate_y(theta);
 
-        assert!(actual.is_near(expected, EPSILON));
+        assert!(actual.is_approx(expected, EPSILON));
     }
 
     #[test]
@@ -488,7 +488,7 @@ mod tests {
         let mut actual = q;
         actual.rotate_z(theta);
 
-        assert!(actual.is_near(expected, EPSILON));
+        assert!(actual.is_approx(expected, EPSILON));
     }
     #[test]
     fn test_non_zero_slerp_midpoint() {

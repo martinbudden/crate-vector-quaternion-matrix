@@ -248,11 +248,11 @@ where
     /// # use vqm::Matrix3x3xM3x3f32;
     /// # use num_traits::Zero;
     /// let z = Matrix3x3xM3x3f32::zero();
-    /// assert!(z.is_near_zero(1e-5));
+    /// assert!(z.is_approx_zero(1e-5));
     /// ```
-    pub fn is_near_zero(self, epsilon: T) -> bool {
+    pub fn is_approx_zero(self, epsilon: T) -> bool {
         for a in &self.a {
-            if !a.is_near_zero(epsilon) {
+            if !a.is_approx_zero(epsilon) {
                 return false;
             }
         }
@@ -344,10 +344,10 @@ where
     /// # use vqm::Matrix3x3xM3x3f32;
     /// # use num_traits::One;
     /// let i = Matrix3x3xM3x3f32::one();
-    /// assert!(i.is_near_identity(1e-5));
+    /// assert!(i.is_approx_identity(1e-5));
     /// ```
-    pub fn is_near_identity(self, epsilon: T) -> bool {
-        (self - Matrix3x3xM3x3::<T>::one()).is_near_zero(epsilon)
+    pub fn is_approx_identity(self, epsilon: T) -> bool {
+        (self - Matrix3x3xM3x3::<T>::one()).is_approx_zero(epsilon)
     }
 }
 

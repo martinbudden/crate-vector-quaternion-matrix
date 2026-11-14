@@ -52,7 +52,7 @@ where
     /// assert!(option.is_some());
     /// if let Some(cholesky) = option {
     ///     const R: f32 = core::f32::consts::FRAC_1_SQRT_2;
-    ///     assert!(cholesky.l().is_near(Matrix4x4f32::new([
+    ///     assert!(cholesky.l().is_approx(Matrix4x4f32::new([
     ///                     2.0*R, 0.0,  0.0, 0.0,
     ///                     3.0*R,   R,  0.0, 0.0,
     ///                     7.0*R,   R,  2.0, 0.0,
@@ -246,8 +246,8 @@ where
     /// if let Some(cholesky) = option {
     ///     // Solve Ax = b, for x
     ///     let x = cholesky.solve_vector(b);
-    ///     assert!(x.is_near(Vector4f32 { x: 144.0, y: 1.5, z: -18.0, t: -11.5 }, 5e-4));
-    ///     assert!((A * x).is_near(b, 5e-4));
+    ///     assert!(x.is_approx(Vector4f32 { x: 144.0, y: 1.5, z: -18.0, t: -11.5 }, 5e-4));
+    ///     assert!((A * x).is_approx(b, 5e-4));
     /// }
     /// ```
     #[must_use]
@@ -269,8 +269,8 @@ where
     /// assert!(option.is_some());
     /// if let Some(cholesky) = option {
     ///     let X = cholesky.solve_matrix(A);
-    ///     assert!(X.is_near_identity(1e-1));
-    ///     //assert!((A * X).is_near(B, 1e-4));
+    ///     assert!(X.is_approx_identity(1e-1));
+    ///     //assert!((A * X).is_approx(B, 1e-4));
     /// }
     /// ```
     #[must_use]
@@ -330,12 +330,12 @@ where
     /// assert!(option.is_some());
     /// if let Some(cholesky) = option {
     ///     let X = cholesky.invert();
-    ///     assert!(X.is_near(Matrix4x4f32::new([
+    ///     assert!(X.is_approx(Matrix4x4f32::new([
     ///                 18.5,  -2.5,  -1.75, -1.25,
     ///                 -2.5,   2.25, -0.25,  0.0,
     ///                 -1.75, -0.25,  0.375, 0.125,
     ///                 -1.25,  0.0,   0.125, 0.125 ]), 5e-5));
-    ///     assert!((A * X).is_near_identity(1e-5));
+    ///     assert!((A * X).is_approx_identity(1e-5));
     /// }
     /// ```
     #[inline]
@@ -365,7 +365,7 @@ where
     /// assert!(option.is_some());
     /// if let Some(cholesky) = option {
     ///     const R: f32 = core::f32::consts::FRAC_1_SQRT_2;
-    ///     assert!(cholesky.l().is_near(Matrix4x4f32::new([
+    ///     assert!(cholesky.l().is_approx(Matrix4x4f32::new([
     ///                     2.0*R, 0.0,  0.0, 0.0,
     ///                     3.0*R,   R,  0.0, 0.0,
     ///                     7.0*R,   R,  2.0, 0.0,
@@ -413,7 +413,7 @@ mod tests {
             let L = cholesky.l();
             #[cfg(feature = "libm")]
             #[rustfmt::skip]
-            assert!(L.is_near(Matrix4x4f32::new([
+            assert!(L.is_approx(Matrix4x4f32::new([
                             2.0*R, 0.0,  0.0, 0.0,
                             3.0*R,   R,  0.0, 0.0,
                             7.0*R,   R,  2.0, 0.0,
@@ -421,28 +421,28 @@ mod tests {
             // Check L*L^T = A
             let B = L * L.transpose();
             #[cfg(feature = "libm")]
-            assert!(A.is_near(B, 1e-6));
+            assert!(A.is_approx(B, 1e-6));
 
             // Solve Ax = b, for x
             let b = Vector4f32 { x: 17.0, y: 23.0, z: 31.0, t: 47.0 };
             let x = cholesky.solve_vector(b);
             //assert_eq!(x, Vector4f32 { x: 136.0, y: 1.0, z: -17.0, t: -11.0 });
-            assert!(x.is_near(Vector4f32 { x: 144.0, y: 1.5, z: -18.0, t: -11.5 }, 5e-4));
-            assert!((A * x).is_near(b, 5e-4));
+            assert!(x.is_approx(Vector4f32 { x: 144.0, y: 1.5, z: -18.0, t: -11.5 }, 5e-4));
+            assert!((A * x).is_approx(b, 5e-4));
 
             // Solving A * X = A gives identity
             let X = cholesky.solve_matrix(A);
-            assert!(X.is_near_identity(5e-6));
+            assert!(X.is_approx_identity(5e-6));
 
             // Solving A * X = I for X gives A inverse
             let X = cholesky.solve_matrix(Matrix4x4f32::identity());
             #[rustfmt::skip]
-            assert!(X.is_near(Matrix4x4f32::new([
+            assert!(X.is_approx(Matrix4x4f32::new([
                            18.5,  -2.5,  -1.75, -1.25,
                            -2.5,   2.25, -0.25,  0.0,
                            -1.75, -0.25,  0.375, 0.125,
                            -1.25,  0.0,   0.125, 0.125 ]), 5e-5));
-            assert!((A * X).is_near_identity(1e-5));
+            assert!((A * X).is_approx_identity(1e-5));
         }
     }
 

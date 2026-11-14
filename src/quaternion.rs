@@ -125,12 +125,12 @@ where
     /// # use vqm::Quaternionf32;
     /// # use num_traits::Zero;
     /// let z = Quaternionf32::zero();
-    /// assert!(z.is_near_zero(1e-5));
+    /// assert!(z.is_approx_zero(1e-5));
     /// let q = Quaternionf32 { w: 0.0001187, x: 0.0, y: 0.0, z: 0.0 };
-    /// assert!(q.is_near_zero(1e-3));
-    /// assert!(!q.is_near_zero(1e-4));
+    /// assert!(q.is_approx_zero(1e-3));
+    /// assert!(!q.is_approx_zero(1e-4));
     /// ```
-    pub fn is_near_zero(self, epsilon: T) -> bool {
+    pub fn is_approx_zero(self, epsilon: T) -> bool {
         if self.w.abs() > epsilon || self.x.abs() > epsilon || self.y.abs() > epsilon || self.z.abs() > epsilon {
             return false;
         }
@@ -147,11 +147,11 @@ where
     /// # use vqm::Quaternionf32;
     /// let q = Quaternionf32::new(2.0,  3.0, 7.0, 11.0);
     /// let r = Quaternionf32::new(2.0,  3.0, 7.0, 11.001);
-    /// assert!(q.is_near(r, 1.01e-3));
-    /// assert!(!q.is_near(r, 1e-4));
+    /// assert!(q.is_approx(r, 1.01e-3));
+    /// assert!(!q.is_approx(r, 1e-4));
     /// ```
-    pub fn is_near(self, other: Quaternion<T>, epsilon: T) -> bool {
-        (self - other).is_near_zero(epsilon)
+    pub fn is_approx(self, other: Quaternion<T>, epsilon: T) -> bool {
+        (self - other).is_approx_zero(epsilon)
     }
 }
 
@@ -246,10 +246,10 @@ where
     /// # use vqm::Quaternionf32;
     /// # use num_traits::One;
     /// let q = Quaternionf32 { w: 1.0001187, x: 0.0, y: 0.0, z: 0.0 };
-    /// assert!(q.is_near_one(1e-3));
-    /// assert!(!q.is_near_one(1e-4));
+    /// assert!(q.is_approx_one(1e-3));
+    /// assert!(!q.is_approx_one(1e-4));
     /// ```
-    pub fn is_near_one(self, epsilon: T) -> bool {
+    pub fn is_approx_one(self, epsilon: T) -> bool {
         if (self.w - T::one()).abs() > epsilon
             || self.x.abs() > epsilon
             || self.y.abs() > epsilon
@@ -690,7 +690,7 @@ where
     /// let r = Quaternionf32::new(-1.0, 4.0, 2.0, 1.0).normalize();
     /// let s = q.slerp(r, 0.5);
     ///
-    /// assert!(s.is_near(Quaternionf32::new(0.19861867, 0.7277963, 0.11018632, 0.64708747), 1e-5));
+    /// assert!(s.is_approx(Quaternionf32::new(0.19861867, 0.7277963, 0.11018632, 0.64708747), 1e-5));
     /// ```
     #[inline]
     #[must_use]
@@ -881,7 +881,7 @@ where
     /// # use vqm::Quaternionf32;
     /// let q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
     /// let r = q.normalized_unchecked();
-    /// assert!((Quaternionf32 { w: 0.21442251, x: 0.32163376, y: 0.5360563, z: 0.7504788 } - r).is_near_zero(1.0e-4));
+    /// assert!((Quaternionf32 { w: 0.21442251, x: 0.32163376, y: 0.5360563, z: 0.7504788 } - r).is_approx_zero(1.0e-4));
     /// ```
     #[inline]
     #[must_use]
@@ -895,7 +895,7 @@ where
     /// # use vqm::Quaternionf32;
     /// let mut q = Quaternionf32::new(2.0, 3.0, 5.0, 7.0);
     /// q.normalize_unchecked_in_place();
-    /// assert!((Quaternionf32 { w: 0.21442251, x: 0.32163376, y: 0.5360563, z: 0.7504788 } - q).is_near_zero(1.0e-4));
+    /// assert!((Quaternionf32 { w: 0.21442251, x: 0.32163376, y: 0.5360563, z: 0.7504788 } - q).is_approx_zero(1.0e-4));
     /// ```
     #[inline]
     pub fn normalize_unchecked_in_place(&mut self) -> &mut Self {

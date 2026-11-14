@@ -28,6 +28,10 @@ At some point [0.1.0] to [0.1.11] will be [YANKED]
 - `is_normalized` function to vectors.
 - additional protection against floating-point rounding errors.
 
+### Changed
+
+- renamed all `is_near` functions and variants to `is_approx` and variants.
+
 ### Fixed
 
 - quaternion `direction_cosine_matrix_z`.

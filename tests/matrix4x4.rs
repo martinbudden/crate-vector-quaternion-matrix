@@ -51,11 +51,11 @@ mod tests {
         assert_eq!(a, z);
         assert!(z.is_zero());
         assert!(!z.is_one());
-        assert!(z.is_near_zero(1e-5));
+        assert!(z.is_approx_zero(1e-5));
 
         let i = Matrix4x4f32::one();
         assert!(i.is_one());
         assert!(!i.is_zero());
-        assert!(i.is_near_identity(1e-5));
+        assert!(i.is_approx_identity(1e-5));
     }
 }

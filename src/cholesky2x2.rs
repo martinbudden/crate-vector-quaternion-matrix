@@ -42,12 +42,12 @@ where
     /// if let Some(cholesky) = option {
     ///     const R: f32 = core::f32::consts::FRAC_1_SQRT_2;
     ///     let L = cholesky.l();
-    ///     assert!(L.is_near(Matrix2x2f32::new([
+    ///     assert!(L.is_approx(Matrix2x2f32::new([
     ///             2.0*R, 0.0,
     ///             3.0*R, R]), 1e-6));
     ///     // Check L*L^T = A
     ///     let B = L * L.transpose();
-    ///     assert!(A.is_near(B, 1e-6));
+    ///     assert!(A.is_approx(B, 1e-6));
     /// }
     /// ```
     #[allow(clippy::many_single_char_names)]
@@ -169,7 +169,7 @@ where
     /// if let Some(cholesky) = option {
     ///     // Solve Ax = b, for x
     ///     let x = cholesky.solve_vector(b);
-    ///     assert!(x.is_near(Vector2f32 { x: 14.0, y: -5.0 }, 5e-5));
+    ///     assert!(x.is_approx(Vector2f32 { x: 14.0, y: -5.0 }, 5e-5));
     /// }
     /// ```
     #[must_use]
@@ -193,7 +193,7 @@ where
     /// assert!(option.is_some());
     /// if let Some(cholesky) = option {
     ///     let X = cholesky.solve_matrix(B);
-    ///     assert!((A * X).is_near(B, 1e-4));
+    ///     assert!((A * X).is_approx(B, 1e-4));
     /// }
     /// ```
     #[must_use]
@@ -228,10 +228,10 @@ where
     /// assert!(option.is_some());
     /// if let Some(cholesky) = option {
     ///     let X = cholesky.solve_matrix(B);
-    ///     assert!((A * X).is_near(B, 1e-4));
+    ///     assert!((A * X).is_approx(B, 1e-4));
     ///     let Y = cholesky.solve_matrix_transposed(B);
     ///     let Z = cholesky.solve_matrix(B.transpose()).transpose();
-    ///     assert!(Z.is_near(Y, 1e-7));
+    ///     assert!(Z.is_approx(Y, 1e-7));
     /// }
     /// ```
     #[must_use]
@@ -267,10 +267,10 @@ where
     /// assert!(option.is_some());
     /// if let Some(cholesky) = option {
     ///     let X = cholesky.invert();
-    ///     assert!(X.is_near(Matrix2x2f32::new([
+    ///     assert!(X.is_approx(Matrix2x2f32::new([
     ///                  5.0,  -3.0,
     ///                 -3.0,   2.0 ]), 1e-5));
-    ///     assert!((A * X).is_near_identity(1e-5));
+    ///     assert!((A * X).is_approx_identity(1e-5));
     /// }
     /// ```
     #[inline]
@@ -296,12 +296,12 @@ impl<T> Matrix2x2<T> {
     /// if let Some(cholesky) = option {
     ///     const R: f32 = core::f32::consts::FRAC_1_SQRT_2;
     ///     let L = cholesky.l();
-    ///     assert!(L.is_near(Matrix2x2f32::new([
+    ///     assert!(L.is_approx(Matrix2x2f32::new([
     ///             2.0*R, 0.0,
     ///             3.0*R, R]), 1e-6));
     ///     // Check L*L^T = A
     ///     let B = L * L.transpose();
-    ///     assert!(A.is_near(B, 1e-6));
+    ///     assert!(A.is_approx(B, 1e-6));
     /// }
     /// ```
     #[must_use]
@@ -366,38 +366,38 @@ mod tests {
             const R: f32 = core::f32::consts::FRAC_1_SQRT_2;
             let L = cholesky.l();
             #[rustfmt::skip]
-            assert!(L.is_near(Matrix2x2f32::new([
+            assert!(L.is_approx(Matrix2x2f32::new([
                             2.0*R, 0.0,
                             3.0*R, R ]), 1e-6));
             // Check L*L^T = A
             #[cfg(feature = "libm")]
-            assert!(A.is_near(L * L.transpose(), 5e-5));
+            assert!(A.is_approx(L * L.transpose(), 5e-5));
 
             // Solve Ax = b, for x
             let b = Vector2f32 { x: 13.0, y: 17.0 };
             let x = cholesky.solve_vector(b);
-            assert!(x.is_near(Vector2f32 { x: 14.0, y: -5.0 }, 5e-5));
-            assert!((A * x).is_near(b, 5e-6));
+            assert!(x.is_approx(Vector2f32 { x: 14.0, y: -5.0 }, 5e-5));
+            assert!((A * x).is_approx(b, 5e-6));
 
             // Solving A * X = A gives identity
             let X = cholesky.solve_matrix(A);
-            assert!(X.is_near_identity(2e-6));
+            assert!(X.is_approx_identity(2e-6));
 
             // Solving A * X = I for X gives A inverse
             let X = cholesky.solve_matrix(Matrix2x2f32::identity());
             #[rustfmt::skip]
-            assert!(X.is_near(Matrix2x2f32::new([
+            assert!(X.is_approx(Matrix2x2f32::new([
                             5.0,  -3.0,
                            -3.0,   2.0 ]), 1e-5));
-            assert!((A * X).is_near_identity(1e-5));
+            assert!((A * X).is_approx_identity(1e-5));
 
             let X = cholesky.solve_matrix(B);
-            assert!((A * X).is_near(B, 1e-4));
+            assert!((A * X).is_approx(B, 1e-4));
 
             let Y = cholesky.solve_matrix_transposed(B);
             let Z = cholesky.solve_matrix(B.transpose()).transpose();
-            assert!(Z.is_near(Y, 1e-7));
-            //assert!((A * X.transpose()).is_near(B.transpose(), 1e-2));
+            assert!(Z.is_approx(Y, 1e-7));
+            //assert!((A * X.transpose()).is_approx(B.transpose(), 1e-2));
         }
     }
 
