@@ -55,16 +55,18 @@ impl<T> UnitQuaternion<T> {
         Self { q: q / norm }
     }
 
-    /// Create a `UnitQuaternion` from a normalized Quaternion `q` if `q` is normalizable, otherwise return `None`.
+    /// Create a `UnitQuaternion` from a Quaternion `q`,  normalizing it if possible, otherwise return `None`.
     #[inline]
     pub fn try_from_quaternion(q: Quaternion<T>) -> Option<Self>
     where
         T: Copy + FloatCore + MathMethods + QuaternionMath,
     {
-        let norm = q.norm();
-        if !norm.is_finite() || norm <= T::epsilon() {
+        let scale = q.w.abs().max(q.x.abs()).max(q.y.abs()).max(q.z.abs());
+        if !scale.is_finite() || scale == T::zero() {
             return None;
         }
+        let q = q / scale;
+        let norm = q.norm();
         Some(Self { q: q / norm })
     }
 
@@ -97,7 +99,7 @@ impl<T> From<UnitQuaternion<T>> for Quaternion<T> {
 
 impl<T> One for UnitQuaternion<T>
 where
-    T: Copy + ConstZero + ConstOne + PartialEq + QuaternionMath + MathMethods,
+    T: Copy + FloatCore + ConstZero + ConstOne + PartialEq + QuaternionMath + MathMethods,
 {
     /// Unit quaternion.
     #[inline]
@@ -114,7 +116,7 @@ where
 /// Const unit quaternion.
 impl<T> ConstOne for UnitQuaternion<T>
 where
-    T: Copy + ConstZero + ConstOne + PartialEq + QuaternionMath + MathMethods,
+    T: Copy + FloatCore + ConstZero + ConstOne + PartialEq + QuaternionMath + MathMethods,
 {
     const ONE: Self = Self { q: Quaternion::ONE };
 }
@@ -140,6 +142,20 @@ where
     pub fn is_near_one(self, epsilon: T) -> bool {
         self.q.is_near_one(epsilon)
     }
+
+    /// Asserts quaternion is indeed a unit quaternion.
+    /// # Panics
+    /// if quaternion is not unit quaternion.
+    pub fn assert_unit(q: UnitQuaternion<T>, epsilon: T)
+    where
+        T: FloatCore + MathMethods + QuaternionMath,
+    {
+        let q = q.q();
+
+        let norm_squared = q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z;
+
+        assert!((norm_squared - T::one()).abs() < epsilon);
+    }
 }
 
 // **** Neg ****
@@ -162,7 +178,7 @@ where
 // Mul is required for the `One` trait.
 impl<T> Mul<UnitQuaternion<T>> for UnitQuaternion<T>
 where
-    T: Copy + MathMethods + QuaternionMath,
+    T: Copy + FloatCore + MathMethods + QuaternionMath,
 {
     type Output = Self;
 
@@ -171,20 +187,29 @@ where
     fn mul(self, other: Self) -> Self {
         let q = self.q * other.q;
         let norm_squared = q.norm_squared();
+        debug_assert!(norm_squared.is_finite() && norm_squared > T::epsilon());
         Self { q: q * norm_squared.sqrt_reciprocal() }
     }
 }
 
 // **** approx_eq ****
 
-impl<T> UnitQuaternion<T>
-where
-    T: Copy + Signed + PartialOrd,
-{
-    /// Compare two unit quaternions with a tolerance.
+impl<T> UnitQuaternion<T> {
+    /// Compare two unit quaternions componentwise with a tolerance.
     #[inline]
-    pub fn approx_eq(&self, other: Self, epsilon: T) -> bool {
+    pub fn approx_eq(&self, other: Self, epsilon: T) -> bool
+    where
+        T: Copy + Signed + PartialOrd,
+    {
         self.q.approx_eq(other.q, epsilon)
+    }
+
+    /// Check if two unit quaternions represent the same rotation.
+    pub fn orientation_approx_eq(&self, other: Self, epsilon: T) -> bool
+    where
+        T: Copy + FloatCore + MathMethods + QuaternionMath,
+    {
+        self.angle_to(other) <= epsilon
     }
 }
 
@@ -302,35 +327,6 @@ impl<T> UnitQuaternion<T> {
                 * two,
         }
     }
-
-    /// Rotate about the x-axis,
-    /// equivalent to *= Quaternion(cos(theta/2), sin(theta/2), 0, 0).
-    pub fn rotate_x(&mut self, theta: T) -> &mut Self
-    where
-        T: FloatCore + MathMethods,
-    {
-        self.q = *self.q.rotate_x(theta);
-        self
-    }
-
-    /// Rotate about the y-axis,
-    /// equivalent to *= Quaternion(cos(theta/2), 0, sin(theta/2), 0).
-    pub fn rotate_y(&mut self, theta: T) -> &mut Self
-    where
-        T: FloatCore + MathMethods,
-    {
-        self.q = *self.q.rotate_y(theta);
-        self
-    }
-    /// Rotate about the z-axis,
-    /// equivalent to *= Quaternion(cos(theta/2), 0, 0, sin(theta/2)).
-    pub fn rotate_z(&mut self, theta: T) -> &mut Self
-    where
-        T: FloatCore + MathMethods,
-    {
-        self.q = *self.q.rotate_z(theta);
-        self
-    }
 }
 
 impl<T> UnitQuaternion<T>
@@ -375,10 +371,10 @@ where
         let s: T = self.sin_pitch();
         let sq = T::one() - s * s;
 
-        if sq <= T::zero() { T::zero() } else { s * sq.sqrt_reciprocal() }
+        if sq <= T::zero() { T::nan() } else { s * sq.sqrt_reciprocal() }
     }
 
-    /// Returns the cosine of the Euler pitch angle.
+    /// Returns the cosine of the Euler yaw angle.
     ///
     /// Uses the aerospace roll-pitch-yaw convention.
     pub fn cos_yaw(self) -> T {
@@ -425,7 +421,7 @@ where
     ///
     /// Uses the aerospace roll-pitch-yaw convention.
     pub fn sin_tilt(self) -> T {
-        let c: T = self.cos_tilt();
+        let c = self.cos_tilt().clamp(-T::one(), T::one());
         let sq = T::one() - c * c;
         if sq <= T::zero() { T::zero() } else { sq.sqrt() }
     }
@@ -460,7 +456,7 @@ where
         let sin_pitch = two * (self.q.w * self.q.y - self.q.x * self.q.z);
         let d = self.q.w * self.q.w - self.q.y * self.q.y;
 
-        // if d < 0.0, then self is outside the range [-90, 90] degrees, so we return 1.0 or 1.0 according to the sign of sin_pitch
+        // if d < 0.0, then self is outside the range [-90, 90] degrees, so we return 1.0 or -1.0 according to the sign of sin_pitch
         if d < T::zero() {
             if sin_pitch < T::zero() {
                 return -T::one();
@@ -468,7 +464,7 @@ where
             return T::one();
         }
         // self is in the range [-90, 90] degrees, so we can just return sin(self)
-        sin_pitch
+        sin_pitch.clamp(-T::one(), T::one())
     }
 }
 
@@ -487,7 +483,7 @@ where
     #[inline]
     pub fn calculate_pitch_radians(self) -> T {
         let two = T::one() + T::one();
-        (two * (self.q.w * self.q.y - self.q.x * self.q.z)).asin()
+        (two * (self.q.w * self.q.y - self.q.x * self.q.z)).clamp(-T::one(), T::one()).asin()
     }
 
     /// Calculate yaw angle of quaternion, in radians.
@@ -556,7 +552,7 @@ where
         Self::from_roll_pitch_radians(roll_degrees.to_radians(), pitch_degrees.to_radians())
     }
 
-    /// Create a `UnitQuaternion` from roll Euler angle (in radians), assumes pitch and roll angles are zero.
+    /// Create a `UnitQuaternion` from roll Euler angle (in radians), assumes pitch and yaw angles are zero.
     pub fn from_roll_radians(roll_radians: T) -> Self {
         let half: T = T::one() / (T::one() + T::one());
         let (sin_half_roll, cos_half_roll) = (roll_radians * half).sin_cos();
@@ -564,7 +560,7 @@ where
         Self { q: Quaternion { w: cos_half_roll, x: sin_half_roll, y: T::zero(), z: T::zero() } }
     }
 
-    /// Create a `UnitQuaternion` from roll Euler angle (in degrees), assumes pitch and roll angles are zero.
+    /// Create a `UnitQuaternion` from roll Euler angle (in degrees), assumes pitch and yaw angles are zero.
     pub fn from_roll_degrees(roll_degrees: T) -> Self {
         Self::from_roll_radians(roll_degrees.to_radians())
     }
@@ -648,11 +644,13 @@ where
 
 impl<T> UnitQuaternion<T> {
     /// Create a `UnitQuaternion` from a rotation axis and an angle in radians.
+    /// #Preconditions
     /// Rotation axis must be normalized.
     pub fn from_axis_angle_radians(axis: Vector3<T>, angle_radians: T) -> Self
     where
         T: FloatCore + MathMethods,
     {
+        debug_assert!(axis.is_normalized(T::epsilon()));
         let half: T = T::one() / (T::one() + T::one());
         let (sin_half_angle, cos_half_angle) = (angle_radians * half).sin_cos();
         Self {
@@ -681,20 +679,27 @@ impl<T> UnitQuaternion<T> {
     /// For an identity quaternion (zero rotation), an arbitrary unit axis is returned (1, 0, 0).
     ///
     /// # Returns
-    /// * `(axis, angle)` - The unit rotation axis and rotation angle in radians.
+    /// * `(axis, angle)` - The unit rotation axis and rotation angle in radians in range [0, PI].
     pub fn to_axis_angle(&self) -> (Vector3<T>, T)
     where
-        T: FloatCore + MathMethods,
+        T: FloatCore + MathMethods + QuaternionMath,
     {
-        let w = self.q.w.clamp(-T::one(), T::one());
+        let mut q = self.q;
 
-        let two: T = T::one() + T::one();
+        // Select the quaternion representation with non-negative w.
+        if q.w < T::zero() {
+            q = -q;
+        }
+
+        let w = q.w.clamp(-T::one(), T::one());
+
+        let two = T::one() + T::one();
         let angle = two * w.acos();
 
-        let s = (self.q.x * self.q.x + self.q.y * self.q.y + self.q.z * self.q.z).sqrt();
+        let s = (q.x * q.x + q.y * q.y + q.z * q.z).sqrt();
 
         let axis = if s > T::epsilon() {
-            Vector3::new(self.q.x / s, self.q.y / s, self.q.z / s)
+            Vector3::new(q.x / s, q.y / s, q.z / s)
         } else {
             Vector3::new(T::one(), T::zero(), T::zero())
         };
@@ -703,6 +708,14 @@ impl<T> UnitQuaternion<T> {
     }
 
     /// Calculate the quaternion representing the shortest rotation that transforms vector `a` into vector `b`.
+    /// ```
+    /// # use vqm::{UnitQuaternionf32, Vector3f32};
+    /// let a = Vector3f32::new(1.0, 0.0, 0.0);
+    /// let b = Vector3f32::new(0.0, 1.0, 0.0);
+    /// let q = UnitQuaternionf32::from_rotation_between(a, b).unwrap();
+    /// let rotated = q.rotate(a);
+    /// assert!(rotated.is_near(b, 1e-6));
+    /// ```
     pub fn from_rotation_between(a: Vector3<T>, b: Vector3<T>) -> Option<Self>
     where
         T: FloatCore + MathMethods + IsScalar,
@@ -748,7 +761,7 @@ impl<T> UnitQuaternion<T> {
         let two = T::one() + T::one();
         let s = (two * (T::one() + dot)).sqrt_reciprocal();
 
-        Some(Self { q: Quaternion { w: s / two, x: cross.x * s, y: cross.y * s, z: cross.z * s } })
+        Some(Self { q: Quaternion { w: (T::one() + dot) * s, x: cross.x * s, y: cross.y * s, z: cross.z * s } })
     }
 
     /// Calculates the shortest angular distance between two quaternions.
@@ -786,7 +799,7 @@ where
         Vector3::<T> {
             x: (self.q.w * self.q.y + self.q.x * self.q.z) * two,
             y: (self.q.y * self.q.z - self.q.w * self.q.x) * two,
-            z: self.q.w * self.q.w,
+            z: T::one() - (self.q.x * self.q.x + self.q.y * self.q.y) * two,
         }
     }
 
@@ -865,35 +878,52 @@ where
     /// Adapted from [Converting a Rotation Matrix to a Quaternion](https://d3cw3dd2w33x3b.cloudfront.net/wp-content/uploads/2015/01/matrix-to-quat.pdf) by Mike Day.
     /// Note that Day's paper uses the [Shuster multiplication convention](https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation#Alternative_conventions),
     /// rather than the Hamilton multiplication convention used by the Quaternion class.
+    ///
+    /// # Preconditions
+    /// `m` is a valid rotation matrix. This is not checked.
     fn from(m: Matrix3x3<T>) -> Self {
+        // Quaternion uses Hamilton convention.
+        // Matrix is stored in column-major format.
+        #[allow(non_snake_case)]
+        let (M11, M21, M31, M12, M22, M32, M13, M23, M33) = (
+            Matrix3x3::<T>::M11,
+            Matrix3x3::<T>::M21,
+            Matrix3x3::<T>::M31,
+            Matrix3x3::<T>::M12,
+            Matrix3x3::<T>::M22,
+            Matrix3x3::<T>::M32,
+            Matrix3x3::<T>::M13,
+            Matrix3x3::<T>::M23,
+            Matrix3x3::<T>::M33,
+        );
         let half = T::one() / (T::one() + T::one());
         // Choose largest scale factor from 4w, 4x, 4y, and 4z, to avoid a scale factor of zero, or numerical instabilities caused by division of a small scale factor.
-        if m.a[8] < T::zero() {
+        if m.a[M33] < T::zero() {
             // |(x,y)| is bigger than |(z,w)|?
-            if m.a[0] > m.a[4] {
+            if m.a[M11] > m.a[M22] {
                 // |x| bigger than |y|, so use x-form
-                let t = T::one() + (m.a[0] - m.a[4]) - m.a[8]; // 1 + 2(xx - yy) - 1 + 2(xx + yy) = 4xx
-                let q = Self { w: m.a[7] - m.a[5], x: t, y: m.a[1] + m.a[3], z: m.a[6] + m.a[2] };
+                let t = T::one() + (m.a[M11] - m.a[M22]) - m.a[M33]; // 1 + 2(xx - yy) - 1 + 2(xx + yy) = 4xx
+                let q = Self { w: m.a[M32] - m.a[M23], x: t, y: m.a[M12] + m.a[M21], z: m.a[M13] + m.a[M31] };
                 return q * t.sqrt_reciprocal() * half;
             }
             // |y| bigger than |x|, so use y-form
-            let t = T::one() - (m.a[0] - m.a[4]) - m.a[8]; // 1 - 2(xx - yy) - 1 + 2(xx + yy) = 4yy
-            let q = Self { w: m.a[2] - m.a[6], x: m.a[1] + m.a[3], y: t, z: m.a[5] + m.a[7] };
+            let t = T::one() - (m.a[M11] - m.a[M22]) - m.a[M33]; // 1 - 2(xx - yy) - 1 + 2(xx + yy) = 4yy
+            let q = Self { w: m.a[M13] - m.a[M31], x: m.a[M12] + m.a[M21], y: t, z: m.a[M23] + m.a[M32] };
             return q * t.sqrt_reciprocal() * half;
         }
 
         // |(z,w)| bigger than |(x,y)|
-        if m.a[0] < -m.a[4] {
+        if m.a[M11] < -m.a[M22] {
             // |z| bigger than |w|, so use z-form
-            let t = T::one() - m.a[0] - (m.a[4] - m.a[8]); // 1 - (1 - 2*(yy + zz)) - (2(yy - zz)) = 4zz
-            let q = Self { w: m.a[3] - m.a[1], x: m.a[2] + m.a[6], y: m.a[5] + m.a[7], z: t };
+            let t = T::one() - m.a[M11] - (m.a[M22] - m.a[M33]); // 1 - (1 - 2*(yy + zz)) - (2(yy - zz)) = 4zz
+            let q = Self { w: m.a[M21] - m.a[M12], x: m.a[M31] + m.a[M13], y: m.a[M32] + m.a[M23], z: t };
             return q * t.sqrt_reciprocal() * half;
         }
 
         // |w| bigger than |z|, so use w-form
         // ww + xx + yy + zz = 1, since unit quaternion, so xx + yy + zz =  1 - ww
-        let t = T::one() + m.a[0] + m.a[4] + m.a[8]; // 1 + 1 - 2*(yy + zz) + 1 - 2(xx + zz) + 1 - 2(xx + yy) =  4 - 4(xx + yy + zz) = 4 - 4(1 - ww) = 4ww
-        let q = Self { w: t, x: m.a[7] - m.a[5], y: m.a[2] - m.a[6], z: m.a[3] - m.a[1] };
+        let t = T::one() + m.a[M11] + m.a[M22] + m.a[M33]; // 1 + 1 - 2*(yy + zz) + 1 - 2(xx + zz) + 1 - 2(xx + yy) =  4 - 4(xx + yy + zz) = 4 - 4(1 - ww) = 4ww
+        let q = Self { w: t, x: m.a[M32] - m.a[M23], y: m.a[M13] - m.a[M31], z: m.a[M21] - m.a[3] };
         q * t.sqrt_reciprocal() * half
     }
 }
@@ -904,22 +934,26 @@ where
 {
     /// Create rotation matrix from quaternion.
     ///
-    /// see [Quaternion-derived rotation matrix](https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation#Quaternion-derived_rotation_matrix),
-    /// uses Hamilton convention.
+    /// see [Quaternion-derived rotation matrix](https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation#Quaternion-derived_rotation_matrix).
     #[inline]
     fn from(q: UnitQuaternion<T>) -> Self {
+        // Quaternion uses Hamilton convention.
+        // Matrix is stored in column-major format.
         let two = T::one() + T::one();
         let q = q.q();
         Self {
             a: [
+                // Column 0
                 T::one() - (q.y * q.y + q.z * q.z) * two,
-                (q.x * q.y - q.w * q.z) * two,
-                (q.w * q.y + q.x * q.z) * two,
-                (q.w * q.z + q.x * q.y) * two,
-                T::one() - (q.x * q.x + q.z * q.z) * two,
-                (q.y * q.z - q.w * q.x) * two,
+                (q.x * q.y + q.w * q.z) * two,
                 (q.x * q.z - q.w * q.y) * two,
-                (q.w * q.x + q.y * q.z) * two,
+                // Column 1
+                (q.x * q.y - q.w * q.z) * two,
+                T::one() - (q.x * q.x + q.z * q.z) * two,
+                (q.y * q.z + q.w * q.x) * two,
+                // Column 2
+                (q.x * q.z + q.w * q.y) * two,
+                (q.y * q.z - q.w * q.x) * two,
                 T::one() - (q.x * q.x + q.y * q.y) * two,
             ],
         }

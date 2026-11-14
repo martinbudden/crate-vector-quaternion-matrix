@@ -25,7 +25,15 @@ At some point [0.1.0] to [0.1.11] will be [YANKED]
 
 ### Added
 
-Added `is_normalized` function to vectors.
+- `is_normalized` function to vectors.
+- additional protection against floating-point rounding errors.
+
+### Fixed
+
+- quaternion `direction_cosine_matrix_z`.
+- `From<Matrix3x3<T>> for Quaternion<T>`, which hadn't been converted to column-major format for `0.1.14`.
+- quaternion `to_axis_angle`, which didn't consistently return shortest rotation.
+- some incorrect descriptions in documentation.
 
 ## [0.1.20] - 2026-11-10
 

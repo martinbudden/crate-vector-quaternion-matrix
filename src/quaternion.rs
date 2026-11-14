@@ -606,6 +606,7 @@ impl<T> Index<usize> for Quaternion<T> {
         }
     }
 }
+
 // **** IndexMut ****
 
 impl<T> IndexMut<usize> for Quaternion<T> {

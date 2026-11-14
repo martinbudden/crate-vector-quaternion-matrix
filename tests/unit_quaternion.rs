@@ -1,4 +1,4 @@
-use vqm::{Quaternionf32, UnitQuaternionf32};
+use vqm::{Matrix3x3f32, Quaternionf32, UnitQuaternionf32, Vector3f32};
 
 #[cfg(test)]
 mod tests {
@@ -90,5 +90,36 @@ mod tests {
 
         let q = UnitQuaternionf32::from_roll_pitch_yaw_angles_degrees(120.0, 0.0, 0.0);
         assert_abs_diff_eq!(-0.5, q.cos_tilt(), epsilon = 1e-6);
+    }
+
+    #[test]
+    fn rotations() {
+        let q = UnitQuaternionf32::from_roll_pitch_yaw_radians(0.3, 0.5, 0.7);
+
+        let v = Vector3f32::new(1.0, 2.0, 3.0);
+
+        let rotated1 = q.rotate(v);
+
+        let matrix: Matrix3x3f32 = q.into();
+        let rotated2 = matrix * v;
+
+        assert_eq!(rotated1, rotated2);
+        assert!(rotated1.is_near(rotated2, 1e-10));
+    }
+    #[test]
+    fn matrix1() {
+        let q1 = UnitQuaternionf32::from_roll_pitch_yaw_radians(0.3, 0.5, 0.7);
+        let m: Matrix3x3f32 = q1.into();
+        let q2: Quaternionf32 = m.into();
+        let q2 = UnitQuaternionf32::new(q2);
+        assert!(q1.angle_to(q2) < 1e-10);
+    }
+    #[test]
+    fn matrix2() {
+        let q1 = UnitQuaternionf32::from_roll_pitch_yaw_radians(0.3, 0.5, 0.7);
+        let m1: Matrix3x3f32 = q1.into();
+        let q2: Quaternionf32 = m1.into();
+        let m2: Matrix3x3f32 = UnitQuaternionf32::new(q2).into();
+        m1.is_near(m2, 1e-10);
     }
 }
