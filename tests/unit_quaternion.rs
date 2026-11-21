@@ -7,16 +7,6 @@ mod tests {
     const EPSILON: f32 = 1e-5;
 
     #[test]
-    fn from() {
-        let a = UnitQuaternionf32::from((0.0, 0.0, 0.0));
-        let b = UnitQuaternionf32::from_roll_pitch_yaw_radians(0.0, 0.0, 0.0);
-        assert_eq!(a, b);
-        let c = UnitQuaternionf32::from((0.0, 0.0));
-        let d = UnitQuaternionf32::from_roll_pitch_radians(0.0, 0.0);
-        assert_eq!(c, d);
-    }
-
-    #[test]
     fn conversions() {
         use approx::assert_abs_diff_eq;
         let angle_degrees = 65.0f32;

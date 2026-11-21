@@ -1223,6 +1223,25 @@ impl<T> Quaternion<T> {
 
 // **** From ****
 
+impl<T> From<Vector3<T>> for Quaternion<T>
+where
+    T: Copy + Zero + One + PartialEq + MathMethods + QuaternionMath,
+{
+    /// Quaternion from Vector3.
+    /// The vector forms the imaginary part of the quaternion.
+    /// ```
+    /// # use vqm::{Quaternionf32, Vector3f32};
+    /// let v = Vector3f32 { x: 2.0, y: 3.0, z: 6.0 };
+    /// let q = Quaternionf32::from(v);
+    ///
+    /// assert_eq!(q, Quaternionf32 { w: 1.0, x: 2.0, y: 3.0, z: 6.0 });
+    /// ```
+    #[inline]
+    fn from(v: Vector3<T>) -> Self {
+        Self { w: T::one(), x: v.x, y: v.y, z: v.z }
+    }
+}
+
 // **** From Tuple ****
 
 impl<T> From<(T, T, T, T)> for Quaternion<T> {

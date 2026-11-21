@@ -124,16 +124,7 @@ impl QuaternionMath for f32 {
 
     #[inline(always)]
     fn q_mul_add(this: Quaternion<Self>, k: Self, other: Quaternion<Self>) -> Quaternion<Self> {
-        #[cfg(feature = "simd")]
-        {
-            let this_simd = f32x4::from(this);
-            let other_simd = f32x4::from(other);
-            let k_simd = f32x4::splat(k);
-
-            // This maps to the Vector Fused Multiply-Add instruction
-            this_simd.mul_add(k_simd, other_simd)
-        }
-        #[cfg(all(not(feature = "simd"), any(feature = "std", feature = "libm")))]
+        #[cfg(any(feature = "std", feature = "libm"))]
         {
             Quaternion {
                 w: this.w.mul_add(k, other.w),
@@ -142,7 +133,7 @@ impl QuaternionMath for f32 {
                 z: this.z.mul_add(k, other.z),
             }
         }
-        #[cfg(all(not(feature = "simd"), not(any(feature = "std", feature = "libm"))))]
+        #[cfg(not(any(feature = "std", feature = "libm")))]
         {
             Quaternion {
                 w: this.w * k + other.w,

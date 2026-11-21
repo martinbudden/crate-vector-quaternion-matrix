@@ -21,13 +21,14 @@ Once the API has stabilized this project will adopt semantic versioning, the fir
 
 At some point [0.1.0] to [0.1.11] will be [YANKED]
 
-## [0.1.21] - 2026-11-xx
+## [0.1.21] - 2026-11-21
 
 ### Added
 
+- `UnitQuaternion`.
+- `is_approx` for `UnitQuaternion`.
 - `is_normalized` function to vectors.
 - additional protection against floating-point rounding errors.
-- `is_approx` for `UnitQuaternion`.
 - additional SIMD assertions.
 - quaternion `derivative_world`. Returns derivative of quaternion for `omega_rps` in world frame.
 - more tests.

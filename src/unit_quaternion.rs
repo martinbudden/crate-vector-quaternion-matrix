@@ -879,26 +879,6 @@ where
 
 // **** From ****
 
-impl<T> From<(T, T)> for UnitQuaternion<T>
-where
-    T: MathMethods + FloatCore,
-{
-    #[inline]
-    fn from((roll_radians, pitch_radians): (T, T)) -> Self {
-        UnitQuaternion::from_roll_pitch_radians(roll_radians, pitch_radians)
-    }
-}
-
-impl<T> From<(T, T, T)> for UnitQuaternion<T>
-where
-    T: MathMethods + FloatCore,
-{
-    #[inline]
-    fn from((roll_radians, pitch_radians, yaw_radians): (T, T, T)) -> Self {
-        UnitQuaternion::from_roll_pitch_yaw_radians(roll_radians, pitch_radians, yaw_radians)
-    }
-}
-
 impl<T> From<Vector3<T>> for UnitQuaternion<T>
 where
     T: Copy + Zero + One + PartialEq + MathMethods + QuaternionMath,
