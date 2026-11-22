@@ -26,9 +26,9 @@ pub type RollPitchf64 = RollPitch<f64>;
 #[cfg_attr(feature = "std", display("RP{{roll:{roll}, pitch:{pitch}}}"))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
 pub struct RollPitch<T> {
-    /// roll Euler angle.
+    /// roll Euler angle (theta θ) ψ).
     pub roll: T,
-    /// pitch Euler angle.
+    /// pitch Euler angle (phi φ).
     pub pitch: T,
 }
 
@@ -106,11 +106,11 @@ where
 #[cfg_attr(feature = "std", display("RPY{{roll:{roll}, pitch:{pitch}, yaw:{yaw}}}"))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
 pub struct RollPitchYaw<T> {
-    /// roll Euler angle.
+    /// roll Euler angle (theta θ).
     pub roll: T,
-    /// pitch Euler angle.
+    /// pitch Euler angle (phi φ).
     pub pitch: T,
-    /// yaw Euler angle.
+    /// yaw Euler angle (psi ψ).
     pub yaw: T,
 }
 
