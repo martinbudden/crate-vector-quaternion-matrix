@@ -76,6 +76,38 @@ impl<T> Quaternion<T> {
     }
 }
 
+impl<T> Quaternion<T> {
+    /// Create a quaternion from a vector.
+    /// ```
+    /// # use vqm::{Quaternionf32, Vector3f32};
+    /// let q = Quaternionf32::from_vector(Vector3f32::new(3.0, 7.0, 11.0));
+    /// assert_eq!(q, Quaternionf32 { w:1.0, x:3.0, y: 7.0, z: 11.0 });
+    /// ```
+    #[inline]
+    pub const fn from_vector(v: Vector3<T>) -> Self
+    where
+        T: Copy + ConstOne,
+    {
+        Self { w: T::ONE, x: v.x, y: v.y, z: v.z }
+    }
+}
+
+impl<T> Quaternion<T> {
+    /// Create a quaternion from a scalar and a vector.
+    /// ```
+    /// # use vqm::{Quaternionf32, Vector3f32};
+    /// let q = Quaternionf32::from_scalar_vector(2.0, Vector3f32::new(3.0, 7.0, 11.0));
+    /// assert_eq!(q, Quaternionf32 { w:2.0, x:3.0, y: 7.0, z: 11.0 });
+    /// ```
+    #[inline]
+    pub const fn from_scalar_vector(s: T, v: Vector3<T>) -> Self
+    where
+        T: Copy,
+    {
+        Self { w: s, x: v.x, y: v.y, z: v.z }
+    }
+}
+
 // **** Zero ****
 
 impl<T> Zero for Quaternion<T>
@@ -1222,6 +1254,25 @@ impl<T> Quaternion<T> {
 }
 
 // **** From ****
+
+impl<T> From<(T, Vector3<T>)> for Quaternion<T>
+where
+    T: Copy + Zero + One + PartialEq + MathMethods + QuaternionMath,
+{
+    /// Quaternion from Vector3.
+    /// The vector forms the imaginary part of the quaternion.
+    /// ```
+    /// # use vqm::{Quaternionf32, Vector3f32};
+    /// let v = Vector3f32 { x: 3.0, y: 5.0, z: 7.0 };
+    /// let q = Quaternionf32::from((2.0, v));
+    ///
+    /// assert_eq!(q, Quaternionf32 { w: 2.0, x: 3.0, y: 5.0, z: 7.0 });
+    /// ```
+    #[inline]
+    fn from(sv: (T, Vector3<T>)) -> Self {
+        Self { w: sv.0, x: sv.1.x, y: sv.1.y, z: sv.1.z }
+    }
+}
 
 impl<T> From<Vector3<T>> for Quaternion<T>
 where

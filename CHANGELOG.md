@@ -21,6 +21,12 @@ Once the API has stabilized this project will adopt semantic versioning, the fir
 
 At some point [0.1.0] to [0.1.11] will be [YANKED]
 
+## [0.1.22] - 2026-12-xx
+
+### Added
+
+- `DualQuaternion`.
+
 ## [0.1.21] - 2026-11-21
 
 ### Added

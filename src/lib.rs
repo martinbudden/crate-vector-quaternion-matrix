@@ -51,6 +51,7 @@ mod m4x4ut;
 mod matrix4x4;
 mod matrix4x4_math;
 
+mod dual_quaternion;
 mod quaternion;
 mod quaternion_math;
 mod roll_pitch_yaw;
@@ -73,6 +74,7 @@ pub use vector3_buf::SliceTooShortError;
 
 pub use vector4::{Vector4, Vector4f32, Vector4f64};
 
+pub use dual_quaternion::{DualQuaternion, DualQuaternionf32, DualQuaternionf64};
 pub use quaternion::{Quaternion, Quaternionf32, Quaternionf64};
 pub use roll_pitch_yaw::{RollPitch, RollPitchYaw, RollPitchYawf32, RollPitchYawf64, RollPitchf32, RollPitchf64};
 pub use unit_quaternion::{UnitQuaternion, UnitQuaternionf32, UnitQuaternionf64};
