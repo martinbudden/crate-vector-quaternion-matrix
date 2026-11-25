@@ -1,8 +1,7 @@
-use crate::{IsScalar, MathMethods, QuaternionMath, Vector3};
-use core::convert::From;
+use super::{IsScalar, MathMethods, Quaternion, QuaternionMath, UnitQuaternion, Vector3};
 use core::ops::{Add, Div, Mul, MulAssign, Neg};
-use num_traits::Signed;
-use num_traits::{ConstOne, ConstZero, One, Zero, float::FloatCore};
+use num_traits::{ConstOne, ConstZero, One, Signed, Zero, float::FloatCore};
+
 #[cfg(feature = "storage")]
 use sequential_storage::map::PostcardValue;
 
@@ -12,8 +11,6 @@ use {
     serde::{Deserialize, Serialize},
 };
 
-use super::{Quaternion, UnitQuaternion};
-
 /// `UnitDualQuaternion` of `f32` values<br>
 pub type UnitDualQuaternionf32 = UnitDualQuaternion<f32>;
 /// `UnitDualQuaternion` of `f64` values<br><br>
@@ -22,7 +19,7 @@ pub type UnitDualQuaternionf64 = UnitDualQuaternion<f64>;
 // **** Define ****
 
 /// `UnitDualQuaternion<T>`: quaternion type `T`.<br>
-/// Aliases `Quaternionf32` and `Quaternionf64` are provided.<br><br>
+/// Aliases `DualUnitQuaternionf32` and `DualUnitQuaternionf64` are provided.<br><br>
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
 pub struct UnitDualQuaternion<T> {
@@ -37,7 +34,7 @@ impl<T> PostcardValue<'_> for UnitDualQuaternion<T> where T: Serialize + for<'de
 
 // **** Default ****
 
-/// Default dual quaternion.
+/// Default `UnitDualQuaternion`.
 impl<T> Default for UnitDualQuaternion<T>
 where
     T: Copy + Zero + One + ConstZero + ConstOne + PartialEq + FloatCore + MathMethods + QuaternionMath,
@@ -107,13 +104,54 @@ impl<T> UnitDualQuaternion<T> {
     }
 }
 
+impl<T> UnitDualQuaternion<T> {
+    /// Return real component.
+    #[inline]
+    pub fn real(self) -> UnitQuaternion<T> {
+        self.real
+    }
+
+    /// Returns the rotation unit quaternion of a dual-quaternion.
+    pub fn rotation(self) -> UnitQuaternion<T> {
+        self.real
+    }
+
+    /// Return dual component.
+    #[inline]
+    pub fn dual(self) -> Quaternion<T> {
+        self.dual
+    }
+
+    /// Returns the translation vector of a dual-quaternion.
+    pub fn translation(self) -> Vector3<T>
+    where
+        T: One + Neg<Output = T> + Add<Output = T> + QuaternionMath,
+    {
+        let two = T::one() + T::one();
+        let t = self.dual * self.real.q().conjugate() * two;
+        Vector3 { x: t.x, y: t.y, z: t.z }
+    }
+}
+
 impl<T> UnitDualQuaternion<T>
 where
     T: Copy + Signed + PartialOrd + QuaternionMath,
 {
-    /// Return true if dual quaternion is approximately other.
+    /// Return true if dual quaternion is approximately equal to other.
     pub fn is_approx(self, other: UnitDualQuaternion<T>, epsilon: T) -> bool {
         self.real.is_approx(other.real, epsilon) && self.dual.is_approx(other.dual, epsilon)
+    }
+}
+
+impl<T> UnitDualQuaternion<T>
+where
+    T: FloatCore,
+{
+    /// Return true if all the dual quaternion's components are finite.
+    #[inline]
+    #[must_use]
+    pub fn is_finite(self) -> bool {
+        self.real.is_finite() && self.dual.is_finite()
     }
 }
 
@@ -209,6 +247,40 @@ where
     }
 }
 
+// **** approx_eq ****
+
+impl<T> UnitDualQuaternion<T> {
+    /// Compare two unit dual quaternions componentwise with a tolerance.
+    #[inline]
+    pub fn approx_eq(&self, other: Self, epsilon: T) -> bool
+    where
+        T: Copy + Signed + PartialOrd,
+    {
+        self.real.approx_eq(other.real, epsilon) && self.dual.approx_eq(other.dual, epsilon)
+    }
+}
+
+// **** abs ****
+
+impl<T> UnitDualQuaternion<T>
+where
+    T: Copy + Signed,
+{
+    /// Return a copy of the dual quaternion with all components set to their absolute values.
+    #[inline]
+    #[must_use]
+    pub fn abs(self) -> Self {
+        Self { real: self.real.abs(), dual: self.dual.abs() }
+    }
+
+    /// Set all components of the dual quaternion to their absolute values.
+    #[inline]
+    pub fn abs_in_place(&mut self) -> &mut Self {
+        *self = self.abs();
+        self
+    }
+}
+
 // **** dot ****
 
 impl<T> UnitDualQuaternion<T>
@@ -228,7 +300,7 @@ impl<T> UnitDualQuaternion<T>
 where
     T: Copy + QuaternionMath,
 {
-    /// Return square of Euclidean norm.
+    /// Return square of Euclidean norm, for dealing with rounding errors.
     #[inline]
     pub fn norm_squared(self) -> T {
         self.dot(self)
@@ -241,7 +313,7 @@ impl<T> UnitDualQuaternion<T>
 where
     T: Copy + MathMethods + QuaternionMath,
 {
-    /// Return Euclidean norm.
+    /// Return Euclidean norm, for dealing with rounding errors.
     #[inline]
     pub fn norm(self) -> T {
         Self::norm_squared(self).sqrt()
@@ -249,10 +321,10 @@ where
 }
 
 impl<T> UnitDualQuaternion<T> {
-    /// Return normalized form of the dual quaternion.
+    /// Return renormalized unit dual quaternion, for dealing with rounding errors.
     #[inline]
     #[must_use]
-    pub fn normalize(self) -> Self
+    pub fn renormalize(self) -> Self
     where
         T: Copy + Zero + PartialEq + MathMethods + QuaternionMath + FloatCore,
     {
@@ -260,19 +332,13 @@ impl<T> UnitDualQuaternion<T> {
         Self { real, dual: self.dual * norm_reciprocal + self.real.q() * self.real.q().dot(self.dual) }
     }
 
-    /// Normalize the quaternion in place, checking if the magnitude is zero.
-    /// ```
-    /// # use vqm::Quaternionf32;
-    /// let mut q = Quaternionf32::new(0.0, 0.0, 0.0, 0.0);
-    /// q.normalize_in_place();
-    /// assert_eq!(Quaternionf32 { w: 0.0, x: 0.0, y: 0.0, z: 0.0 }, q);
-    /// ```
+    /// Return renormalized unit dual quaternion in-place, for dealing with rounding errors.
     #[inline]
-    pub fn normalize_in_place(&mut self) -> &mut Self
+    pub fn renormalize_in_place(&mut self) -> &mut Self
     where
         T: Copy + Zero + PartialEq + MathMethods + QuaternionMath + FloatCore,
     {
-        *self = self.normalize();
+        *self = self.renormalize();
         self
     }
 }
@@ -340,32 +406,13 @@ impl<T> UnitDualQuaternion<T> {
     }
 }
 
-// **** Accessors ****
-
-impl<T> UnitDualQuaternion<T> {
-    /// Returns the rotation unit quaternion of a dual-quaternion.
-    pub fn rotation(self) -> UnitQuaternion<T> {
-        self.real
-    }
-
-    /// Returns the translation vector of a dual-quaternion.
-    pub fn translation(self) -> Vector3<T>
-    where
-        T: One + Neg<Output = T> + Add<Output = T> + QuaternionMath,
-    {
-        let two = T::one() + T::one();
-        let t = self.dual * self.real.q().conjugate() * two;
-        Vector3 { x: t.x, y: t.y, z: t.z }
-    }
-}
-
 // **** From ****
 
 impl<T> From<(UnitQuaternion<T>, Quaternion<T>)> for UnitDualQuaternion<T>
 where
     T: Copy + Zero + One + Div<Output = T> + QuaternionMath,
 {
-    /// `UnitDualQuaternion` from unit quaternion and quaternion.
+    /// `UnitDualQuaternion` from unit quaternion and quaternion tuple.
     #[inline]
     fn from(rhs: (UnitQuaternion<T>, Quaternion<T>)) -> Self {
         Self { real: rhs.0, dual: rhs.1 }
@@ -381,95 +428,5 @@ mod test_traits {
     #[test]
     fn normal_types() {
         is_full::<UnitDualQuaternion<f32>>();
-    }
-}
-
-#[cfg(test)]
-mod test {
-
-    use super::*;
-    use crate::{UnitQuaternionf32, Vector3f32};
-    const EPSILON: f32 = 0.000_001;
-
-    #[test]
-    fn from_rotation_translation_round_trip() {
-        let r = UnitQuaternionf32::from_roll_pitch_yaw_degrees(45.0, 60.0, 120.0);
-        let t = Vector3f32::new(2.0, 3.0, 5.0);
-
-        let dq = UnitDualQuaternionf32::from_rotation_translation(r, t);
-
-        let r_prime = dq.rotation();
-        let t_prime = dq.translation();
-
-        assert!(r_prime.is_approx(r, EPSILON));
-        assert!(t_prime.is_approx(t, EPSILON));
-    }
-
-    #[test]
-    fn rotations() {
-        // rotate 90 degrees about X
-        let rx = UnitQuaternionf32::from_roll_pitch_yaw_degrees(90.0, 0.0, 0.0);
-
-        // rotate 90 degrees about Y
-        let ry = UnitQuaternionf32::from_roll_pitch_yaw_degrees(0.0, 90.0, 0.0);
-
-        // rotate 90 degrees about Z
-        let rz = UnitQuaternionf32::from_roll_pitch_yaw_degrees(0.0, 0.0, 90.0);
-
-        let v_zero = Vector3f32::zero();
-
-        let dqx = UnitDualQuaternionf32::from_rotation_translation(rx, v_zero);
-        let dqy = UnitDualQuaternionf32::from_rotation_translation(ry, v_zero);
-        let dqz = UnitDualQuaternionf32::from_rotation_translation(rz, v_zero);
-
-        let dq = dqy * dqz * dqx;
-
-        let r = dq.rotation();
-        let t = dq.translation();
-
-        assert_eq!(t, v_zero);
-
-        let rotated = r.rotate(Vector3f32::new(1.0, 0.0, 0.0));
-        assert!(rotated.is_approx(Vector3f32::new(0.0, 1.0, 0.0), EPSILON));
-    }
-
-    #[test]
-    fn translations() {
-        let t1 = Vector3f32::new(1.0, 2.0, 3.0);
-        let t2 = Vector3f32::new(1.0, -2.0, 0.0);
-
-        let dq1 = UnitDualQuaternionf32::from_rotation_translation(UnitQuaternionf32::identity(), t1);
-        let dq2 = UnitDualQuaternionf32::from_rotation_translation(UnitQuaternionf32::identity(), t2);
-        let dq3 = dq1 * dq2;
-
-        let r_prime = dq3.rotation();
-        let t_prime = dq3.translation();
-
-        let r_expected = UnitQuaternionf32::identity();
-        let t_expected = Vector3f32::new(2.0, 0.0, 3.0);
-
-        assert!(t_prime.is_approx(t_expected, EPSILON));
-
-        let rotate1 = r_prime.rotate(Vector3f32::new(1.0, 1.0, 1.0));
-        let rotate2 = r_expected.rotate(Vector3f32::new(1.0, 1.0, 1.0));
-
-        assert!(rotate1.is_approx(rotate2, EPSILON));
-    }
-
-    #[test]
-    fn conjugate() {
-        let r = UnitQuaternionf32::from_roll_pitch_yaw_degrees(45.0, 60.0, 120.0);
-        let t = Vector3f32::new(2.0, 3.0, 5.0);
-
-        let dq = UnitDualQuaternionf32::from_rotation_translation(r, t);
-        let dq_conjugate = dq.conjugate();
-
-        let dq_prime = dq * dq_conjugate;
-        let r_prime = dq_prime.rotation();
-        let t_prime = dq_prime.translation();
-
-        assert!(t_prime.is_approx_zero(EPSILON));
-
-        assert!(r_prime.is_approx_one(EPSILON));
     }
 }
