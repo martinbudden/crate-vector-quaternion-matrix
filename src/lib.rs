@@ -27,10 +27,7 @@ mod sqrt_approximations;
 mod is_scalar;
 
 mod vector2;
-
 mod vector3;
-mod vector3_buf;
-
 mod vector4;
 
 mod cholesky2x2;
@@ -68,10 +65,7 @@ pub use is_scalar::IsScalar;
 pub use math_approximations::{cos_approx_f32, sin_approx_f32, sin_cos_approx_f32}; // needed for benchmarks
 
 pub use vector2::{Vector2, Vector2f32, Vector2f64};
-
 pub use vector3::{Vector3, Vector3f32, Vector3f64};
-pub use vector3_buf::SliceTooShortError;
-
 pub use vector4::{Vector4, Vector4f32, Vector4f64};
 
 pub use quaternion::{Quaternion, Quaternionf32, Quaternionf64};
