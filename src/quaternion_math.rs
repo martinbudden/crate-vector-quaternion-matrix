@@ -11,7 +11,7 @@ use core::{
 };
 
 const _: () = assert!(size_of::<Quaternion<f32>>() == 16);
-const _: () = assert!(align_of::<Quaternion<f32>>() == 16);
+const _: () = assert!(align_of::<Quaternion<f32>>() == 4);
 #[cfg(feature = "simd")]
 const _: () = assert!(size_of::<f32x4>() == 16);
 #[cfg(feature = "simd")]

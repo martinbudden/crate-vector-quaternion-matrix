@@ -1,13 +1,11 @@
 use core::convert::From;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Signed, Zero, float::FloatCore};
-#[cfg(feature = "storage")]
-use sequential_storage::map::PostcardValue;
+
 #[cfg(feature = "serde")]
-use {
-    postcard::experimental::max_size::MaxSize,
-    serde::{Deserialize, Serialize},
-};
+use ::serde::{Deserialize, Serialize};
+#[cfg(feature = "storage")]
+use {postcard::experimental::max_size::MaxSize, sequential_storage::map::PostcardValue};
 
 use super::{IsScalar, UnitQuaternion, Vector3, math_methods::MathMethods, quaternion_math::QuaternionMath};
 
@@ -24,8 +22,10 @@ pub type Quaternionf64 = Quaternion<f64>;
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[cfg_attr(feature = "std", derive(derive_more::Display))]
 #[cfg_attr(feature = "std", display("Q{{w:{w}, x:{x}, y:{y}, z:{z}}}"))]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
-#[repr(C, align(16))]
+#[cfg_attr(feature = "storage", derive(MaxSize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "align", repr(C, align(16)))]
+#[cfg_attr(not(feature = "align"), repr(C))]
 pub struct Quaternion<T> {
     /// The scalar (real) component, often representing `cos(theta/2)`.
     pub w: T,
@@ -163,6 +163,7 @@ where
     /// assert!(!q.is_approx_zero(1e-4));
     /// ```
     pub fn is_approx_zero(self, epsilon: T) -> bool {
+        debug_assert!(epsilon >= T::zero());
         self.w.abs() <= epsilon && self.x.abs() <= epsilon && self.y.abs() <= epsilon && self.z.abs() <= epsilon
     }
 }
@@ -1401,5 +1402,25 @@ impl<T> From<Quaternion<T>> for [T; 4] {
     #[inline]
     fn from(q: Quaternion<T>) -> Self {
         [q.w, q.x, q.y, q.z]
+    }
+}
+
+#[cfg(test)]
+mod test_traits {
+    use super::*;
+
+    fn is_full<T: Sized + Send + Sync + Unpin + Copy + Clone + Default + PartialEq>() {}
+    #[cfg(feature = "serde")]
+    fn is_serde<T: Serialize + for<'a> Deserialize<'a>>() {}
+    #[cfg(feature = "storage")]
+    fn is_storage<T: MaxSize + for<'a> PostcardValue<'a>>() {}
+
+    #[test]
+    fn normal_types() {
+        is_full::<Quaternion<f32>>();
+        #[cfg(feature = "serde")]
+        is_serde::<Quaternion<f32>>();
+        #[cfg(feature = "storage")]
+        is_storage::<Quaternion<f32>>();
     }
 }

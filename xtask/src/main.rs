@@ -24,6 +24,7 @@ fn run_ci_pipeline() {
         ("check", &[]),
         ("check", &["--no-default-features"]),
         ("test", &["--no-default-features"]),
+        ("test", &["--no-default-features", "--features", "serde"]),
         ("test", &["--no-default-features", "--features", "serde", "storage"]),
         ("test", &["--no-default-features", "--features", "libm"]),
         ("test", &["--no-default-features", "--features", "std"]),

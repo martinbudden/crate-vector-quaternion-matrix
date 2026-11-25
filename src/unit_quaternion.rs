@@ -92,6 +92,9 @@ impl<T> UnitQuaternion<T> {
     where
         T: FloatCore + MathMethods + QuaternionMath,
     {
+        let scale = q.w.abs().max(q.x.abs()).max(q.y.abs()).max(q.z.abs());
+        debug_assert!(scale.is_finite() && scale != T::zero());
+        let q = q / scale;
         let norm = q.norm();
         debug_assert!(norm.is_finite() && norm > T::epsilon());
         let norm_reciprocal = T::one() / norm;

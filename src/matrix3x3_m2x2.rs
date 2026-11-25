@@ -245,6 +245,7 @@ where
     /// assert!(z.is_approx_zero(1e-5));
     /// ```
     pub fn is_approx_zero(self, epsilon: T) -> bool {
+        debug_assert!(epsilon >= T::zero());
         for a in &self.a {
             if !a.is_approx_zero(epsilon) {
                 return false;

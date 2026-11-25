@@ -5,13 +5,11 @@ use core::ops::{
 };
 use core::slice::{ChunksExact, ChunksExactMut, Iter, IterMut};
 use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Signed, Zero};
-#[cfg(feature = "storage")]
-use sequential_storage::map::PostcardValue;
+
 #[cfg(feature = "serde")]
-use {
-    postcard::experimental::max_size::MaxSize,
-    serde::{Deserialize, Serialize},
-};
+use ::serde::{Deserialize, Serialize};
+#[cfg(feature = "storage")]
+use {postcard::experimental::max_size::MaxSize, sequential_storage::map::PostcardValue};
 
 use super::{MathConstants, MathMethods, Matrix2x2, Matrix3x3, Quaternion, Vector4, matrix4x4_math::Matrix4x4Math};
 
@@ -27,10 +25,10 @@ pub type Matrix4x4f64 = Matrix4x4<f64>;
 /// Internal implementation is a flattened 4x4 matrix: an array of 16 elements stored in column-major order.
 /// That is the element `m[row][col]` is at array position `[col * 4 + row]`.<br><br>
 #[derive(Clone, Copy, Default, PartialEq)]
-#[cfg_attr(feature = "serde", allow(clippy::unsafe_derive_deserialize))]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
-#[cfg_attr(feature = "align", repr(C, align(64)))]
-#[cfg_attr(not(feature = "align"), repr(C, align(16)))]
+#[cfg_attr(feature = "storage", derive(MaxSize))]
+#[cfg_attr(feature = "serde", allow(clippy::unsafe_derive_deserialize), derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "align", repr(C, align(16)))]
+#[cfg_attr(not(feature = "align"), repr(C))]
 pub struct Matrix4x4<T> {
     // Flattened 4x4 matrix: 16 elements in column-major order
     pub(crate) a: [T; SELF_SIZE],
@@ -489,6 +487,7 @@ where
     /// assert!(!m.is_approx_zero(1e-4));
     /// ```
     pub fn is_approx_zero(self, epsilon: T) -> bool {
+        debug_assert!(epsilon >= T::zero());
         for a in &self.a {
             if a.abs() > epsilon {
                 return false;
@@ -3001,5 +3000,25 @@ impl<T: Copy> From<Matrix4x4<T>> for Matrix3x3<T> {
             m.a[4], m.a[5], m.a[6],
             m.a[8], m.a[9], m.a[10]
         ] }
+    }
+}
+
+#[cfg(test)]
+mod test_traits {
+    use super::*;
+
+    fn is_full<T: Sized + Send + Sync + Unpin + Copy + Clone + Default + PartialEq>() {}
+    #[cfg(feature = "serde")]
+    fn is_serde<T: Serialize + for<'a> Deserialize<'a>>() {}
+    #[cfg(feature = "storage")]
+    fn is_storage<T: MaxSize + for<'a> PostcardValue<'a>>() {}
+
+    #[test]
+    fn normal_types() {
+        is_full::<Matrix4x4<f32>>();
+        #[cfg(feature = "serde")]
+        is_serde::<Matrix4x4<f32>>();
+        #[cfg(feature = "storage")]
+        is_storage::<Matrix4x4<f32>>();
     }
 }

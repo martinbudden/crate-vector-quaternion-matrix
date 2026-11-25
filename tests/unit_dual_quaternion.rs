@@ -16,6 +16,7 @@ mod test {
 
         assert!(dq.real().q().dot(dq.dual()).abs() < 1e-12);
 
+        assert!(dq.rotation().is_approx(rotation, 1e-12));
         assert!(dq.translation().is_approx(translation, 1e-12));
     }
     #[test]

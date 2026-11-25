@@ -2,13 +2,11 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Signed, Zero, float::FloatCore};
-#[cfg(feature = "storage")]
-use sequential_storage::map::PostcardValue;
+
 #[cfg(feature = "serde")]
-use {
-    postcard::experimental::max_size::MaxSize,
-    serde::{Deserialize, Serialize},
-};
+use ::serde::{Deserialize, Serialize};
+#[cfg(feature = "storage")]
+use {postcard::experimental::max_size::MaxSize, sequential_storage::map::PostcardValue};
 
 use super::{IsScalar, MathConstants, MathMethods, Quaternion, Vector2, quaternion_math::QuaternionMath};
 
@@ -24,8 +22,8 @@ pub type Vector3f64 = Vector3<f64>;
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 #[cfg_attr(feature = "std", derive(derive_more::Display))]
 #[cfg_attr(feature = "std", display("V{{x:{x}, y:{y}, z:{z}}}"))]
-// Conditionally derive serde traits
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
+#[cfg_attr(feature = "storage", derive(MaxSize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 // Conditionally apply alignment based on "align" feature
 #[cfg_attr(feature = "align", repr(C, align(16)))]
 #[cfg_attr(not(feature = "align"), repr(C))]
@@ -117,10 +115,8 @@ where
     /// assert!(!Vector3f32::new(0.0, 0.0, 1e-1).is_approx_zero(1e-2));
     /// ```
     pub fn is_approx_zero(self, epsilon: T) -> bool {
-        if self.x.abs() > epsilon || self.y.abs() > epsilon || self.z.abs() > epsilon {
-            return false;
-        }
-        true
+        debug_assert!(epsilon >= T::zero());
+        self.x.abs() <= epsilon && self.y.abs() <= epsilon && self.z.abs() <= epsilon
     }
 }
 
@@ -168,7 +164,7 @@ impl<T> One for Vector3<T>
 where
     T: Copy + One + PartialEq + Add<Output = T> + Mul<Output = T>,
 {
-    /// Unit vector.
+    /// Component-wise multiplicative identity vector.
     /// ```
     /// # use vqm::Vector3f32;
     /// # use num_traits::One;
@@ -497,6 +493,25 @@ where
 }
 
 // **** Mul Elementwise ****
+
+impl<T> Vector3<T> {
+    /// Elementwise multiply a vector by another vector (Hadamard product).
+    /// ```
+    /// # use vqm::Vector3f32;
+    /// let v = Vector3f32::new(2.0, 5.0, 11.0);
+    /// let u = Vector3f32::new(3.0, 7.0, 13.0);
+    /// let r = v.component_mul(&u);
+    ///
+    /// assert_eq!(r, Vector3f32 { x: 6.0, y: 35.0, z: 143.0 });
+    /// ```
+    #[must_use]
+    pub fn component_mul(&self, other: &Self) -> Self
+    where
+        T: Copy + Mul<Output = T>,
+    {
+        Self { x: self.x * other.x, y: self.y * other.y, z: self.z * other.z }
+    }
+}
 
 impl<T> Mul<Self> for Vector3<T>
 where
@@ -1827,5 +1842,25 @@ impl<T> From<Vector3<T>> for Vector2<T> {
     #[inline]
     fn from(v: Vector3<T>) -> Self {
         Vector2::<T> { x: v.x, y: v.y }
+    }
+}
+
+#[cfg(test)]
+mod test_traits {
+    use super::*;
+
+    fn is_full<T: Sized + Send + Sync + Unpin + Copy + Clone + Default + PartialEq>() {}
+    #[cfg(feature = "serde")]
+    fn is_serde<T: Serialize + for<'a> Deserialize<'a>>() {}
+    #[cfg(feature = "storage")]
+    fn is_storage<T: MaxSize + for<'a> PostcardValue<'a>>() {}
+
+    #[test]
+    fn normal_types() {
+        is_full::<Vector3<f32>>();
+        #[cfg(feature = "serde")]
+        is_serde::<Vector3<f32>>();
+        #[cfg(feature = "storage")]
+        is_storage::<Vector3<f32>>();
     }
 }

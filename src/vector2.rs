@@ -2,13 +2,11 @@
 use core::marker::PhantomData;
 use core::ops::{Add, AddAssign, Div, DivAssign, Index, IndexMut, Mul, MulAssign, Neg, Sub, SubAssign};
 use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Signed, Zero, float::FloatCore};
-#[cfg(feature = "storage")]
-use sequential_storage::map::PostcardValue;
+
 #[cfg(feature = "serde")]
-use {
-    postcard::experimental::max_size::MaxSize,
-    serde::{Deserialize, Serialize},
-};
+use ::serde::{Deserialize, Serialize};
+#[cfg(feature = "storage")]
+use {postcard::experimental::max_size::MaxSize, sequential_storage::map::PostcardValue};
 
 use super::{IsScalar, MathConstants, MathMethods};
 
@@ -24,7 +22,8 @@ pub type Vector2f64 = Vector2<f64>;
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 #[cfg_attr(feature = "std", derive(derive_more::Display))]
 #[cfg_attr(feature = "std", display("V{{x:{x}, y:{y}}}"))]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
+#[cfg_attr(feature = "storage", derive(MaxSize))]
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[repr(C, align(8))]
 pub struct Vector2<T> {
     /// x-axis component.
@@ -110,10 +109,8 @@ where
     /// assert!(!Vector2f32::new(0.0, 1e-1).is_approx_zero(1e-2));
     /// ```
     pub fn is_approx_zero(self, epsilon: T) -> bool {
-        if self.x.abs() > epsilon || self.y.abs() > epsilon {
-            return false;
-        }
-        true
+        debug_assert!(epsilon >= T::zero());
+        self.x.abs() <= epsilon && self.y.abs() <= epsilon
     }
 }
 
@@ -161,7 +158,7 @@ impl<T> One for Vector2<T>
 where
     T: Copy + One + PartialEq + Add<Output = T> + Mul<Output = T>,
 {
-    /// Unit vector.
+    /// Component-wise multiplicative identity vector.
     /// ```
     /// # use vqm::Vector2f32;
     /// # use num_traits::One;
@@ -482,6 +479,25 @@ where
 }
 
 // **** Mul Elementwise ****
+
+impl<T> Vector2<T> {
+    /// Elementwise multiply a vector by another vector (Hadamard product).
+    /// ```
+    /// # use vqm::Vector2f32;
+    /// let v = Vector2f32::new(2.0, 5.0);
+    /// let u = Vector2f32::new(3.0, 7.0);
+    /// let r = v.component_mul(&u);
+    ///
+    /// assert_eq!(r, Vector2f32 { x: 6.0, y: 35.0 });
+    /// ```
+    #[must_use]
+    pub fn component_mul(&self, other: &Self) -> Self
+    where
+        T: Copy + Mul<Output = T>,
+    {
+        Self { x: self.x * other.x, y: self.y * other.y }
+    }
+}
 
 impl<T> Mul<Self> for Vector2<T>
 where
@@ -1486,5 +1502,25 @@ impl From<Vector2<f32>> for [i32; 2] {
     fn from(v: Vector2<f32>) -> Self {
         #[allow(clippy::cast_possible_truncation)]
         [v.x as i32, v.y as i32]
+    }
+}
+
+#[cfg(test)]
+mod test_traits {
+    use super::*;
+
+    fn is_full<T: Sized + Send + Sync + Unpin + Copy + Clone + Default + PartialEq>() {}
+    #[cfg(feature = "serde")]
+    fn is_serde<T: Serialize + for<'a> Deserialize<'a>>() {}
+    #[cfg(feature = "storage")]
+    fn is_storage<T: MaxSize + for<'a> PostcardValue<'a>>() {}
+
+    #[test]
+    fn normal_types() {
+        is_full::<Vector2<f32>>();
+        #[cfg(feature = "serde")]
+        is_serde::<Vector2<f32>>();
+        #[cfg(feature = "storage")]
+        is_storage::<Vector2<f32>>();
     }
 }

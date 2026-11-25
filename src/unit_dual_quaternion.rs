@@ -52,9 +52,9 @@ impl<T> UnitDualQuaternion<T> {
     #[inline]
     pub fn try_new(real: UnitQuaternion<T>, dual: Quaternion<T>, epsilon: T) -> Option<Self>
     where
-        T: Copy + Zero + Neg<Output = T> + PartialOrd + QuaternionMath,
+        T: Copy + Zero + Neg<Output = T> + PartialOrd + FloatCore + QuaternionMath,
     {
-        if real.q().dot(dual) < epsilon { Some(Self { real, dual }) } else { None }
+        if (real.q().dot(dual)).abs() < epsilon { Some(Self { real, dual }) } else { None }
     }
 
     /// Create a `UnitDualQuaternion` from a rotation unit quaternion.
@@ -309,10 +309,8 @@ impl<T> UnitDualQuaternion<T> {
     where
         T: Copy + Zero + PartialEq + MathMethods + QuaternionMath + FloatCore,
     {
-        let (real, norm_reciprocal) = UnitQuaternion::quaternion_norm_reciprocal(self.real.q());
-
-        let dual = self.dual * norm_reciprocal;
-        let dual = dual - real.q() * real.q().dot(dual);
+        let real = UnitQuaternion::from_quaternion(self.real.q());
+        let dual = self.dual - real.q() * real.q().dot(self.dual);
 
         Self { real, dual }
     }

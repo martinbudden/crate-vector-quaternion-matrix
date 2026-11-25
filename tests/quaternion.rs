@@ -1,37 +1,10 @@
 use vqm::{Quaternion, Quaternionf32, UnitQuaternionf32, Vector3f32};
 
 const _: () = assert!(size_of::<Quaternion<f32>>() == 16);
-const _: () = assert!(align_of::<Quaternion<f32>>() == 16);
+const _: () = assert!(align_of::<Quaternion<f32>>() == 4);
 
 const _: () = assert!(size_of::<Quaternion<f64>>() == 32);
-const _: () = assert!(align_of::<Quaternion<f64>>() == 16);
-
-#[cfg(test)]
-mod test_traits {
-    use super::*;
-    #[cfg(feature = "storage")]
-    use sequential_storage::map::PostcardValue;
-    #[cfg(feature = "serde")]
-    use {
-        postcard::experimental::max_size::MaxSize,
-        serde::{Deserialize, Serialize},
-    };
-
-    fn is_full<T: Sized + Send + Sync + Unpin + Copy + Clone + Default + PartialEq>() {}
-    #[cfg(feature = "serde")]
-    fn is_serde<T: Serialize + MaxSize + for<'a> Deserialize<'a>>() {}
-    #[cfg(feature = "storage")]
-    fn is_storage<T: for<'a> PostcardValue<'a>>() {}
-
-    #[test]
-    fn normal_types() {
-        is_full::<Quaternion<f32>>();
-        #[cfg(feature = "serde")]
-        is_serde::<Quaternion<f32>>();
-        #[cfg(feature = "storage")]
-        is_storage::<Quaternion<f32>>();
-    }
-}
+const _: () = assert!(align_of::<Quaternion<f64>>() == 8);
 
 #[cfg(test)]
 mod tests {

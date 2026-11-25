@@ -4,13 +4,11 @@ use core::ops::{
 };
 use core::slice::{ChunksExact, ChunksExactMut, Iter, IterMut};
 use num_traits::{ConstOne, ConstZero, MulAdd, MulAddAssign, One, Signed, Zero};
-#[cfg(feature = "storage")]
-use sequential_storage::map::PostcardValue;
+
 #[cfg(feature = "serde")]
-use {
-    postcard::experimental::max_size::MaxSize,
-    serde::{Deserialize, Serialize},
-};
+use ::serde::{Deserialize, Serialize};
+#[cfg(feature = "storage")]
+use {postcard::experimental::max_size::MaxSize, sequential_storage::map::PostcardValue};
 
 use super::{MathConstants, MathMethods, Matrix2x2, Vector3, matrix3x3_math::Matrix3x3Math};
 
@@ -26,9 +24,9 @@ pub type Matrix3x3f64 = Matrix3x3<f64>;
 /// Internal implementation is a flattened 3x3 matrix: an array of 9 elements stored in column-major order.
 /// That is the element `m[row][col]` is at array position `[col * 3 + row]`.<br><br>
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
-#[cfg_attr(feature = "serde", allow(clippy::unsafe_derive_deserialize))]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
-#[cfg_attr(feature = "align", repr(C, align(64)))]
+#[cfg_attr(feature = "storage", derive(MaxSize))]
+#[cfg_attr(feature = "serde", allow(clippy::unsafe_derive_deserialize), derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "align", repr(C, align(16)))]
 #[cfg_attr(not(feature = "align"), repr(C))]
 pub struct Matrix3x3<T> {
     // Flattened 3x3 matrix: 9 elements in column-major order
@@ -486,6 +484,7 @@ where
     /// assert!(!m.is_approx_zero(1e-4));
     /// ```
     pub fn is_approx_zero(self, epsilon: T) -> bool {
+        debug_assert!(epsilon >= T::zero());
         for a in &self.a {
             if a.abs() > epsilon {
                 return false;
@@ -2723,5 +2722,25 @@ impl<T: Copy> From<Matrix3x3<T>> for Matrix2x2<T> {
             m.a[0], m.a[1],
             m.a[3], m.a[4]
         ] }
+    }
+}
+
+#[cfg(test)]
+mod test_traits {
+    use super::*;
+
+    fn is_full<T: Sized + Send + Sync + Unpin + Copy + Clone + Default + PartialEq>() {}
+    #[cfg(feature = "serde")]
+    fn is_serde<T: Serialize + for<'a> Deserialize<'a>>() {}
+    #[cfg(feature = "storage")]
+    fn is_storage<T: MaxSize + for<'a> PostcardValue<'a>>() {}
+
+    #[test]
+    fn normal_types() {
+        is_full::<Matrix3x3<f32>>();
+        #[cfg(feature = "serde")]
+        is_serde::<Matrix3x3<f32>>();
+        #[cfg(feature = "storage")]
+        is_storage::<Matrix3x3<f32>>();
     }
 }
