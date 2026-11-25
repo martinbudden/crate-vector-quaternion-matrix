@@ -1103,7 +1103,7 @@ impl<T> Quaternion<T> {
     where
         T: FloatCore + MathMethods + QuaternionMath,
     {
-         (x * self.ln()).exp()
+        (x * self.ln()).exp()
     }
 }
 // **** sum ****

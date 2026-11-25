@@ -1,10 +1,52 @@
-use vqm::{UnitDualQuaternionf32, UnitQuaternionf32, Vector3f32};
+use vqm::{UnitDualQuaternionf32, UnitDualQuaternionf64, UnitQuaternionf32, UnitQuaternionf64, Vector3f32, Vector3f64};
 
 #[cfg(test)]
 mod test {
     use super::*;
     const EPSILON: f32 = 0.000_001;
 
+    #[test]
+    fn dual_quaternion_normalization() {
+        let rotation = UnitQuaternionf64::from_roll_pitch_yaw_radians(0.5, 0.7, 1.2);
+        let translation = Vector3f64::new(2.0, 3.0, 5.0);
+        let dq = UnitDualQuaternionf64::from_rotation_translation(rotation, translation);
+        let dq = dq.renormalize();
+
+        assert!((dq.real().norm_squared() - 1.0).abs() < 1e-12);
+
+        assert!(dq.real().q().dot(dq.dual()).abs() < 1e-12);
+
+        assert!(dq.translation().is_approx(translation, 1e-12));
+    }
+    #[test]
+    fn dual_quaternion_inverse() {
+        let rotation = UnitQuaternionf64::from_roll_pitch_yaw_radians(0.5, 0.7, 1.2);
+        let translation = Vector3f64::new(2.0, 3.0, 5.0);
+        let dq = UnitDualQuaternionf64::from_rotation_translation(rotation, translation);
+
+        let identity = dq * dq.inverse();
+        assert!(identity.is_approx_one(1e-12));
+    }
+    #[test]
+    fn dual_quaternion_composition() {
+        let dq1 = UnitDualQuaternionf64::from_rotation_translation(
+            UnitQuaternionf64::from_roll_radians(0.5),
+            Vector3f64::new(2.0, 3.0, 1.0),
+        );
+
+        let dq2 = UnitDualQuaternionf64::from_rotation_translation(
+            UnitQuaternionf64::from_pitch_radians(0.7),
+            Vector3f64::new(1.0, 2.0, 3.0),
+        );
+
+        let combined = dq1 * dq2;
+
+        let v = Vector3f64::new(1.0, 2.0, 3.0);
+        let sequential = dq1.rotation().rotate(dq2.rotation().rotate(v) + dq2.translation()) + dq1.translation();
+        let result = combined.rotation().rotate(v) + combined.translation();
+
+        assert!(result.is_approx(sequential, 1e-12));
+    }
     #[test]
     fn from_rotation_translation_round_trip() {
         let r = UnitQuaternionf32::from_roll_pitch_yaw_degrees(45.0, 60.0, 120.0);

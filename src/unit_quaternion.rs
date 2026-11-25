@@ -120,14 +120,6 @@ impl<T> UnitQuaternion<T> {
     {
         Self::try_from_quaternion(Quaternion::<T> { w: s, x: v.x, y: v.y, z: v.z })
     }
-
-    #[inline]
-    pub(crate) fn from_scalar_vector(s: T, v: Vector3<T>) -> Self
-    where
-        T: Copy + FloatCore + MathMethods + QuaternionMath,
-    {
-        Self::from_quaternion(Quaternion::<T> { w: s, x: v.x, y: v.y, z: v.z })
-    }
 }
 
 impl<T> UnitQuaternion<T> {
@@ -273,7 +265,7 @@ where
 
     /// Multiply two unit quaternions.
     /// For computational efficiency the result is not renormalized:
-    /// The caller should `renormalize` appropriately after multiplications.
+    /// The caller should `renormalize` after accumulated floating point operations.
     #[inline]
     fn mul(self, other: Self) -> Self {
         let q = self.q * other.q;
@@ -457,7 +449,6 @@ impl<T> UnitQuaternion<T> {
         self
     }
 }
-
 
 // **** rotate ***
 
@@ -858,7 +849,7 @@ impl<T> UnitQuaternion<T> {
 
         let two = T::one() + T::one();
         let s = (q.x * q.x + q.y * q.y + q.z * q.z).sqrt();
-    
+
         let axis = if s > T::epsilon() {
             Vector3::new(q.x / s, q.y / s, q.z / s)
         } else {
