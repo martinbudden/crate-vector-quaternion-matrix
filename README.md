@@ -44,7 +44,7 @@ Each type has versions for `f32` and `f64`. So we have:
 3. 4D vectors: `Vector4f32`, `Vector4f64`
 4. [quaternions](https://en.wikipedia.org/wiki/Quaternion): `Quaternionf32`, `Quaternionf64`
 5. Unit quaternions: `UnitQuaternionf32` and `UnitQuaternionf64`.
-6. Dual quaternions: `DualQuaternionf32` and `DualQuaternionf64`.
+6. Unit dual quaternions: `UnitDualQuaternionf32` and `UnitDualQuaternionf64`.
 7. 2x2 matrices: `Matrix2x2f32`, `Matrix2x2f64`
 8. 3x3 matrices: `Matrix3x3f32`, `Matrix3x3f64`
 9. 4x4 matrices: `Matrix4x4f32`, `Matrix4x4f64`
@@ -80,7 +80,7 @@ of the famous [Quake inverse square root](https://en.wikipedia.org/wiki/Fast_inv
 A small selection from what is available:
 
 ```rust
-use vqm::{Matrix3x3f32, DualQuaternionf32, Quaternionf32, UnitQuaternionf32, Vector3f32};
+use vqm::{Matrix3x3f32, Quaternionf32, UnitDualQuaternionf32, UnitQuaternionf32, Vector3f32};
 
 // vectors
 let a = Vector3f32 { x: 1.0, y: 2.0, z: 3.0 };
@@ -131,10 +131,10 @@ let c = q.conjugate();
 let orientation = UnitQuaternionf32::from_roll_pitch_yaw_degrees(15.0, 60.0, 120.0);
 let pitch = orientation.calculate_pitch_degrees();
 
-// Dual quaternion
+// Unit dual quaternion
 let rotation = UnitQuaternionf32::from_roll_pitch_yaw_degrees(45.0, 60.0, 120.0);
 let translation = Vector3f32::new(2.0, 3.0, 5.0);
-let dq = DualQuaternionf32::from_rotation_translation(rotation, translation);
+let dq = UnitDualQuaternionf32::from_rotation_translation(rotation, translation);
 ```
 
 ## Mathematical methods

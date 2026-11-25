@@ -14,26 +14,26 @@ use {
 
 use super::{Quaternion, UnitQuaternion};
 
-/// `DualQuaternion` of `f32` values<br>
-pub type DualQuaternionf32 = DualQuaternion<f32>;
-/// `DualQuaternion` of `f64` values<br><br>
-pub type DualQuaternionf64 = DualQuaternion<f64>;
+/// `UnitDualQuaternion` of `f32` values<br>
+pub type UnitDualQuaternionf32 = UnitDualQuaternion<f32>;
+/// `UnitDualQuaternion` of `f64` values<br><br>
+pub type UnitDualQuaternionf64 = UnitDualQuaternion<f64>;
 
 // **** Define ****
 
-/// `DualQuaternion<T>`: quaternion type `T`.<br>
+/// `UnitDualQuaternion<T>`: quaternion type `T`.<br>
 /// Aliases `Quaternionf32` and `Quaternionf64` are provided.<br><br>
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
-pub struct DualQuaternion<T>(UnitQuaternion<T>, Quaternion<T>);
+pub struct UnitDualQuaternion<T>(UnitQuaternion<T>, Quaternion<T>);
 
 #[cfg(feature = "storage")]
-impl<T> PostcardValue<'_> for DualQuaternion<T> where T: Serialize + for<'de> Deserialize<'de> {}
+impl<T> PostcardValue<'_> for UnitDualQuaternion<T> where T: Serialize + for<'de> Deserialize<'de> {}
 
 // **** Default ****
 
 /// Default dual quaternion.
-impl<T> Default for DualQuaternion<T>
+impl<T> Default for UnitDualQuaternion<T>
 where
     T: Copy + Zero + One + ConstZero + ConstOne + PartialEq + FloatCore + MathMethods + QuaternionMath,
 {
@@ -45,14 +45,14 @@ where
 
 // **** New ****
 
-impl<T> DualQuaternion<T> {
-    /// Create a dual quaternion, from a unit quaternion and a quaternion.
+impl<T> UnitDualQuaternion<T> {
+    /// Create a unit dual quaternion, from a unit quaternion and a quaternion.
     #[inline]
     pub const fn new(r: UnitQuaternion<T>, t: Quaternion<T>) -> Self {
         Self(r, t)
     }
 
-    /// Create a `DualQuaternion` from a rotation unit quaternion.
+    /// Create a `UnitDualQuaternion` from a rotation unit quaternion.
     #[inline]
     pub fn from_rotation(rotation: UnitQuaternion<T>) -> Self
     where
@@ -61,12 +61,12 @@ impl<T> DualQuaternion<T> {
         Self(rotation, Quaternion::zero())
     }
 
-    /// Create a `DualQuaternion` from a translation vector.
+    /// Create a `UnitDualQuaternion` from a translation vector.
     ///```
-    /// # use vqm::{DualQuaternionf32, UnitQuaternionf32, Vector3f32};
+    /// # use vqm::{UnitDualQuaternionf32, UnitQuaternionf32, Vector3f32};
     /// let r = UnitQuaternionf32::from_roll_pitch_yaw_degrees(45.0, 60.0, 120.0);
     /// let t = Vector3f32::new(2.0, 3.0, 5.0);
-    /// let dq = DualQuaternionf32::from_rotation_translation(r, t);
+    /// let dq = UnitDualQuaternionf32::from_rotation_translation(r, t);
     /// ```
     #[inline]
     pub fn from_translation(translation: Vector3<T>) -> Self
@@ -80,12 +80,12 @@ impl<T> DualQuaternion<T> {
         Self(UnitQuaternion::one(), dual)
     }
 
-    /// Create a `DualQuaternion` from  a rotation unit quaternion and translation vector.
+    /// Create a `UnitDualQuaternion` from  a rotation unit quaternion and translation vector.
     ///```
-    /// # use vqm::{DualQuaternionf32, UnitQuaternionf32, Vector3f32};
+    /// # use vqm::{UnitDualQuaternionf32, UnitQuaternionf32, Vector3f32};
     /// let r = UnitQuaternionf32::from_roll_pitch_yaw_degrees(45.0, 60.0, 120.0);
     /// let t = Vector3f32::new(2.0, 3.0, 5.0);
-    /// let dq = DualQuaternionf32::from_rotation_translation(r, t);
+    /// let dq = UnitDualQuaternionf32::from_rotation_translation(r, t);
     /// ```
     #[inline]
     pub fn from_rotation_translation(rotation: UnitQuaternion<T>, translation: Vector3<T>) -> Self
@@ -102,19 +102,19 @@ impl<T> DualQuaternion<T> {
     }
 }
 
-impl<T> DualQuaternion<T>
+impl<T> UnitDualQuaternion<T>
 where
     T: Copy + Signed + PartialOrd + QuaternionMath,
 {
     /// Return true if dual quaternion is approximately other.
-    pub fn is_approx(self, other: DualQuaternion<T>, epsilon: T) -> bool {
+    pub fn is_approx(self, other: UnitDualQuaternion<T>, epsilon: T) -> bool {
         self.0.is_approx(other.0, epsilon) && self.1.is_approx(other.1, epsilon)
     }
 }
 
 // **** One ****
 
-impl<T> One for DualQuaternion<T>
+impl<T> One for UnitDualQuaternion<T>
 where
     T: Copy + FloatCore + ConstZero + ConstOne + PartialEq + QuaternionMath + MathMethods,
 {
@@ -131,14 +131,14 @@ where
 }
 
 /// Const unit dual quaternion.
-impl<T> ConstOne for DualQuaternion<T>
+impl<T> ConstOne for UnitDualQuaternion<T>
 where
     T: Copy + FloatCore + ConstZero + ConstOne + PartialEq + QuaternionMath + MathMethods,
 {
     const ONE: Self = Self(UnitQuaternion::ONE, Quaternion::ZERO);
 }
 
-impl<T> DualQuaternion<T>
+impl<T> UnitDualQuaternion<T>
 where
     T: Copy + Zero + One + ConstZero + ConstOne + QuaternionMath + PartialEq,
 {
@@ -151,7 +151,7 @@ where
     }
 }
 
-impl<T> DualQuaternion<T>
+impl<T> UnitDualQuaternion<T>
 where
     T: Copy + One + Signed + PartialOrd,
 {
@@ -163,7 +163,7 @@ where
 
 // **** Neg ****
 
-impl<T> Neg for DualQuaternion<T>
+impl<T> Neg for UnitDualQuaternion<T>
 where
     T: QuaternionMath,
 {
@@ -178,7 +178,7 @@ where
 
 // **** Mul ****
 
-impl<T> Mul<DualQuaternion<T>> for DualQuaternion<T>
+impl<T> Mul<UnitDualQuaternion<T>> for UnitDualQuaternion<T>
 where
     T: Copy + FloatCore + MathMethods + QuaternionMath,
 {
@@ -193,7 +193,7 @@ where
 
 // **** MulAssign ****
 
-impl<T> MulAssign<DualQuaternion<T>> for DualQuaternion<T>
+impl<T> MulAssign<UnitDualQuaternion<T>> for UnitDualQuaternion<T>
 where
     T: Copy + FloatCore + MathMethods + QuaternionMath,
 {
@@ -206,7 +206,7 @@ where
 
 // **** dot ****
 
-impl<T> DualQuaternion<T>
+impl<T> UnitDualQuaternion<T>
 where
     T: QuaternionMath,
 {
@@ -219,7 +219,7 @@ where
 
 // **** norm_squared ****
 
-impl<T> DualQuaternion<T>
+impl<T> UnitDualQuaternion<T>
 where
     T: Copy + QuaternionMath,
 {
@@ -232,7 +232,7 @@ where
 
 // **** norm ****
 
-impl<T> DualQuaternion<T>
+impl<T> UnitDualQuaternion<T>
 where
     T: Copy + MathMethods + QuaternionMath,
 {
@@ -243,7 +243,7 @@ where
     }
 }
 
-impl<T> DualQuaternion<T> {
+impl<T> UnitDualQuaternion<T> {
     /// Return normalized form of the dual quaternion.
     #[inline]
     #[must_use]
@@ -272,7 +272,7 @@ impl<T> DualQuaternion<T> {
     }
 }
 
-impl<T> DualQuaternion<T> {
+impl<T> UnitDualQuaternion<T> {
     /// Return the conjugate of the dual quaternion.
     #[inline]
     #[must_use]
@@ -294,8 +294,8 @@ impl<T> DualQuaternion<T> {
     }
 }
 
-impl<T> DualQuaternion<T> {
-    /// Calculate the dual quaternion to the power of exponent.Compute the power of the `DualQuaternion`.
+impl<T> UnitDualQuaternion<T> {
+    /// Calculate the dual quaternion to the power of exponent.Compute the power of the `UnitDualQuaternion`.
     #[must_use]
     pub fn pow(self, exponent: T) -> Self
     where
@@ -337,7 +337,7 @@ impl<T> DualQuaternion<T> {
 
 // **** Accessors ****
 
-impl<T> DualQuaternion<T> {
+impl<T> UnitDualQuaternion<T> {
     /// Returns the rotation unit quaternion of a dual-quaternion.
     pub fn rotation(self) -> UnitQuaternion<T> {
         self.0
@@ -356,11 +356,11 @@ impl<T> DualQuaternion<T> {
 
 // **** From ****
 
-impl<T> From<(UnitQuaternion<T>, Quaternion<T>)> for DualQuaternion<T>
+impl<T> From<(UnitQuaternion<T>, Quaternion<T>)> for UnitDualQuaternion<T>
 where
     T: Copy + Zero + One + Div<Output = T> + QuaternionMath,
 {
-    /// `DualQuaternion` from unit quaternion and quaternion.
+    /// `UnitDualQuaternion` from unit quaternion and quaternion.
     #[inline]
     fn from(rhs: (UnitQuaternion<T>, Quaternion<T>)) -> Self {
         Self(rhs.0, rhs.1)
@@ -375,7 +375,7 @@ mod test_traits {
 
     #[test]
     fn normal_types() {
-        is_full::<DualQuaternion<f32>>();
+        is_full::<UnitDualQuaternion<f32>>();
     }
 }
 
@@ -391,7 +391,7 @@ mod test {
         let r = UnitQuaternionf32::from_roll_pitch_yaw_degrees(45.0, 60.0, 120.0);
         let t = Vector3f32::new(2.0, 3.0, 5.0);
 
-        let dq = DualQuaternionf32::from_rotation_translation(r, t);
+        let dq = UnitDualQuaternionf32::from_rotation_translation(r, t);
 
         let r_prime = dq.rotation();
         let t_prime = dq.translation();
@@ -413,9 +413,9 @@ mod test {
 
         let v_zero = Vector3f32::zero();
 
-        let dqx = DualQuaternionf32::from_rotation_translation(rx, v_zero);
-        let dqy = DualQuaternionf32::from_rotation_translation(ry, v_zero);
-        let dqz = DualQuaternionf32::from_rotation_translation(rz, v_zero);
+        let dqx = UnitDualQuaternionf32::from_rotation_translation(rx, v_zero);
+        let dqy = UnitDualQuaternionf32::from_rotation_translation(ry, v_zero);
+        let dqz = UnitDualQuaternionf32::from_rotation_translation(rz, v_zero);
 
         let dq = dqy * dqz * dqx;
 
@@ -433,8 +433,8 @@ mod test {
         let t1 = Vector3f32::new(1.0, 2.0, 3.0);
         let t2 = Vector3f32::new(1.0, -2.0, 0.0);
 
-        let dq1 = DualQuaternionf32::from_rotation_translation(UnitQuaternionf32::identity(), t1);
-        let dq2 = DualQuaternionf32::from_rotation_translation(UnitQuaternionf32::identity(), t2);
+        let dq1 = UnitDualQuaternionf32::from_rotation_translation(UnitQuaternionf32::identity(), t1);
+        let dq2 = UnitDualQuaternionf32::from_rotation_translation(UnitQuaternionf32::identity(), t2);
         let dq3 = dq1 * dq2;
 
         let r_prime = dq3.rotation();
@@ -456,7 +456,7 @@ mod test {
         let r = UnitQuaternionf32::from_roll_pitch_yaw_degrees(45.0, 60.0, 120.0);
         let t = Vector3f32::new(2.0, 3.0, 5.0);
 
-        let dq = DualQuaternionf32::from_rotation_translation(r, t);
+        let dq = UnitDualQuaternionf32::from_rotation_translation(r, t);
         let dq_conjugate = dq.conjugate();
 
         let dq_prime = dq * dq_conjugate;
