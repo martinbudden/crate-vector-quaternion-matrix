@@ -25,7 +25,12 @@ pub type UnitDualQuaternionf64 = UnitDualQuaternion<f64>;
 /// Aliases `Quaternionf32` and `Quaternionf64` are provided.<br><br>
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
-pub struct UnitDualQuaternion<T>(UnitQuaternion<T>, Quaternion<T>);
+pub struct UnitDualQuaternion<T> {
+    /// Real (rotation) component.
+    real: UnitQuaternion<T>,
+    /// Dual component.
+    dual: Quaternion<T>,
+}
 
 #[cfg(feature = "storage")]
 impl<T> PostcardValue<'_> for UnitDualQuaternion<T> where T: Serialize + for<'de> Deserialize<'de> {}
@@ -39,7 +44,7 @@ where
 {
     #[inline]
     fn default() -> Self {
-        Self(UnitQuaternion::one(), Quaternion::zero())
+        Self { real: UnitQuaternion::one(), dual: Quaternion::zero() }
     }
 }
 
@@ -48,8 +53,8 @@ where
 impl<T> UnitDualQuaternion<T> {
     /// Create a unit dual quaternion, from a unit quaternion and a quaternion.
     #[inline]
-    pub const fn new(r: UnitQuaternion<T>, t: Quaternion<T>) -> Self {
-        Self(r, t)
+    pub const fn new(real: UnitQuaternion<T>, dual: Quaternion<T>) -> Self {
+        Self { real, dual }
     }
 
     /// Create a `UnitDualQuaternion` from a rotation unit quaternion.
@@ -58,7 +63,7 @@ impl<T> UnitDualQuaternion<T> {
     where
         T: Copy + Zero + ConstZero + QuaternionMath + PartialEq,
     {
-        Self(rotation, Quaternion::zero())
+        Self { real: rotation, dual: Quaternion::zero() }
     }
 
     /// Create a `UnitDualQuaternion` from a translation vector.
@@ -77,7 +82,7 @@ impl<T> UnitDualQuaternion<T> {
         let dual =
             Quaternion::<T> { w: T::zero(), x: translation.x * half, y: translation.y * half, z: translation.z * half };
 
-        Self(UnitQuaternion::one(), dual)
+        Self { real: UnitQuaternion::one(), dual }
     }
 
     /// Create a `UnitDualQuaternion` from  a rotation unit quaternion and translation vector.
@@ -93,12 +98,12 @@ impl<T> UnitDualQuaternion<T> {
         T: Copy + Zero + One + Div<Output = T> + QuaternionMath,
     {
         let half = T::one() / (T::one() + T::one());
-        Self(
-            rotation,
-            Quaternion::<T> { w: T::zero(), x: translation.x, y: translation.y, z: translation.z }
+        Self {
+            real: rotation,
+            dual: Quaternion::<T> { w: T::zero(), x: translation.x, y: translation.y, z: translation.z }
                 * rotation.q()
                 * half,
-        )
+        }
     }
 }
 
@@ -108,7 +113,7 @@ where
 {
     /// Return true if dual quaternion is approximately other.
     pub fn is_approx(self, other: UnitDualQuaternion<T>, epsilon: T) -> bool {
-        self.0.is_approx(other.0, epsilon) && self.1.is_approx(other.1, epsilon)
+        self.real.is_approx(other.real, epsilon) && self.dual.is_approx(other.dual, epsilon)
     }
 }
 
@@ -121,7 +126,7 @@ where
     /// Unit quaternion.
     #[inline]
     fn one() -> Self {
-        Self(UnitQuaternion::ONE, Quaternion::ZERO)
+        Self { real: UnitQuaternion::ONE, dual: Quaternion::ZERO }
     }
 
     #[inline]
@@ -135,7 +140,7 @@ impl<T> ConstOne for UnitDualQuaternion<T>
 where
     T: Copy + FloatCore + ConstZero + ConstOne + PartialEq + QuaternionMath + MathMethods,
 {
-    const ONE: Self = Self(UnitQuaternion::ONE, Quaternion::ZERO);
+    const ONE: Self = Self { real: UnitQuaternion::ONE, dual: Quaternion::ZERO };
 }
 
 impl<T> UnitDualQuaternion<T>
@@ -147,7 +152,7 @@ where
     #[inline]
     #[must_use]
     pub fn identity() -> Self {
-        Self(UnitQuaternion::identity(), Quaternion::zero())
+        Self { real: UnitQuaternion::identity(), dual: Quaternion::zero() }
     }
 }
 
@@ -157,7 +162,7 @@ where
 {
     /// Return true if dual quaternion is approximately equal the unit dual quaternion.
     pub fn is_approx_one(self, epsilon: T) -> bool {
-        self.0.is_approx_one(epsilon) && self.1.is_approx_one(epsilon)
+        self.real.is_approx_one(epsilon) && self.dual.is_approx_one(epsilon)
     }
 }
 
@@ -172,7 +177,7 @@ where
     /// Negate dual quaternion.
     #[inline]
     fn neg(self) -> Self {
-        Self(-self.0, -self.1)
+        Self { real: -self.real, dual: -self.dual }
     }
 }
 
@@ -187,7 +192,7 @@ where
     /// Multiply two dual quaternions.
     #[inline]
     fn mul(self, other: Self) -> Self {
-        Self(self.0 * other.0, self.0.q() * other.1 + self.1 * other.0.q())
+        Self { real: self.real * other.real, dual: self.real.q() * other.dual + self.dual * other.real.q() }
     }
 }
 
@@ -213,7 +218,7 @@ where
     /// Dual quaternion dot product.
     #[inline]
     pub fn dot(self, other: Self) -> T {
-        self.0.dot(other.0)
+        self.real.dot(other.real)
     }
 }
 
@@ -251,8 +256,8 @@ impl<T> UnitDualQuaternion<T> {
     where
         T: Copy + Zero + PartialEq + MathMethods + QuaternionMath + FloatCore,
     {
-        let (r, norm_reciprocal) = UnitQuaternion::quaternion_norm_reciprocal(self.0.q());
-        Self(r, self.1 * norm_reciprocal + self.0.q() * self.0.q().dot(self.1))
+        let (real, norm_reciprocal) = UnitQuaternion::quaternion_norm_reciprocal(self.real.q());
+        Self { real, dual: self.dual * norm_reciprocal + self.real.q() * self.real.q().dot(self.dual) }
     }
 
     /// Normalize the quaternion in place, checking if the magnitude is zero.
@@ -280,7 +285,7 @@ impl<T> UnitDualQuaternion<T> {
     where
         T: Neg<Output = T> + QuaternionMath,
     {
-        Self(self.0.conjugate(), self.1.conjugate())
+        Self { real: self.real.conjugate(), dual: self.dual.conjugate() }
     }
 
     /// Set dual quaternion to its conjugate.
@@ -315,14 +320,14 @@ impl<T> UnitDualQuaternion<T> {
         let one = T::one();
         let two = one + one;
         let half = one / two;
-        let theta = two * self.0.scalar().acos();
+        let theta = two * self.real.scalar().acos();
         let (s, c) = (theta / two).sin_cos();
         if theta.abs() <= T::epsilon() {
             Self::from_translation(self.translation() * exponent)
         } else {
-            let s0 = self.0.imaginary() / s;
-            let d = self.1.scalar() * -two / s;
-            let se = (self.1.imaginary() - s0 * (d * half) * c) / s;
+            let s0 = self.real.imaginary() / s;
+            let d = self.dual.scalar() * -two / s;
+            let se = (self.dual.imaginary() - s0 * (d * half) * c) / s;
 
             let (s_exp, c_exp) = (exponent * theta / two).sin_cos();
             let q_real = UnitQuaternion::from_scalar_vector_unchecked(c_exp, s0 * s_exp);
@@ -340,7 +345,7 @@ impl<T> UnitDualQuaternion<T> {
 impl<T> UnitDualQuaternion<T> {
     /// Returns the rotation unit quaternion of a dual-quaternion.
     pub fn rotation(self) -> UnitQuaternion<T> {
-        self.0
+        self.real
     }
 
     /// Returns the translation vector of a dual-quaternion.
@@ -349,7 +354,7 @@ impl<T> UnitDualQuaternion<T> {
         T: One + Neg<Output = T> + Add<Output = T> + QuaternionMath,
     {
         let two = T::one() + T::one();
-        let t = self.1 * self.0.q().conjugate() * two;
+        let t = self.dual * self.real.q().conjugate() * two;
         Vector3 { x: t.x, y: t.y, z: t.z }
     }
 }
@@ -363,7 +368,7 @@ where
     /// `UnitDualQuaternion` from unit quaternion and quaternion.
     #[inline]
     fn from(rhs: (UnitQuaternion<T>, Quaternion<T>)) -> Self {
-        Self(rhs.0, rhs.1)
+        Self { real: rhs.0, dual: rhs.1 }
     }
 }
 
