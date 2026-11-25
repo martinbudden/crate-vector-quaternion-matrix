@@ -2,15 +2,6 @@ use super::{IsScalar, MathMethods, Matrix3x3, Quaternion, QuaternionMath, Vector
 use core::ops::{Mul, MulAssign, Neg};
 use num_traits::{ConstOne, ConstZero, One, Signed, Zero, float::FloatCore};
 
-#[cfg(feature = "storage")]
-use sequential_storage::map::PostcardValue;
-
-#[cfg(feature = "serde")]
-use {
-    postcard::experimental::max_size::MaxSize,
-    serde::{Deserialize, Serialize},
-};
-
 /// `UnitQuaternion` of `f32` values<br>
 pub type UnitQuaternionf32 = UnitQuaternion<f32>;
 /// `UnitQuaternion` of `f64` values<br><br>
@@ -22,14 +13,10 @@ pub type UnitQuaternionf64 = UnitQuaternion<f64>;
 /// Aliases `UnitQuaternionf32` and `UnitQuaternionf64` are provided.<br><br>
 #[derive(Clone, Copy, Debug, PartialEq)]
 #[cfg_attr(feature = "std", derive(derive_more::Display))]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
 pub struct UnitQuaternion<T> {
     /// Underlying quaternion.
     q: Quaternion<T>,
 }
-
-#[cfg(feature = "storage")]
-impl<T> PostcardValue<'_> for UnitQuaternion<T> where T: Serialize + for<'de> Deserialize<'de> {}
 
 // **** Default ****
 
@@ -65,10 +52,7 @@ impl<T> UnitQuaternion<T> {
     where
         T: FloatCore + MathMethods + QuaternionMath,
     {
-        let q = Quaternion { w, x, y, z };
-        let norm = q.norm();
-        debug_assert!(norm.is_finite() && norm > T::epsilon());
-        Self { q: q / norm }
+        Self::from_quaternion(Quaternion::new(w, x, y, z))
     }
 
     /// Create a `UnitQuaternion` from a Quaternion `q`,  normalizing it if possible, otherwise return `None`.
@@ -93,6 +77,9 @@ impl<T> UnitQuaternion<T> {
     where
         T: FloatCore + MathMethods + QuaternionMath,
     {
+        let scale = q.w.abs().max(q.x.abs()).max(q.y.abs()).max(q.z.abs());
+        debug_assert!(scale.is_finite() && scale != T::zero());
+        let q = q / scale;
         let norm = q.norm();
         debug_assert!(norm.is_finite() && norm > T::epsilon());
         Self { q: q / norm }
@@ -135,7 +122,7 @@ impl<T> UnitQuaternion<T> {
     }
 
     #[inline]
-    pub(crate) fn from_scalar_vector_unchecked(s: T, v: Vector3<T>) -> Self
+    pub(crate) fn from_scalar_vector(s: T, v: Vector3<T>) -> Self
     where
         T: Copy + FloatCore + MathMethods + QuaternionMath,
     {
@@ -285,6 +272,8 @@ where
     type Output = Self;
 
     /// Multiply two unit quaternions.
+    /// For computational efficiency the result is not renormalized:
+    /// The caller should `renormalize` appropriately after multiplications.
     #[inline]
     fn mul(self, other: Self) -> Self {
         let q = self.q * other.q;
@@ -469,64 +458,6 @@ impl<T> UnitQuaternion<T> {
     }
 }
 
-impl<T> UnitQuaternion<T> {
-    /// Return the quaternion exponential. This may not be a normalized quaternion.
-    #[inline]
-    #[must_use]
-    pub fn exp(self) -> Quaternion<T>
-    where
-        T: FloatCore + MathMethods,
-    {
-        let exp_w = self.q.w.exp();
-        let s = self.q.x * self.q.x + self.q.y * self.q.y + self.q.z * self.q.z;
-        if s <= T::epsilon() {
-            Quaternion { w: exp_w, x: T::zero(), y: T::zero(), z: T::zero() }
-        } else {
-            let k = s.sin() / s;
-            Quaternion { w: exp_w * s.cos(), x: self.q.x * exp_w * k, y: self.q.y * exp_w * k, z: self.q.z * exp_w * k }
-        }
-    }
-
-    /// Return the quaternion logarithm.
-    #[inline]
-    #[must_use]
-    pub fn ln(self) -> Self
-    where
-        T: FloatCore + MathMethods,
-    {
-        let acos = self.q.w.acos();
-        let imaginary_norm_reciprocal =
-            (self.q.x * self.q.x + self.q.y * self.q.y + self.q.z * self.q.z).sqrt_reciprocal();
-        Self {
-            q: Quaternion {
-                w: T::zero(),
-                x: self.q.x * acos * imaginary_norm_reciprocal,
-                y: self.q.y * acos * imaginary_norm_reciprocal,
-                z: self.q.z * acos * imaginary_norm_reciprocal,
-            },
-        }
-    }
-
-    /// Return the quaternion square root.
-    #[must_use]
-    pub fn sqrt(&self) -> Self
-    where
-        T: FloatCore + MathMethods + QuaternionMath,
-    {
-        let one = T::one();
-        let two = one + one;
-        Self { q: Self { q: (self.ln().q() * (one / two)) }.exp() }
-    }
-
-    /// Return the quaternion raised to the power `x`.
-    #[must_use]
-    pub fn pow(&self, x: Self) -> Self
-    where
-        T: FloatCore + MathMethods + QuaternionMath,
-    {
-        Self { q: (x * self.ln()).exp() }
-    }
-}
 
 // **** rotate ***
 
@@ -882,7 +813,7 @@ impl<T> UnitQuaternion<T> {
     where
         T: FloatCore + MathMethods,
     {
-        debug_assert!(axis.is_normalized(T::epsilon()));
+        //debug_assert!(axis.is_normalized(T::epsilon()));
         let half: T = T::one() / (T::one() + T::one());
         let (sin_half_angle, cos_half_angle) = (angle_radians * half).sin_cos();
         Self {
@@ -926,16 +857,15 @@ impl<T> UnitQuaternion<T> {
         let w = q.w.clamp(-T::one(), T::one());
 
         let two = T::one() + T::one();
-        let angle = two * w.acos();
-
         let s = (q.x * q.x + q.y * q.y + q.z * q.z).sqrt();
-
+    
         let axis = if s > T::epsilon() {
             Vector3::new(q.x / s, q.y / s, q.z / s)
         } else {
             Vector3::new(T::one(), T::zero(), T::zero())
         };
 
+        let angle = two * s.atan2(w);
         (axis, angle)
     }
 

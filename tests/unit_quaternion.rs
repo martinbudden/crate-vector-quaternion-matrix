@@ -1,4 +1,4 @@
-use vqm::{Matrix3x3f32, Quaternionf32, UnitQuaternionf32, Vector3f32};
+use vqm::{Matrix3x3f32, Matrix3x3f64, Quaternionf32, UnitQuaternionf32, UnitQuaternionf64, Vector3f32, Vector3f64};
 
 #[cfg(test)]
 mod tests {
@@ -6,6 +6,27 @@ mod tests {
     //use approx::assert_abs_diff_eq;
     const EPSILON: f32 = 1e-5;
 
+    #[test]
+    fn normalization_extreme_values() {
+        let q = UnitQuaternionf64::new(1e300, 1e300, 0.0, 0.0);
+        assert!((q.norm_squared() - 1.0).abs() < 1e-12);
+        let q = UnitQuaternionf64::new(1e-300, 1e-300, 0.0, 0.0);
+        assert!((q.norm_squared() - 1.0).abs() < 1e-12);
+    }
+    #[test]
+    fn test_multiplication() {
+        let q1 = UnitQuaternionf64::from_roll_radians(0.5);
+        let q2 = UnitQuaternionf64::from_pitch_radians(0.7);
+
+        let q3 = q1 * q2;
+
+        let v = Vector3f64::new(1.0, 0.0, 0.0);
+
+        let sequential = q1.rotate(q2.rotate(v));
+        let combined = q3.rotate(v);
+
+        assert!(combined.is_approx(sequential, 1e-12));
+    }
     #[test]
     fn conversions() {
         use approx::assert_abs_diff_eq;
@@ -113,6 +134,15 @@ mod tests {
         m1.is_approx(m2, 1e-10);
     }
     #[test]
+    fn rotation_matrix_roundtrip() {
+        let q = UnitQuaternionf64::from_roll_pitch_yaw_radians(0.7, -0.4, 1.2);
+
+        let m: Matrix3x3f64 = q.into();
+        let q2 = UnitQuaternionf64::from_quaternion(m.into());
+
+        assert!(q.orientation_approx_eq(q2, 1e-10));
+    }
+    #[test]
     fn sign_equivalence() {
         let q = UnitQuaternionf32::from_axis_angle_radians(Vector3f32::new(0.0, 0.0, 1.0), 0.7);
         assert!(q.angle_to(-q) < 1e-12);
@@ -125,6 +155,18 @@ mod tests {
 
         let rotated = q.rotate(v);
         assert!(rotated.is_approx(v, EPSILON));
+    }
+    #[test]
+    fn axis_angle_roundtrip() {
+        let axis = Vector3f64::new(1.0 / 3.0_f64.sqrt(), 1.0 / 3.0_f64.sqrt(), 1.0 / 3.0_f64.sqrt());
+
+        let angle = 2.3;
+        let q = UnitQuaternionf64::from_axis_angle_radians(axis, angle);
+
+        let (axis2, angle2) = q.to_axis_angle();
+
+        assert!((angle2 - angle).abs() < 1e-12);
+        assert!(axis.is_approx(axis2, 1e-12));
     }
     #[test]
     fn rotate_90_degrees_about_x() {

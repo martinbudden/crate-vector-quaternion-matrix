@@ -1050,6 +1050,62 @@ where
     }
 }
 
+impl<T> Quaternion<T> {
+    /// Return the quaternion exponential.
+    #[inline]
+    #[must_use]
+    pub fn exp(self) -> Quaternion<T>
+    where
+        T: FloatCore + MathMethods,
+    {
+        let exp_w = self.w.exp();
+
+        let v_squared = self.x * self.x + self.y * self.y + self.z * self.z;
+        let v_norm = v_squared.sqrt();
+        let k = if v_norm <= T::epsilon() { T::one() } else { v_norm.sin() / v_norm };
+
+        Quaternion { w: exp_w * v_norm.cos(), x: exp_w * self.x * k, y: exp_w * self.y * k, z: exp_w * self.z * k }
+    }
+
+    /// Return the quaternion logarithm.
+    #[inline]
+    #[must_use]
+    pub fn ln(self) -> Quaternion<T>
+    where
+        T: FloatCore + MathMethods,
+    {
+        let v_squared = self.x * self.x + self.y * self.y + self.z * self.z;
+        let v_norm = v_squared.sqrt();
+        if v_norm <= T::epsilon() {
+            return Quaternion { w: T::zero(), x: T::zero(), y: T::zero(), z: T::zero() };
+        }
+
+        let angle = v_norm.atan2(self.w);
+        let k = angle / v_norm;
+
+        Quaternion { w: T::zero(), x: self.x * k, y: self.y * k, z: self.z * k }
+    }
+
+    /// Return the quaternion square root.
+    #[must_use]
+    pub fn sqrt(&self) -> Quaternion<T>
+    where
+        T: FloatCore + MathMethods + QuaternionMath,
+    {
+        let one = T::one();
+        let two = one + one;
+        (self.ln() * (one / two)).exp()
+    }
+
+    /// Return the quaternion raised to the power `x`.
+    #[must_use]
+    pub fn pow(&self, x: Self) -> Quaternion<T>
+    where
+        T: FloatCore + MathMethods + QuaternionMath,
+    {
+         (x * self.ln()).exp()
+    }
+}
 // **** sum ****
 
 impl<T> Quaternion<T>

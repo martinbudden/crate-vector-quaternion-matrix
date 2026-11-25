@@ -2,15 +2,6 @@ use super::{IsScalar, MathMethods, Quaternion, QuaternionMath, UnitQuaternion, V
 use core::ops::{Add, Div, Mul, MulAssign, Neg};
 use num_traits::{ConstOne, ConstZero, One, Signed, Zero, float::FloatCore};
 
-#[cfg(feature = "storage")]
-use sequential_storage::map::PostcardValue;
-
-#[cfg(feature = "serde")]
-use {
-    postcard::experimental::max_size::MaxSize,
-    serde::{Deserialize, Serialize},
-};
-
 /// `UnitDualQuaternion` of `f32` values<br>
 pub type UnitDualQuaternionf32 = UnitDualQuaternion<f32>;
 /// `UnitDualQuaternion` of `f64` values<br><br>
@@ -21,16 +12,12 @@ pub type UnitDualQuaternionf64 = UnitDualQuaternion<f64>;
 /// `UnitDualQuaternion<T>`: quaternion type `T`.<br>
 /// Aliases `DualUnitQuaternionf32` and `DualUnitQuaternionf64` are provided.<br><br>
 #[derive(Clone, Copy, Debug, PartialEq)]
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize, MaxSize))]
 pub struct UnitDualQuaternion<T> {
     /// Real (rotation) component.
     real: UnitQuaternion<T>,
     /// Dual component.
     dual: Quaternion<T>,
 }
-
-#[cfg(feature = "storage")]
-impl<T> PostcardValue<'_> for UnitDualQuaternion<T> where T: Serialize + for<'de> Deserialize<'de> {}
 
 // **** Default ****
 
@@ -228,6 +215,8 @@ where
     type Output = Self;
 
     /// Multiply two dual quaternions.
+    /// For computational efficiency the result is not renormalized:
+    /// The caller should `renormalize` appropriately after multiplications.
     #[inline]
     fn mul(self, other: Self) -> Self {
         Self { real: self.real * other.real, dual: self.real.q() * other.dual + self.dual * other.real.q() }
@@ -396,7 +385,7 @@ impl<T> UnitDualQuaternion<T> {
             let se = (self.dual.imaginary() - s0 * (d * half) * c) / s;
 
             let (s_exp, c_exp) = (exponent * theta / two).sin_cos();
-            let q_real = UnitQuaternion::from_scalar_vector_unchecked(c_exp, s0 * s_exp);
+            let q_real = UnitQuaternion::from_scalar_vector(c_exp, s0 * s_exp);
             let q_dual = Quaternion::from_scalar_vector(
                 s_exp * -exponent * d / two,
                 s0 * c_exp * exponent * d / two + se * s_exp,
