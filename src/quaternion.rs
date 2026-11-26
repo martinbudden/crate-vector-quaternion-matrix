@@ -1027,7 +1027,7 @@ impl<T> Quaternion<T> {
 
     /// Return the imaginary part of the quaternion.
     #[inline]
-    pub fn imaginary(self) -> Vector3<T> {
+    pub fn imag(self) -> Vector3<T> {
         Vector3::<T> { x: self.x, y: self.y, z: self.z }
     }
 }

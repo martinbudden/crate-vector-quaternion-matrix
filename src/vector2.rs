@@ -22,8 +22,8 @@ pub type Vector2f64 = Vector2<f64>;
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 #[cfg_attr(feature = "std", derive(derive_more::Display))]
 #[cfg_attr(feature = "std", display("V{{x:{x}, y:{y}}}"))]
-#[cfg_attr(feature = "storage", derive(MaxSize))]
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "storage", derive(MaxSize))]
 #[repr(C, align(8))]
 pub struct Vector2<T> {
     /// x-axis component.

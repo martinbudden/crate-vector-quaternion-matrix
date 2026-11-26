@@ -58,6 +58,7 @@
         "hashbrown",
         "heapless",
         "hypot",
+        "imag",
         "indexmap",
         "inversed",
         "invertable",

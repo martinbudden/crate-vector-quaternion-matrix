@@ -140,8 +140,8 @@ impl<T> UnitQuaternion<T> {
 
     /// Return the imaginary part of the unit quaternion.
     #[inline]
-    pub fn imaginary(self) -> Vector3<T> {
-        self.q.imaginary()
+    pub fn imag(self) -> Vector3<T> {
+        self.q.imag()
     }
 }
 
