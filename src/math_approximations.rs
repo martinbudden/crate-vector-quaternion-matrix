@@ -584,7 +584,34 @@ fn atan2_approx_f32(y: f32, x: f32) -> f32 {
 #[must_use]
 fn atan2_approx_f64(y: f64, x: f64) -> f64 {
     #[allow(clippy::cast_possible_truncation)]
-    f64::from(atan2_approx_f32(y as f32, x as f32))
+    if x == 0.0 && y == 0.0 {
+        return 0.0;
+    }
+
+    let abs_y = y.abs();
+    let abs_x = x.abs();
+
+    // Octant reduction
+    let (ratio, offset, sign) = if abs_y > abs_x {
+        // Octant 2: FRAC_PI_2 - atan(x/y)
+        (abs_x / abs_y, core::f64::consts::FRAC_PI_2, -1.0)
+    } else {
+        // Octant 1: 0.0 + atan(y/x)
+        (abs_y / abs_x, 0.0, 1.0)
+    };
+
+    // Calculate core first-quadrant angle cleanly
+    let mut angle = offset + (sign * atan_poly9(ratio));
+
+    // Map back to the correct quadrant based on original signs
+    if x < 0.0 {
+        angle = core::f64::consts::PI - angle;
+    }
+    if y < 0.0 {
+        angle = -angle;
+    }
+
+    angle
 }
 
 #[inline(always)]
@@ -617,14 +644,16 @@ fn acos_approx_f64(x: f64) -> f64 {
 fn exp_approx_f32(x: f32) -> f32 {
     const LN_2: f32 = core::f32::consts::LN_2;
     const FRAC_1_LN_2: f32 = 1.0 / LN_2;
+    const EXP_MIN: f32 = -103.278_93;
+    const EXP_MAX: f32 = 88.722_839;
 
     if x.is_nan() {
         return f32::NAN;
     }
-    if x > 88.722_839 {
+    if x > EXP_MAX {
         return f32::INFINITY;
     }
-    if x < -103.278_93 {
+    if x < EXP_MIN {
         return 0.0;
     }
 
@@ -643,8 +672,31 @@ fn exp_approx_f32(x: f32) -> f32 {
 #[inline(always)]
 #[must_use]
 fn exp_approx_f64(x: f64) -> f64 {
+    const LN_2: f64 = core::f64::consts::LN_2;
+    const FRAC_1_LN_2: f64 = 1.0 / LN_2;
+    const EXP_MIN: f64 = -708.396_418_532_264_1;
+    const EXP_MAX: f64 = 709.782_712_893_384;
+
+    if x.is_nan() {
+        return f64::NAN;
+    }
+    if x > EXP_MAX {
+        return f64::INFINITY;
+    }
+    if x < EXP_MIN {
+        return 0.0;
+    }
+
+    // Argument reduction: x = k * ln(2) + r
+    // We round to the nearest integer to keep the remainder 'r' as small as possible (-0.35 <= r <= 0.35)
+    let k = (x * FRAC_1_LN_2).round();
+    let r = x - k * LN_2;
+
+    let exp = exp_poly7(r);
+
+    // Correctly scale the calculated sum by 2^k
     #[allow(clippy::cast_possible_truncation)]
-    f64::from(exp_approx_f32(x as f32))
+    scale_binary_f64(exp, k as i32)
 }
 
 #[inline(always)]
@@ -698,7 +750,35 @@ fn ln_approx_f32(x: f32) -> f32 {
 #[must_use]
 fn ln_approx_f64(x: f64) -> f64 {
     #[allow(clippy::cast_possible_truncation)]
-    f64::from(ln_approx_f32(x as f32))
+    if x <= 0.0 || x.is_nan() {
+        return f64::NAN;
+    }
+    if x.is_infinite() {
+        return f64::INFINITY;
+    }
+
+    // Range reduction: ln(x) = ln(m * 2^k) = ln(m) + k * ln(2)
+    let (mut m, mut k) = mantissa_exponent_f64(x);
+
+    // Narrow the range to [0.707, 1.414] for faster convergence
+    if m > core::f64::consts::SQRT_2 {
+        m *= 0.5;
+        k += 1;
+    } else if m < core::f64::consts::FRAC_1_SQRT_2 {
+        m *= 2.0;
+        k -= 1;
+    }
+
+    // Padé approximation around 1.0 using z = (m - 1) / (m + 1)
+    let z = (m - 1.0) / (m + 1.0);
+
+    let ln_m = ln_poly7(z);
+
+    // ln(m*2^k) = ln(m) + k * ln(2)
+    #[allow(clippy::cast_precision_loss)]
+    {
+        ln_m + f64::from(k) * core::f64::consts::LN_2
+    }
 }
 
 #[inline(always)]
@@ -797,6 +877,29 @@ fn mantissa_exponent_f32(x: f32) -> (f32, i32) {
     (f32::from_bits(mantissa), k)
 }
 
+/// Takes x and returns (mantissa, exponent) with mantissa in the range
+/// [0.5, 1.0) or [-1.0, -0.5) for negative numbers.
+#[inline]
+fn mantissa_exponent_f64(x: f64) -> (f64, i32) {
+    if x == 0.0 {
+        return (0.0, 0);
+    }
+
+    let bits = x.to_bits();
+    #[allow(clippy::cast_possible_wrap)]
+    let exp_bits = ((bits >> 52) & 0x7FF) as i32;
+
+    if exp_bits == 0 {
+        // Subnormal handling
+        return mantissa_exponent_f64(x * 4_503_599_627_370_496.0); // scale up by 2^52
+    }
+
+    let k = exp_bits - 1022;
+    let mantissa = (bits & 0x000F_FFFF_FFFF_FFFF) | 0x3FE0_0000_0000_0000;
+
+    (f64::from_bits(mantissa), k)
+}
+
 /// Returns x * 2^k.
 #[inline]
 fn scale_binary_f32(x: f32, k: i32) -> f32 {
@@ -841,10 +944,54 @@ fn scale_binary_f32(x: f32, k: i32) -> f32 {
     f32::from_bits(sign | ((exp_bits as u32) << 23) | mantissa)
 }
 
+fn scale_binary_f64(x: f64, k: i32) -> f64 {
+    if x == 0.0 || x.is_nan() || x.is_infinite() {
+        return x;
+    }
+
+    let bits = x.to_bits();
+    let sign = bits & 0x8000_0000_0000_0000;
+    #[allow(clippy::cast_possible_wrap)]
+    let mut exp_bits = ((bits >> 52) & 0x7FF) as i32;
+    let mantissa = bits & 0x000F_FFFF_FFFF_FFFF;
+
+    // Handle subnormal inputs
+    if exp_bits == 0 {
+        // Scale up to normalize, then adjust k
+        return scale_binary_f64(x * 4_503_599_627_370_496.0, k - 52);
+    }
+
+    // Add the new exponent scale factor
+    exp_bits += k;
+
+    // Handle overflow to Infinity
+    if exp_bits >= 2047 {
+        return f64::from_bits(sign | 0x7FF0_0000_0000_0000);
+    }
+
+    // Handle underflow to Subnormal / Zero
+    if exp_bits <= 0 {
+        if exp_bits < -51 {
+            return f64::from_bits(sign); // Returns signed zero
+        }
+
+        // Shift mantissa to construct a subnormal number
+        let implicit_bit = 0x0010_0000_0000_0000;
+        let full_mantissa = mantissa | implicit_bit;
+        let shift = 1 - exp_bits;
+
+        return f64::from_bits(sign | (full_mantissa >> shift));
+    }
+
+    // Reconstruct the normal float
+    #[allow(clippy::cast_sign_loss)]
+    f64::from_bits(sign | ((exp_bits as u64) << 52) | mantissa)
+}
+
 #[cfg(test)]
 mod test_logs {
     #![allow(clippy::float_cmp)]
-    use super::*; // Brings your custom functions into scope
+    use super::*; // Brings custom functions into scope
 
     fn approx_equal(a: f32, b: f32, epsilon: f32) -> bool {
         if a.is_nan() && b.is_nan() {
@@ -903,7 +1050,7 @@ mod test_logs {
 #[cfg(test)]
 mod test_exp {
     #![allow(clippy::float_cmp)]
-    use super::*; // Brings your custom functions into scope
+    use super::*; // Brings custom functions into scope
 
     /// Helper to check if two floats are approximately equal within a tolerance.
     fn approx_equal(a: f32, b: f32, max_error: f32) -> bool {
@@ -932,6 +1079,24 @@ mod test_exp {
         // Test extreme scaling and limits
         assert_eq!(scale_binary_f32(1.0, 150), f32::INFINITY); // Overflows smoothly
         assert_eq!(scale_binary_f32(1.0, -150), 0.0); // Underflows smoothly to 0
+    }
+
+    #[test]
+    fn test_scale_binary_f64() {
+        // Test standard powers of 2 multiplication
+        assert_eq!(scale_binary_f64(1.0, 3), 8.0); // 1 * 2^3 = 8
+        assert_eq!(scale_binary_f64(1.5, 2), 6.0); // 1.5 * 2^2 = 6
+        assert_eq!(scale_binary_f64(16.0, -2), 4.0); // 16 * 2^-2 = 4
+
+        // Test sign preservation
+        assert_eq!(scale_binary_f64(-2.0, 2), -8.0);
+
+        // Test identity property
+        assert_eq!(scale_binary_f64(5.23, 0), 5.23);
+
+        // Test extreme scaling and limits
+        assert_eq!(scale_binary_f64(1.0, 1024), f64::INFINITY); // Overflows smoothly
+        assert_eq!(scale_binary_f64(1.0, -1075), 0.0); // Underflows smoothly to 0
     }
 
     #[test]
@@ -966,7 +1131,7 @@ mod test_exp {
 
     #[test]
     fn test_powf_approx_f32() {
-        // Test basic integer powers using your full pipeline
+        // Test basic integer powers using full pipeline
         assert!(approx_equal(powf_approx_f32(2.0, 3.0), 8.0, 1e-20)); // 2^3
         assert!(approx_equal(powf_approx_f32(5.0, -1.0), 0.2, 2e-8)); // 5^-1
 
