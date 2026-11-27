@@ -9,7 +9,7 @@ use vqm::{Quaternionf32, Vector3f32};
 
 // see target/criterion/Matrix%20Math/report/index.html for results
 
-// # Replace 'v3_bench' with the name defined in your Cargo.toml [[bench]] section
+// # Replace 'v3_bench' with the name defined in Cargo.toml [[bench]] section
 // RUSTFLAGS="-C target-cpu=native" cargo asm --bench vq_bench "mul_add"
 
 #[allow(clippy::too_many_lines)]

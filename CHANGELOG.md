@@ -25,7 +25,16 @@ At some point [0.1.0] to [0.1.11] will be [YANKED]
 
 ### Added
 
-- `DualQuaternion`.
+- `UnitDualQuaternion`.
+
+### Changed
+
+- moved `MaxSize` trait out of serde feature into storage feature.
+- renamed quaternion `imaginary()` to `imag()` for compatibility with `nalgebra`.
+
+### Removed
+
+- removed `vector3_buf.rs`.
 
 ## [0.1.21] - 2026-11-21
 

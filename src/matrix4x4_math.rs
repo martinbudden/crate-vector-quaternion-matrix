@@ -298,7 +298,7 @@ impl Matrix4x4Math for f32 {
     #[rustfmt::skip]
     #[inline(always)]
     fn m4x4_determinant(s: Matrix4x4<Self>) -> Self {
-        // Unpack rows according to your column-major index constants
+        // Unpack rows according to column-major index constants
         // Row 1
         let s0  = s.a[M11]; let s1  = s.a[M12]; let s2  = s.a[M13]; let s3  = s.a[M14];
         // Row 2
