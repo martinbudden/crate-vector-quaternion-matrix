@@ -62,7 +62,9 @@ pub use quaternion_math::QuaternionMath;
 // The trigonometric approximation functions need to be `pub` for benchmarking, but are not documented for general use.
 pub use is_scalar::IsScalar;
 #[doc(hidden)]
-pub use math_approximations::{cos_approx_f32, sin_approx_f32, sin_cos_approx_f32}; // needed for benchmarks
+pub use math_approximations::{atan2_approx_f32, cos_approx_f32, ln_approx_f32, sin_approx_f32, sin_cos_approx_f32}; // needed for benchmarks
+#[doc(hidden)]
+pub use sqrt_approximations::sqrt_approx_f32; // needed for benchmarks
 
 pub use vector2::{Vector2, Vector2f32, Vector2f64};
 pub use vector3::{Vector3, Vector3f32, Vector3f64};

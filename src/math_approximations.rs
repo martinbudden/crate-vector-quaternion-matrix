@@ -603,7 +603,7 @@ fn tan_approx_f64(x: f64) -> f64 {
 /// Arctangent of y/x (f32).
 #[inline(always)]
 #[must_use]
-fn atan2_approx_f32(y: f32, x: f32) -> f32 {
+pub fn atan2_approx_f32(y: f32, x: f32) -> f32 {
     if x == 0.0 && y == 0.0 {
         return 0.0;
     }
@@ -780,7 +780,7 @@ fn exp2_approx_f64(x: f64) -> f64 {
 /// Approximates ln(x) for f32 using range reduction and a Padé approximation.
 #[inline]
 #[must_use]
-fn ln_approx_f32(x: f32) -> f32 {
+pub fn ln_approx_f32(x: f32) -> f32 {
     if x == 0.0 {
         return f32::NEG_INFINITY;
     }
@@ -1243,7 +1243,7 @@ mod test_exp {
         let (m, k) = mantissa_exponent_f32(x);
 
         assert!((0.5..1.0).contains(&m));
-        assert!((m * 2.0_f32.powi(k)- x).abs() < 3e-45);
+        assert!((m * 2.0_f32.powi(k) - x).abs() < 3e-45);
     }
 
     #[test]
@@ -1252,7 +1252,7 @@ mod test_exp {
         let (m, k) = mantissa_exponent_f64(x);
 
         assert!((0.5..1.0).contains(&m));
-        assert!((m * 2.0_f64.powi(k)- x).abs() < 8e-324);
+        assert!((m * 2.0_f64.powi(k) - x).abs() < 8e-324);
     }
 
     #[test]

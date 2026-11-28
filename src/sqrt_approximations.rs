@@ -38,9 +38,11 @@ pub fn sqrt_f64(x: f64) -> f64 {
     f64::from(sqrt_f32(x as f32))
 }
 
+/// Approximate square root of x.
 #[allow(unused)]
 #[inline(always)]
-fn sqrt_approx_f32(x: f32) -> f32 {
+#[must_use]
+pub fn sqrt_approx_f32(x: f32) -> f32 {
     1.0 / sqrt_reciprocal_approx_f32(x)
 }
 
@@ -98,7 +100,7 @@ fn sqrt_reciprocal_approx_f32(x: f32) -> f32 {
     // First iteration of Newton's method.
     y *= (1.690_002_31 - 0.714_158_168 * x * y * y);
     // Second iteration
-    // y *= (1.5 - 0.5 * x * y * y);
+    y *= (1.5 - 0.5 * x * y * y);
     y
 }
 

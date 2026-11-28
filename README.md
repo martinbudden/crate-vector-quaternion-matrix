@@ -71,6 +71,14 @@ but that is transparent to the user.)
 The approximations are typically calculated using range mapping and [Padé approximants](https://en.wikipedia.org/wiki/Pad%C3%A9_approximant).
 They are accurate to 4 or more significant figures, depending on the function.
 
+| Function           | Max absolute error | Max relative error   | RMS absolute error  | Test                                                      |
+|--------------------|--------------------|----------------------|---------------------| --------------------------------------------------------- |
+| `sin_approx_f32`   | 4.79 e-6           | 7.58 e-6             | 1.87 e-6            | 10,000 samples in [0..PI/2]                               |
+| `cos_approx_f32`   | 4.65 e-6           | 2.01 e-4             | 1.90 e-6            | 10,000 samples in [0..PI/2]                               |
+| `atan2_approx_f32` | 2.23 e-5           | 3.01 e-5             | 1.05 e-6            | 25,000 samples in unit square                             |
+| `ln_approx_f32`    | 9.54 e-7           | 1.94 e-7             | 3.20 e-7            | 10,000 samples logarithmically distributed in [1e-6, 1e6] |
+| `sqrt_approx_f32`  | 6.10 e-4           | 7.89 e-7             | 7.14 e-5            | 10,000 samples logarithmically distributed in [1e-6, 1e6] |
+
 The `sqrt` functions will directly use inline assembly (eg `vsqrt.f32` and `vrsqrt.f32`) if the target architecture supports it,
 otherwise they use [Pizer’s optimization](https://pizer.wordpress.com/2008/10/12/fast-inverse-square-root/)
 of the famous [Quake inverse square root](https://en.wikipedia.org/wiki/Fast_inverse_square_root).
